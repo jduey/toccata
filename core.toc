@@ -1,0 +1,3930 @@
+
+toccata-core
+
+(def true)
+(def false)
+(def abort)
+(def get-type)
+(def type=)
+(def subs)
+(def number-str)
+(def number=)
+(def number-less-than)
+(def add-numbers)
+(def subtract-numbers)
+(def mult-numbers)
+(def empty-list)
+(def cons)
+(def list-count)
+(def car)
+(def cdr)
+(def fn-name)
+(def new-list)
+(def snoc)
+(def char)
+(def str-count)
+(def str=)
+(def symkey=)
+(def str-malloc)
+(def str-append)
+(def pr*)
+(def pr-err*)
+(def slurp)
+(def fn-apply)
+(def print-err)
+(def symkey-name)
+(def symbol)
+(def new-keyword)
+(def char-code)
+
+;; @jneen_
+(defprotocol Variant
+  (match* [_ match-targets]))
+
+(defprotocol Monad
+  (flat-map [mval func]
+    (print-err "*** 'flat-map' not implemented")
+    (abort)))
+
+(defprotocol Comonad
+  (extract [wv])
+  (extend [wv f]))
+
+(def comprehend)
+
+(defprotocol Applicative
+  (wrap [x v]
+    (print-err "*** 'wrap' not implemented"))
+  (apply* [fv args]
+    (cond
+     (number= 0 (list-count args)) (flat-map fv (fn [f] (wrap fv (f))))
+     (flat-map fv (fn [f] (comprehend f args))))))
+
+(defn apply [fv & args]
+  (apply* fv args))
+
+(defn apply-to [f & args]
+  (cond
+   (number= 0 (list-count args)) (f)
+   (apply* (wrap (car args) f) args)))
+
+(defn list [& l]
+  l)
+
+(defprotocol Functor
+  (map [v f]
+    (apply* (wrap v f) (list v))))
+
+(defprotocol Named
+  (name [value]
+    (print-err "'name' not implemented for type " (get-type value))
+    (abort)))
+
+(defprotocol Stringable
+  (string-list [value]
+    (print-err "'string-list' not implemented for type" (get-type value))
+    (abort)))
+
+(defprotocol Serializable
+  (serialize [value]
+    (print-err "'serialize' not implemented for type" (get-type value))
+    (abort)))
+
+(defn list-empty? [coll]
+  (number= 0 (list-count coll)))
+
+(defn interpose [coll sep]
+  (cond
+   (list-empty? coll) coll
+   (cons (car coll)
+         (flat-map (cdr coll)
+                   (fn [x]
+                     (list sep x))))))
+
+(defn prn [& vs]
+  (map (interpose (flat-map vs serialize) " ")
+        pr*)
+  (pr* "\\n"))
+
+(defn print [& vs]
+  (map (flat-map (interpose vs " ") string-list)
+        pr*))
+
+(defn println [& vs]
+  (map (flat-map (interpose vs " ") string-list) pr*)
+  (pr* "\\n"))
+
+(defn print-err [& vs]
+  (pr-err* "\\n*** ")
+  (map (flat-map (interpose vs " ") string-list) pr-err*)
+  (pr-err* "\\n"))
+
+(defprotocol Eq
+  (=* [x y]
+    (print-err "'=*' not implemented:" x)
+    (abort)))
+
+(defprotocol Ord
+  (<* [value values]
+    (print-err "'<*' not implemented:" value)
+    (abort)))
+
+(defprotocol Collection
+  (empty? [coll])
+  (empty [coll])
+  (destruct [coll target])
+  (count [coll]
+    (print-err "'count' not implemented for " coll)
+    (abort))
+  (conj [coll value]))
+
+(defprotocol Seqable
+  (seq? [coll] 0)
+  (seq [coll])
+  (first [coll])
+  (rest [coll]))
+
+(defprotocol Traversable
+  (traverse [coll f]))
+
+(defprotocol Monoid
+  (zero [_])
+  (comp* [mval mvals]))
+
+(defn comp [coll & colls]
+  (cond
+   (empty? colls) coll
+   (comp* coll colls)))
+
+(defprotocol Associative
+  (assoc [m k v])
+  (get [m k not-found]
+    (print-err "'get' not implemented: " :m m :k k)
+    (abort))
+  (keys [m])
+  (vals [m]))
+
+(defn not [b-val]
+  (cond
+   b-val 0
+   1))
+
+(defn and [& b-vals]
+  (cond
+   (empty? b-vals) 1
+   (first b-vals) (apply and (rest b-vals))
+   0))
+
+(defn or [& b-vals]
+  (cond
+   (empty? b-vals) 0
+   (first b-vals) 1
+   (apply or (rest b-vals))))
+
+(defn =
+  ([x y] (=* x y))
+  ([v & vs]
+     (cond
+      (empty? vs) 1
+      (not (=* v (first vs))) 0
+      (number= 1 (count vs)) 1
+      (apply = vs))))
+
+(defn <
+  ([x y] (<* x y))
+  ([v & vs]
+     (cond
+      (empty? vs) 1
+      (not (<* v (first vs))) 0
+      (number= 1 (count vs)) 1
+      (apply < vs))))
+
+(defn list** [arg args]
+  (cond
+   (empty? args) arg
+   (cons arg (list** (first args) (rest args)))))
+
+(defn list* [arg & args]
+  (list** arg args))
+
+(extend-type Function
+  ;; Stringable
+  ;; (string-list [f] (list "<Fn: " (fn-name f) ">"))
+
+  ;; Serializable
+  ;; (serialize [f] (list "<Fn: " (fn-name f) ">"))
+
+  Applicative
+  (apply* [f args]
+    (cond
+     (empty? args) (f)
+     (let [new-args (list** (first args) (rest args))]
+       (fn-apply f new-args)))))
+
+(extend-type Number
+  Eq
+  (=* [x y]
+    (number= x y))
+
+  Ord
+  (<* [x y] (number-less-than x y))
+
+  Stringable
+  (string-list [v] (list (number-str v)))
+
+  ;; Serializable
+  ;; (serialize [v] (list (number-str v)))
+  )
+
+(extend-type Symbol
+  Eq
+  (=* [x y]
+    (symkey= x y))
+
+  Named
+  (name [v]
+    (symkey-name v))
+
+  Stringable
+  (string-list [v] (list (name v)))
+
+  ;; Serializable
+  ;; (serialize [v] (list (name v)))
+  )
+
+(extend-type Keyword
+  Eq
+  (=* [x y]
+    (symkey= x y))
+
+  Named
+  (name [v]
+    (symkey-name v))
+
+  Stringable
+  (string-list [v] (list (name v)))
+
+  ;; Serializable
+  ;; (serialize [v] (list (name v)))
+  )
+
+(defn any? [pred coll]
+  (cond
+   (empty? coll) 0
+   (pred (first coll)) 1
+   (any? pred (rest coll))))
+
+(defn ZipList [v]
+  (reify
+    Applicative
+    (apply* [zv arg-lists]
+      (cond
+       (any? empty? arg-lists) empty-list
+       (let [cars (map arg-lists (fn [l] (cond
+                                          (empty? l) :nil
+                                          (first l))))
+             cdrs (map arg-lists rest)]
+         (cons (apply v cars)
+               (apply* zv cdrs)))))))
+
+(defn reduce [l result f]
+  (cond
+   (empty? l) result
+   (let [head (first l)
+         tail (rest l)
+         mapped-val (f result head)]
+     (cond
+      (empty? tail) mapped-val
+      (reduce tail mapped-val f)))))
+
+(defn filter [l f]
+  (cond
+   (empty? l) l
+   (let [head (new-list)]
+     (reduce l head
+             (fn [tail v]
+               (cond
+                (f v) (snoc head tail v)
+                tail)))
+     head)))
+
+(defn remove [l f]
+  (filter l (fn [v] (not (f v)))))
+
+(defn partial [f & args]
+  (fn [& more-args]
+    (apply f (comp args more-args))))
+
+(defn reverse [l]
+  (reduce l (empty l) conj))
+
+(defn comprehend [f mvs]
+  (cond
+   (empty? mvs) (f)
+   (let [mv (first mvs)
+         rest-steps (reduce (reverse (rest mvs))
+                            (fn [acc x]
+                              (wrap mv (apply f (reverse (cons x acc)))))
+                            (fn [steps new-mv]
+                              (fn [acc x]
+                                (flat-map new-mv (partial steps (cons x acc))))))]
+     (cond
+      (number= 1 (count mvs)) (flat-map (first mvs) (fn [x]
+                                                           (wrap mv (f x))))
+      (flat-map mv (partial rest-steps empty-list))))))
+
+(defn list-concat [l1 l2]
+  (cond
+   (list-empty? l1) l2
+   (list-empty? (cdr l1)) (cons (car l1) l2)
+   (cons (car l1) (list-concat (cdr l1) l2))))
+
+(defn list=* [ls]
+  (cond
+   (empty? ls) 1
+   (empty? (first ls)) 1
+   (not (apply = (map ls (fn [l] (first l))))) 0
+   (list=* (map ls rest))))
+
+(extend-type List
+  Traversable
+  (traverse [l f]
+    (let [vs (map l f)]
+      (apply* (wrap (first vs) list) vs)))
+
+  Eq
+  (=* [x y]
+    (cond
+     (not (= (get-type x) (get-type y))) 0
+     (not (number= (count x) (count y))) 0
+     (list=* (list x y))))
+
+  Stringable
+  (string-list [l]
+    (comp (list "(")
+          (flat-map (interpose l ", ") string-list)
+          (list ")")))
+
+  ;; Serializable
+  ;; (serialize [l]
+  ;;   (comp (list "(")
+  ;;         (flat-map (interpose l ", ") string-list)
+  ;;         (list ")")))
+
+  Collection
+  (empty? [coll] (number= 0 (list-count coll)))
+  (empty [coll] empty-list)
+  (conj [l v] (cons v l))
+  (count [l] (list-count l))
+
+  Seqable
+  (seq? [l]
+    true)
+  (seq [l] l)
+  (first [l] (car l))
+  (rest [l] (cdr l))
+
+  Monoid
+  (zero [_] empty-list)
+  (comp* [l ls]
+    (cond
+     (list-empty? ls) l
+     (list-concat l (comp* (first ls)
+                           (rest ls)))))
+
+  Functor
+  (map [l f]
+    (cond
+     (empty? l) l
+     (let [head (new-list)]
+       (reduce l head (fn [tail v]
+                        (snoc head tail (f v))))
+       head)))
+
+  Monad
+  (wrap [x v] (list v))
+  (flat-map [mv mf]
+    (let [l (map mv mf)]
+      (cond
+       (empty? l) empty-list
+       (comp* (car l) (cdr l))))))
+
+(defn some [f coll]
+  (cond
+   (empty? coll) 0
+   (f (first coll)) 1
+   (some f (rest coll))))
+
+(defn inc [x]
+  (add-numbers x 1))
+
+(defn + [& xs]
+  (cond
+   (empty? xs) 0
+   (reduce xs 0 add-numbers)))
+
+(defn * [& xs]
+  (cond
+   (empty? xs) 1
+   (reduce xs 1 mult-numbers)))
+
+(defn dec [x]
+  (subtract-numbers x 1))
+
+(defn - [& xs]
+  (cond
+   (empty? xs) 0
+   (let [h (first xs)
+         t (rest xs)]
+     (cond
+      (empty? t) h
+      (reduce t h subtract-numbers)))))
+
+(extend-type String
+  Eq
+  (=* [x y] (str= x y))
+
+  Collection
+  (empty? [s]
+    (= 0 (str-count s)))
+  (empty [s]
+    "")
+  (count [s]
+    (str-count s))
+  (conj [s value]
+    (apply comp (flat-map (list s value) string-list)))
+
+  Seqable
+  (seq [s]
+    (cond
+     (= s "") empty-list
+     (cons (subs s 0 1) (seq (subs s 1)))))
+  (first [s]
+    (cond
+     (= s "") (abort)
+     (subs s 0 1)))
+  (rest [s]
+    (subs s 1))
+
+  Stringable
+  (string-list [v] (list v))
+
+  ;; Serializable
+  ;; (serialize [v] (list (char 34) v (char 34)))
+
+  Monoid
+  (comp* [s ss]
+    (cond
+     (list-empty? ss) s
+     (let [ss-list (flat-map (cons s ss) string-list)
+           new-len (apply + (map ss-list str-count))]
+       (reduce ss-list (str-malloc new-len) str-append)))))
+
+(extend-type SubStr
+  Stringable
+  (string-list [v] (list v))
+
+  ;; Serializable
+  ;; (serialize [v] (list (char 34) v (char 34)))
+
+  Eq
+  (=* [x y] (str= x y))
+
+  Collection
+  (empty? [s]
+    (= 0 (str-count s)))
+  (empty [s]
+    "")
+  (count [s]
+    (str-count s))
+  (conj [s value]
+    (apply comp (flat-map (list s value) string-list)))
+
+  Seqable
+  (seq [s]
+    (cond
+     (= s "") empty-list
+     (cons (subs s 0 1) (seq (subs s 1)))))
+  (first [s]
+    (cond
+     (= s "") (abort)
+     (subs s 0 1)))
+  (rest [s]
+    (subs s 1))
+
+  Monoid
+  (comp* [s ss]
+    (cond
+     (list-empty? ss) s
+     (let [ss-list (flat-map (cons s ss) string-list)
+           new-len (apply + (map ss-list str-count))]
+       (reduce ss-list (str-malloc new-len) str-append)))))
+
+(defn str [& vs]
+  (cond
+   (empty? vs) ""
+   (comp* "" (flat-map vs string-list))))
+
+(defn take [l n]
+  (cond
+   (empty? l) l
+   (= 0 n) empty-list
+   (cons (first l)
+         (take (rest l) (dec n)))))
+
+(defn drop [coll n]
+  (cond
+   (< n 1) coll
+   (drop (rest coll) (dec n))))
+
+(defn partition [coll n]
+  (cond
+   (< (count coll) n) empty-list
+   (cons (take coll n)
+         (partition (drop coll n) n))))
+
+(defn partition-all [coll n]
+  (cond
+   (< (count coll) n) (list coll)
+   (cons (take coll n)
+         (partition-all (drop coll n) n))))
+
+(defn nth
+  ([coll n]
+     (cond
+      (empty? coll) (let [_ (print-err "'nth' from empty seq")]
+                      (abort))
+      (= n 0) (first (seq coll))
+      (nth (rest (seq coll)) (dec n))))
+  ([coll n not-found]
+     (cond
+      (empty? coll) not-found
+      (= n 0) (first (seq coll))
+      (nth (rest (seq coll)) (dec n) not-found))))
+
+(defn last [coll last-val]
+  (nth coll (dec (count coll))))
+
+(defn butlast [coll]
+  (cond
+   (empty? coll) coll
+   (= 1 (count coll)) empty-list
+   (cons (first coll) (butlast (rest coll)))))
+
+(defn map-assoc [m k v]
+  (cond
+   (list-empty? m) (list (list k v))
+   (= (car (car m)) k) (cons (list k v) (cdr m))
+   (cons (car m) (map-assoc (cdr m) k v))))
+
+(defn map-get [m k not-found]
+  (cond
+   (list-empty? m)
+   not-found
+
+   (= (car (car m)) k)
+   (car (cdr (car m)))
+
+   (map-get (cdr m) k not-found)))
+
+(defn hash-map= [a-list m]
+  (cond
+   (empty? a-list) 1
+   (let [kv-pair (first a-list)
+         k (first kv-pair)
+         v (first (rest kv-pair))]
+     (cond
+      (= :hm-nf k) 0
+      (= :hm-nf v) 0
+      (not (= v (get m k :hm-nf))) 0
+      (hash-map= (rest a-list) m)))))
+
+(defn HashMap [a-list]
+  (reify
+    Seqable
+    (seq [_]
+      a-list)
+    (first [_]
+      (car a-list))
+    (rest [_]
+      (cdr a-list))
+
+    Eq
+    (=* [x y]
+      (cond
+       (not (= (count a-list) (count (seq y)))) 0
+       (hash-map= a-list y)))
+
+    Stringable
+    (string-list [m]
+      (cond
+       (list-empty? a-list) (list "{}")
+       (let [kv-strs (map a-list
+                           (fn [kv]
+                             (apply comp (interpose (map kv string-list)
+                                                    (list " ")))))
+             body-list (apply comp (interpose kv-strs (list ", ")))]
+         (comp (list "{")
+               body-list
+               (list "}")))))
+
+    ;; Serializable
+    ;; (serialize [m]
+    ;;   (cond
+    ;;    (list-empty? a-list) (list "{}")
+    ;;    (let [kv-strs (map a-list
+    ;;                        (fn [kv]
+    ;;                          (apply comp (interpose (map kv string-list)
+    ;;                                                 (list " ")))))
+    ;;          body-list (apply comp (interpose kv-strs (list ", ")))]
+    ;;      (comp (list "{")
+    ;;            body-list
+    ;;            (list "}")))))
+
+    Collection
+    (empty? [_]
+      (empty? a-list))
+    (count [_]
+      (count a-list))
+
+    Associative
+    (assoc [_ k v]
+      (HashMap (map-assoc a-list k v)))
+
+    (get [_ k not-found]
+      (map-get a-list k not-found))
+
+    (keys [m]
+      (map a-list (fn [x] (first x))))
+
+    (vals [m]
+      (map a-list (fn [x] (nth x 1))))))
+
+(defn hash-map [& kv-pairs]
+  (HashMap (partition kv-pairs 2)))
+
+(defn merge [hm & ms]
+  (cond
+   (empty? ms) hm
+   (reduce ms hm
+           (fn [hm m]
+             (reduce (seq m) hm
+                     (fn [hm kv]
+                       (assoc hm (nth kv 0) (nth kv 1))))))))
+
+(defn merge-with [merge-fn hm & ms]
+  (cond
+   (empty? ms) hm
+   (reduce ms hm
+           (fn [hm m]
+             (reduce (seq m) hm
+                     (fn [hm kv]
+                       (cond
+                        (not (= 2 (count kv))) hm
+                        (let [k (nth kv 0)
+                              v (nth kv 1)
+                              old-v (get hm k :not-found)]
+                          (cond
+                           (= :not-found old-v) (assoc hm k v)
+                           (assoc hm k (merge-fn old-v v)))))))))))
+
+(defn get-in [m path nf]
+  (cond
+   (= (count path) 0) nf
+   (= (count path) 1) (get m (first path) nf)
+   (let [v (get m (first path) :get-in-not-found)]
+     (cond
+      (= :get-in-not-found v) nf
+      (get-in v (rest path) nf)))))
+
+(defn update-in [m path f]
+  (cond
+   (= (count path) 0) m
+   (= (count path) 1) (let [k (first path)
+                            curr-v (get m k :update-in-nil)]
+                        (cond
+                         (= :update-in-nil curr-v) m
+                         (assoc m k (f curr-v))))
+   (let [k (first path)
+         v (get m k :update-in-nil)]
+     (cond
+      (= :update-in-nil v) m
+      (assoc m k (update-in v (rest path) f))))))
+
+(defn assoc-in [m path v]
+  (cond
+   (= (count path) 0) m
+   (= (count path) 1) (assoc m (first path) v)
+   (let [k (first path)
+         curr-v (get m k :assoc-in-nil)]
+     (cond
+      (= :assoc-in-nil curr-v) (assoc m k (assoc-in {} (rest path) v))
+      (assoc m k (assoc-in curr-v (rest path) v))))))
+
+(def identity-m
+  (reify
+   Eq
+   (=* [x y] (type= x y))
+
+   ;; Stringable
+   ;; (string-list [_]
+   ;;   (list "<Id> "))
+
+   Fn
+   (invoke [_ v]
+     (reify
+       ;; Stringable
+       ;; (string-list [_]
+       ;;   (comp (list "<Id: ")
+       ;;         (string-list v)
+       ;;         (list ">")))
+
+       Applicative
+       (wrap [ev v] (invoke ev v))
+
+       Monad
+       (flat-map [mv f] (f v))
+
+       Comonad
+       (extract [wv] v)))))
+
+(defn symbol? [sym]
+  (= Symbol (get-type sym)))
+
+(defn keyword [kw-name]
+  (new-keyword (str ":" kw-name)))
+
+(defn keyword? [kw]
+  (= Keyword (get-type kw)))
+
+(defn number? [n]
+  (= Number (get-type n)))
+
+(defn string? [s]
+  (or (= String (get-type s))
+      (= SubStr (get-type s))))
+
+(defn range* [n]
+  (cond
+   (= 0 n) (list 0)
+   (cons n (range* (dec n)))))
+
+(defn range [n]
+  (reverse (range* (dec n))))
+
+(defn repeat [n v]
+  (map (range* (dec n))
+       (fn [_] v)))
+
+
+;; parser effect
+
+(defn sm-apply [l head tail s]
+  (cond
+   (empty? l) (list (apply (first head) (rest head)) s)
+   (let [v-s ((first l) s)]
+     (cond
+      (empty? v-s) v-s
+      (sm-apply (rest l) head (snoc head tail (nth v-s 0)) (nth v-s 1))))))
+
+(defn new-sm [invoke-fn]
+  (reify
+    ;; Stringable
+    ;; (string-list [_]
+    ;;   (cond
+    ;;    (= identity-m effect) (comp (list "<State: ")
+    ;;                                val-string-list
+    ;;                                (list ">"))
+    ;;    (comp (list "<State ")
+    ;;          (string-list effect)
+    ;;          (list ": ")
+    ;;          val-string-list
+    ;;          (list ">"))))
+
+    Fn
+    (invoke [ev s]
+      (invoke-fn s))
+
+    Applicative
+    (wrap [_ v]
+      (new-sm (fn [s]
+                (list v s))))
+    (apply* [fv args]
+      (new-sm (fn [s]
+                (let [head (new-list)]
+                  (sm-apply (cons fv args) head head s)))))
+
+    Monad
+    (flat-map [ev f]
+      (new-sm (fn [s]
+                (let [v-ss (ev s)]
+                  (cond
+                   (empty? v-ss) v-ss
+                   (let [v (nth v-ss 0)
+                         ss (nth v-ss 1)]
+                     ((f v) ss)))))))
+
+    Monoid
+    (zero [_]
+      (new-sm (fn [s]
+                empty-list)))
+    (comp* [mv mvs]
+      (new-sm (fn [s]
+                (let [x (mv s)]
+                  (cond
+                   (empty? mvs) x
+                   (empty? x) ((comp* (first mvs) (rest mvs)) s)
+                   x)))))))
+
+(defprotocol FreeEval
+  (evaluate [free-val eval-endo]))
+
+(def free-val)
+(def free-app)
+
+(def free-zero
+  (reify
+   ;; Stringable
+   ;; (string-list [_] (list "<FreeZero>"))
+
+   Eq
+   (=* [x y] (type= x y))
+
+   Applicative
+   (wrap [_ v] (free-val v))
+   (apply* [fv args]
+           (free-app fv args))
+
+   Monoid
+   (zero [ev] ev)
+   (comp* [_ mvs] mvs)))
+
+(def free-plus
+  (reify
+   ;; Stringable
+   ;; (string-list [_] (list "<FreePlus>"))
+
+   Eq
+   (=* [x y] (type= x y))
+
+   Fn
+   (invoke [free-plus alts]
+           (reify
+             ;; Stringable
+             ;; (string-list [_]
+             ;;   (comp (list "<FreePlus: ")
+             ;;         (string-list alts)
+             ;;         (list ">")))
+
+             FreeEval
+             (evaluate [free-val eval-endo]
+               (apply comp
+                      (map alts (fn [alt]
+                                  (evaluate alt eval-endo)))))
+
+             Applicative
+             (wrap [_ v] (free-val v))
+             (apply* [fv args]
+               (free-app fv args))
+
+             Comonad
+             (extract [_] alts)
+
+             Monoid
+             (zero [ev] free-zero)
+             (comp* [mv mvs]
+               (invoke free-plus (cons mv mvs)))))))
+
+(defn pure [arg]
+  (reify
+    ;; Stringable
+    ;; (string-list [_]
+    ;;   (comp (list "<Pure: ")
+    ;;         (string-list arg)
+    ;;         (list ">")))
+
+    FreeEval
+    (evaluate [pure-val eval-endo]
+      (eval-endo arg))
+
+    Eq
+    (=* [x y]
+      (and (type= x y)
+           (= arg (extract y))))
+
+    Applicative
+    (wrap [_ v] (pure v))
+    (apply* [fv args]
+      (free-app fv args))
+
+    Comonad
+    (extract [_] arg)
+
+    Monoid
+    (zero [ev] free-zero)
+    (comp* [mv mvs]
+      (free-plus (cons mv mvs)))))
+
+(defn free-app [fv args]
+  (reify
+    ;; Stringable
+    ;; (string-list [_]
+    ;;   (comp (list "<FreeApp: ")
+    ;;         (string-list fv)
+    ;;         (list " ")
+    ;;         (string-list args)
+    ;;         (list ">")))
+
+    FreeEval
+    (evaluate [free-val eval-endo]
+      (let [args (map args (fn [arg]
+                             (evaluate arg eval-endo)))
+            f (evaluate fv eval-endo)]
+        (apply* f args)))
+
+    Eq
+    (=* [x y]
+      (and (type= x y)
+           (= (list fv args)
+              (extract y))))
+
+    Applicative
+    (wrap [_ v] (free-val v))
+    (apply* [fv args]
+      (free-app fv args))
+
+    Comonad
+    (extract [_]
+      (list fv args))
+
+    Monoid
+    (zero [ev]
+      free-zero)
+    (comp* [mv mvs]
+      (free-plus (cons mv mvs)))))
+
+(defn free [v]
+  (reify
+    ;; Stringable
+    ;; (string-list [_]
+    ;;   (comp (list "<Free: ")
+    ;;         (string-list v)
+    ;;         (list ">")))
+
+    FreeEval
+    (evaluate [free-val eval-endo]
+      (eval-endo v))
+
+    Eq
+    (=* [x y]
+      (and (type= x y)
+           (= v (extract y))))
+
+    Applicative
+    (wrap [_ v]
+      (free v))
+    (apply* [fv args]
+      (free-app fv args))
+
+    Comonad
+    (extract [_] v)
+
+    ;; Monad
+    ;; (flat-map [ev f]
+    ;;   (println :v v)
+    ;;   (invoke effect (map v (fn [inner-v]
+    ;;                           (println :inner-v inner-v)
+    ;;                           (flat-map inner-v f)))))
+
+    Monoid
+    (zero [_]
+      free-zero)
+    (comp* [mv mvs]
+      (free-plus (cons mv mvs)))))
+
+(defn free-val [v] (free v))
+
+(defn state-maybe [v]
+  (new-sm (fn [s]
+            (list v s))))
+
+(defn update-state [f]
+  (new-sm (fn [s]
+            (list s (f s)))))
+
+(def not-found
+  (reify
+    Eq
+    (=* [x y]
+      (= (get-type x) (get-type y)))))
+
+(defn get-val
+  ([k]
+     (new-sm (fn [s]
+               (let [v (get s k not-found)]
+                 (cond
+                  (= not-found v) empty-list
+                  (list v s))))))
+  ([k nf]
+     (new-sm (fn [s]
+               (list (get s k nf) s)))))
+
+(defn set-val [k v]
+  (new-sm (fn [s]
+            (list (get s k :not-found) (assoc s k v)))))
+
+(defn get-in-val
+  ([path]
+     (new-sm (fn [s]
+               (let [v (get-in s path not-found)]
+                 (cond
+                  (= not-found v) empty-list
+                  (list v s))))))
+  ([path nf]
+     (new-sm (fn [s]
+               (list (get-in s path nf) s)))))
+
+(defn assoc-in-val [path v]
+  (new-sm (fn [s]
+            (list v (assoc-in s path v)))))
+
+(defn update-in-val [path f]
+  (new-sm (fn [s]
+            (list (get-in s path :not-found) (update-in s path f)))))
+
+(defprotocol Parser
+  (recursive-descent [f]
+    (state-maybe (fn [& args]
+                   (list (apply f (map (remove args empty?)
+                                       first)))))))
+
+(defn term [term-str]
+  (free (reify
+          Parser
+          (recursive-descent [_]
+            (let [s-len (count term-str)]
+              (for [text (get-val :text "")
+                    :when (and (not (< (count text) s-len))
+                               (= term-str (subs text 0 s-len)))
+                    _ (set-val :text (subs text s-len))]
+                (list term-str)))))))
+
+(defn recur [rule]
+  (for [a rule
+        as (comp (recur rule)
+                 (state-maybe empty-list))]
+    (cons a as)))
+
+(defn one-or-more [rule]
+  (free (reify
+          Parser
+          (recursive-descent [_]
+            (let [rule (evaluate rule recursive-descent)]
+              (flat-map (recur rule)
+                        (fn [v]
+                          (state-maybe (list (apply comp v))))))))))
+
+(defn ignore [rule]
+  (free (reify
+          Parser
+          (recursive-descent [_]
+            (flat-map (evaluate rule recursive-descent)
+                      (fn [_]
+                        (state-maybe empty-list)))))))
+
+(defn always [v]
+  (free (reify
+          Parser
+          (recursive-descent [_]
+            (state-maybe (list v))))))
+
+(defn all [& rules]
+  (apply* (pure comp) rules))
+
+(defn optional [rule]
+  (comp rule (always "")))
+
+(defn none-or-more [rule]
+  (comp (one-or-more rule)
+        (always empty-list)))
+
+(defn char-test [pred]
+  (for [txt (get-val :text "")
+        :let [c (subs txt 0 1)]
+        :when (cond
+               (< 0 (count txt)) (pred c)
+               false)
+        _ (set-val :text (subs txt 1))]
+    (list c)))
+
+(defn lower-alpha []
+  (free (reify
+          Parser
+          (recursive-descent [_]
+            (char-test (fn [c]
+                         (< (dec (char-code "a")) (char-code c) (inc (char-code "z")))))))))
+
+(defn upper-alpha []
+  (free (reify
+          Parser
+          (recursive-descent [_]
+            (char-test (fn [c]
+                         (< (dec (char-code "A")) (char-code c) (inc (char-code "Z")))))))))
+
+(defn alpha []
+  (comp (lower-alpha)
+        (upper-alpha)))
+
+(defn digit []
+  (free (reify
+          Parser
+          (recursive-descent [_]
+            (char-test (fn [c]
+                         (< (dec (char-code "0")) (char-code c) (inc (char-code "9")))))))))
+
+(defn one-of [coll]
+  (let [coll (seq coll)]
+    (comp* (term (first coll))
+           (map (rest coll) term))))
+
+(defn to-string [rule]
+  (apply-to (fn [chars]
+              (apply str chars))
+            rule))
+
+(defn symbol-start []
+  (comp (alpha) (one-of "_<>=+-*/")))
+
+(defn symbol-punct [] (one-of "_<>=*/+!-?"))
+
+(defn symbol-char [] (comp (alpha) (digit) (symbol-punct)))
+
+(defn rest-of-symbol []
+  (none-or-more (symbol-char)))
+
+(defn read-symbol []
+  (apply-to (fn [start the-rest]
+              (symbol (apply str (cons start the-rest))))
+            (symbol-start)
+            (rest-of-symbol)))
+
+(defn read-keyword []
+  (apply-to (fn [start the-rest]
+              (keyword (apply str (cons start the-rest))))
+            (ignore (term ":"))
+            (symbol-start)
+            (rest-of-symbol)))
+
+(defn backslash []
+  (term (char 92)))
+
+(defn read-string-newline []
+  (all (ignore (backslash))
+       (ignore (term "n"))
+       (always (char 10))))
+
+(defn read-string-tab []
+  (all (ignore (backslash))
+       (ignore (term "t"))
+       (always (char 9))))
+
+(defn read-string-backspace []
+  (all (ignore (backslash))
+       (ignore (term "b"))
+       (always (char 8))))
+
+(defn read-string-return []
+  (all (ignore (backslash))
+       (ignore (term "r"))
+       (always (char 13))))
+
+(defn read-string-formfeed []
+  (all (ignore (backslash))
+       (ignore (term "f"))
+       (always (char 12))))
+
+(defn read-string-doublequote []
+  (all (ignore (backslash))
+       (ignore (term (char 34)))
+       (always (char 34))))
+
+(defn read-string-backslash []
+  (all (ignore (backslash))
+       (ignore (backslash))
+       (always (char 92))))
+
+(defn not-backslash []
+  (free (reify
+          Parser
+          (recursive-descent [_]
+            (for [txt (get-val :text "")
+                  :let [x (subs txt 0 1)]
+                  :when (cond
+                         (= x (char 92)) false
+                         (= x (char 34)) false
+                         true)
+                  _ (set-val :text (subs txt 1))]
+              (list x))))))
+
+(defn read-const-string []
+  (all (ignore (term (char 34)))
+       (to-string
+        (none-or-more
+         (comp (not-backslash)
+               (read-string-backslash)
+               (read-string-doublequote)
+               (read-string-tab)
+               (read-string-backspace)
+               (read-string-return)
+               (read-string-formfeed)
+               (read-string-newline))))
+       (ignore (term (char 34)))))
+
+(defn str-to-int [negate? int-str]
+  (let [magnitude (reduce int-str 0
+                          (fn [n c]
+                            (+ (* n 10)
+                               (cond
+                                (= c "1") 1
+                                (= c "2") 2
+                                (= c "3") 3
+                                (= c "4") 4
+                                (= c "5") 5
+                                (= c "6") 6
+                                (= c "7") 7
+                                (= c "8") 8
+                                (= c "9") 9
+                                0))))]
+    (cond
+     (= "-" negate?) (* -1 magnitude)
+     magnitude)))
+
+;; only reads integers
+(defn read-number []
+  (apply-to str-to-int
+            (optional (term "-"))
+            (one-or-more (digit))))
+
+(def read-form)
+
+(defn read-sub-form []
+  (free (reify
+          Parser
+          (recursive-descent [_]
+            (for [parser-fn (get-in-val (list :parser-fns "form") :blah)
+                  result (new-sm parser-fn)]
+              result)))))
+
+(defn read-list []
+  (all (ignore (term "("))
+       (none-or-more (read-sub-form))
+       (ignore (term ")"))))
+
+(defn read-hash-map []
+  (apply-to cons
+            (ignore (term "{"))
+            (always 'hash-map)
+            (none-or-more (read-sub-form))
+            (ignore (term "}"))))
+
+(defn read-vector []
+  (apply-to cons
+            (ignore (term "["))
+            (always 'vector)
+            (none-or-more (read-sub-form))
+            (ignore (term "]"))))
+
+(defn not-eol []
+  (free (reify
+          Parser
+          (recursive-descent [_]
+            (for [txt (get-val :text "")
+                  :let [x (subs txt 0 1)]
+                  :when (not (= x (char 10)))
+                  _ (set-val :text (subs txt 1))]
+              (list x))))))
+
+(defn read-comment []
+  (all (term ";")
+       (ignore (none-or-more (not-eol)))
+       (term (char 10))))
+
+(defn whitespace []
+  (comp (one-of " ,")
+        (term (char 9))
+        (term (char 13))
+        (term (char 10))
+        (read-comment)))
+
+(defn read-var-arg []
+  (apply-to list
+            (ignore (none-or-more (whitespace)))
+            (term "&")
+            (ignore (one-or-more (whitespace)))
+            (read-symbol)))
+
+(defn read-arg []
+  (all (ignore (none-or-more (whitespace)))
+       (read-symbol)
+       (ignore (none-or-more (whitespace)))))
+
+(defn read-args []
+  (apply-to comp
+            (ignore (none-or-more (whitespace)))
+            (ignore (term "["))
+            (none-or-more (read-arg))
+            (comp (read-var-arg)
+                  (always empty-list))
+            (ignore (term "]"))))
+
+(defn read-main []
+  (apply-to list*
+            (ignore (term "("))
+            (ignore (none-or-more (whitespace)))
+            (ignore (term "main"))
+            (always 'main)
+            (ignore (one-or-more (whitespace)))
+            (read-args)
+            (one-or-more (read-sub-form))
+            (ignore (none-or-more (whitespace)))
+            (ignore (term ")"))))
+
+(defn read-single-arity []
+  (apply-to (fn [& vs]
+              (list vs))
+            (always 'fn-arity)
+            (read-args)
+            (none-or-more (read-sub-form))))
+
+(defn read-multi-arity []
+  (apply-to list
+            (ignore (none-or-more (whitespace)))
+            (ignore (term "("))
+            (ignore (none-or-more (whitespace)))
+            (always 'fn-arity)
+            (read-args)
+            (none-or-more (read-sub-form))
+            (ignore (none-or-more (whitespace)))
+            (ignore (term ")"))))
+
+(defn read-arities []
+  (comp (read-single-arity)
+        (one-or-more (read-multi-arity))))
+
+(defn read-defn []
+  (apply-to (fn [name arities]
+              (list 'def name (list 'fn name arities)))
+            (ignore (term "("))
+            (ignore (none-or-more (whitespace)))
+            (ignore (term "defn"))
+            (ignore (one-or-more (whitespace)))
+            (read-symbol)
+            (ignore (one-or-more (whitespace)))
+            (read-arities)
+            (ignore (none-or-more (whitespace)))
+            (ignore (term ")"))))
+
+(defn read-fn []
+  (apply-to list
+            (ignore (term "("))
+            (ignore (none-or-more (whitespace)))
+            (ignore (term "fn"))
+            (always 'fn)
+            (ignore (one-or-more (whitespace)))
+            (comp (read-symbol)
+                  (always 'anon))
+            (ignore (none-or-more (whitespace)))
+            (read-arities)
+            (ignore (none-or-more (whitespace)))
+            (ignore (term ")"))))
+
+(defn read-let-binding []
+  (apply-to list
+            (ignore (none-or-more (whitespace)))
+            (read-symbol)
+            (ignore (none-or-more (whitespace)))
+            (read-sub-form)))
+
+(defn read-let []
+  (apply-to list*
+            (ignore (term "("))
+            (ignore (none-or-more (whitespace)))
+            (ignore (term "let"))
+            (always 'let)
+            (ignore (one-or-more (whitespace)))
+            (ignore (term "["))
+            (none-or-more (read-let-binding))
+            (ignore (term "]"))
+            (one-or-more (read-sub-form))
+            (ignore (none-or-more (whitespace)))
+            (ignore (term ")"))))
+
+(defn read-for-let []
+  (apply-to list
+            (ignore (none-or-more (whitespace)))
+            (ignore (term ":let"))
+            (always :let)
+            (ignore (one-or-more (whitespace)))
+            (ignore (term "["))
+            (none-or-more (read-let-binding))
+            (ignore (term "]"))))
+
+(defn read-for-when []
+  (apply-to list
+            (ignore (none-or-more (whitespace)))
+            (ignore (term ":when"))
+            (always :when)
+            (ignore (one-or-more (whitespace)))
+            (read-sub-form)))
+
+(defn read-for-binding []
+  (comp (read-for-let)
+        (read-for-when)
+        (read-let-binding)))
+
+(defn read-for []
+  (apply-to (fn [bound val bindings body]
+              (let [bindings (cons (list bound 'some-unique-var) bindings)]
+                (list 'let (list (list 'some-unique-var val))
+                      (reduce (reverse bindings) (list 'wrap 'some-unique-var body)
+                              (fn [expr sym-val]
+                                (let [sym (first sym-val)
+                                      val (first (rest sym-val))]
+                                  (cond
+                                   (= sym :let) (list 'let val expr)
+                                   (= sym :when) (list 'cond val expr (list 'zero 'some-unique-var))
+                                   (list 'flat-map val
+                                         (list 'fn 'anon
+                                               (list (list 'fn-arity (list sym) (list expr))))))))))))
+            (ignore (term "("))
+            (ignore (none-or-more (whitespace)))
+            (ignore (term "for"))
+            (ignore (one-or-more (whitespace)))
+            (ignore (term "["))
+            (ignore (none-or-more (whitespace)))
+            (read-symbol)
+            (ignore (one-or-more (whitespace)))
+            (read-sub-form)
+            (none-or-more (read-for-binding))
+            (ignore (term "]"))
+            (read-sub-form)
+            (ignore (none-or-more (whitespace)))
+            (ignore (term ")"))))
+
+(defn read-quoted []
+  (apply-to list
+            (ignore (term "'"))
+            (always 'quote)
+            (read-symbol)))
+
+(defn rule [name grammar]
+  (free (reify
+          Parser
+          (recursive-descent [_]
+            (let [parser (evaluate grammar recursive-descent)
+                  parser-fn (fn [s] (parser s))]
+              (for [_ (assoc-in-val (list :parser-fns name) parser-fn)
+                    result (new-sm parser-fn)]
+                result))))))
+
+(defn read-form []
+  (rule "form"
+        (all (ignore (none-or-more (whitespace)))
+             (comp (read-number)
+                   (read-keyword)
+                   (read-symbol)
+                   (read-quoted)
+                   (read-const-string)
+                   (read-let)
+                   (read-main)
+                   (read-defn)
+                   (read-fn)
+                   (read-for)
+                   ;; (read-character)
+                   (read-hash-map)
+                   (read-vector)
+                   (read-list))
+             (ignore (none-or-more (whitespace))))))
+
+(defn make-parser [rule]
+  (let [p (evaluate rule recursive-descent)]
+    (flat-map p (fn [v]
+                  (state-maybe (first v))))))
+
+
+;; code analyzer
+
+(defn set-expr [expr]
+  (set-val :expr expr))
+
+(defn is-expr [pred]
+  (for [expr (get-val :expr)
+        :when (pred expr)]
+    expr))
+
+(def analyze-expr)
+
+(def inline-ast)
+(def symbol-ast)
+(def keyword-ast)
+(def const-number-ast)
+(def const-string-ast)
+(def variadic-arity-ast)
+(def fn-arity-ast)
+(def main-ast)
+(def call-ast)
+(def binding-ast)
+(def let-ast)
+(def fn-ast)
+(def quoted-ast)
+(def definition-ast)
+(def cond-ast)
+(def extend-ast)
+(def reify-ast)
+(def protocol-ast)
+
+(defn analyze-inline-text []
+  (for [expr (is-expr (fn [x]
+                       (cond
+                        (not (seq? x)) false
+                        (empty? x) false
+                        (= (first x) 'inline-text))))]
+    (inline-ast (nth expr 1 ""))))
+
+(defn analyze-symbol []
+  (for [sym (is-expr symbol?)]
+    (symbol-ast sym)))
+
+(defn keyword-already-defined? [kw]
+  (get-in-val (list :keywords kw)))
+
+(defn keyword-recently-defined? [kw]
+  (get-in-val (list :new-keywords kw)))
+
+(defn keyword-defined-in-core [kw]
+  (for [ext-kw (get-in-val (list :core-keywords kw))
+        _ (assoc-in-val (list :keywords kw) ext-kw)
+        _ (update-in-val (list :new-externs)
+                         (fn [externs]
+                           (cons (str "SymKey " ext-kw) externs)))]
+    ext-kw))
+
+(defn make-static-keyword [kw]
+  (for [kw-idx (get-val :kw-count 0)
+        _ (set-val :kw-count (inc kw-idx))
+        _ (assoc-in-val (list :new-keywords kw)
+                        (str "_kw_" kw-idx))]
+    ""))
+
+(defn analyze-keyword []
+  (for [kw (is-expr keyword?)
+        _ (comp (keyword-already-defined? kw)
+                (keyword-recently-defined? kw)
+                (keyword-defined-in-core kw)
+                (make-static-keyword kw))]
+    (keyword-ast kw)))
+
+(defn number-already-defined? [num]
+  (get-in-val (list :numbers num)))
+
+(defn number-recently-defined? [num]
+  (get-in-val (list :new-numbers num)))
+
+(defn number-defined-in-core [num]
+  (for [ext-num (get-in-val (list :core-numbers num))
+        _ (assoc-in-val (list :numbers num) ext-num)
+        _ (update-in-val (list :new-externs)
+                         (fn [externs]
+                           (cons (str "Number " ext-num) externs)))]
+    ext-num))
+
+(defn make-static-number [num]
+  (for [num-idx (get-val :num-count 0)
+        _ (set-val :num-count (inc num-idx))
+        _ (assoc-in-val (list :new-numbers num)
+                        (str "_num_" num-idx))]
+    ""))
+
+(defn analyze-number []
+  (for [num (is-expr number?)
+        _ (comp (number-already-defined? num)
+                (number-recently-defined? num)
+                (number-defined-in-core num)
+                (make-static-number num))]
+    (const-number-ast num)))
+
+(defn string-already-defined? [str-val]
+  (get-in-val (list :strings str-val)))
+
+(defn string-recently-defined? [str-val]
+  (get-in-val (list :new-strings str-val)))
+
+(defn string-defined-in-core [str-val]
+  (for [ext-str (get-in-val (list :core-strings str-val))
+        _ (assoc-in-val (list :strings str-val) ext-str)
+        _ (update-in-val (list :new-externs)
+                         (fn [externs]
+                           (cons (str "String " ext-str) externs)))]
+    ext-str))
+
+(defn make-static-string [str-val]
+  (for [str-idx (get-val :str-count 0)
+        _ (set-val :str-count (inc str-idx))
+        _ (assoc-in-val (list :new-strings str-val)
+                        (str "_str_" str-idx))]
+    ""))
+
+(defn analyze-string []
+  (for [str-val (is-expr string?)
+        _ (comp (string-already-defined? str-val)
+                (string-recently-defined? str-val)
+                (string-defined-in-core str-val)
+                (make-static-string str-val))]
+    (const-string-ast str-val)))
+
+(defn analyze-call []
+  (for [expr (is-expr (fn [s] (not (empty? s))))
+        ast (traverse expr analyze-expr)]
+    (call-ast (first ast) (rest ast))))
+
+(defn analyze-let-binding [binding-pair]
+  (cond
+   (not (= 2 (count binding-pair))) empty-list
+   (let [binding (nth binding-pair 0)
+         expr (nth binding-pair 1)]
+     (for [curr-expr (get-val :expr)
+           _ (set-expr binding)
+           binding (is-expr symbol?)
+           ast (analyze-expr expr)
+           _ (set-val :expr curr-expr)]
+       (binding-ast binding ast)))))
+
+(defn analyze-let []
+  (for [expr (is-expr (fn [x]
+                        (cond
+                         (not (seq? x)) false
+                         (not (< 2 (count x))) false
+                         (= (nth x 0 :not-let) 'let))))
+        bindings (traverse (nth expr 1 empty-list)
+                           analyze-let-binding)
+        body (traverse (drop expr 2) analyze-expr)]
+    (let-ast (apply* (pure list) bindings)
+             (apply* (pure list) body))))
+
+(defn variadic? [expr]
+  (let [args (nth expr 1 empty-list)]
+    (apply or (map args (fn [arg] (= "&" arg))))))
+
+(defn analyze-variadic []
+  (for [expr (is-expr (fn [x]
+                        (cond
+                         (not (< 1 (count x))) false
+                         (not (= (first x) 'fn-arity)) false
+                         (variadic? x))))
+        body (traverse (nth expr 2 empty-list) analyze-expr)]
+    (variadic-arity-ast (filter (nth expr 1 empty-list) (fn [arg]
+                                                          (not (= "&" arg))))
+                        (apply* (pure list) body))))
+
+(defn analyze-fn-arity []
+  (for [expr (is-expr (fn [x]
+                        (cond
+                         (not (< 1 (count x))) false
+                         (not (= (first x) 'fn-arity)) false
+                         (not (variadic? x)))))
+        file-name (get-val :file-name "")
+        body (traverse (nth expr 2 empty-list) analyze-expr)]
+    (fn-arity-ast (nth expr 1 empty-list)
+                  (apply* (pure list) body))))
+
+;; TODO: let anonymous function closures reference themselves by name
+(defn analyze-fn []
+  (for [expr (is-expr (fn [x]
+                        (cond
+                         (not (seq? x)) false
+                         (not (< 1 (count x))) false
+                         (= (first x) 'fn))))
+        arities (traverse (nth expr 2 empty-list) analyze-expr)]
+    (fn-ast (nth expr 1 "no-name") arities)))
+
+(defn analyze-arity [args]
+  (cond
+   (< (count args) 2) empty-list
+   (let [fn-name (nth args 0)
+         params (rest (nth args 1))
+         body (drop args 2)
+         default-fn-expr (list 'fn fn-name (list (list 'fn-arity params body)))]
+     (cond
+      (< 0 (count body)) (for [default (analyze-expr default-fn-expr)]
+                           {fn-name {(count params) {:default default}}})
+      (state-maybe {fn-name {(count params) {}}})))))
+
+(defn sym-already-defined? [sym]
+  (get-in-val (list :symbols sym)))
+
+(defn sym-recently-defined? [sym]
+  (get-in-val (list :new-symbols sym)))
+
+(defn sym-defined-in-core [sym]
+  (for [ext-sym (get-in-val (list :core-symbols sym))
+        _ (assoc-in-val (list :symbols sym) ext-sym)
+        _ (update-in-val (list :new-externs)
+                         (fn [externs]
+                           (cons (str "SymKey " ext-sym) externs)))]
+    ext-sym))
+
+(defn make-static-symbol [sym]
+  (for [sym-idx (get-val :sym-count 0)
+        _ (set-val :sym-count (inc sym-idx))
+        _ (assoc-in-val (list :new-symbols sym)
+                        (str "_sym_" sym-idx))]
+    ""))
+
+(defn analyze-quoted []
+  (for [expr (is-expr (fn [x]
+                        (cond
+                         (not (= 2 (count x))) false
+                         (= (first x) 'quote))))
+        _ (let [sym (nth expr 1)]
+            (comp (sym-already-defined? sym)
+                  (sym-recently-defined? sym)
+                  (sym-defined-in-core sym)
+                  (make-static-symbol sym)))]
+    (quoted-ast (nth expr 1))))
+
+(defn analyze-def []
+  (for [curr-expr (get-val :expr :no-expr)
+        expr (is-expr (fn [x]
+                        (cond
+                         (not (seq? x)) false
+                         (< 1 (count x)))))
+        :let [def (nth expr 0 :not-def)
+              name (nth expr 1 'no-name)
+              value (nth expr 2 :no-value)]
+        :when (and (= def 'def) (symbol? name))
+        val-ast (cond
+                 (= value :no-value) (state-maybe :no-value)
+                 (analyze-expr value))]
+    (definition-ast name val-ast)))
+
+(defn analyze-cond []
+  (for [expr (is-expr seq?)
+        :when (cond
+               (empty? expr) false
+               (= (first expr) 'cond))
+        clause-pairs (traverse (rest expr) analyze-expr)]
+    (let [clauses (partition-all clause-pairs 2)
+          default (last clauses empty-list)]
+      (cond
+       (= 1 (count default)) (cond-ast (butlast clauses)
+                                       (first default))
+       (print-err "cond must have a default clause")))))
+
+(defn next-form []
+  (for [expr (get-val :expr empty-list)
+        _ (set-val :expr (rest expr))
+        :when (< 0 (count expr))]
+    (first expr)))
+
+(defn is-form? [pred]
+  (for [frm (next-form)
+        :when (pred frm)]
+    frm))
+
+(defn analyze-proto-fn []
+  (for [expr (is-form? (fn [x]
+                         (cond
+                          (not (seq? x)) false
+                          (< 2 (count x)))))
+        arg-vec (traverse (nth expr 1 empty-list) analyze-expr)
+        body (traverse (drop expr 2) analyze-expr)]
+    (list (nth expr 0 'no-name)
+          (fn-ast (str (nth expr 0 'no-name) "_impl")
+                  (list (fn-arity-ast (rest (nth expr 1 empty-list))
+                                      (apply* (pure list) body)))))))
+
+(defn analyze-proto-impl []
+  (for [name (is-form? symbol?)
+        fn-impls (recur (analyze-proto-fn))]
+    (list name fn-impls)))
+
+(defn analyze-extensions [exts]
+  (for [curr-expr (get-val :expr empty-list)
+        _ (set-val :expr exts)
+        proto-impls (recur (analyze-proto-impl))
+        _ (set-val :expr curr-expr)]
+    (HashMap proto-impls)))
+
+(defn analyze-extend-type []
+  (for [expr (is-expr (fn [x]
+                        (cond
+                         (not (seq? x)) false
+                         (not (< 1 (count x))) false
+                         (= 'extend-type (first x)))))
+        proto-specs (analyze-extensions (drop expr 2))]
+    (extend-ast (nth expr 1 :no-type) proto-specs)))
+
+(defn analyze-reify []
+  (for [expr (is-expr (fn [x]
+                        (cond
+                         (not (seq? x)) false
+                         (= 'reify (nth x 0 :not-reify)))))
+        proto-specs (analyze-extensions (rest expr))]
+    (reify-ast proto-specs)))
+
+(defn analyze-protocol []
+  (for [expr (is-expr (fn [x]
+                        (cond
+                         (not (seq? x)) false
+                         (not (< 2 (count x))) false
+                         (= 'defprotocol (first x)))))
+        ;; TODO: make this only accept fixed arities
+        arities (traverse (drop expr 2) analyze-arity)]
+    (protocol-ast (nth expr 1 :no-name)
+                  (apply merge-with merge arities))))
+
+(defn analyze-main []
+  (for [expr (is-expr (fn [x]
+                        (cond
+                         (not (seq? x)) false
+                         (not (< 2 (count x))) false
+                         (= 'main (first x)))))
+        body (traverse (drop expr 2) analyze-expr)]
+    (main-ast (nth expr 1 empty-list)
+              (apply* (pure list) body))))
+
+(defn expr->ast []
+  (comp (analyze-symbol)
+        (analyze-keyword)
+        (analyze-number)
+        (analyze-string)
+        (analyze-fn)
+        (analyze-protocol)
+        (analyze-main)
+        (analyze-def)
+        (analyze-cond)
+        (analyze-extend-type)
+        (analyze-reify)
+        (analyze-inline-text)
+        (analyze-fn-arity)
+        (analyze-variadic)
+        (analyze-let)
+        (analyze-quoted)
+        (analyze-call)
+        (flat-map (get-val :expr :expr-nil)
+                  (fn [e]
+                    (print-err "could not analyze" e)
+                    empty-list))))
+
+(defn analyze-expr [expr]
+  (for [curr-expr (get-val :expr :no-expr)
+        file-name (get-val :file-name "")
+        _ (set-expr expr)
+        ast (expr->ast)
+        _ (set-val :expr curr-expr)]
+    ast))
+
+(defn analyze [expr]
+  (first (expr->ast {:expr expr})))
+
+;; code emitter
+
+(defn types []
+  ;; type numbers must start at 1 and be contiguous
+  {'String 1
+   'Number 2
+   'Function 3
+   'List 4
+   'Keyword 5
+   'SubStr 6
+   'Symbol 7
+   })
+
+(def VoidT "void")
+(def Int8 "char")
+(def Int8* "char *")
+(def Int32 "int")
+(def Int64 "int64_t")
+(def ValueType Int64)  ;; type of boxed values
+(def Value "typedef struct {int64_t type;} Value;\\n")
+(def Value* "Value *")
+(def NumberVal "typedef struct {int64_t type; int64_t numVal;} Number;\\n")
+(def NumberVal* "Number *")
+(def SymKey "typedef struct {int64_t type; char *name;} SymKey;\\n")
+(def StringVal "typedef struct {int64_t type; int64_t len; char buffer[0];} String;\\n")
+(def StringVal* "String *")
+(def SubStringVal "typedef struct {int64_t type; int64_t len; Value *source; char *buffer;} SubString;\\n")
+(def SubStringVal* "SubString *")
+(def ListVal "typedef struct List {int64_t type; int64_t len; Value* head; struct List *tail;} List;\\n")
+(def ListVal* "List *")
+(def FnArity "typedef struct {int count; List *closures; int variadic; void *fn;} FnArity;\\n")
+(def FnArity* "FnArity *")
+(def FunctionVal "typedef struct {int64_t type; char *name; int64_t arityCount; FnArity *arities[];} Function;\\n")
+(def ProtoImpl "typedef struct {int64_t type; Value *implFn;} ProtoImpl;\\n")
+(def ProtoImpls "typedef struct {int64_t implCount; Value *defaultImpl; ProtoImpl impls[];} ProtoImpls;\\n")
+(def ReifiedVal "typedef struct {int64_t type; int implCount; Value* impls[];} ReifiedVal;\\n")
+(def ReifiedVal* "ReifiedVal *")
+
+(def true (inline-text "(Value *)&trueVal;"))
+(def false (inline-text "(Value *)&falseVal;"))
+
+(defn symkey-name [v]
+  (inline-text
+     "return(stringValue(((SymKey *)arg0)->name));"))
+
+(defn char-code [c]
+  (inline-text "if (arg0->type == StringType) {
+                  String *s = (String *)arg0;
+                  return(numberValue((int)s->buffer[0]));
+                } else if (arg0->type == SubStringType) {
+                  SubString *s = (SubString *)arg0;
+                  return(numberValue((int)s->buffer[0]));
+                } else
+                  abort();\n "))
+
+(defn symbol [sym-str]
+  (inline-text
+   "SymKey *sym = (SymKey *)GC_malloc(sizeof(SymKey));
+    sym->type = SymbolType;
+    if(arg0->type == StringType)
+      sym->name = ((String *)arg0)->buffer;
+    else if (arg0->type == SubStringType)
+      sym->name = ((SubString *)arg0)->buffer;
+    return((Value *)sym);"))
+
+(defn new-keyword [kw-str]
+  (inline-text
+   "SymKey *sym = (SymKey *)GC_malloc(sizeof(SymKey));
+    sym->type = KeywordType;
+    if(arg0->type == StringType)
+      sym->name = ((String *)arg0)->buffer;
+    else if (arg0->type == SubStringType)
+      sym->name = ((SubString *)arg0)->buffer;
+    return((Value *)sym);"))
+
+(defn abort []
+  (inline-text
+   "abort();
+    return(true);\n"))
+
+(defn get-type [value]
+  (inline-text
+   "return(numberValue(arg0->type));"))
+
+(defn type= [x y]
+  (inline-text "if (arg0->type == arg1->type)
+                   return((Value *)&trueVal);
+                else
+                   return((Value *)&falseVal);\n"))
+
+(defn subs
+  ([src index]
+     (inline-text "int64_t idx = ((Number *)arg1)->numVal;
+                   if (arg0->type == StringType) {
+                     String *s = (String *)arg0;
+                     SubString *subStr = (SubString *)GC_malloc(sizeof(SubString));
+                     subStr->type = SubStringType;
+                     if (idx < s->len) {
+                       subStr->len = s->len - idx;
+                       subStr->source = arg0;
+                       subStr->buffer = s->buffer + idx;
+                     }
+                     else {
+                       subStr->len = 0;
+                       subStr->source = (Value *)0;
+                       subStr->buffer = (char *)0;
+                     }
+                     return((Value *)subStr);
+                   } else if (arg0->type == SubStringType) {
+                     SubString *s = (SubString *)arg0;
+                     SubString *subStr = (SubString *)GC_malloc(sizeof(SubString));
+                     subStr->type = SubStringType;
+                     if (idx < s->len) {
+                       subStr->len = s->len - idx;
+                       subStr->source = arg0;
+                       subStr->buffer = s->buffer + idx;
+                     }
+                     else {
+                       subStr->len = 0;
+                       subStr->source = (Value *)0;
+                       subStr->buffer = (char *)0;
+                     }
+                     return((Value *)subStr);
+                   } else
+                     abort();\n"))
+  ([src index length]
+     (inline-text "int64_t idx = ((Number *)arg1)->numVal;
+                   int64_t len = ((Number *)arg2)->numVal;
+                   if (arg0->type == StringType) {
+                     String *s = (String *)arg0;
+                     SubString *subStr = (SubString *)GC_malloc(sizeof(SubString));
+                     subStr->type = SubStringType;
+                     if (idx + len <= s->len) {
+                       subStr->len = len;
+                       subStr->source = arg0;
+                       subStr->buffer = s->buffer + idx;
+                     }
+                     else {
+                       subStr->len = 0;
+                       subStr->source = (Value *)0;
+                       subStr->buffer = (char *)0;
+                     }
+                     return((Value *)subStr);
+                   } else if (arg0->type == SubStringType) {
+                     SubString *s = (SubString *)arg0;
+                     SubString *subStr = (SubString *)GC_malloc(sizeof(SubString));
+                     subStr->type = SubStringType;
+                     if (idx + len <= s->len) {
+                       subStr->len = len;
+                       subStr->source = arg0;
+                       subStr->buffer = s->buffer + idx;
+                     }
+                     else {
+                       subStr->len = 0;
+                       subStr->source = (Value *)0;
+                       subStr->buffer = (char *)0;
+                     }
+                     return((Value *)subStr);
+                   } else
+                     abort();\n")))
+
+;; this function assumes the type of 'n' has already been checked
+(defn number-str [n]
+  (inline-text
+   "char *buffer = (char *)GC_malloc(10);
+    snprintf(buffer, 9, \"%lld\", ((Number *)arg0)->numVal);
+    return(stringValue(buffer));\n"))
+
+(defn number= [x y]
+  (inline-text
+   "if (arg0->type != arg1->type) {
+      return(false);
+   } else if (((Number *)arg0)->numVal != ((Number *)arg1)->numVal)
+      return(false);
+   else
+      return(true);\n"))
+
+;; this function assumes the type of 'x' has already been checked
+(defn number-less-than [x y]
+  (inline-text
+   "if (arg0->type != arg1->type) {
+      printf(\"\\ninvalid types for 'number-less-than'\\n\");
+      abort();
+   } else if (((Number *)arg0)->numVal < ((Number *)arg1)->numVal)
+      return(true);
+   else
+      return(false);\n"))
+
+;; this function assumes the type of 'x' has already been checked
+(defn add-numbers [x y]
+  (inline-text
+   "if (arg0->type != arg1->type) {
+      printf(\"\\ninvalid types for 'add-numbers'\\n\");
+      abort();
+    } else
+      return(numberValue(((Number *)arg0)->numVal + ((Number *)arg1)->numVal));\n"))
+
+;; this function assumes the type of 'x' has already been checked
+(defn subtract-numbers [x y]
+  (inline-text
+   "if (arg0->type != arg1->type) {
+      printf(\"\\ninvalid types for 'subtract-numbers'\\n\");
+      abort();
+    } else
+      return(numberValue(((Number *)arg0)->numVal - ((Number *)arg1)->numVal));\n"))
+
+;; this function assumes the type of 'x' has already been checked
+(defn mult-numbers [x y]
+  (inline-text
+   "if (arg0->type != arg1->type) {
+      fprintf(stderr, \"\\n*** invalid types for 'mult-numbers'\\n\");
+      abort();
+    } else
+      return(numberValue(((Number *)arg0)->numVal * ((Number *)arg1)->numVal));\n"))
+
+(def empty-list
+  (inline-text "(Value *)&(List){4,0,0,0};"))
+
+(defn cons
+  ([x]
+     (inline-text "return((Value *)listCons(arg0, empty_list));"))
+  ([x l]
+     (inline-text "return((Value *)listCons(arg0, (List *)arg1));")))
+
+(defn list-count [l]
+  (inline-text
+   "if (arg0->type != ListType)
+      abort();
+    else
+      return(numberValue(((List *)arg0)->len));"))
+
+(defn car [l]
+  (inline-text
+   "List *lst = (List *)arg0;
+    if (arg0->type != ListType) {
+      fprintf(stderr, \"\\n*** 'car' requires a list\\n\");
+      abort();
+    } else if (lst->len == 0) {
+       fprintf(stderr, \"\\n*** Cannot get head of empty list!!\\n\");
+       abort();
+    } else
+       return(((List *)arg0)->head);"))
+
+(defn cdr [l]
+  (inline-text
+   "List *lst = (List *)arg0;
+    if (arg0->type != ListType) {
+      fprintf(stderr, \"\\n*** 'cdr' requires a list\\n\");
+      abort();
+    } else if (lst->len == 0) {
+       return(arg0);
+    } else {
+       List *tail = ((List *)arg0)->tail;
+       tail->len = lst->len - 1;
+       return((Value *)tail);
+    }\n"))
+
+(defn fn-name [f]
+  (inline-text
+   "if (arg0->type != FunctionType) {
+      fprintf(stderr, \"\\n*** invalid type for 'fn-name'\\n\");
+      abort();
+    } else
+      return(stringValue(((Function *)arg0)->name));\n"))
+
+(defn new-list []
+  (inline-text
+   "List *newList = (List *)GC_malloc(sizeof(List));
+    newList->type = ListType;
+    newList->len = 0;
+    newList->head = (Value *)0;
+    newList->tail = (List *)0;
+    return((Value *)newList);\n"))
+
+(defn snoc [head tail v]
+  (inline-text
+   "if (arg1->type != ListType || arg0->type != ListType) {
+      printf(\"\\ninvalid type for 'snoc'\\n\");
+      abort();
+    }
+
+    List *newTail = (List *)GC_malloc(sizeof(List));
+    newTail->type = ListType;
+    newTail->len = 0;
+    newTail->head = (Value *)0;
+    newTail->tail = (List *)0;
+
+    List *t = (List *)arg1;
+    t->head = (Value *)arg2;
+    t->tail = newTail;
+
+    ((List *)arg0)->len++;
+    return((Value *)newTail);\n"))
+
+(defn char [n]
+  (inline-text
+   "if (arg0->type != NumberType) {
+      printf(\"\\ninvalid type for 'char'\\n\");
+      abort();
+    }
+    String *strVal = (String *)GC_malloc(sizeof(String) + 2);
+    strVal->type = StringType;
+    strVal->len = 1;
+    strVal->buffer[0] = ((Number *)arg0)->numVal;
+    strVal->buffer[1] = 0;
+    return((Value *)strVal);\n"))
+
+(defn str-count [str]
+  (inline-text
+   "if (arg0->type != StringType && arg0->type != SubStringType ) {
+      printf(\"\\ninvalid type for 'char'\\n\");
+      abort();
+    }
+   return (numberValue(((String *)arg0)->len));\n"))
+
+(defn str= [str1 str2]
+  (inline-text
+   "if (arg0->type == StringType && arg1->type == StringType) {
+      String *s1 = (String *)arg0;
+      String *s2 = (String *)arg1;
+      if (s1->len == s2->len && strncmp(s1->buffer,s2->buffer,s1->len) == 0)
+        return(true);
+      else
+        return(false);
+    } else if (arg0->type == SubStringType && arg1->type == SubStringType) {
+      SubString *s1 = (SubString *)arg0;
+      SubString *s2 = (SubString *)arg1;
+      if (s1->len == s2->len && strncmp(s1->buffer,s2->buffer,s1->len) == 0)
+        return(true);
+      else
+        return(false);
+    } else if (arg0->type == StringType &&
+               arg1->type == SubStringType) {
+      String *s1 = (String *)arg0;
+      SubString *s2 = (SubString *)arg1;
+      if (s1->len == s2->len && strncmp(s1->buffer,s2->buffer,s1->len) == 0)
+        return(true);
+      else
+        return(false);
+    } else if (arg0->type == SubStringType &&
+               arg1->type == StringType) {
+      SubString *s1 = (SubString *)arg0;
+      String *s2 = (String *)arg1;
+      if (s1->len == s2->len && strncmp(s1->buffer,s2->buffer,s1->len) == 0)
+        return(true);
+      else
+        return(false);
+    } else
+       return(false);\n"))
+
+(defn symkey= [v1 v2]
+  (inline-text
+   "if (arg0->type != arg1->type)
+      return(false);
+    else {
+      SymKey *s1 = (SymKey *)arg0;
+      SymKey *s2 = (SymKey *)arg1;
+      if (s1->type == s2->type && strcmp(s1->name,s2->name) == 0) {
+        return(true);
+      } else
+        return(false);
+    }\n"))
+
+(defn str-malloc [len]
+  (inline-text
+   "String *strVal = (String *)GC_malloc(sizeof(String) + ((Number *)arg0)->numVal);
+    strVal->type = StringType;
+    strVal->len = 0;
+    strVal->buffer[0] = 0;
+    return((Value *)strVal);\n"))
+
+(defn str-append [dest src]
+  (inline-text
+   "String *s1 = (String *)arg0;
+    if (arg0->type != StringType) {
+      printf(\"\\ninvalid type for 'str-append'\\n\");
+      abort();
+    }
+
+    if (arg1->type == StringType) {
+      String *s2 = (String *)arg1;
+      strncat(s1->buffer, s2->buffer, s2->len);
+      s1->len += s2->len;
+    } else if (arg1->type == SubStringType) {
+      SubString *s2 = (SubString *)arg1;
+      strncat(s1->buffer, s2->buffer, s2->len);
+      s1->len += s2->len;
+    }
+    return(arg0);\n"))
+
+(defn pr* [str]
+  (inline-text
+   "if (arg0->type == StringType)
+      printf(\"%-.*s\", (int)((String *)arg0)->len, ((String *)arg0)->buffer);
+    else if (arg0->type == SubStringType)
+      printf(\"%-.*s\", (int)((SubString *)arg0)->len, ((SubString *)arg0)->buffer);
+    else {
+      printf(\"\\ninvalid type for 'pr*'\\n\");
+      abort();
+    }
+    return(true);\n"))
+
+(defn pr-err* [str]
+  (inline-text
+   "if (arg0->type == StringType)
+      fprintf(stderr, \"%-.*s\", (int)((String *)arg0)->len, ((String *)arg0)->buffer);
+    else if (arg0->type == SubStringType)
+      fprintf(stderr, \"%-.*s\", (int)((SubString *)arg0)->len, ((SubString *)arg0)->buffer);
+    else {
+      fprintf(stderr, \"\\ninvalid type for 'pr-err*'\\n\");
+      abort();
+    }
+    return(true);\n"))
+
+(defn slurp [fileName]
+  (inline-text
+   "char *arg0Str = (char *)GC_malloc(((String *)arg0)->len + 5);
+    if (arg0->type == StringType)
+      snprintf(arg0Str, ((String *)arg0)->len + 1, \"%s\", ((String *)arg0)->buffer);
+    else if (arg0->type == SubStringType)
+      snprintf(arg0Str, ((String *)arg0)->len + 1, \"%s\", ((SubString *)arg0)->buffer);
+    else {
+      printf(\"\\ninvalid type for 'slurp'\\n\");
+      abort();
+    }
+
+    FILE *file = fopen(arg0Str, \"r\");
+    fseek(file, 0, SEEK_END);
+    int64_t buffSize = ftell(file);
+    fseek(file, 0, SEEK_SET);
+    String *strVal = (String *)GC_malloc(sizeof(String) + buffSize + 10);
+    strVal->type = StringType;
+    strVal->len = buffSize;
+    fread(strVal->buffer, 1, buffSize, file);
+    fclose(file);
+    return((Value *)strVal);\n"))
+
+(defn fn-apply [x args]
+  (inline-text "List *argList = (List *)arg1;
+                     FnArity *_arity = findFnArity(arg0, argList->len);
+
+                     if (_arity == (FnArity *)0) {
+                       fprintf(stderr, \"\\n*** no arity found to apply\\n\");
+                       abort();
+                     } else if(_arity->variadic) {
+                       FnType1 *_fn = (FnType1 *)_arity->fn;
+                       return(_fn(_arity->closures, arg1));
+                   ")
+  (inline-text "} else if (argList->len == 1) {
+                       FnType1 *_fn = (FnType1 *)_arity->fn;
+                       Value *appArg0 = argList->head;
+                       return(_fn(_arity->closures, appArg0));
+                   ")
+  (inline-text "} else if (argList->len == 2) {
+                       FnType2 *_fn = (FnType2 *)_arity->fn;
+                       Value *appArg0 = argList->head;
+                       argList = argList->tail;
+                       Value *appArg1 = argList->head;
+                       return(_fn(_arity->closures, appArg0, appArg1));
+                   ")
+  (inline-text "} else if (argList->len == 3) {
+                       FnType3 *_fn = (FnType3 *)_arity->fn;
+                       Value *appArg0 = argList->head;
+                       argList = argList->tail;
+                       Value *appArg1 = argList->head;
+                       argList = argList->tail;
+                       Value *appArg2 = argList->head;
+                       return(_fn(_arity->closures, appArg0, appArg1, appArg2));
+                   ")
+  (inline-text "} else if (argList->len == 4) {
+                       FnType4 *_fn = (FnType4 *)_arity->fn;
+                       Value *appArg0 = argList->head;
+                       argList = argList->tail;
+                       Value *appArg1 = argList->head;
+                       argList = argList->tail;
+                       Value *appArg2 = argList->head;
+                       argList = argList->tail;
+                       Value *appArg3 = argList->head;
+                       return(_fn(_arity->closures, appArg0, appArg1, appArg2, appArg3));
+                   ")
+  (inline-text "} else if (argList->len == 5) {
+                       FnType5 *_fn = (FnType5 *)_arity->fn;
+                       Value *appArg0 = argList->head;
+                       argList = argList->tail;
+                       Value *appArg1 = argList->head;
+                       argList = argList->tail;
+                       Value *appArg2 = argList->head;
+                       argList = argList->tail;
+                       Value *appArg3 = argList->head;
+                       argList = argList->tail;
+                       Value *appArg4 = argList->head;
+                       return(_fn(_arity->closures, appArg0, appArg1, appArg2, appArg3,
+                                                    appArg4));
+                   ")
+  (inline-text "} else if (argList->len == 6) {
+                       FnType6 *_fn = (FnType6 *)_arity->fn;
+                       Value *appArg0 = argList->head;
+                       argList = argList->tail;
+                       Value *appArg1 = argList->head;
+                       argList = argList->tail;
+                       Value *appArg2 = argList->head;
+                       argList = argList->tail;
+                       Value *appArg3 = argList->head;
+                       argList = argList->tail;
+                       Value *appArg4 = argList->head;
+                       argList = argList->tail;
+                       Value *appArg5 = argList->head;
+                       return(_fn(_arity->closures, appArg0, appArg1, appArg2, appArg3,
+                                                    appArg4, appArg5));
+                   ")
+  (inline-text "} else if (argList->len == 7) {
+                       FnType7 *_fn = (FnType7 *)_arity->fn;
+                       Value *appArg0 = argList->head;
+                       argList = argList->tail;
+                       Value *appArg1 = argList->head;
+                       argList = argList->tail;
+                       Value *appArg2 = argList->head;
+                       argList = argList->tail;
+                       Value *appArg3 = argList->head;
+                       argList = argList->tail;
+                       Value *appArg4 = argList->head;
+                       argList = argList->tail;
+                       Value *appArg5 = argList->head;
+                       argList = argList->tail;
+                       Value *appArg6 = argList->head;
+                       return(_fn(_arity->closures, appArg0, appArg1, appArg2, appArg3,
+                                                    appArg4, appArg5, appArg6));
+                   ")
+  (inline-text "} else if (argList->len == 8) {
+                       FnType8 *_fn = (FnType8 *)_arity->fn;
+                       Value *appArg0 = argList->head;
+                       argList = argList->tail;
+                       Value *appArg1 = argList->head;
+                       argList = argList->tail;
+                       Value *appArg2 = argList->head;
+                       argList = argList->tail;
+                       Value *appArg3 = argList->head;
+                       argList = argList->tail;
+                       Value *appArg4 = argList->head;
+                       argList = argList->tail;
+                       Value *appArg5 = argList->head;
+                       argList = argList->tail;
+                       Value *appArg6 = argList->head;
+                       argList = argList->tail;
+                       Value *appArg7 = argList->head;
+                       return(_fn(_arity->closures, appArg0, appArg1, appArg2, appArg3,
+                                                    appArg4, appArg5, appArg6, appArg7));
+                   ")
+  (inline-text "} else if (argList->len == 9) {
+                       FnType9 *_fn = (FnType9 *)_arity->fn;
+                       Value *appArg0 = argList->head;
+                       argList = argList->tail;
+                       Value *appArg1 = argList->head;
+                       argList = argList->tail;
+                       Value *appArg2 = argList->head;
+                       argList = argList->tail;
+                       Value *appArg3 = argList->head;
+                       argList = argList->tail;
+                       Value *appArg4 = argList->head;
+                       argList = argList->tail;
+                       Value *appArg5 = argList->head;
+                       argList = argList->tail;
+                       Value *appArg6 = argList->head;
+                       argList = argList->tail;
+                       Value *appArg7 = argList->head;
+                       argList = argList->tail;
+                       Value *appArg8 = argList->head;
+                       return(_fn(_arity->closures, appArg0, appArg1, appArg2, appArg3,
+                                                    appArg4, appArg5, appArg6, appArg7,
+                                                    appArg8));
+                     } else {
+                       printf(\"error in 'fn-apply'\\n\");
+                       abort();
+                     }
+                   "))
+
+(defn write [str]
+  (new-sm (fn [s]
+            (list (print str) s))))
+
+(defn write-strs [str-list]
+  (cond
+   (= 0 (count str-list)) (state-maybe "")
+   (new-sm (fn [s]
+             (list (map str-list print) s)))))
+
+(defn gensym [pre]
+  (for [sym-count (get-val :gensym-count 0)
+        _ (set-val :gensym-count (inc sym-count))]
+    (symbol (str pre sym-count))))
+
+(defn genlocal [pre]
+  (for [sym-count (get-val :local-sym-count 0)
+        _ (set-val :local-sym-count (inc sym-count))]
+    (symbol (str pre sym-count))))
+
+(defprotocol AST
+  (emit-c [ast]
+    (state-maybe ast)))
+
+(defn inline-ast [txt]
+  (free (reify
+          AST
+          (emit-c [_]
+            (state-maybe (list "" (list txt)))))))
+
+(defn local-sym [sym]
+  (for [sym-val (get-in-val (list :local-syms sym))]
+    (list sym-val empty-list)))
+
+(defn closed-over-sym [sym]
+  (for [sym-val (get-in-val (list :context sym))
+        closed-over (get-val :closed-over empty-list)
+        :let [closure-sym (reduce closed-over :not-found
+                                  (fn [found? c]
+                                    (cond
+                                     (= sym (nth c 1)) (nth c 0)
+                                     found?)))]
+        closure-sym (cond
+                     (= closure-sym :not-found) (for [closure-sym (genlocal "val")
+                                                      _ (update-in-val (list :closed-over)
+                                                                       (fn [closures]
+                                                                         (cons (list closure-sym sym)
+                                                                               closures)))]
+                                                  closure-sym)
+                     (state-maybe closure-sym))]
+    (list closure-sym empty-list)))
+
+(defn defined-sym [sym]
+  (for [sym-val (get-in-val (list :defined-syms sym))]
+    (list (nth sym-val 1) empty-list)))
+
+(defn core-def [sym]
+  (for [ext-ref (get-in-val (list :core-defined-syms sym))
+        _ (assoc-in-val (list :defined-syms sym) ext-ref)
+        _ (update-in-val (list :new-externs)
+                         (fn [externs]
+                           (cons (nth ext-ref 0) externs)))]
+    ext-ref))
+
+;; A symbol can be a local, from the context, from the dictionary or
+;; from the core
+(defn lookup-sym [sym]
+  (comp (local-sym sym)
+        (closed-over-sym sym)
+        (defined-sym sym)
+        (apply-to (fn [ext-ref] (list (nth ext-ref 1) empty-list))
+                  (core-def sym))
+        (new-sm (fn [s]
+                  (print-err "Undefined symbol:" sym "at" (get s :file-name "") ":" (get s :line-num ""))
+                  (abort)))))
+
+(defn symbol-ast [sym]
+  (free (reify
+          Stringable
+          (string-list [f] (list (str sym)))
+
+          AST
+          (emit-c [_]
+            (lookup-sym sym)))))
+
+(defn keyword-ast [kw]
+  (free (reify
+          AST
+          (emit-c [_]
+            (for [static-kw (get-in-val (list :keywords kw))]
+              (list (str "(Value *)&" static-kw) empty-list))))))
+
+(defn const-number-ast [num]
+  (free (reify
+          AST
+          (emit-c [_]
+            (for [static-num (get-in-val (list :numbers num))]
+              (list (str "(Value *)&" static-num) empty-list))))))
+
+(defn const-string-ast [const-str]
+  (free (reify
+          AST
+          (emit-c [ast]
+            (for [static-str (get-in-val (list :strings const-str) :no-static-str)]
+              (list (str "(Value *)&" static-str) empty-list))))))
+
+(defn reset-fn-context []
+  (for [locals (get-val :local-syms {})
+        _ (set-val :local-syms {})
+        local-sym-count (get-val :local-sym-count 0)
+        _ (set-val :local-sym-count 0)
+        context (get-val :context {})
+        _ (set-val :context (merge context locals))
+        closed-over (get-val :closed-over empty-list)
+        _ (set-val :closed-over empty-list)]
+    (list locals local-sym-count context closed-over)))
+
+(defn restore-fn-context [fn-context]
+  (let [locals (nth fn-context 0 {})
+        local-sym-count (nth fn-context 1 0)
+        context (nth fn-context 2 {})
+        closed-over (nth fn-context 3 empty-list)]
+    (apply-to list
+              (set-val :context context)
+              (set-val :local-syms locals)
+              (set-val :local-sym-count local-sym-count)
+              (set-val :closed-over closed-over))))
+
+(defn emit-closures []
+  (for [closures (get-val :closed-over empty-list)
+        _ (write-strs (flat-map (reverse closures)
+                                (fn [closure]
+                                  (list "Value *" (first closure)
+                                        " = closures->head;\\n"
+                                        "if (closures->tail)\\nclosures->tail->len = closures->len - 1;\\n"
+                                        "closures = closures->tail;\\n"))))]
+    ""))
+
+(defn emit-body [body-exprs]
+  (let [result-sym (nth body-exprs 0 "")
+        stmts (nth body-exprs 1 empty-list)]
+    (apply-to list
+              (write-strs stmts)
+              (cond
+               (= result-sym "") (state-maybe "")
+               (write (str "return (" result-sym ");\\n"))))))
+
+(defn static-arity [arity-fn-sym arg-syms variadic]
+  (state-maybe (list (str "&(FnArity){" (count arg-syms) ", (List *)0, " variadic ", " arity-fn-sym "}")
+                     empty-list
+                     (cond
+                      variadic {:variadic arity-fn-sym}
+                      {(count arg-syms) arity-fn-sym}))))
+
+(defn arity-closes-over [arity-sym arity-fn-sym arg-syms closures variadic]
+  (for [closed-over (traverse closures
+                              (fn [closure]
+                                (for [c-sym (lookup-sym (nth closure 1 ""))]
+                                  (str arity-sym "->closures = listCons((Value *)"
+                                       (first c-sym)
+                                       ", (List *)" arity-sym "->closures);\\n"))))]
+    (list arity-sym
+          (list* (str "FnArity *" arity-sym " = (FnArity *)GC_malloc(sizeof(FnArity));\\n")
+                 (str arity-sym "->count = " (count arg-syms) ";\\n")
+                 (str arity-sym "->closures = empty_list;\\n")
+                 (str arity-sym "->variadic = " variadic ";\\n")
+                 (str arity-sym "->fn = " arity-fn-sym ";\\n")
+                 closed-over))))
+
+(defn emit-externs []
+  (for [bootstrapping (get-val :bootstrapping false)
+        externs (get-val :new-externs empty-list)
+        _ (write-strs (map externs (fn [ext] (str "extern " ext ";\\n"))))
+        _ (set-val :new-externs empty-list)
+
+        static-fns (get-val :new-static-fns empty-list)
+        _ (write-strs static-fns)
+        _ (set-val :new-static-fns empty-list)]
+    ""))
+
+(defn eval-exprs [ast]
+  (for [exprs (evaluate ast emit-c)]
+    (reduce exprs empty-list
+            (fn [result expr]
+              (let [result-stmts (nth result 1 empty-list)
+                    expr-sym (nth expr 0 "")
+                    expr-stmts (nth expr 1 empty-list)]
+                (list expr-sym (comp result-stmts expr-stmts)))))))
+
+(defn gen-arg-syms [args]
+  (cond
+   (< 0 (count args))
+   (traverse (range (count args))
+             (fn [arg-index]
+               (let [c-sym (str "arg" arg-index)]
+                 (for [_ (assoc-in-val (list :local-syms (nth args arg-index "")) c-sym)]
+                   c-sym))))
+
+   (state-maybe empty-list)))
+
+(defn variadic-arity-ast [args body]
+  (free (reify
+          AST
+          (emit-c [_]
+            (let [c-args (list "closures" "varArgs")
+                  arg-count (count args)]
+              (for [arity-fn-sym (gensym "arityImpl_")
+                    arity-sym (genlocal "arity_")
+                    fn-context (reset-fn-context)
+                    arg-syms (gen-arg-syms args)
+                    body-exprs (eval-exprs body)
+                    _ (emit-externs)
+
+                    _ (write-strs (list*
+                                   (str "Value *" arity-fn-sym "(List *closures, Value *varArgs) {\\n")
+                                   "List *argsList = (List *)varArgs;\\n"
+                                   (map (range arg-count)
+                                        (fn [index]
+                                          (let [c-sym (nth arg-syms index "")]
+                                            (cond
+                                             (< (inc index) arg-count)
+                                             (str "Value *" c-sym
+                                                  " = argsList->head;\\n"
+                                                  "if (argsList->tail) argsList->tail->len = argsList->len - 1;\\n"
+                                                  "argsList = argsList->tail;\\n")
+
+                                             (str "Value *" c-sym " = (Value *)argsList;\\n")))))))
+
+                    _ (apply-to list
+                                (emit-closures)
+                                (emit-body body-exprs)
+                                (write "};\\n"))
+                    closures (get-val :closed-over empty-list)
+                    _ (restore-fn-context fn-context)
+                    result (cond
+                            (< 0 (count closures)) (arity-closes-over arity-sym arity-fn-sym
+                                                                      c-args closures 1)
+                            (static-arity arity-fn-sym c-args 1))]
+                result))))))
+
+(defn fn-arity-ast [args body]
+  (free (reify
+          AST
+          (emit-c [_]
+            (for [arity-fn-sym (gensym "arityImpl_")
+                  arity-sym (genlocal "arity_")
+                  fn-context (reset-fn-context)
+                  arg-syms (gen-arg-syms args)
+                  body-exprs (eval-exprs body)
+                  _ (emit-externs)
+
+                  _ (apply-to list
+                              (write (str "Value *" arity-fn-sym "("))
+                              (write-strs (interpose (cons "List *closures"
+                                                           (map arg-syms (fn [arg] (str "Value *" arg))))
+                                                     ", "))
+                              (write ") {\\n")
+                              (emit-closures)
+                              (emit-body body-exprs)
+                              (write "};\\n\\n"))
+                  closures (get-val :closed-over empty-list)
+                  _ (restore-fn-context fn-context)
+                  result (cond
+                          (< 0 (count closures)) (arity-closes-over arity-sym arity-fn-sym
+                                                                    arg-syms closures 0)
+                          (static-arity arity-fn-sym arg-syms 0))]
+              result)))))
+
+(defn main-ast [args body]
+  (free (reify
+          AST
+          (emit-c [_]
+            (for [main-sym (gensym "main_")
+                  _ (set-val :main-sym main-sym)
+                  arg-syms (gen-arg-syms args)
+                  _ (set-val :local-sym-count 0)
+                  body (eval-exprs body)
+                  _ (emit-externs)
+                  _ (write (str "\\nint " main-sym " ("))
+                  _ (write-strs (interpose (map arg-syms (fn [arg] (str "Value *" arg)))
+                                            ", "))
+                  _ (write ") {\\n")
+                  _ (write-strs (nth body 1 empty-list))
+                  _ (write "\\nreturn(0);\\n}\\n\\n")]
+              "")))))
+
+(defn eval-args [args]
+  (cond
+   (empty? args) (state-maybe "")
+   (for [evalled (traverse args (fn [arg-ast] (evaluate arg-ast emit-c)))]
+     (reduce evalled (list empty-list empty-list)
+             (fn [results evalled]
+               (let [syms (nth results 0 empty-list)
+                     stmts (nth results 1 empty-list)
+                     sym (nth evalled 0 :no-arg-sym)
+                     evalled-stmts (nth evalled 1 empty-list)]
+                 (list (comp syms (list sym))
+                       (comp stmts evalled-stmts))))))))
+
+(defn core-static-fn [target-sym num-args]
+  (let [args (cons "List *" (cond
+                             (= 0 num-args) empty-list
+                             (= :variadic num-args) (list "Value *")
+                             (map (range num-args)
+                                  (fn [index]
+                                    "Value *"))))
+        args (apply str (interpose args ", "))]
+    (for [arity-sym (get-in-val (list :core-static-fns target-sym num-args))
+          _ (update-in-val (list :new-static-fns)
+                           (fn [s-fns]
+                             (cons (str "Value *" arity-sym "(" args ");\\n") s-fns)))]
+      arity-sym)))
+
+(defn lookup-static-fn [target-sym num-args]
+  (comp (get-in-val (list :static-fns target-sym num-args))
+        (core-static-fn target-sym num-args)))
+
+(defn call-dynamic-fn [target args]
+  (let [target-sym (nth target 0 "")
+        target-stmts (nth target 1 empty-list)
+        arg-stmts (nth args 1 empty-list)
+        args (nth args 0 empty-list)
+        num-args (count args)]
+    (for [arity-sym (genlocal "arity")
+          variadic-sym (genlocal "varArgs")
+          fn-sym (genlocal "fn")
+          result-sym (genlocal "rslt")
+          invoke-sym (get-in-val (list :defined-syms 'invoke))
+          invoke-arity-sym (lookup-static-fn (nth invoke-sym 1) 2)]
+      (let [arg-syms (cons (str arity-sym "->closures") args)]
+        (list result-sym
+              (comp target-stmts
+                    arg-stmts
+                    (list (str "Value *" result-sym ";\\n"
+                               "if((" target-sym ")->type != " (get (types) 'Function :no-fn-type) ") {\\n"
+
+                               ;; TODO: currently hard coded for just 2
+                               ;; arguments to 'invoke'
+                               (cond
+                                (< 0 num-args)
+                                (str result-sym " = " invoke-arity-sym "(empty_list, " target-sym ", (Value *)"
+                                     (nth arg-syms 1 "") ");\\n")
+
+                                (str "printf(\\\"calling a non-function\\\\n\\\");\\n abort();\\n"))
+                               "} else {\\n"
+
+                               "FnArity *" arity-sym " = findFnArity(" target-sym ", " num-args ");\\n"
+                               "if(" arity-sym " != (FnArity *)0 && !" arity-sym "->variadic) {\\n"
+                               "FnType" num-args " *" fn-sym " = (FnType" num-args " *)" arity-sym "->fn;\\n"
+                               result-sym " = " fn-sym "(" (apply str (interpose arg-syms ", ")) ");\\n"
+                               "} else if(" arity-sym " != (FnArity *)0 && " arity-sym "->variadic) {\\n"
+                               "FnType1 *" fn-sym " = (FnType1 *)" arity-sym "->fn;\\n"
+                               "List *" variadic-sym " = (List *)GC_malloc(sizeof(List));\\n"
+                               variadic-sym "->type  = ListType;\\n"
+                               variadic-sym "->len = 0;\\n"
+                               variadic-sym "->head = (Value *)0;\\n"
+                               variadic-sym "->tail = (List *)0;\\n"
+                               (reduce (reverse (rest arg-syms)) ""
+                                       (fn [arg-list arg-sym]
+                                         (str arg-list
+                                              variadic-sym " = (List *)listCons("
+                                              ;; TODO: This "(Value *)" may be superfluous
+                                              "(Value *)" arg-sym
+                                              ", " variadic-sym ");\\n")))
+                               result-sym " = " fn-sym "(" (first arg-syms) ", (Value *)" variadic-sym ");\\n"
+                               "} else {\\nfprintf(stderr, \\\"\\\\n*** no arity found for '%s'.\\\\n\\\", "
+                               "((Function *)" target-sym ")->name"
+                               ");\\n  abort();\\n}\\n}\\n"))))))))
+
+(defn debug [& args]
+  (comp (for [debugging (get-val :debug-on)
+              :when debugging]
+          (apply print-err args))
+        (state-maybe "")))
+
+(defn call-static-fixed [target args]
+  (let [target-sym (nth target 0 "")
+        target-stmts (nth target 1 empty-list)
+        arg-stmts (nth args 1 empty-list)
+        args (nth args 0 empty-list)
+        num-args (count args)]
+    (for [arity-sym (lookup-static-fn target-sym num-args)
+          ;; _ (debug :call-static-fixed-arity target-sym arity-sym)
+          empty-list (comp (get-in-val (list :defined-syms 'empty-list))
+                           (core-def 'empty-list))
+          result-sym (genlocal "rslt")]
+      (let [arg-syms (cons (str "(List *)" (nth empty-list 1)) args)]
+        (list result-sym
+              (comp target-stmts
+                    arg-stmts
+                    (list (str Value* result-sym " = " arity-sym "("
+                               (apply str (interpose arg-syms ", ")) ");\\n"))))))))
+
+(defn call-static-variadic [target args]
+  (let [target-sym (nth target 0 "")
+        target-stmts (nth target 1 empty-list)
+        arg-stmts (nth args 1 empty-list)
+        args (nth args 0 empty-list)
+        num-args (count args)]
+    (for [arity-sym (lookup-static-fn target-sym :variadic)
+          empty-list (comp (get-in-val (list :defined-syms 'empty-list))
+                           (core-def 'empty-list))
+          variadic-sym (genlocal "varArgs")
+          result-sym (genlocal "rslt")]
+      (let [arg-syms (cons (str "(List *)" (nth empty-list 1)) args)]
+        (list result-sym
+              (comp target-stmts
+                    arg-stmts
+                    (list (str "List *" variadic-sym " = (List *)GC_malloc(sizeof(List));\\n"
+                               variadic-sym "->type  = ListType;\\n"
+                               variadic-sym "->len = 0;\\n"
+                               variadic-sym "->head = (Value *)0;\\n"
+                               variadic-sym "->tail = (List *)0;\\n"
+                               (reduce (reverse (rest arg-syms)) ""
+                                       (fn [arg-list arg-sym]
+                                         (str arg-list
+                                              variadic-sym " = (List *)listCons("
+                                              "(Value *)" arg-sym
+                                              ", " variadic-sym ");\\n")))
+                               Value* result-sym " = " arity-sym "(" (first arg-syms) ", (Value *)"
+                               variadic-sym ");\\n"))))))))
+
+(defn call-ast [callee params]
+  (free (reify
+          AST
+          (emit-c [_]
+            ;; TODO: check for recursive call to same arity
+            (for [target (evaluate callee emit-c)
+                  args (eval-args params)
+                  result (comp (call-static-fixed target args)
+                               (call-static-variadic target args)
+                               (call-dynamic-fn target args)
+                               (new-sm (fn [s]
+                                         (print-err (str "could not emit callsite for '"
+                                                         (first (evaluate callee string-list))
+                                                         "'"))
+                                         (print-err :target (first target))
+                                         (abort))))]
+              result)))))
+
+(defn binding-ast [binding val]
+  (free (reify
+          AST
+          (emit-c [_]
+            (for [evalled (evaluate val emit-c)
+                  _ (assoc-in-val (list :local-syms binding) (nth evalled 0 ""))]
+              (list "" (nth evalled 1 empty-list)))))))
+
+(defn let-ast [bindings body]
+  (free (reify
+          AST
+          (emit-c [_]
+            (for [locals (get-val :local-syms {})
+                  bindings (evaluate bindings emit-c)
+                  body-exprs (eval-exprs body)
+                  _ (set-val :local-syms locals)]
+              (let [binding-stmts (apply comp (map bindings
+                                                   (fn [binding]
+                                                     (nth binding 1 empty-list))))
+                    result-sym (nth body-exprs 0 "")
+                    body-stmts (nth body-exprs 1 empty-list)]
+                (list result-sym (comp binding-stmts body-stmts))))))))
+
+(defn fn-ast [name arities]
+  (free (reify
+          AST
+          (emit-c [_]
+            (let [arity-count (count arities)]
+              (for [fn-sym (gensym "fn_")
+                    _ (write (str "\\n// --------- " name " --------------\\n"))
+                    _ (write (str "Function " fn-sym ";\\n"))
+                    ;; TODO: check for anon fn, save previous value of
+                    ;; :defined-sym and restore at end
+                    _ (assoc-in-val (list :defined-syms name) (list (str "Function " fn-sym)
+                                                                    (str "(Value *)&" fn-sym)))
+                    arity-vals (traverse arities
+                                         (fn [arity]
+                                           (evaluate arity emit-c)))
+                    :let [arity-syms (map arity-vals (fn [av]
+                                                       (nth av 0 "")))
+                          arity-init (apply comp (map arity-vals
+                                                      (fn [av]
+                                                        (nth av 1 empty-list))))
+                          static-arities (apply merge (map arity-vals
+                                                           (fn [av]
+                                                             (nth av 2 {}))))]
+                    _ (cond
+                       (= 0 (count arity-init))
+                       (apply-to list
+                                 (write (str "\\n// --------- " name " main body --------------\\n"))
+                                 (write (str "Function " fn-sym " = {"
+                                             (get (types) 'Function :no-fn-type) ", \\\""
+                                             name "\\\", " arity-count ", "
+                                             "{" (apply str (interpose arity-syms ", ")) "}};\\n"))
+                                 (assoc-in-val (list :static-fns (str "(Value *)&" fn-sym)) static-arities))
+
+                       (state-maybe ""))]
+                (cond
+                 (= 0 (count arity-init))
+                 (list (str "(Value *)&" fn-sym) empty-list (str "Function " fn-sym))
+
+                 (list (str "(Value *)" fn-sym)
+                       (comp arity-init
+                             (list* (str "Function *" fn-sym " = (Function *)GC_malloc(sizeof(Function)"
+                                         " + sizeof(FnArity *) * " arity-count ");\\n")
+                                    (str fn-sym "->type = " (get (types) 'Function :no-fn-type) ";\\n")
+                                    (str fn-sym "->name = \\\"" name "\\\";\\n")
+                                    (str fn-sym "->arityCount = " arity-count ";\\n")
+                                    (map (range arity-count)
+                                         (fn [index]
+                                           (str fn-sym "->arities[" index "] = "
+                                                (nth arity-syms index "") ";\\n")))))
+                       (str "Function " fn-sym)))))))))
+
+(defn emit-static-sym [sym]
+  (for [sym-val (get-in-val (list :symbols sym) :no-static-sym)]
+    (let [_ (cond
+             (= :no-static-sym sym-val) (print-err "// not found" sym)
+             "")]
+      (list (str "(Value *)&" sym-val) empty-list))))
+
+(defn quoted-ast [sym]
+  (free (reify
+          AST
+          (emit-c [_]
+            (emit-static-sym sym)))))
+
+(defn forward-decl [name value]
+  (cond
+   (= :no-value value)
+   (for [c-name (gensym "var_")
+         _ (write-strs (list (str "// forward declaration for '" name "'\\n")
+                             (str Value* c-name ";\\n\\n")))
+         _ (assoc-in-val (list :defined-syms name) (list (str "Value *" c-name) c-name))]
+     "")
+
+   empty-list))
+
+(defn define-fwd-decl [name value]
+  (for [c-name (get-in-val (list :defined-syms name))
+        evalled-expr (evaluate value emit-c)
+        :let [c-name (nth c-name 1)
+              result-sym (nth evalled-expr 0 "")
+              initialization (nth evalled-expr 1 empty-list)
+              init-count (count initialization)
+              initialization (cond
+                              (empty? initialization) (list "")
+                              initialization)]
+        _ (cond
+           (= result-sym "") (write (str "Value *" c-name " = " (first initialization)))
+           (< 1 init-count) (state-maybe (let [_ (print-err (str "invalid definition: " name))]
+                                           (abort)))
+           (apply-to list
+                     (write (first initialization))
+                     (write (str Value* c-name " = " result-sym ";\\n"))))]
+    ""))
+
+(defn inline-text-definition [name initialization]
+  (for [c-name (gensym "var_")
+        _ (write (str Value* c-name " = " (first initialization) ";\\n"))
+        _ (assoc-in-val (list :defined-syms name) (list (str "Value *" c-name ";")
+                                                        c-name))]
+    c-name))
+
+(defn expression-definition [name result-sym initialization extern-def]
+  (for [c-name (gensym "var_")
+        _ (cond
+           (< 0 (count initialization)) (write (first initialization))
+           (state-maybe ""))
+        _ (assoc-in-val (list :defined-syms name) (list extern-def result-sym))]
+    c-name))
+
+(defn define-value [name value]
+  (for [evalled-expr (evaluate value emit-c)
+        :let [result-sym (nth evalled-expr 0 "")
+              initialization (nth evalled-expr 1 empty-list)
+              extern-def (nth evalled-expr 2 "")]
+        _ (cond
+           (= result-sym "") (inline-text-definition name initialization)
+           (< 1 (count initialization)) (state-maybe (let [_ (print-err (str "invalid definition: " name))]
+                                                       (abort)))
+           (expression-definition name result-sym initialization extern-def))]
+    ""))
+
+(defn definition-ast [name value]
+  (free (reify
+          AST
+          (emit-c [_]
+            (cond
+             (= :no-value value) (forward-decl name value)
+             (comp (define-fwd-decl name value)
+                   (define-value name value)))))))
+
+(defn eval-cond-clause [clauses default cond-result]
+  (cond
+   (empty? clauses)
+   (state-maybe
+    (let [clause-result (nth default 0 "")
+          default-stmts (nth default 1 empty-list)]
+      (list cond-result
+            (comp default-stmts
+                  (list (str cond-result " = " (nth default 0 "") ";\\n"))))))
+
+   (let [clause (first clauses)]
+     (for [test (evaluate (first clause) emit-c)
+           clause-result (evaluate (nth clause 1) emit-c)
+           cond-rest (eval-cond-clause (rest clauses) default cond-result)]
+       (let [test-sym (nth test 0 "")
+             test-stmts (nth test 1 empty-list)
+             clause-sym (nth clause-result 0 "")
+             clause-stmts (nth clause-result 1 empty-list)]
+         (list cond-result
+               (comp test-stmts
+                     (list (str "\\nif (isTrue(" test-sym ")) {\\n"))
+                     clause-stmts
+                     (list (str cond-result " = " clause-sym ";\\n} else {\\n"))
+                     (nth cond-rest 1 empty-list)
+                     (list "}\\n"))))))))
+
+(defn cond-ast [clauses default]
+  (free (reify
+          AST
+          (emit-c [_]
+            (for [cond-result (genlocal "cond")
+                  default (evaluate default emit-c)
+                  evalled-clauses (eval-cond-clause clauses default cond-result)]
+              (let [cond-stmts (nth evalled-clauses 1 empty-list)]
+                (list cond-result (cons (str "Value *" cond-result ";\\n")
+                                        cond-stmts))))))))
+
+(defn emit-extension [type-num proto]
+  (for [_ (traverse (nth proto 1 empty-list)
+                    (fn [impl]
+                      (let [impl-fn (nth impl 1 "")]
+                        (for [ext-fn (evaluate impl-fn emit-c)
+                              _ (write-strs (nth ext-fn 1 empty-list))
+                              _ (assoc-in-val (list :protocols (first impl)
+                                                    :impls type-num)
+                                              (first ext-fn))]
+                          ""))))]
+    (list "" empty-list)))
+
+(defn extend-ast [type impls]
+  (free (reify
+          AST
+          (emit-c [_]
+            (for [type-num (get-in-val (list :types type))
+                  _ (traverse (seq impls)
+                              (partial emit-extension type-num))]
+              "")))))
+
+(defn emit-reified-fn [name-asts type-num index]
+  (let [name-ast (nth name-asts index :no-name-ast)
+        name (nth name-ast 0 "")
+        ast (nth name-ast 1 :no-ast)]
+    (for [evalled (evaluate ast emit-c)
+          num-args (get-in-val (list :protocols name :num-args) 0)
+          impl-sym (gensym "protoImpl_")
+          fn-sym (gensym "protoFn_")
+          :let [_ (cond (= 0 num-args)
+                        (let [_ (print-err "invalid protocol fn spec for" name)]
+                          (abort))
+                        :nothing)
+                args (map (range num-args) (fn [idx] (str "arg" idx)))
+                arg-decls (apply str (interpose (cons (str ListVal* "closures")
+                                                      (map args (fn [arg] (str Value* arg))))
+                                                ", "))
+                args (apply str (interpose (cons "closures" args) ", "))]
+          _ (write (str Value* impl-sym "(" arg-decls ") {\\n"
+                        FnArity* "arityPtr = ((Function *)((ReifiedVal *)arg0)->impls["
+                        index "])->arities[0];\\n"
+                        "return (((FnType" num-args " *)arityPtr->fn)(arityPtr->" args "));\\n};\\n\\n"))
+          _ (write (str "Function " fn-sym " = {3, \\\"" name
+                        "\\\", 1, {&(FnArity){" num-args
+                        ", (List *)0, 0, " impl-sym"}}};\\n\\n"))
+          _ (assoc-in-val (list :protocols name :impls type-num) (str "(Value *)&" fn-sym))]
+      evalled)))
+
+(defn reified-type [type-num impl-fns]
+  (for [reified-sym (genlocal "reified_")
+        _ (state-maybe "")]
+    (let [inits (apply comp (map impl-fns (fn [sym-inits]
+                                            (nth sym-inits 1 empty-list))))
+          impls-syms (map impl-fns (fn [sym-inits] (nth sym-inits 0 "")))
+          reify-init (list* (str ReifiedVal* reified-sym " = (ReifiedVal *)GC_malloc(sizeof("
+                                 "ReifiedVal) + sizeof(Function *) * "
+                                 (count impls-syms) ");\\n")
+                            (str reified-sym "->type = " type-num ";\\n")
+                            (str reified-sym "->implCount = " (count impl-fns) ";\\n")
+                            (map (range (count impl-fns))
+                                 (fn [index]
+                                   (let [sym-init (nth impl-fns index empty-list)
+                                         sym (nth sym-init 0 "")]
+                                     (str reified-sym "->impls[" index "] = " sym ";\\n")))))]
+      (list (str "(Value *)" reified-sym)
+            (comp inits reify-init)))))
+
+(defn static-reified [type-num impl-fns]
+  (for [reified-sym (gensym "reified_")
+        :let [fns-init (map impl-fns (fn [impl-fn]
+                                       (first impl-fn)))
+              reify-init (list (str "ReifiedVal " reified-sym " = {"
+                                    type-num ", " (count impl-fns) ", {"
+                                    (apply str (interpose fns-init ", "))
+                                    "}};\\n"))]
+        _ (write (first reify-init))]
+    (list (str "(Value *)&" reified-sym) empty-list reified-sym)))
+
+(defn reify-ast [impls]
+  (free (reify
+          AST
+          (emit-c [_]
+            (let [protos (seq impls)
+                  name-asts (apply comp (map protos (fn [proto]
+                                                      (nth proto 1 empty-list))))]
+              (for [types (get-val :types {})
+                    :let [type-num (inc (count (seq types)))]
+                    _ (assoc-in-val (list :types type-num) type-num)
+                    impl-fns (traverse (range (count name-asts))
+                                       (partial emit-reified-fn name-asts type-num))
+                    reified-result (let [inits (apply comp (map impl-fns (fn [sym-inits]
+                                                                           (nth sym-inits 1 empty-list))))]
+                                     (cond
+                                      (= 0 (count inits))
+                                      (static-reified type-num impl-fns)
+
+                                      (reified-type type-num impl-fns)))]
+                reified-result))))))
+
+(defn write-default [default-impl]
+  (cond
+   (= :no-default default-impl) (state-maybe {})
+
+   (for [default-fn (evaluate default-impl emit-c)
+         _ (write-strs (nth default-fn 1 empty-list))]
+     {:default (nth default-fn 0 "")})))
+
+(defn emit-proto-fn [proto]
+  (let [name (nth proto 0 "")
+        arities (first (seq (nth proto 1 {0 {}})))
+        num-args (nth arities 0 0)
+        args (map (range num-args) (fn [idx] (str "arg" idx)))
+        default-fn-ast (get (nth arities 1 {}) :default :no-default)
+        args (map (range num-args) (fn [idx]
+                                     (str "arg" idx)))]
+    (for [c-name (gensym "protoFnImpl_")
+          impls-sym (gensym "protoImpls_")
+          fn-sym (gensym "protoFn_")
+          _ (write (str "ProtoImpls *" impls-sym ";\\n"))
+          default-impl (write-default default-fn-ast)
+          arity-sym (gensym "protoFnArity_")
+          _ (apply-to list
+                      (write (str "Value *" c-name "("))
+                      (write-strs
+                       (interpose (cons "List *closures" (map args (fn [arg] (str "Value *" arg))))
+                                  ", "))
+                      (write-strs
+                       (list ") {\\n"
+                             "  Function *implFn = (Function *)findProtoImpl(arg0->type, "
+                             impls-sym ");\\n"
+                             "  if(implFn == (Function *)0) {\\n"
+                             "   fprintf(stderr, \\\"\\\\n*** Could not find proto impl for '"
+                             name "' %lld\\\\n\\\", arg0->type);\\nabort();\\n}\\n"
+                             "  FnArity *_arity = findFnArity((Value *)implFn, " num-args ");\\n"
+                             "  if(_arity == (FnArity *)0 || _arity->variadic) {\\n"
+                             "    fprintf(stderr, \\\"\\\\n*** Invalid number of args in call to '"
+                             name "'\\\");\\n"
+                             "    abort();\\n}\\n"
+                             "  FnType" num-args " *_fn = (FnType" num-args " *)_arity->fn;\\n"
+                             "  return(_fn("))
+                      (write-strs (interpose (cons "_arity->closures" args) ", "))
+                      (write-strs (list "));\\n}\\n"
+                                        "FnArity "
+                                        (str arity-sym) " = {" (str num-args) ", (List *)0, 0, "
+                                        (str c-name) "};\\n"
+                                        "Function " (str fn-sym)  " = {3, \\\"" (str name)
+                                        "\\\", 1, {&" (str arity-sym) "}};\\n\\n"))
+                      (assoc-in-val (list :static-fns (str "(Value *)&" fn-sym) num-args) c-name)
+                      (assoc-in-val (list :defined-syms name) (list (str "Function " fn-sym)
+                                                                    (str "(Value *)&" fn-sym)))
+                      (assoc-in-val (list :protocols name) {:impls-sym impls-sym
+                                                            :extern-def (str "extern Function "
+                                                                             fn-sym ";")
+                                                            :impls default-impl
+                                                            :num-args num-args}))]
+      fn-sym)))
+
+(defn protocol-ast [name prototypes]
+  (free (reify
+          AST
+          (emit-c [ast]
+            (traverse (seq prototypes) emit-proto-fn)))))
+
+(defn fixed-fn-types []
+  (traverse (range 10)
+            (fn [arg-count]
+              (cond
+               (= arg-count 0)
+               (write (str "typedef Value *(FnType0)(List *);\\n"))
+
+               (apply-to list
+                         (write (str "typedef Value *(FnType" arg-count ")("))
+                         (write-strs (interpose (cons "List *"
+                                                      (repeat arg-count "Value *"))
+                                                ", "))
+                         (write ");\\n"))))))
+
+(defn extern-fn [name variadic return-type & arg-types]
+  (let [arg-types (comp arg-types
+                        (cond
+                         variadic (list "...")
+                         empty-list))]
+    (apply-to list
+              (write (str "extern " return-type " " name "("))
+              (write-strs (interpose arg-types ", "))
+              (write ");\\n"))))
+
+(defn extern-functions []
+  (apply-to list
+            (write "\\n")
+            (extern-fn 'abort 0 VoidT)
+            (extern-fn 'printf 1 Int32 "const char *")
+            (extern-fn 'GC_init 0 VoidT)
+            (extern-fn 'GC_malloc 0 Value* Int64)))
+
+(defn core-base-fns []
+  (write-strs (list "\\n"
+                    "Value* true;\\n"
+                    "Value* false;\\n"
+                    "Number trueVal;\\n"
+                    "Number falseVal;\\n"
+                    "int isTrue(Value *boolVal);\\n"
+                    "Value *findProtoImpl(int64_t type, ProtoImpls *impls);\\n"
+                    "FnArity *findFnArity(Value *fnVal, int argCount);\\n"
+                    "Value *symbolValue(char *s);\\n"
+                    "Value *keywordValue(char *s);\\n"
+                    "Value *stringValue(char *s);\\n"
+                    "Value *makeSubstr(int64_t len, Value *str, char *subsStart);\\n"
+                    "Value *numberValue(int64_t n);\\n"
+                    "List *listCons(Value *x, List *l);\\n")))
+
+(defn base-fns []
+  (write-strs (list "\\n"
+                    "Number trueVal = {NumberType, 1};\\n"
+                    "Value* true = (Value *)&trueVal;\\n"
+                    "Number falseVal = {NumberType, 0};\\n"
+                    "Value* false = (Value *)&falseVal;\\n"
+                    "\\n"
+                    "int isTrue(Value *boolVal) {\\n"
+                    "if (boolVal->type != " (get (types) 'Number 99) ") {\\n"
+                    "printf(\\\"Invalid boolean value\\\\n"
+                    "\\\");\\nabort();\\n}\\nelse\\nreturn (((Number *)boolVal)->numVal);\\n}\\n"
+                    "\\n"
+                    "Value *findProtoImpl(int64_t type, ProtoImpls *impls) {\\n"
+                    "int64_t implIndex = 0;\\n"
+                    "while(implIndex < impls->implCount) {\\n"
+                    "if (type != impls->impls[implIndex].type) {\\n"
+                    "implIndex++;\\n"
+                    "} else\\n"
+                    "return(impls->impls[implIndex].implFn);\\n"
+                    "}\\n"
+                    "return(impls->defaultImpl);\\n"
+                    "};\\n\\n"
+                    "FnArity *findFnArity(Value *fnVal, int argCount) {\\n"
+                    "Function *fn = (Function *)fnVal;\\n"
+                    "int arityIndex = 0;\\n"
+                    "FnArity *arity = (FnArity *)fn->arities[arityIndex];\\n"
+                    "FnArity *variadic = (FnArity *)0;\\n"
+                    "while(arityIndex < fn->arityCount) {\\n"
+                    "arity = (FnArity *)fn->arities[arityIndex];\\n"
+                    "if (arity->variadic) {\\n"
+                    "variadic = arity;\\n"
+                    "arityIndex++;\\n"
+                    "} else if (arity->count != argCount) {\\n"
+                    "arityIndex++;\\n"
+                    "} else\\n"
+                    "return(arity);\\n"
+                    "}\\n"
+                    "return(variadic);\\n"
+                    "};\\n\\n"
+                    "\\n"
+                    "Value *symbolValue(char *s) {\\n"
+                    "SymKey *sym = (SymKey *)GC_malloc(sizeof(SymKey));\\n"
+                    "sym->type = SymbolType;\\n"
+                    "sym->name = s;\\n"
+                    "return((Value *)sym);\\n"
+                    "};\\n"
+                    "\\n"
+                    "Value *keywordValue(char *s) {\\n"
+                    "SymKey *kw = (SymKey *)GC_malloc(sizeof(SymKey));\\n"
+                    "kw->type = KeywordType;\\n"
+                    "kw->name = s;\\n"
+                    "return((Value *)kw);\\n"
+                    "};\\n"
+                    "\\n"
+                    "Value *stringValue(char *s) {\\n"
+                    "int64_t len = strlen(s);\\n"
+                    "String *strVal = (String *)GC_malloc(sizeof(String) + len + 4);\\n"
+                    "strVal->type = StringType;\\n"
+                    "strVal->len = strlen(s);\\n"
+                    "strncpy(strVal->buffer, s, len);\\n"
+                    "return((Value *)strVal);\\n"
+                    "};\\n"
+                    "\\n"
+                    "Value *makeSubstr(int64_t len, Value *str, char *subsStart) {\\n"
+                    "SubString *subStr = (SubString *)GC_malloc(sizeof(SubString));\\n"
+                    "subStr->type = SubStringType;\\n"
+                    "subStr->len = len;\\n"
+                    "subStr->source = str;\\n"
+                    "subStr->buffer = subsStart;\\n"
+                    "return((Value *)subStr);}\\n"
+                    "\\n"
+                    "Value *numberValue(int64_t n) {\\n"
+                    "Number *numVal = (Number *)GC_malloc(sizeof(Number));\\n"
+                    "numVal->type = NumberType;\\n"
+                    "numVal->numVal = n;\\n"
+                    "return((Value *)numVal);\\n"
+                    "};\\n"
+                    "\\n"
+                    "List *listCons(Value *x, List *l) {\\n"
+                    "if (l->type != ListType) {\\n"
+                    "printf(\\\"'cons' requires a list\\\n\\\");\\n"
+                    "abort();\\n"
+                    "}\\n"
+                    "List *newList = (List *)GC_malloc(sizeof(List));\\n"
+                    "List *oldList = (List *)l;\\n"
+                    "newList->type = ListType;\\n"
+                    "newList->len = oldList->len + 1;\\n"
+                    "newList->head = (Value *)x;\\n"
+                    "newList->tail = oldList;\\n"
+                    "return(newList);\\n"
+                    "};\\n")))
+
+(defn emit-impl [default impls]
+  (let [default-sym (cond
+                     (= default :no-default) "(Value *)0"
+                     default)
+        impls-strs (map impls (fn [impl]
+                                (str "{" (apply str (interpose impl ", ")) "}")))]
+    (apply-to list
+              (write (str "{" (count impls-strs) ", " default-sym ", {"))
+              (write-strs (interpose impls-strs ", "))
+              (write "}};\\n"))))
+
+(defn finalize-protocols []
+  (for [protocols (get-val :protocols {})
+        bootstrapping (get-val :bootstrapping false)
+        result (cond
+                (empty? protocols) (state-maybe "")
+                (traverse (seq protocols)
+                          (fn [proto]
+                            (let [proto-fn (nth proto 0 "")
+                                  proto-impls (nth proto 1 {})
+                                  impls-sym (get proto-impls :impls-sym "")
+                                  impls (get proto-impls :impls {})
+                                  default (get impls :default :no-default)
+                                  impls (filter (seq impls)
+                                                (fn [impl]
+                                                  (let [type (first impl)]
+                                                    (cond
+                                                     (= type :default) 0
+                                                     (= type :no-type) 0
+                                                     1))))]
+                              (for [local-sym (gensym "localImpls_")
+                                    _ (cond
+                                       bootstrapping (state-maybe "")
+                                       (write (str "extern ProtoImpls *" impls-sym ";\\n")))
+                                    _ (write (str "ProtoImpls " local-sym " = "))
+                                    _ (emit-impl default impls)]
+                                (list impls-sym local-sym))))))]
+    result))
+
+(defn base-types []
+  (let [types (types)]
+    (write-strs (list
+                 "#include <sys/types.h>\\n"
+                 "#include <stdio.h>\\n"
+                 "#include <string.h>\\n\\n"
+                 Value
+                 NumberVal
+                 SymKey
+                 StringVal
+                 SubStringVal
+                 ListVal
+                 FnArity
+                 FunctionVal
+                 ProtoImpl
+                 ProtoImpls
+                 ReifiedVal
+                 "List *listCons(Value *x, List *l);\\n"
+                 "Value *stringValue(char *s);\\n"
+                 "const int64_t NumberType;\\n"
+                 "const int64_t KeywordType;\\n"
+                 "const int64_t SymbolType;\\n"
+                 "const int64_t StringType;\\n"
+                 "const int64_t SubStringType;\\n"
+                 "const int64_t ListType;\\n"
+                 "const int64_t FunctionType;\\n"
+                 "List *empty_list;\\n"
+                 "Value *number_literals();\\n"
+                 "Value *symbol_literals();\\n"
+                 "Value *keyword_literals();\\n"
+                 "Value *string_literals();\\n"
+                 "Value *defined_syms();\\n"
+                 "Value *static_fns();\\n"
+                 "Value *protocols();\\n"
+                 "\\n"))))
+
+(defn const-strings [strs type]
+  (let [strs (seq strs)]
+    (cond
+     (< 0 (count strs))
+     (traverse strs (fn [const-str]
+                      (let [str-ptr (nth const-str 1 "noString_ptr")
+                            str-val (nth const-str 0 "noString_name")]
+                        (write (str "struct {int64_t type;\\n   int64_t len;\\n   char buffer["
+                                    (inc (count str-val))
+                                    "];} " str-ptr " = {" type ","
+                                    (count str-val) ",\\\"" str-val "\\\"};\\n")))))
+
+     (state-maybe ""))))
+
+(defn static-syms [syms sym-type]
+  (let [syms (seq syms)]
+    (cond
+     (< 0 (count syms))
+     (traverse syms
+               (fn [sym]
+                 (write (str "SymKey "
+                             (nth sym 1 "no_symbol_val")
+                             " = {"
+                             sym-type
+                             ",\\\""
+                             (nth sym 0 "no_symbol_name")
+                             "\\\"};\\n"))))
+
+     (state-maybe ""))))
+
+(defn static-numbers [nums num-type]
+  (let [nums (seq nums)]
+    (cond
+     (< 0 (count nums))
+     (traverse nums
+               (fn [num]
+                 (write (str "Number "
+                             (nth num 1 "noNumber_sym")
+                             " = {"
+                             num-type
+                             ","
+                             (nth num 0 "noNumber_val")
+                             "};\\n"))))
+
+     (state-maybe ""))))
+
+(defn static-values []
+  (let [types (types)]
+    (for [strs (get-in-val (list :new-strings) empty-list)
+          _ (apply-to list
+                      (const-strings strs (get types 'String "no_String_type"))
+                      (update-in-val (list :strings)
+                                     (fn [old-strs]
+                                       (merge old-strs strs)))
+                      (assoc-in-val (list :new-strings) {}))
+
+          nums (get-in-val (list :new-numbers) empty-list)
+          _ (apply-to list
+                      (static-numbers nums (get types 'Number "no_Number_type"))
+                      (update-in-val (list :numbers)
+                                     (fn [old-nums]
+                                       (merge old-nums nums)))
+                      (assoc-in-val (list :new-numbers) {}))
+
+          syms (get-in-val (list :new-symbols) empty-list)
+          _ (apply-to list
+                      (static-syms syms (get types 'Symbol "no_Symbol_type"))
+                      (update-in-val (list :symbols)
+                                     (fn [old-sys]
+                                       (merge old-sys syms)))
+                      (assoc-in-val (list :new-symbols) {}))
+
+          kws (get-in-val (list :new-keywords) empty-list)
+          _ (apply-to list
+                      (static-syms kws (get types 'Keyword "no_Keyword_type"))
+                      (update-in-val (list :keywords)
+                                     (fn [old-kws]
+                                       (merge old-kws kws)))
+                      (assoc-in-val (list :new-keywords) {}))]
+      "")))
+
+(defn emit-main []
+  (for [_ (set-val :local-sym-count 0)
+        main-sym (get-val :main-sym :no-main)
+        :when (not (= :no-main main-sym))
+        bootstrapping (get-val :bootstrapping false)
+        :let [main-name (cond
+                         bootstrapping "toccataMain"
+                         "main")]
+        proto-syms (finalize-protocols)
+        _ (write-strs (list (str  "\\nint " main-name "(int argc, char *argv[]) {\\n")
+                            "    GC_init();\\n"
+                            "     List *argList = (List *)GC_malloc(sizeof(List));\\n"
+                            "      argList->type = ListType;\\n"
+                            "      argList->len = 0;\\n"
+                            "      argList->head = (Value *)0;\\n"
+                            "      argList->tail = (List *)0;\\n"
+                            "      List *tail = argList;\\n"
+                            "      for(int i = 0; i < argc; i++) {\\n"
+                            "         tail->head = stringValue(argv[i]);\\n"
+                            "         List *newTail = (List *)GC_malloc(sizeof(List));\\n"
+                            "         newTail->type = ListType;\\n"
+                            "         newTail->len = 0;\\n"
+                            "         newTail->tail = (List *)0;\\n"
+                            "         newTail->head = (Value *)0;\\n"
+                            "         tail->head = stringValue(argv[i]);\\n"
+                            "         tail->tail = newTail;\\n"
+                            "         tail = newTail;\\n"
+                            "         argList->len++;\\n}\\n"))
+        _ (traverse proto-syms
+                    (fn [proto-sym]
+                      (let [impls-sym (nth proto-sym 0 "")
+                            local-sym (nth proto-sym 1 "")]
+                        (write (str "  " impls-sym " = &" local-sym ";\\n")))))
+        _ (write (str "  return(" main-sym "((Value *)argList));\\n};\\n"))]
+    ""))
+
+(defn protocols []
+  (inline-text "return(protocols());"))
+
+(defn load-protocols []
+  (let [protos (protocols)
+        protos (map protos
+                    (fn [proto-info]
+                      (let [proto-name (nth proto-info 0)
+                            impls-sym (nth proto-info 1)
+                            num-args (nth proto-info 2)
+                            extern-def (nth proto-info 3)
+                            impls (HashMap (nth proto-info 4))]
+                        (list proto-name {:impls-sym impls-sym
+                                          :num-args num-args
+                                          :extern-def extern-def
+                                          :impls impls}))))]
+    (apply-to list
+              (set-val :protocols (HashMap protos))
+              (traverse protos
+                        (fn [proto]
+                          (let [impls (get (nth proto 1) :impls {})]
+                            (cond
+                             (empty? impls) (state-maybe "")
+                             (traverse (seq impls)
+                                       (fn [impl]
+                                         (write (str "extern Function " (subs (nth impl 1) 10) ";\\n")))))))))))
+
+(defn serialize-protocols []
+  (for [protos (get-val :protocols {})
+        _ (write "Value *protocols() {\\n")
+        _ (write "List *protos = empty_list;\\n")
+        _ (write "List *protoInfo;\\n")
+        _ (write "List *impls;\\n")
+        _ (write "List *impl;\\n")
+        _ (write-strs (map (seq protos)
+                           (fn [proto-inf]
+                             (let [impls-info (nth proto-inf 1 empty-list)
+                                   num-args (get impls-info :num-args 1)
+                                   impls-sym (get impls-info :impls-sym "")
+                                   extern-def (get impls-info :extern-def "")
+                                   impls (seq (get impls-info :impls empty-list))]
+                               (str "protoInfo = empty_list;\\n"
+                                    "impls = empty_list;\\n"
+                                    (apply str (map (seq impls)
+                                                    (fn [impl]
+                                                      (let [impl-type (nth impl 0 0)]
+                                                        (str "impl = empty_list;\\n"
+                                                             "impl = listCons(stringValue(\\\"" (nth impl 1 "")
+                                                             "\\\"), impl);\\n"
+                                                             "impl = listCons("
+                                                             (cond
+                                                              (= :default impl-type)
+                                                              "keywordValue(\\\":default\\\")"
+
+                                                              (str "numberValue(" impl-type ")"))
+                                                             ", impl);\\n"
+                                                             "impls = listCons((Value *)impl, impls);\\n")))))
+                                    "protoInfo = listCons((Value *)impls, protoInfo);\\n"
+                                    "protoInfo = listCons(stringValue(\\\"" extern-def "\\\"), protoInfo);\\n"
+                                    "protoInfo = listCons(numberValue(" num-args "), protoInfo);\\n"
+                                    "protoInfo = listCons(stringValue(\\\"" impls-sym "\\\"), protoInfo);\\n"
+                                    "protoInfo = listCons(stringValue(\\\"" (first proto-inf)
+                                    "\\\"), protoInfo);\\n"
+                                    "protos = listCons((Value *)protoInfo, protos);\\n")))))
+        _ (write "return((Value *)protos);\\n")
+        _ (write "}\\n\\n")]
+    ""))
+
+(defn static-fns []
+  (inline-text "return(static_fns());"))
+
+(defn load-static-fns []
+  (let [s-funs (static-fns)
+        s-funs (map s-funs
+                    (fn [fn-info]
+                      (let [fn-name (nth fn-info 0)
+                            arities (nth fn-info 1)]
+                        (list fn-name (HashMap arities)))))]
+    (set-val :core-static-fns (HashMap s-funs))))
+
+(defn serialize-static-fns []
+  (for [s-fns (get-val :static-fns {})
+        _ (write "Value *static_fns() {\\n")
+        _ (write "List *staticFns = empty_list;\\n")
+        _ (write "List *fnInfo;\\n")
+        _ (write "List *arityInfo;\\n")
+        _ (write-strs (flat-map (seq s-fns)
+                                (fn [static-fn]
+                                  (let [name (nth static-fn 0)
+                                        arities (nth static-fn 1)]
+                                    (comp
+                                     (list "fnInfo = empty_list;\\n")
+                                     (flat-map (seq arities)
+                                               (fn [arity]
+                                                 (let [arg-count (nth arity 0)
+                                                       arity-sym (nth arity 1)]
+                                                   (list
+                                                    (str "arityInfo = listCons(stringValue(\\\"" arity-sym
+                                                         "\\\"), empty_list);\\n")
+                                                    (cond
+                                                     (= :variadic arg-count)
+                                                     (str "arityInfo = listCons(keywordValue(\\\":variadic\\\")"
+                                                          ", arityInfo);\\n")
+
+                                                     (str "arityInfo = listCons(numberValue(" arg-count
+                                                          "), arityInfo);\\n"))
+                                                    (str "fnInfo = listCons((Value *)arityInfo, fnInfo);\\n")))))
+                                     (list
+                                      (str "fnInfo = listCons((Value *)fnInfo, empty_list);\\n")
+                                      (str "fnInfo = listCons(stringValue(\\\"" name "\\\"), fnInfo);\\n")
+                                      (str "staticFns = listCons((Value *)fnInfo, staticFns);\\n")))))))
+        _ (write "return((Value *)staticFns);\\n")
+        _ (write "}\\n\\n")]
+    ""))
+
+(defn defined-syms []
+  (inline-text "return(defined_syms());"))
+
+(defn load-defined-syms []
+  (let [defined (HashMap (defined-syms))]
+    (set-val :core-defined-syms defined)))
+
+(defn serialize-defined-syms []
+  (for [def-syms (get-val :defined-syms {})
+        _ (write "Value *defined_syms() {\\n")
+        _ (write "List *defSyms = empty_list;\\n")
+        _ (write "List *symInfo;\\n")
+        _ (write-strs (flat-map (seq def-syms)
+                                (fn [def]
+                                  (let [sym (nth def 0)
+                                        ext-ref (nth def 1)
+                                        ext (nth ext-ref 0)
+                                        ref (nth ext-ref 1)]
+                                    (list
+                                     (str "symInfo = listCons(stringValue(\\\"" ref "\\\"), empty_list);\\n")
+                                     (str "symInfo = listCons(stringValue(\\\"" ext "\\\"), symInfo);\\n")
+                                     (str "symInfo = listCons((Value *)symInfo, empty_list);\\n")
+                                     (str "symInfo = listCons(symbolValue(\\\"" sym "\\\"), symInfo);\\n")
+                                     (str "defSyms = listCons((Value *)symInfo, defSyms);\\n"))))))
+        _ (write "return((Value *)defSyms);\\n")
+        _ (write "}\\n\\n")]
+    ""))
+
+(defn number-literals []
+  (inline-text "return(number_literals());"))
+
+(defn load-number-literals []
+  (let [nums (HashMap (number-literals))]
+    (apply-to list
+              (set-val :num-count (count nums))
+              (set-val :core-numbers nums))))
+
+(defn serialize-number-literals []
+  (for [nums (get-val :numbers {})
+        _ (write "Value *number_literals() {\\n")
+        _ (write "List *nums = empty_list;\\n")
+        _ (write "List *numInfo;\\n")
+        _ (write-strs (flat-map (seq nums)
+                                (fn [num-lit]
+                                  (let [num (nth num-lit 0)
+                                        ref (nth num-lit 1)]
+                                    (list
+                                     (str "numInfo = listCons(stringValue(\\\"" ref "\\\"), empty_list);\\n")
+                                     (str "numInfo = listCons(numberValue(" num "), numInfo);\\n")
+                                     (str "nums = listCons((Value *)numInfo, nums);\\n"))))))
+        _ (write "return((Value *)nums);\\n")
+        _ (write "}\\n\\n")]
+    ""))
+
+(defn string-literals []
+  (inline-text "return(string_literals());\n"))
+
+(defn load-string-literals []
+  (let [strs (HashMap (string-literals))]
+    (apply-to list
+              (set-val :str-count (count strs))
+              (set-val :core-strings strs))))
+
+(defn serialize-string-literals []
+  (for [strs (get-val :strings {})
+        _ (write "Value *string_literals() {\\n")
+        _ (write "List *strs = empty_list;\\n")
+        _ (write "List *strInfo;\\n")
+        _ (write-strs (flat-map (seq strs)
+                                (fn [str-lit]
+                                  (let [str-val (nth str-lit 0)
+                                        ref (nth str-lit 1)]
+                                    (list
+                                     (str "strInfo = listCons(stringValue(\\\"" ref "\\\"), empty_list);\\n")
+                                     (str "strInfo = listCons(stringValue(\\\"" str-val "\\\"), strInfo);\\n")
+                                     (str "strs = listCons((Value *)strInfo, strs);\\n"))))))
+        _ (write "return((Value *)strs);\\n")
+        _ (write "}\\n\\n")]
+    ""))
+
+(defn keyword-literals []
+  (inline-text "return(keyword_literals());\n"))
+
+(defn load-keyword-literals []
+  (let [kws (HashMap (keyword-literals))]
+    (apply-to list
+              (set-val :kw-count (count kws))
+              (set-val :core-keywords kws))))
+
+(defn serialize-keyword-literals []
+  (for [kws (get-val :keywords {})
+        _ (write "Value *keyword_literals() {\\n")
+        _ (write "List *kws = empty_list;\\n")
+        _ (write "List *kwInfo;\\n")
+        _ (write-strs (flat-map (seq kws)
+                                (fn [kw-lit]
+                                  (let [kw (nth kw-lit 0)
+                                        ref (nth kw-lit 1)]
+                                    (list
+                                     (str "kwInfo = listCons(stringValue(\\\"" ref "\\\"), empty_list);\\n")
+                                     (str "kwInfo = listCons(keywordValue(\\\"" kw "\\\"), kwInfo);\\n")
+                                     (str "kws = listCons((Value *)kwInfo, kws);\\n"))))))
+        _ (write "return((Value *)kws);\\n")
+        _ (write "}\\n\\n")]
+    ""))
+
+(defn symbol-literals []
+  (inline-text "return(symbol_literals());\n"))
+
+(defn load-symbol-literals []
+  (let [syms (HashMap (symbol-literals))]
+    (apply-to list
+              (set-val :sym-count (count syms))
+              (set-val :core-symbols syms))))
+
+(defn serialize-symbol-literals []
+  (for [syms (get-val :symbols {})
+        _ (write "Value *symbol_literals() {\\n")
+        _ (write "List *syms = empty_list;\\n")
+        _ (write "List *symInfo;\\n")
+        _ (write-strs (flat-map (seq syms)
+                                (fn [sym-lit]
+                                  (let [sym (nth sym-lit 0)
+                                        ref (nth sym-lit 1)]
+                                    (list
+                                     (str "symInfo = listCons(stringValue(\\\"" ref "\\\"), empty_list);\\n")
+                                     (str "symInfo = listCons(symbolValue(\\\"" sym "\\\"), symInfo);\\n")
+                                     (str "syms = listCons((Value *)symInfo, syms);\\n"))))))
+        _ (write "return((Value *)syms);\\n")
+        _ (write "}\\n\\n")]
+    ""))
+
+(defn bootstrap-toccata [parser]
+  (let [types (types)]
+    (for [expr parser
+          :when (= expr 'toccata-core)
+          _ (apply-to list
+                      (base-types)
+                      (extern-functions)
+                      (static-values)
+                      (fixed-fn-types)
+                      (write-strs
+                       (list
+                        (str "const int64_t NumberType = " (get types 'Number 0) ";\\n")
+                        (str "const int64_t KeywordType = " (get types 'Keyword 0) ";\\n")
+                        (str "const int64_t SymbolType = " (get types 'Symbol 0) ";\\n")
+                        (str "const int64_t StringType = " (get types 'String 0) ";\\n")
+                        (str "const int64_t SubStringType = " (get types 'SubStr 0) ";\\n")
+                        (str "const int64_t ListType = " (get types 'List 0) ";\\n")
+                        (str "const int64_t FunctionType = " (get types 'Function 0) ";\\n")
+                        "List *empty_list = &(List){4,0,0,0};\\n"))
+                      (base-fns)
+                      (emit-proto-fn (list 'invoke {2 {}})))]
+      "")))
+
+(defn compile-core [parser]
+  (apply-to list
+            (assoc-in-val (list :new-numbers)
+                          (reduce (seq (types)) {}
+                                  (fn [m type]
+                                    (assoc m
+                                      (nth type 1 0)
+                                      (str "_num_" (nth type 1 0))))))
+            (bootstrap-toccata parser)
+            (set-val :bootstrapping true)
+            (recur (for [expr parser
+                         ast (analyze-expr expr)
+                         _ (static-values)
+                         _ (evaluate ast emit-c)]
+                     ""))
+            (serialize-symbol-literals)
+            (serialize-number-literals)
+            (serialize-string-literals)
+            (serialize-keyword-literals)
+            (serialize-protocols)
+            (serialize-static-fns)
+            (serialize-defined-syms)
+            (emit-main)))
+
+(defn compile-main [parser]
+  (apply-to list
+            (set-val :debug-on true)
+            (base-types)
+            (extern-functions)
+            (core-base-fns)
+            (fixed-fn-types)
+            (load-symbol-literals)
+            (load-keyword-literals)
+            (load-string-literals)
+            (load-number-literals)
+            (load-defined-syms)
+            (load-protocols)
+            (load-static-fns)
+            (recur (for [expr parser
+                         ast (analyze-expr expr)
+                         _ (static-values)
+                         _ (evaluate ast emit-c)]
+                     ""))
+            (emit-main)))
+
+(defn compile-module [src-files]
+  (let [parser (make-parser (read-form))
+        compiling-fn (apply-to list
+                               (set-val :text (slurp (first src-files)))
+                               (comp (compile-core parser)
+                                     (compile-main parser)))]
+    (compiling-fn {:file-name (first src-files)
+                   :line-num 0
+                   :types (types)
+                   :symbols {}
+                   :keywords {}
+                   :numbers {}
+                   :strings {}
+                   :new-externs empty-list
+                   :new-static-fns empty-list
+                   :defined-syms (reduce (seq (types)) {}
+                                         (fn [m type]
+                                           (assoc m
+                                             (nth type 0 0)
+                                             (list (str "Number _num_" (nth type 1 0))
+                                                   (str "(Value *)&_num_" (nth type 1 0))))))
+                   :num-count (inc (count (seq (types))))})))
+
+(main [argList]
+      (compile-module (rest argList)))
