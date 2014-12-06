@@ -1102,11 +1102,10 @@ toccata-core
   (apply* (pure comp) rules))
 
 (defn optional [rule]
-  (comp rule (always "")))
+  (comp rule (term "")))
 
 (defn none-or-more [rule]
-  (comp (one-or-more rule)
-        (always empty-list)))
+  (optional (one-or-more rule)))
 
 (defn char-test [pred]
   (for [txt (get-val :text "")
@@ -1146,11 +1145,6 @@ toccata-core
   (let [coll (seq coll)]
     (comp* (term (first coll))
            (map (rest coll) term))))
-
-(defn to-string [rule]
-  (apply-to (fn [chars]
-              (apply str chars))
-            rule))
 
 (defn symbol-start []
   (comp (alpha) (one-of "_<>=+-*/")))
@@ -1228,16 +1222,17 @@ toccata-core
 
 (defn read-const-string []
   (all (ignore (term (char 34)))
-       (to-string
-        (none-or-more
-         (comp (not-backslash)
-               (read-string-backslash)
-               (read-string-doublequote)
-               (read-string-tab)
-               (read-string-backspace)
-               (read-string-return)
-               (read-string-formfeed)
-               (read-string-newline))))
+       (apply-to (fn [chars]
+                   (apply str chars))
+                 (none-or-more
+                  (comp (not-backslash)
+                        (read-string-backslash)
+                        (read-string-doublequote)
+                        (read-string-tab)
+                        (read-string-backspace)
+                        (read-string-return)
+                        (read-string-formfeed)
+                        (read-string-newline))))
        (ignore (term (char 34)))))
 
 (defn str-to-int [negate? int-str]
