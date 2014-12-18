@@ -38,8 +38,8 @@ toccata-core
 (def char-code)
 
 ;; @jneen_
-;; (defprotocol Variant
-;;   (match* [_ match-targets]))
+(defprotocol Variant
+  (match* [_ match-targets]))
 
 (defprotocol Monad
   (flat-map [mval func]
@@ -138,13 +138,8 @@ toccata-core
     (abort))
   (conj [coll value]))
 
-(defn not-empty? [coll]
-  (cond
-   (empty? coll) false
-   true))
-
 (defprotocol Seqable
-  (seq? [coll] false)
+  (seq? [coll] 0)
   (seq [coll])
   (first [coll])
   (rest [coll]))
@@ -1107,10 +1102,11 @@ toccata-core
   (apply* (pure comp) rules))
 
 (defn optional [rule]
-  (comp rule (term "")))
+  (comp rule (always "")))
 
 (defn none-or-more [rule]
-  (optional (one-or-more rule)))
+  (comp (one-or-more rule)
+        (always empty-list)))
 
 (defn char-test [pred]
   (for [txt (get-val :text "")
@@ -1151,6 +1147,11 @@ toccata-core
     (comp* (term (first coll))
            (map (rest coll) term))))
 
+(defn to-string [rule]
+  (apply-to (fn [chars]
+              (apply str chars))
+            rule))
+
 (defn symbol-start []
   (comp (alpha) (one-of "_<>=+-*/")))
 
@@ -1163,7 +1164,7 @@ toccata-core
 
 (defn read-symbol []
   (apply-to (fn [start the-rest]
-              (symbol (comp* start the-rest)))
+              (symbol (apply str (cons start the-rest))))
             (symbol-start)
             (rest-of-symbol)))
 
@@ -1227,17 +1228,16 @@ toccata-core
 
 (defn read-const-string []
   (all (ignore (term (char 34)))
-       (apply-to (fn [chars]
-                   (apply str chars))
-                 (none-or-more
-                  (comp (not-backslash)
-                        (read-string-backslash)
-                        (read-string-doublequote)
-                        (read-string-tab)
-                        (read-string-backspace)
-                        (read-string-return)
-                        (read-string-formfeed)
-                        (read-string-newline))))
+       (to-string
+        (none-or-more
+         (comp (not-backslash)
+               (read-string-backslash)
+               (read-string-doublequote)
+               (read-string-tab)
+               (read-string-backspace)
+               (read-string-return)
+               (read-string-formfeed)
+               (read-string-newline))))
        (ignore (term (char 34)))))
 
 (defn str-to-int [negate? int-str]
@@ -1264,6 +1264,8 @@ toccata-core
   (apply-to str-to-int
             (optional (term "-"))
             (one-or-more (digit))))
+
+(def read-form)
 
 (defn read-sub-form []
   (free (reify
@@ -1504,15 +1506,10 @@ toccata-core
                    (read-list))
              (ignore (none-or-more (whitespace))))))
 
-(defn parser []
-  (evaluate (read-form) recursive-descent))
-
-(defn make-parser []
-  (let [p (parser)]
+(defn make-parser [rule]
+  (let [p (evaluate rule recursive-descent)]
     (flat-map p (fn [v]
-                  (cond
-                   (empty? v) empty-list
-                   (state-maybe (first v)))))))
+                  (state-maybe (first v))))))
 
 
 ;; code analyzer
@@ -1646,9 +1643,9 @@ toccata-core
     (const-string-ast str-val)))
 
 (defn analyze-call []
-  (for [expr (is-expr not-empty?)
-        asts (traverse expr analyze-expr)]
-    (call-ast (first asts) (rest asts))))
+  (for [expr (is-expr (fn [s] (not (empty? s))))
+        ast (traverse expr analyze-expr)]
+    (call-ast (first ast) (rest ast))))
 
 (defn analyze-let-binding [binding-pair]
   (cond
@@ -1856,7 +1853,7 @@ toccata-core
     (main-ast (nth expr 1 empty-list)
               (apply* (pure list) body))))
 
-(defn expr-to-ast []
+(defn expr->ast []
   (comp (analyze-symbol)
         (analyze-keyword)
         (analyze-number)
@@ -1883,9 +1880,12 @@ toccata-core
   (for [curr-expr (get-val :expr :no-expr)
         file-name (get-val :file-name "")
         _ (set-expr expr)
-        ast (expr-to-ast)
+        ast (expr->ast)
         _ (set-val :expr curr-expr)]
     ast))
+
+(defn analyze [expr]
+  (first (expr->ast {:expr expr})))
 
 ;; code emitter
 
@@ -3858,14 +3858,7 @@ toccata-core
                       (emit-proto-fn (list 'invoke {2 {}})))]
       "")))
 
-(defn compile-text [parser]
-  (recur (for [expr parser
-               ast (analyze-expr expr)
-               _ (static-values)
-               _ (evaluate ast emit-c)]
-           "")))
-
-(defn compile-core [parser text]
+(defn compile-core [parser]
   (apply-to list
             (assoc-in-val (list :new-numbers)
                           (reduce (seq (types)) {}
@@ -3873,10 +3866,13 @@ toccata-core
                                     (assoc m
                                       (nth type 1 0)
                                       (str "_num_" (nth type 1 0))))))
-            (set-val :text text)
             (bootstrap-toccata parser)
             (set-val :bootstrapping true)
-            (compile-text parser)
+            (recur (for [expr parser
+                         ast (analyze-expr expr)
+                         _ (static-values)
+                         _ (evaluate ast emit-c)]
+                     ""))
             (serialize-symbol-literals)
             (serialize-number-literals)
             (serialize-string-literals)
@@ -3886,7 +3882,7 @@ toccata-core
             (serialize-defined-syms)
             (emit-main)))
 
-(defn compile-main [parser text]
+(defn compile-main [parser]
   (apply-to list
             (set-val :debug-on true)
             (base-types)
@@ -3900,15 +3896,19 @@ toccata-core
             (load-defined-syms)
             (load-protocols)
             (load-static-fns)
-            (set-val :text text)
-            (compile-text parser)
+            (recur (for [expr parser
+                         ast (analyze-expr expr)
+                         _ (static-values)
+                         _ (evaluate ast emit-c)]
+                     ""))
             (emit-main)))
 
 (defn compile-module [src-files]
-  (let [parser (make-parser)
-        text (slurp (first src-files))
-        compiling-fn (comp (compile-core parser text)
-                           (compile-main parser text))]
+  (let [parser (make-parser (read-form))
+        compiling-fn (apply-to list
+                               (set-val :text (slurp (first src-files)))
+                               (comp (compile-core parser)
+                                     (compile-main parser)))]
     (compiling-fn {:file-name (first src-files)
                    :line-num 0
                    :types (types)
