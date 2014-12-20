@@ -3858,8 +3858,16 @@ toccata-core
                       (emit-proto-fn (list 'invoke {2 {}})))]
       "")))
 
-(defn compile-core [parser]
+(defn compile-source [parser text]
+  (recur (for [expr parser
+               ast (analyze-expr expr)
+               _ (static-values)
+               _ (evaluate ast emit-c)]
+           "")))
+
+(defn compile-core [parser text]
   (apply-to list
+            (set-val :text text)
             (assoc-in-val (list :new-numbers)
                           (reduce (seq (types)) {}
                                   (fn [m type]
@@ -3868,11 +3876,7 @@ toccata-core
                                       (str "_num_" (nth type 1 0))))))
             (bootstrap-toccata parser)
             (set-val :bootstrapping true)
-            (recur (for [expr parser
-                         ast (analyze-expr expr)
-                         _ (static-values)
-                         _ (evaluate ast emit-c)]
-                     ""))
+            (compile-source parser text)
             (serialize-symbol-literals)
             (serialize-number-literals)
             (serialize-string-literals)
@@ -3882,9 +3886,10 @@ toccata-core
             (serialize-defined-syms)
             (emit-main)))
 
-(defn compile-main [parser]
+(defn compile-main [parser text]
   (apply-to list
             (set-val :debug-on true)
+            (set-val :text text)
             (base-types)
             (extern-functions)
             (core-base-fns)
@@ -3896,19 +3901,14 @@ toccata-core
             (load-defined-syms)
             (load-protocols)
             (load-static-fns)
-            (recur (for [expr parser
-                         ast (analyze-expr expr)
-                         _ (static-values)
-                         _ (evaluate ast emit-c)]
-                     ""))
+            (compile-source parser text)
             (emit-main)))
 
 (defn compile-module [src-files]
   (let [parser (make-parser (read-form))
-        compiling-fn (apply-to list
-                               (set-val :text (slurp (first src-files)))
-                               (comp (compile-core parser)
-                                     (compile-main parser)))]
+        text (slurp (first src-files))
+        compiling-fn (comp (compile-core parser text)
+                           (compile-main parser text))]
     (compiling-fn {:file-name (first src-files)
                    :line-num 0
                    :types (types)
