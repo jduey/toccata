@@ -1,0 +1,8 @@
+
+./build &&
+./toccata core.toc > core.c &&
+./build &&
+./toccata core.toc > core.c &&
+./build &&
+./toccata core.toc > core.c &&
+./build
