@@ -138,8 +138,13 @@ toccata-core
     (abort))
   (conj [coll value]))
 
+(defn not-empty? [coll]
+  (cond
+   (empty? coll) false
+   true))
+
 (defprotocol Seqable
-  (seq? [coll] 0)
+  (seq? [coll] false)
   (seq [coll])
   (first [coll])
   (rest [coll]))
@@ -1265,8 +1270,6 @@ toccata-core
             (optional (term "-"))
             (one-or-more (digit))))
 
-(def read-form)
-
 (defn read-sub-form []
   (free (reify
           Parser
@@ -1506,10 +1509,15 @@ toccata-core
                    (read-list))
              (ignore (none-or-more (whitespace))))))
 
-(defn make-parser [rule]
-  (let [p (evaluate rule recursive-descent)]
+(defn parser [grammar]
+  (evaluate grammar recursive-descent))
+
+(defn make-parser []
+  (let [p (parser (read-form))]
     (flat-map p (fn [v]
-                  (state-maybe (first v))))))
+                  (cond
+                   (empty? v) empty-list
+                   (state-maybe (first v)))))))
 
 
 ;; code analyzer
@@ -1643,9 +1651,9 @@ toccata-core
     (const-string-ast str-val)))
 
 (defn analyze-call []
-  (for [expr (is-expr (fn [s] (not (empty? s))))
-        ast (traverse expr analyze-expr)]
-    (call-ast (first ast) (rest ast))))
+  (for [expr (is-expr (fn [s] (not-empty? s)))
+        asts (traverse expr analyze-expr)]
+    (call-ast (first asts) (rest asts))))
 
 (defn analyze-let-binding [binding-pair]
   (cond
@@ -1853,7 +1861,7 @@ toccata-core
     (main-ast (nth expr 1 empty-list)
               (apply* (pure list) body))))
 
-(defn expr->ast []
+(defn expr-to-ast []
   (comp (analyze-symbol)
         (analyze-keyword)
         (analyze-number)
@@ -1880,12 +1888,9 @@ toccata-core
   (for [curr-expr (get-val :expr :no-expr)
         file-name (get-val :file-name "")
         _ (set-expr expr)
-        ast (expr->ast)
+        ast (expr-to-ast)
         _ (set-val :expr curr-expr)]
     ast))
-
-(defn analyze [expr]
-  (first (expr->ast {:expr expr})))
 
 ;; code emitter
 
@@ -3905,7 +3910,7 @@ toccata-core
             (emit-main)))
 
 (defn compile-module [src-files]
-  (let [parser (make-parser (read-form))
+  (let [parser (make-parser)
         text (slurp (first src-files))
         compiling-fn (comp (compile-core parser text)
                            (compile-main parser text))]
