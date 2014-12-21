@@ -3505,6 +3505,7 @@ toccata-core
                  "List *empty_list;\\n"
                  "Value *number_literals();\\n"
                  "Value *counts();\\n"
+                 "Value *types();\\n"
                  "Value *symbol_literals();\\n"
                  "Value *keyword_literals();\\n"
                  "Value *string_literals();\\n"
@@ -3894,6 +3895,30 @@ toccata-core
         _ (write "}\\n\\n")]
     ""))
 
+(defn types* []
+  (inline-text "return(types());\n"))
+
+(defn load-types []
+  (let [types (HashMap (types*))]
+    (set-val :types types)))
+
+(defn serialize-types []
+  (for [types (get-val :types {})
+        _ (write "Value *types() {\\n")
+        _ (write "List *types = empty_list;\\n")
+        _ (write "List *typeInfo;\\n")
+        _ (write-strs (flat-map (seq types)
+                                (fn [type]
+                                  (let [type-sym (nth type 0)
+                                        type-num (nth type 1)]
+                                    (list
+                                     (str "typeInfo = listCons(numberValue(" type-num "), empty_list);\\n")
+                                     (str "typeInfo = listCons(symbolValue(\\\"" type-sym "\\\"), typeInfo);\\n")
+                                     (str "types = listCons((Value *)typeInfo, types);\\n"))))))
+        _ (write "return((Value *)types);\\n")
+        _ (write "}\\n\\n")]
+    ""))
+
 (defn bootstrap-toccata [parser]
   (let [types (types)]
     (for [expr parser
@@ -3943,6 +3968,7 @@ toccata-core
             (serialize-protocols)
             (serialize-static-fns)
             (serialize-defined-syms)
+            (serialize-types)
             (emit-main)
             (serialize-counts)))
 
@@ -3962,6 +3988,7 @@ toccata-core
             (load-defined-syms)
             (load-protocols)
             (load-static-fns)
+            (load-types)
             (compile-source parser text)
             (emit-main)))
 
