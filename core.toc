@@ -1549,6 +1549,7 @@ toccata-core
 (def cond-ast)
 (def extend-ast)
 (def reify-ast)
+(def type-ast)
 (def protocol-ast)
 
 (defn analyze-inline-text []
@@ -1851,6 +1852,18 @@ toccata-core
     (protocol-ast (nth expr 1 :no-name)
                   (apply merge-with merge arities))))
 
+(defn analyze-deftype []
+  (for [expr (is-expr (fn [x]
+                        (cond
+                         (not (seq? x)) false
+                         (< (count x) 3) false
+                         (= 'deftype (first x)))))
+        proto-specs (comp (analyze-extensions (drop expr 3))
+                          (state-maybe empty-list))]
+    (type-ast (nth expr 1) ;; name
+              (nth expr 2) ;; fields
+              (reify-ast proto-specs))))
+
 (defn analyze-main []
   (for [expr (is-expr (fn [x]
                         (cond
@@ -1867,6 +1880,7 @@ toccata-core
         (analyze-number)
         (analyze-string)
         (analyze-fn)
+        (analyze-deftype)
         (analyze-protocol)
         (analyze-main)
         (analyze-def)
@@ -2708,6 +2722,12 @@ toccata-core
                             (static-arity arity-fn-sym c-args 1))]
                 result))))))
 
+(defn debug [& args]
+  (comp (for [debugging (get-val :debug-on)
+              :when debugging]
+          (apply print-err args))
+        (state-maybe "")))
+
 (defn fn-arity-ast [args body]
   (free (reify
           AST
@@ -2836,12 +2856,6 @@ toccata-core
                                "} else {\\nfprintf(stderr, \\\"\\\\n*** no arity found for '%s'.\\\\n\\\", "
                                "((Function *)" target-sym ")->name"
                                ");\\n  abort();\\n}\\n}\\n"))))))))
-
-(defn debug [& args]
-  (comp (for [debugging (get-val :debug-on)
-              :when debugging]
-          (apply print-err args))
-        (state-maybe "")))
 
 (defn call-static-fixed [target args]
   (let [target-sym (nth target 0 "")
@@ -3127,10 +3141,10 @@ toccata-core
           num-args (get-in-val (list :protocols name :num-args) 0)
           impl-sym (gensym "protoImpl_")
           fn-sym (gensym "protoFn_")
-          :let [_ (cond (= 0 num-args)
-                        (let [_ (print-err "invalid protocol fn spec for" name)]
-                          (abort))
-                        :nothing)
+          :let [_ (cond
+                   (= 0 num-args) (let [_ (print-err "invalid protocol fn spec for" name)]
+                                    (abort))
+                   :nothing)
                 args (map (range num-args) (fn [idx] (str "arg" idx)))
                 arg-decls (apply str (interpose (cons (str ListVal* "closures")
                                                       (map args (fn [arg] (str Value* arg))))
@@ -3180,22 +3194,44 @@ toccata-core
   (free (reify
           AST
           (emit-c [_]
-            (let [protos (seq impls)
-                  name-asts (apply comp (map protos (fn [proto]
-                                                      (nth proto 1 empty-list))))]
-              (for [types (get-val :types {})
-                    :let [type-num (inc (count (seq types)))]
-                    _ (assoc-in-val (list :types type-num) type-num)
-                    impl-fns (traverse (range (count name-asts))
-                                       (partial emit-reified-fn name-asts type-num))
-                    reified-result (let [inits (apply comp (map impl-fns (fn [sym-inits]
-                                                                           (nth sym-inits 1 empty-list))))]
-                                     (cond
-                                      (= 0 (count inits))
-                                      (static-reified type-num impl-fns)
+            (cond
+             (empty? impls) (let [_ (print-err :no-impls)]
+                              (list "" empty-list))
+             (let [protos (seq impls)
+                   name-asts (apply comp (map protos (fn [proto]
+                                                       (nth proto 1 empty-list))))]
+               (for [types (get-val :types {})
+                     :let [type-num (inc (count (seq types)))]
+                     _ (assoc-in-val (list :types type-num) type-num)
+                     impl-fns (traverse (range (count name-asts))
+                                        (partial emit-reified-fn name-asts type-num))
+                     reified-result (let [inits (apply comp (map impl-fns (fn [sym-inits]
+                                                                            (nth sym-inits 1 empty-list))))]
+                                      (cond
+                                       (= 0 (count inits))
+                                       (static-reified type-num impl-fns)
 
-                                      (reified-type type-num impl-fns)))]
-                reified-result))))))
+                                       (reified-type type-num impl-fns)))]
+                 reified-result)))))))
+
+(defn type-ast [name fields impls]
+  (free (reify
+          AST
+          (emit-c [_]
+            (for [types (get-val :types {})
+                  :let [type-num (inc (count (seq types)))
+                        _ (print-err :type-sym name :type-num type-num)]
+                  curr-expr (get-val :expr)
+                  _ (set-expr type-num)
+                  type-ast (analyze-number)
+                  _ (set-val :expr curr-expr)
+                  _ (define-value name type-ast)
+
+                  _ (define-value (symbol (str name "."))
+                                  (fn-ast (symbol (str name "."))
+                                          (list (fn-arity-ast (rest fields)
+                                                              (apply* (pure list) (list impls))))))]
+              (list "" empty-list))))))
 
 (defn write-default [default-impl]
   (cond
@@ -3468,6 +3504,7 @@ toccata-core
                  "const int64_t FunctionType;\\n"
                  "List *empty_list;\\n"
                  "Value *number_literals();\\n"
+                 "Value *counts();\\n"
                  "Value *symbol_literals();\\n"
                  "Value *keyword_literals();\\n"
                  "Value *string_literals();\\n"
@@ -3840,6 +3877,23 @@ toccata-core
         _ (write "}\\n\\n")]
     ""))
 
+(defn counts []
+  (inline-text "return(counts());\n"))
+
+(defn load-counts []
+  (let [cnts (counts)]
+    (apply-to list
+              (set-val :gensym-count (nth cnts 0 0)))))
+
+(defn serialize-counts []
+  (for [gensym-count (get-val :gensym-count 0)
+        _ (write "\\nValue *counts() {\\n")
+        _ (write "List *cnts = empty_list;\\n")
+        _ (write (str "cnts = listCons(numberValue(" gensym-count "), cnts);\\n"))
+        _ (write "return((Value *)cnts);\\n")
+        _ (write "}\\n\\n")]
+    ""))
+
 (defn bootstrap-toccata [parser]
   (let [types (types)]
     (for [expr parser
@@ -3889,16 +3943,18 @@ toccata-core
             (serialize-protocols)
             (serialize-static-fns)
             (serialize-defined-syms)
-            (emit-main)))
+            (emit-main)
+            (serialize-counts)))
 
 (defn compile-main [parser text]
   (apply-to list
-            (set-val :debug-on true)
             (set-val :text text)
             (base-types)
             (extern-functions)
             (core-base-fns)
             (fixed-fn-types)
+            (set-val :debug-on true)
+            (load-counts)
             (load-symbol-literals)
             (load-keyword-literals)
             (load-string-literals)
