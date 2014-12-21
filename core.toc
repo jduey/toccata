@@ -2795,8 +2795,8 @@ toccata-core
           variadic-sym (genlocal "varArgs")
           fn-sym (genlocal "fn")
           result-sym (genlocal "rslt")
-          invoke-sym (get-in-val (list :defined-syms 'invoke))
-          invoke-arity-sym (lookup-static-fn (nth invoke-sym 1) 2)]
+          invoke-sym (lookup-sym 'invoke)
+          invoke-arity-sym (lookup-static-fn (first invoke-sym) 2)]
       (let [arg-syms (cons (str arity-sym "->closures") args)]
         (list result-sym
               (comp target-stmts
