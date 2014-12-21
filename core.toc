@@ -1607,6 +1607,12 @@ toccata-core
                            (cons (str "Number " ext-num) externs)))]
     ext-num))
 
+(defn debug [& args]
+  (comp (for [debugging (get-val :debug-on)
+              :when debugging]
+          (apply print-err args))
+        (state-maybe "")))
+
 (defn make-static-number [num]
   (for [num-idx (get-val :num-count 0)
         _ (set-val :num-count (inc num-idx))
@@ -2578,7 +2584,8 @@ toccata-core
   (free (reify
           AST
           (emit-c [_]
-            (for [static-num (get-in-val (list :numbers num))]
+            (for [static-num (comp (get-in-val (list :numbers num))
+                                   (get-in-val (list :new-numbers num)))]
               (list (str "(Value *)&" static-num) empty-list))))))
 
 (defn const-string-ast [const-str]
@@ -2722,12 +2729,6 @@ toccata-core
                             (static-arity arity-fn-sym c-args 1))]
                 result))))))
 
-(defn debug [& args]
-  (comp (for [debugging (get-val :debug-on)
-              :when debugging]
-          (apply print-err args))
-        (state-maybe "")))
-
 (defn fn-arity-ast [args body]
   (free (reify
           AST
@@ -2864,7 +2865,6 @@ toccata-core
         args (nth args 0 empty-list)
         num-args (count args)]
     (for [arity-sym (lookup-static-fn target-sym num-args)
-          ;; _ (debug :call-static-fixed-arity target-sym arity-sym)
           empty-list (comp (get-in-val (list :defined-syms 'empty-list))
                            (core-def 'empty-list))
           result-sym (genlocal "rslt")]
@@ -3219,18 +3219,19 @@ toccata-core
           AST
           (emit-c [_]
             (for [types (get-val :types {})
-                  :let [type-num (inc (count (seq types)))
-                        _ (print-err :type-sym name :type-num type-num)]
+                  :let [type-num (inc (count (seq types)))]
+
                   curr-expr (get-val :expr)
                   _ (set-expr type-num)
                   type-ast (analyze-number)
                   _ (set-val :expr curr-expr)
-                  _ (define-value name type-ast)
-
+                  _ (define-value name (const-number-ast type-num))
+                  _ (set-val :debug-on true)
                   _ (define-value (symbol (str name "."))
                                   (fn-ast (symbol (str name "."))
                                           (list (fn-arity-ast (rest fields)
-                                                              (apply* (pure list) (list impls))))))]
+                                                              (apply* (pure list) (list impls))))))
+                  _ (debug :constructor-defd)]
               (list "" empty-list))))))
 
 (defn write-default [default-impl]
@@ -3961,6 +3962,7 @@ toccata-core
             (bootstrap-toccata parser)
             (set-val :bootstrapping true)
             (compile-source parser text)
+            (emit-main)
             (serialize-symbol-literals)
             (serialize-number-literals)
             (serialize-string-literals)
@@ -3969,7 +3971,6 @@ toccata-core
             (serialize-static-fns)
             (serialize-defined-syms)
             (serialize-types)
-            (emit-main)
             (serialize-counts)))
 
 (defn compile-main [parser text]
@@ -3979,7 +3980,6 @@ toccata-core
             (extern-functions)
             (core-base-fns)
             (fixed-fn-types)
-            (set-val :debug-on true)
             (load-counts)
             (load-symbol-literals)
             (load-keyword-literals)
