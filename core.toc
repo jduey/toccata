@@ -41,6 +41,9 @@ toccata-core
 (defprotocol Variant
   (match* [_ match-targets]))
 
+(defprotocol Type
+  (instance? [type val]))
+
 (defprotocol Monad
   (flat-map [mval func]
     (print-err "*** 'flat-map' not implemented")
@@ -1551,6 +1554,7 @@ toccata-core
 (def reify-ast)
 (def type-ast)
 (def protocol-ast)
+(def static-values)
 
 (defn analyze-inline-text []
   (for [expr (is-expr (fn [x]
@@ -1811,7 +1815,6 @@ toccata-core
                          (cond
                           (not (seq? x)) false
                           (< 2 (count x)))))
-        arg-vec (traverse (nth expr 1 empty-list) analyze-expr)
         body (traverse (drop expr 2) analyze-expr)]
     (list (nth expr 0 'no-name)
           (fn-ast (str (nth expr 0 'no-name) "_impl")
@@ -1863,12 +1866,10 @@ toccata-core
                         (cond
                          (not (seq? x)) false
                          (< (count x) 3) false
-                         (= 'deftype (first x)))))
-        proto-specs (comp (analyze-extensions (drop expr 3))
-                          (state-maybe empty-list))]
+                         (= 'deftype (first x)))))]
     (type-ast (nth expr 1) ;; name
               (nth expr 2) ;; fields
-              (reify-ast proto-specs))))
+              (drop expr 3))))
 
 (defn analyze-main []
   (for [expr (is-expr (fn [x]
@@ -1906,10 +1907,9 @@ toccata-core
 
 (defn analyze-expr [expr]
   (for [curr-expr (get-val :expr :no-expr)
-        file-name (get-val :file-name "")
         _ (set-expr expr)
         ast (expr-to-ast)
-        _ (set-val :expr curr-expr)]
+        _ (set-expr curr-expr)]
     ast))
 
 ;; code emitter
@@ -2999,7 +2999,7 @@ toccata-core
 (defn emit-static-sym [sym]
   (for [sym-val (get-in-val (list :symbols sym) :no-static-sym)]
     (let [_ (cond
-             (= :no-static-sym sym-val) (print-err "// not found" sym)
+             (= :no-static-sym sym-val) (print-err "not found" sym)
              "")]
       (list (str "(Value *)&" sym-val) empty-list))))
 
@@ -3219,20 +3219,26 @@ toccata-core
           AST
           (emit-c [_]
             (for [types (get-val :types {})
-                  :let [type-num (inc (count (seq types)))]
+                  :let [type-val-num (+ 2 (count (seq types)))]
 
                   curr-expr (get-val :expr)
-                  _ (set-expr type-num)
-                  type-ast (analyze-number)
-                  _ (set-val :expr curr-expr)
-                  _ (define-value name (const-number-ast type-num))
-                  _ (set-val :debug-on true)
-                  _ (define-value (symbol (str name "."))
-                                  (fn-ast (symbol (str name "."))
-                                          (list (fn-arity-ast (rest fields)
-                                                              (apply* (pure list) (list impls))))))
-                  _ (debug :constructor-defd)]
-              (list "" empty-list))))))
+                  _ (set-expr type-val-num)
+                  _ (analyze-number)
+                  _ (set-expr (list 'reify
+                                    'Type
+                                    (list 'instance? (list 'vector '_ 'v)
+                                          (list '= type-val-num (list 'get-type 'v)))
+                                    'Function
+                                    (list 'invoke (cons 'vector (cons '_ (rest fields)))
+                                          (cons 'reify impls))))
+                  type-ast (analyze-reify)
+                  _ (static-values)
+                  _ (set-expr curr-expr)
+                  result (define-value name type-ast)
+                  ;; TODO: Do some surgery on :types to assoc the
+                  ;; correct name to type-val-num
+                  ]
+              result)))))
 
 (defn write-default [default-impl]
   (cond
@@ -3285,6 +3291,7 @@ toccata-core
                       (assoc-in-val (list :static-fns (str "(Value *)&" fn-sym) num-args) c-name)
                       (assoc-in-val (list :defined-syms name) (list (str "Function " fn-sym)
                                                                     (str "(Value *)&" fn-sym)))
+
                       (assoc-in-val (list :protocols name) {:impls-sym impls-sym
                                                             :extern-def (str "extern Function "
                                                                              fn-sym ";")
@@ -3693,7 +3700,7 @@ toccata-core
                                     "protoInfo = listCons(stringValue(\\\"" extern-def "\\\"), protoInfo);\\n"
                                     "protoInfo = listCons(numberValue(" num-args "), protoInfo);\\n"
                                     "protoInfo = listCons(stringValue(\\\"" impls-sym "\\\"), protoInfo);\\n"
-                                    "protoInfo = listCons(stringValue(\\\"" (first proto-inf)
+                                    "protoInfo = listCons(symbolValue(\\\"" (first proto-inf)
                                     "\\\"), protoInfo);\\n"
                                     "protos = listCons((Value *)protoInfo, protos);\\n")))))
         _ (write "return((Value *)protos);\\n")
@@ -3781,7 +3788,7 @@ toccata-core
 (defn load-number-literals []
   (let [nums (HashMap (number-literals))]
     (apply-to list
-              (set-val :num-count (count nums))
+              (set-val :num-count (inc (count nums)))
               (set-val :core-numbers nums))))
 
 (defn serialize-number-literals []
@@ -3961,6 +3968,7 @@ toccata-core
                                       (str "_num_" (nth type 1 0))))))
             (bootstrap-toccata parser)
             (set-val :bootstrapping true)
+            (set-val :debug-on true)
             (compile-source parser text)
             (emit-main)
             (serialize-symbol-literals)
@@ -3976,6 +3984,7 @@ toccata-core
 (defn compile-main [parser text]
   (apply-to list
             (set-val :text text)
+            (set-val :debug-on true)
             (base-types)
             (extern-functions)
             (core-base-fns)
