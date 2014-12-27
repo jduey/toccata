@@ -27,7 +27,6 @@ toccata-core
 (def symkey=)
 (def str-malloc)
 (def str-append)
-(def pr*)
 (def pr-err*)
 (def slurp)
 (def fn-apply)
@@ -36,6 +35,18 @@ toccata-core
 (def symbol)
 (def new-keyword)
 (def char-code)
+
+(defn pr* [str]
+  (inline-text
+   "if (arg0->type == StringType)
+      printf(\"%-.*s\", (int)((String *)arg0)->len, ((String *)arg0)->buffer);
+    else if (arg0->type == SubStringType)
+      printf(\"%-.*s\", (int)((SubString *)arg0)->len, ((SubString *)arg0)->buffer);
+    else {
+      printf(\"\\ninvalid type for 'pr*'\\n\");
+      abort();
+    }
+    return(true);\n"))
 
 ;; @jneen_
 (defprotocol Variant
@@ -2316,18 +2327,6 @@ toccata-core
       s1->len += s2->len;
     }
     return(arg0);\n"))
-
-(defn pr* [str]
-  (inline-text
-   "if (arg0->type == StringType)
-      printf(\"%-.*s\", (int)((String *)arg0)->len, ((String *)arg0)->buffer);
-    else if (arg0->type == SubStringType)
-      printf(\"%-.*s\", (int)((SubString *)arg0)->len, ((SubString *)arg0)->buffer);
-    else {
-      printf(\"\\ninvalid type for 'pr*'\\n\");
-      abort();
-    }
-    return(true);\n"))
 
 (defn pr-err* [str]
   (inline-text
