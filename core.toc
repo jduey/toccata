@@ -2617,7 +2617,7 @@ toccata-core
             (for [static-str (get-in-val (list :strings const-str) :no-static-str)]
               (list (str "(Value *)&" static-str) empty-list))))))
 
-(defn reset-fn-context []
+(defn reset-fn-context [arity-fn-sym num-args]
   (for [locals (get-val :local-syms {})
         _ (set-val :local-syms {})
         local-sym-count (get-val :local-sym-count 0)
@@ -2625,19 +2625,28 @@ toccata-core
         context (get-val :context {})
         _ (set-val :context (comp context locals))
         closed-over (get-val :closed-over empty-list)
-        _ (set-val :closed-over empty-list)]
-    (list locals local-sym-count context closed-over)))
+        _ (set-val :closed-over empty-list)
+        curr-arity-fn-sym (get-val :curr-arity-fn-sym "")
+        _ (set-val :curr-arity-fn-sym arity-fn-sym)
+        curr-arg-count (get-val :curr-arg-count 0)
+        _ (set-val :curr-arg-count num-args)]
+    (list locals local-sym-count context closed-over
+          curr-arity-fn-sym curr-arg-count)))
 
 (defn restore-fn-context [fn-context]
   (let [locals (nth fn-context 0 {})
         local-sym-count (nth fn-context 1 0)
         context (nth fn-context 2 {})
-        closed-over (nth fn-context 3 empty-list)]
+        closed-over (nth fn-context 3 empty-list)
+        curr-arity-fn-sym (nth fn-context 4 empty-list)
+        curr-arg-count (nth fn-context 5 empty-list)]
     (apply-to list
               (set-val :context context)
               (set-val :local-syms locals)
               (set-val :local-sym-count local-sym-count)
-              (set-val :closed-over closed-over))))
+              (set-val :closed-over closed-over)
+              (set-val :curr-arity-fn-sym curr-arity-fn-sym)
+              (set-val :curr-arg-count curr-arg-count))))
 
 (defn emit-closures []
   (for [closures (get-val :closed-over empty-list)
@@ -2719,7 +2728,7 @@ toccata-core
                   arg-count (count args)]
               (for [arity-fn-sym (gensym "arityImpl_")
                     arity-sym (genlocal "arity_")
-                    fn-context (reset-fn-context)
+                    fn-context (reset-fn-context arity-fn-sym arg-count)
                     arg-syms (gen-arg-syms args)
                     body-exprs (eval-exprs body)
                     _ (emit-externs)
@@ -2761,9 +2770,9 @@ toccata-core
 
           AST
           (emit-c [_]
-            (for [arity-fn-sym (gensym "arityImpl_")
-                  arity-sym (genlocal "arity_")
-                  fn-context (reset-fn-context)
+            (for [arity-sym (genlocal "arity_")
+                  arity-fn-sym (gensym "arityImpl_")
+                  fn-context (reset-fn-context arity-fn-sym (count args))
                   arg-syms (gen-arg-syms args)
                   body-exprs (eval-exprs body)
                   _ (emit-externs)
@@ -2850,33 +2859,49 @@ toccata-core
         (list result-sym
               (comp target-stmts
                     arg-stmts
-                    (list (str "Value *" result-sym ";\\n"
-                               "if((" target-sym ")->type != " (get (types) 'Function :no-fn-type) ") {\\n"
+                    (list "Value *" result-sym ";\\n"
+                          "if((" target-sym ")->type != " (get (types) 'Function :no-fn-type) ") {\\n"
 
-                               result-sym " = " invoke-arity-sym "(empty_list, "
-                               (apply str (interpose (cons target-sym args) ", "))
-                               ");\\n} else {\\n"
+                          result-sym " = " invoke-arity-sym "(empty_list, "
+                          (apply str (interpose (cons target-sym args) ", "))
+                          ");\\n} else {\\n"
 
-                               "FnArity *" arity-sym " = findFnArity(" target-sym ", " num-args ");\\n"
-                               "if(" arity-sym " != (FnArity *)0 && !" arity-sym "->variadic) {\\n"
-                               "FnType" num-args " *" fn-sym " = (FnType" num-args " *)" arity-sym "->fn;\\n"
-                               result-sym " = " fn-sym "(" (apply str (interpose arg-syms ", ")) ");\\n"
-                               "} else if(" arity-sym " != (FnArity *)0 && " arity-sym "->variadic) {\\n"
-                               "FnType1 *" fn-sym " = (FnType1 *)" arity-sym "->fn;\\n"
-                               "List *" variadic-sym " = (List *)GC_malloc(sizeof(List));\\n"
-                               variadic-sym "->type  = ListType;\\n"
-                               variadic-sym "->len = 0;\\n"
-                               variadic-sym "->head = (Value *)0;\\n"
-                               variadic-sym "->tail = (List *)0;\\n"
-                               (reduce (reverse (rest arg-syms)) ""
-                                       (fn [arg-list arg-sym]
-                                         (str arg-list
-                                              variadic-sym " = (List *)listCons("
-                                              arg-sym ", " variadic-sym ");\\n")))
-                               result-sym " = " fn-sym "(" (first arg-syms) ", (Value *)" variadic-sym ");\\n"
-                               "} else {\\nfprintf(stderr, \\\"\\\\n*** no arity found for '%s'.\\\\n\\\", "
-                               "((Function *)" target-sym ")->name"
-                               ");\\n  abort();\\n}\\n}\\n"))))))))
+                          "FnArity *" arity-sym " = findFnArity(" target-sym ", " num-args ");\\n"
+                          "if(" arity-sym " != (FnArity *)0 && !" arity-sym "->variadic) {\\n"
+                          "FnType" num-args " *" fn-sym " = (FnType" num-args " *)" arity-sym "->fn;\\n"
+                          result-sym " = " fn-sym "(" (apply str (interpose arg-syms ", ")) ");\\n"
+                          "} else if(" arity-sym " != (FnArity *)0 && " arity-sym "->variadic) {\\n"
+                          "FnType1 *" fn-sym " = (FnType1 *)" arity-sym "->fn;\\n"
+                          "List *" variadic-sym " = (List *)GC_malloc(sizeof(List));\\n"
+                          variadic-sym "->type  = ListType;\\n"
+                          variadic-sym "->len = 0;\\n"
+                          variadic-sym "->head = (Value *)0;\\n"
+                          variadic-sym "->tail = (List *)0;\\n"
+                          (reduce (reverse (rest arg-syms)) ""
+                                  (fn [arg-list arg-sym]
+                                    (str arg-list
+                                         variadic-sym " = (List *)listCons("
+                                         arg-sym ", " variadic-sym ");\\n")))
+                          result-sym " = " fn-sym "(" (first arg-syms) ", (Value *)" variadic-sym ");\\n"
+                          "} else {\\nfprintf(stderr, \\\"\\\\n*** no arity found for '%s'.\\\\n\\\", "
+                          "((Function *)" target-sym ")->name"
+                          ");\\n  abort();\\n}\\n}\\n")))))))
+
+(defn call-recursive [target args]
+  (let [target-stmts (nth target 1 empty-list)
+        arg-stmts (nth args 1 empty-list)
+        args (nth args 0 empty-list)]
+    (for [curr-fn-sym (get-val :curr-fn-sym)
+          curr-num-args (get-val :curr-arg-count -1)
+          :when (and (= (str "(Value *)&" curr-fn-sym) (nth target 0 ""))
+                     (= (count args) curr-num-args))
+          curr-arity-fn-sym (get-val :curr-arity-fn-sym)
+          result-sym (genlocal "rslt")]
+      (list result-sym
+            (comp target-stmts
+                  arg-stmts
+                  (list "Value *" result-sym " = " curr-arity-fn-sym
+                        "(" (apply str (interpose (cons "closures" args) ", ")) ");\\n"))))))
 
 (defn call-static-fixed [target args]
   (let [target-sym (nth target 0 "")
@@ -2928,11 +2953,11 @@ toccata-core
   (free (reify
           AST
           (emit-c [_]
-            ;; TODO: check for recursive call to same arity
             (for [target (evaluate callee emit-c)
                   args (eval-args params)
                   result (comp (call-static-fixed target args)
                                (call-static-variadic target args)
+                               (call-recursive target args)
                                (call-dynamic-fn target args)
                                (new-sm (fn [s]
                                          (print-err (str "could not emit callsite for '"
@@ -2976,24 +3001,21 @@ toccata-core
           AST
           (emit-c [_]
             (let [arity-count (count arities)]
-              (for [fn-sym (gensym "fn_")
+              (for [curr-fn-sym (get-val :curr-fn-sym "")
+                    fn-sym (gensym "fn_")
+                    _ (set-val :curr-fn-sym fn-sym)
                     _ (write (str "\\n// --------- " name " --------------\\n"))
                     _ (write (str "Function " fn-sym ";\\n"))
                     ;; TODO: check for anon fn, save previous value of
                     ;; :defined-sym and restore at end
                     _ (assoc-in-val (list :defined-syms name) (list (str "Function " fn-sym)
                                                                     (str "(Value *)&" fn-sym)))
-                    arity-vals (traverse arities
-                                         (fn [arity]
-                                           (evaluate arity emit-c)))
-                    :let [arity-syms (map arity-vals (fn [av]
-                                                       (nth av 0 "")))
-                          arity-init (crush arity-vals
-                                            (fn [av]
-                                              (nth av 1 empty-list)))
-                          static-arities (crush arity-vals
-                                                (fn [av]
-                                                  (nth av 2 {})))]
+                    arity-vals (traverse arities (fn [arity]
+                                                   (evaluate arity emit-c)))
+                    :let [arity-syms (map arity-vals first)
+                          arity-init (crush arity-vals second)
+                          static-arities (crush arity-vals (fn [av]
+                                                             (nth av 2 {})))]
                     _ (cond
                        (= 0 (count arity-init))
                        (apply-to list
@@ -3004,7 +3026,8 @@ toccata-core
                                              "{" (apply str (interpose arity-syms ", ")) "}};\\n"))
                                  (assoc-in-val (list :static-fns (str "(Value *)&" fn-sym)) static-arities))
 
-                       (state-maybe ""))]
+                       (state-maybe ""))
+                    _ (set-val :curr-fn-sym curr-fn-sym)]
                 (cond
                  (= 0 (count arity-init))
                  (list (str "(Value *)&" fn-sym) empty-list (str "Function " fn-sym))
