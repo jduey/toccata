@@ -39,7 +39,11 @@ toccata-core
 
 ;; @jneen_
 (defprotocol Variant
-  (match* [_ match-targets]))
+  (bippity [_])
+  (match* [_]
+    (pr* ":match*-one-arg"))
+  (match* [_ match-targets]
+    (pr* ":match*-two-args")))
 
 (defprotocol Type
   (instance? [type val]))
@@ -152,8 +156,14 @@ toccata-core
   (first [coll])
   (rest [coll]))
 
+(defn second [coll]
+  (first (rest coll)))
+
 (defprotocol Traversable
   (traverse [coll f]))
+
+(defprotocol Crushable
+  (crush [coll f]))
 
 (defprotocol Monoid
   (zero [_])
@@ -355,6 +365,11 @@ toccata-core
    (list=* (map ls rest))))
 
 (extend-type List
+  Crushable
+  (crush [l f]
+    (reduce (cdr l) (f (car l))
+            (fn [x y] (comp x (f y)))))
+
   Traversable
   (traverse [l f]
     (let [vs (map l f)]
@@ -1726,13 +1741,13 @@ toccata-core
         arities (traverse (nth expr 2 empty-list) analyze-expr)]
     (fn-ast (nth expr 1 "no-name") arities)))
 
-(defn analyze-arity [args]
+(defn analyze-proto-arity [args]
   (cond
    (< (count args) 2) empty-list
    (let [fn-name (nth args 0)
          params (rest (nth args 1))
          body (drop args 2)
-         default-fn-expr (list 'fn fn-name (list (list 'fn-arity params body)))]
+         default-fn-expr (list 'fn-arity params body)]
      (cond
       (< 0 (count body)) (for [default (analyze-expr default-fn-expr)]
                            {fn-name {(count params) {:default default}}})
@@ -1857,7 +1872,7 @@ toccata-core
                          (not (< 2 (count x))) false
                          (= 'defprotocol (first x)))))
         ;; TODO: make this only accept fixed arities
-        arities (traverse (drop expr 2) analyze-arity)]
+        arities (traverse (drop expr 2) analyze-proto-arity)]
     (protocol-ast (nth expr 1 :no-name)
                   (apply merge-with merge arities))))
 
@@ -2729,8 +2744,14 @@ toccata-core
                             (static-arity arity-fn-sym c-args 1))]
                 result))))))
 
+(defprotocol FunctionArityAST
+  (fn-args [_]))
+
 (defn fn-arity-ast [args body]
   (free (reify
+          FunctionArityAST
+          (fn-args [_] args)
+
           AST
           (emit-c [_]
             (for [arity-fn-sym (gensym "arityImpl_")
@@ -2945,8 +2966,14 @@ toccata-core
                     body-stmts (nth body-exprs 1 empty-list)]
                 (list result-sym (comp binding-stmts body-stmts))))))))
 
+(defprotocol FunctionAST
+  (arities [_]))
+
 (defn fn-ast [name arities]
   (free (reify
+          FunctionAST
+          (arities [_] (crush arities (fn [arity] (evaluate arity list))))
+
           AST
           (emit-c [_]
             (let [arity-count (count arities)]
@@ -3136,9 +3163,11 @@ toccata-core
 (defn emit-reified-fn [name-asts type-num index]
   (let [name-ast (nth name-asts index :no-name-ast)
         name (nth name-ast 0 "")
-        ast (nth name-ast 1 :no-ast)]
+        ast (nth name-ast 1 :no-ast)
+        num-args (first (map (arities (evaluate ast (fn [a] a)))
+                             (fn [x]
+                               (count (fn-args x)))))]
     (for [evalled (evaluate ast emit-c)
-          num-args (get-in-val (list :protocols name :num-args) 0)
           impl-sym (gensym "protoImpl_")
           fn-sym (gensym "protoFn_")
           :let [_ (cond
@@ -3197,16 +3226,16 @@ toccata-core
             (cond
              (empty? impls) (let [_ (print-err :no-impls)]
                               (list "" empty-list))
-             (let [protos (seq impls)
-                   name-asts (apply comp (map protos (fn [proto]
-                                                       (nth proto 1 empty-list))))]
+             (let [name-asts (crush (seq impls)
+                                    (fn [proto]
+                                      (nth proto 1 empty-list)))]
                (for [types (get-val :types {})
                      :let [type-num (inc (count (seq types)))]
                      _ (assoc-in-val (list :types type-num) type-num)
                      impl-fns (traverse (range (count name-asts))
                                         (partial emit-reified-fn name-asts type-num))
-                     reified-result (let [inits (apply comp (map impl-fns (fn [sym-inits]
-                                                                            (nth sym-inits 1 empty-list))))]
+                     reified-result (let [inits (crush impl-fns (fn [sym-inits]
+                                                                  (nth sym-inits 1 empty-list)))]
                                       (cond
                                        (= 0 (count inits))
                                        (static-reified type-num impl-fns)
@@ -3240,27 +3269,19 @@ toccata-core
                   ]
               result)))))
 
-(defn write-default [default-impl]
-  (cond
-   (= :no-default default-impl) (state-maybe {})
+(defn emit-proto-default [arity]
+  (let [default-impl (get (nth arity 1 {}) :default :no-default)]
+    (cond
+     (= :no-default default-impl) (state-maybe empty-list)
 
-   (for [default-fn (evaluate default-impl emit-c)
-         _ (write-strs (nth default-fn 1 empty-list))]
-     {:default (nth default-fn 0 "")})))
+     (for [default-fn (evaluate default-impl emit-c)
+           _ (write-strs (nth default-fn 1 empty-list))]
+       (list (nth default-fn 0 ""))))))
 
-(defn emit-proto-fn [proto]
-  (let [name (nth proto 0 "")
-        arities (first (seq (nth proto 1 {0 {}})))
-        num-args (nth arities 0 0)
-        args (map (range num-args) (fn [idx] (str "arg" idx)))
-        default-fn-ast (get (nth arities 1 {}) :default :no-default)
-        args (map (range num-args) (fn [idx]
-                                     (str "arg" idx)))]
+(defn emit-proto-arity [name fn-sym impls-sym arity]
+  (let [num-args (nth arity 0 1)
+        args (map (range num-args) (fn [idx] (str "arg" idx)))]
     (for [c-name (gensym "protoFnImpl_")
-          impls-sym (gensym "protoImpls_")
-          fn-sym (gensym "protoFn_")
-          _ (write (str "ProtoImpls *" impls-sym ";\\n"))
-          default-impl (write-default default-fn-ast)
           arity-sym (gensym "protoFnArity_")
           _ (apply-to list
                       (write (str "Value *" c-name "("))
@@ -3277,7 +3298,7 @@ toccata-core
                              "  FnArity *_arity = findFnArity((Value *)implFn, " num-args ");\\n"
                              "  if(_arity == (FnArity *)0 || _arity->variadic) {\\n"
                              "    fprintf(stderr, \\\"\\\\n*** Invalid number of args in call to '"
-                             name "'\\\");\\n"
+                             name "'\\\\n\\\");\\n"
                              "    abort();\\n}\\n"
                              "  FnType" num-args " *_fn = (FnType" num-args " *)_arity->fn;\\n"
                              "  return(_fn("))
@@ -3285,18 +3306,36 @@ toccata-core
                       (write-strs (list "));\\n}\\n"
                                         "FnArity "
                                         (str arity-sym) " = {" (str num-args) ", (List *)0, 0, "
-                                        (str c-name) "};\\n"
-                                        "Function " (str fn-sym)  " = {3, \\\"" (str name)
-                                        "\\\", 1, {&" (str arity-sym) "}};\\n\\n"))
-                      (assoc-in-val (list :static-fns (str "(Value *)&" fn-sym) num-args) c-name)
+                                        (str c-name) "};\\n"))
+                      (assoc-in-val (list :static-fns (str "(Value *)&" fn-sym) num-args) c-name))]
+      (str "&" arity-sym))))
+
+(defn emit-proto-fn [proto]
+  (let [name (first proto)
+        arities (seq (second proto))]
+    (for [impls-sym (gensym "protoImpls_")
+          fn-sym (gensym "protoFn_")
+          default-fn-sym (gensym "defaultFn_")
+          _ (write (str "ProtoImpls *" impls-sym ";\\n"))
+          default-syms (crush arities emit-proto-default)
+          arity-syms (traverse arities (partial emit-proto-arity name fn-sym impls-sym))
+          _ (apply-to list
+                      (cond
+                       (empty? default-syms) (state-maybe "")
+                       (write (str "Function " default-fn-sym " = {3, \\\"" name
+                                   "\\\", " (count default-syms)
+                                   ", {" (apply str (interpose default-syms ",\\n"))
+                                   "}};\\n\\n")))
+                      (write-strs (list "Function " (str fn-sym)  " = {3, \\\"" (str name)
+                                        "\\\", " (count arity-syms)
+                                        ", {" (apply str (interpose arity-syms ",\\n")) "}};\\n\\n"))
                       (assoc-in-val (list :defined-syms name) (list (str "Function " fn-sym)
                                                                     (str "(Value *)&" fn-sym)))
-
                       (assoc-in-val (list :protocols name) {:impls-sym impls-sym
-                                                            :extern-def (str "extern Function "
-                                                                             fn-sym ";")
-                                                            :impls default-impl
-                                                            :num-args num-args}))]
+                                                            :impls (cond
+                                                                    (empty? default-syms) {}
+                                                                    {:default (str "(Value *)&" default-fn-sym)})
+                                                            :extern-def (str "extern Function " fn-sym ";")}))]
       fn-sym)))
 
 (defn protocol-ast [name prototypes]
