@@ -2838,7 +2838,7 @@ toccata-core
           fn-sym (genlocal "fn")
           result-sym (genlocal "rslt")
           invoke-sym (lookup-sym 'invoke)
-          invoke-arity-sym (lookup-static-fn (first invoke-sym) 2)]
+          invoke-arity-sym (lookup-static-fn (first invoke-sym) (inc num-args))]
       (let [arg-syms (cons (str arity-sym "->closures") args)]
         (list result-sym
               (comp target-stmts
@@ -2846,15 +2846,9 @@ toccata-core
                     (list (str "Value *" result-sym ";\\n"
                                "if((" target-sym ")->type != " (get (types) 'Function :no-fn-type) ") {\\n"
 
-                               ;; TODO: currently hard coded for just 2
-                               ;; arguments to 'invoke'
-                               (cond
-                                (< 0 num-args)
-                                (str result-sym " = " invoke-arity-sym "(empty_list, " target-sym ", (Value *)"
-                                     (nth arg-syms 1 "") ");\\n")
-
-                                (str "printf(\\\"calling a non-function\\\\n\\\");\\n abort();\\n"))
-                               "} else {\\n"
+                               result-sym " = " invoke-arity-sym "(empty_list, "
+                               (apply str (interpose (cons target-sym args) ", "))
+                               ");\\n} else {\\n"
 
                                "FnArity *" arity-sym " = findFnArity(" target-sym ", " num-args ");\\n"
                                "if(" arity-sym " != (FnArity *)0 && !" arity-sym "->variadic) {\\n"
@@ -2871,9 +2865,7 @@ toccata-core
                                        (fn [arg-list arg-sym]
                                          (str arg-list
                                               variadic-sym " = (List *)listCons("
-                                              ;; TODO: This "(Value *)" may be superfluous
-                                              "(Value *)" arg-sym
-                                              ", " variadic-sym ");\\n")))
+                                              arg-sym ", " variadic-sym ");\\n")))
                                result-sym " = " fn-sym "(" (first arg-syms) ", (Value *)" variadic-sym ");\\n"
                                "} else {\\nfprintf(stderr, \\\"\\\\n*** no arity found for '%s'.\\\\n\\\", "
                                "((Function *)" target-sym ")->name"
@@ -3986,7 +3978,8 @@ toccata-core
                         (str "const int64_t FunctionType = " (get types 'Function 0) ";\\n")
                         "List *empty_list = &(List){4,0,0,0};\\n"))
                       (base-fns)
-                      (emit-proto-fn (list 'invoke {2 {}})))]
+                      (emit-proto-fn (list 'invoke (map (range 8) (fn [num-args]
+                                                                    (list (inc num-args) {}))))))]
       "")))
 
 (defn compile-source [parser text]
