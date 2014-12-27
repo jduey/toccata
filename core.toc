@@ -3391,11 +3391,13 @@ toccata-core
                     "Number falseVal = {NumberType, 0};\\n"
                     "Value* false = (Value *)&falseVal;\\n"
                     "\\n"
+
                     "int isTrue(Value *boolVal) {\\n"
                     "if (boolVal->type != " (get (types) 'Number 99) ") {\\n"
                     "printf(\\\"Invalid boolean value\\\\n"
                     "\\\");\\nabort();\\n}\\nelse\\nreturn (((Number *)boolVal)->numVal);\\n}\\n"
                     "\\n"
+
                     "Value *findProtoImpl(int64_t type, ProtoImpls *impls) {\\n"
                     "int64_t implIndex = 0;\\n"
                     "while(implIndex < impls->implCount) {\\n"
@@ -3406,6 +3408,7 @@ toccata-core
                     "}\\n"
                     "return(impls->defaultImpl);\\n"
                     "};\\n\\n"
+
                     "FnArity *findFnArity(Value *fnVal, int argCount) {\\n"
                     "Function *fn = (Function *)fnVal;\\n"
                     "int arityIndex = 0;\\n"
@@ -3424,6 +3427,7 @@ toccata-core
                     "return(variadic);\\n"
                     "};\\n\\n"
                     "\\n"
+
                     "Value *symbolValue(char *s) {\\n"
                     "SymKey *sym = (SymKey *)GC_malloc(sizeof(SymKey));\\n"
                     "sym->type = SymbolType;\\n"
@@ -3431,6 +3435,7 @@ toccata-core
                     "return((Value *)sym);\\n"
                     "};\\n"
                     "\\n"
+
                     "Value *keywordValue(char *s) {\\n"
                     "SymKey *kw = (SymKey *)GC_malloc(sizeof(SymKey));\\n"
                     "kw->type = KeywordType;\\n"
@@ -3438,6 +3443,7 @@ toccata-core
                     "return((Value *)kw);\\n"
                     "};\\n"
                     "\\n"
+
                     "Value *stringValue(char *s) {\\n"
                     "int64_t len = strlen(s);\\n"
                     "String *strVal = (String *)GC_malloc(sizeof(String) + len + 4);\\n"
@@ -3447,6 +3453,7 @@ toccata-core
                     "return((Value *)strVal);\\n"
                     "};\\n"
                     "\\n"
+
                     "Value *makeSubstr(int64_t len, Value *str, char *subsStart) {\\n"
                     "SubString *subStr = (SubString *)GC_malloc(sizeof(SubString));\\n"
                     "subStr->type = SubStringType;\\n"
@@ -3455,6 +3462,7 @@ toccata-core
                     "subStr->buffer = subsStart;\\n"
                     "return((Value *)subStr);}\\n"
                     "\\n"
+
                     "Value *numberValue(int64_t n) {\\n"
                     "Number *numVal = (Number *)GC_malloc(sizeof(Number));\\n"
                     "numVal->type = NumberType;\\n"
@@ -3462,6 +3470,7 @@ toccata-core
                     "return((Value *)numVal);\\n"
                     "};\\n"
                     "\\n"
+
                     "List *listCons(Value *x, List *l) {\\n"
                     "if (l->type != ListType) {\\n"
                     "printf(\\\"'cons' requires a list\\\n\\\");\\n"
@@ -3673,6 +3682,7 @@ toccata-core
 (defn protocols []
   (inline-text "return(protocols());"))
 
+;; TODO: remove :num-args
 (defn load-protocols []
   (let [protos (protocols)
         protos (map protos
