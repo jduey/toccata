@@ -1,6 +1,4 @@
 
-;; TODO: replace 'apply comp' with 'crush' where possible
-
 toccata-core
 
 (def true)
@@ -683,6 +681,18 @@ toccata-core
     (count [_]
       (count a-list))
 
+    Monoid
+    (zero [_]
+      (HashMap empty-list))
+    (comp* [hm ms]
+      (cond
+       (empty? ms) hm
+       (reduce ms hm
+               (fn [hm m]
+                 (reduce (seq m) hm
+                         (fn [hm kv]
+                           (assoc hm (nth kv 0) (nth kv 1))))))))
+
     Associative
     (assoc [_ k v]
       (HashMap (map-assoc a-list k v)))
@@ -698,15 +708,6 @@ toccata-core
 
 (defn hash-map [& kv-pairs]
   (HashMap (partition kv-pairs 2)))
-
-(defn merge [hm & ms]
-  (cond
-   (empty? ms) hm
-   (reduce ms hm
-           (fn [hm m]
-             (reduce (seq m) hm
-                     (fn [hm kv]
-                       (assoc hm (nth kv 0) (nth kv 1))))))))
 
 (defn merge-with [merge-fn hm & ms]
   (cond
@@ -1892,7 +1893,7 @@ toccata-core
         ;; TODO: make this only accept fixed arities
         arities (traverse (drop expr 2) analyze-proto-arity)]
     (protocol-ast (nth expr 1 :no-name)
-                  (apply merge-with merge arities))))
+                  (apply merge-with comp arities))))
 
 (defn analyze-deftype []
   (for [expr (is-expr (fn [x]
@@ -2622,7 +2623,7 @@ toccata-core
         local-sym-count (get-val :local-sym-count 0)
         _ (set-val :local-sym-count 0)
         context (get-val :context {})
-        _ (set-val :context (merge context locals))
+        _ (set-val :context (comp context locals))
         closed-over (get-val :closed-over empty-list)
         _ (set-val :closed-over empty-list)]
     (list locals local-sym-count context closed-over)))
@@ -2957,9 +2958,9 @@ toccata-core
                   bindings (evaluate bindings emit-c)
                   body-exprs (eval-exprs body)
                   _ (set-val :local-syms locals)]
-              (let [binding-stmts (apply comp (map bindings
-                                                   (fn [binding]
-                                                     (nth binding 1 empty-list))))
+              (let [binding-stmts (crush bindings
+                                         (fn [binding]
+                                           (nth binding 1 empty-list)))
                     result-sym (nth body-exprs 0 "")
                     body-stmts (nth body-exprs 1 empty-list)]
                 (list result-sym (comp binding-stmts body-stmts))))))))
@@ -2987,12 +2988,12 @@ toccata-core
                                            (evaluate arity emit-c)))
                     :let [arity-syms (map arity-vals (fn [av]
                                                        (nth av 0 "")))
-                          arity-init (apply comp (map arity-vals
-                                                      (fn [av]
-                                                        (nth av 1 empty-list))))
-                          static-arities (apply merge (map arity-vals
-                                                           (fn [av]
-                                                             (nth av 2 {}))))]
+                          arity-init (crush arity-vals
+                                            (fn [av]
+                                              (nth av 1 empty-list)))
+                          static-arities (crush arity-vals
+                                                (fn [av]
+                                                  (nth av 2 {})))]
                     _ (cond
                        (= 0 (count arity-init))
                        (apply-to list
@@ -3190,8 +3191,8 @@ toccata-core
 (defn reified-type [type-num impl-fns]
   (for [reified-sym (genlocal "reified_")
         _ (state-maybe "")]
-    (let [inits (apply comp (map impl-fns (fn [sym-inits]
-                                            (nth sym-inits 1 empty-list))))
+    (let [inits (crush impl-fns (fn [sym-inits]
+                                  (nth sym-inits 1 empty-list)))
           impls-syms (map impl-fns (fn [sym-inits] (nth sym-inits 0 "")))
           reify-init (list* (str ReifiedVal* reified-sym " = (ReifiedVal *)GC_malloc(sizeof("
                                  "ReifiedVal) + sizeof(Function *) * "
@@ -3621,7 +3622,7 @@ toccata-core
                       (const-strings strs (get types 'String "no_String_type"))
                       (update-in-val (list :strings)
                                      (fn [old-strs]
-                                       (merge old-strs strs)))
+                                       (comp old-strs strs)))
                       (assoc-in-val (list :new-strings) {}))
 
           nums (get-in-val (list :new-numbers) empty-list)
@@ -3629,7 +3630,7 @@ toccata-core
                       (static-numbers nums (get types 'Number "no_Number_type"))
                       (update-in-val (list :numbers)
                                      (fn [old-nums]
-                                       (merge old-nums nums)))
+                                       (comp old-nums nums)))
                       (assoc-in-val (list :new-numbers) {}))
 
           syms (get-in-val (list :new-symbols) empty-list)
@@ -3637,7 +3638,7 @@ toccata-core
                       (static-syms syms (get types 'Symbol "no_Symbol_type"))
                       (update-in-val (list :symbols)
                                      (fn [old-sys]
-                                       (merge old-sys syms)))
+                                       (comp old-sys syms)))
                       (assoc-in-val (list :new-symbols) {}))
 
           kws (get-in-val (list :new-keywords) empty-list)
@@ -3645,7 +3646,7 @@ toccata-core
                       (static-syms kws (get types 'Keyword "no_Keyword_type"))
                       (update-in-val (list :keywords)
                                      (fn [old-kws]
-                                       (merge old-kws kws)))
+                                       (comp old-kws kws)))
                       (assoc-in-val (list :new-keywords) {}))]
       "")))
 
