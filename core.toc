@@ -1,4 +1,6 @@
 
+;; TODO: replace 'apply comp' with 'crush' where possible
+
 toccata-core
 
 (def true)
@@ -912,9 +914,8 @@ toccata-core
 
              FreeEval
              (evaluate [free-val eval-endo]
-               (apply comp
-                      (map alts (fn [alt]
-                                  (evaluate alt eval-endo)))))
+               (crush alts (fn [alt]
+                             (evaluate alt eval-endo))))
 
              Applicative
              (wrap [_ v] (free-val v))
@@ -1507,7 +1508,7 @@ toccata-core
   (apply-to list
             (ignore (term "'"))
             (always 'quote)
-            (read-symbol)))
+            (read-sub-form)))
 
 (defn rule [name grammar]
   (free (reify
@@ -1785,16 +1786,21 @@ toccata-core
                         (str "_sym_" sym-idx))]
     ""))
 
+(defn make-symbols [quoted-form]
+  (cond
+   (symbol? quoted-form) (comp (sym-already-defined? quoted-form)
+                               (sym-recently-defined? quoted-form)
+                               (sym-defined-in-core quoted-form)
+                               (make-static-symbol quoted-form))
+   (seq? quoted-form) (traverse quoted-form make-symbols)
+   (state-maybe "")))
+
 (defn analyze-quoted []
   (for [expr (is-expr (fn [x]
                         (cond
                          (not (= 2 (count x))) false
                          (= (first x) 'quote))))
-        _ (let [sym (nth expr 1)]
-            (comp (sym-already-defined? sym)
-                  (sym-recently-defined? sym)
-                  (sym-defined-in-core sym)
-                  (make-static-symbol sym)))]
+        _ (make-symbols (nth expr 1))]
     (quoted-ast (nth expr 1))))
 
 (defn analyze-def []
@@ -1868,6 +1874,7 @@ toccata-core
         proto-specs (analyze-extensions (drop expr 2))]
     (extend-ast (nth expr 1 :no-type) proto-specs)))
 
+;; TODO: handle multi-arity reified fns
 (defn analyze-reify []
   (for [expr (is-expr (fn [x]
                         (cond
@@ -3681,18 +3688,15 @@ toccata-core
 (defn protocols []
   (inline-text "return(protocols());"))
 
-;; TODO: remove :num-args
 (defn load-protocols []
   (let [protos (protocols)
         protos (map protos
                     (fn [proto-info]
                       (let [proto-name (nth proto-info 0)
                             impls-sym (nth proto-info 1)
-                            num-args (nth proto-info 2)
-                            extern-def (nth proto-info 3)
-                            impls (HashMap (nth proto-info 4))]
+                            extern-def (nth proto-info 2)
+                            impls (HashMap (nth proto-info 3))]
                         (list proto-name {:impls-sym impls-sym
-                                          :num-args num-args
                                           :extern-def extern-def
                                           :impls impls}))))]
     (apply-to list
@@ -3716,7 +3720,6 @@ toccata-core
         _ (write-strs (map (seq protos)
                            (fn [proto-inf]
                              (let [impls-info (nth proto-inf 1 empty-list)
-                                   num-args (get impls-info :num-args 1)
                                    impls-sym (get impls-info :impls-sym "")
                                    extern-def (get impls-info :extern-def "")
                                    impls (seq (get impls-info :impls empty-list))]
@@ -3738,7 +3741,6 @@ toccata-core
                                                              "impls = listCons((Value *)impl, impls);\\n")))))
                                     "protoInfo = listCons((Value *)impls, protoInfo);\\n"
                                     "protoInfo = listCons(stringValue(\\\"" extern-def "\\\"), protoInfo);\\n"
-                                    "protoInfo = listCons(numberValue(" num-args "), protoInfo);\\n"
                                     "protoInfo = listCons(stringValue(\\\"" impls-sym "\\\"), protoInfo);\\n"
                                     "protoInfo = listCons(symbolValue(\\\"" (first proto-inf)
                                     "\\\"), protoInfo);\\n"
