@@ -1,0 +1,7 @@
+
+(main [arglist]
+      (let [a (list 1 3 4)
+            b (list :a :x)]
+        (println :list-a a)
+        (println :list-b b)
+        (println :comp (comp a b))))
