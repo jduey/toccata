@@ -1094,16 +1094,18 @@ toccata-core
                    (list (apply f (map (remove args empty?)
                                        first)))))))
 
+(deftype parser-terminal [term-str]
+  Parser
+  (recursive-descent [_]
+    (let [s-len (count term-str)]
+      (for [text (get-val :text "")
+            :when (and (not (< (count text) s-len))
+                       (= term-str (subs text 0 s-len)))
+            _ (set-val :text (subs text s-len))]
+        (list term-str)))))
+
 (defn term [term-str]
-  (free (reify
-          Parser
-          (recursive-descent [_]
-            (let [s-len (count term-str)]
-              (for [text (get-val :text "")
-                    :when (and (not (< (count text) s-len))
-                               (= term-str (subs text 0 s-len)))
-                    _ (set-val :text (subs text s-len))]
-                (list term-str)))))))
+  (free (parser-terminal term-str)))
 
 (defn recur [rule]
   (for [a rule
@@ -1111,28 +1113,34 @@ toccata-core
                  (state-maybe empty-list))]
     (cons a as)))
 
+(deftype repeat-rule [rule]
+  Parser
+  (recursive-descent [_]
+    (let [rule (evaluate rule recursive-descent)]
+      (flat-map (recur rule)
+                (fn [v]
+                  (state-maybe (list (apply comp v))))))))
+
 (defn one-or-more [rule]
-  (free (reify
-          Parser
-          (recursive-descent [_]
-            (let [rule (evaluate rule recursive-descent)]
-              (flat-map (recur rule)
-                        (fn [v]
-                          (state-maybe (list (apply comp v))))))))))
+  (free (repeat-rule rule)))
+
+(deftype ignore-rule [rule]
+  Parser
+  (recursive-descent [_]
+    (flat-map (evaluate rule recursive-descent)
+              (fn [_]
+                (state-maybe empty-list)))))
 
 (defn ignore [rule]
-  (free (reify
-          Parser
-          (recursive-descent [_]
-            (flat-map (evaluate rule recursive-descent)
-                      (fn [_]
-                        (state-maybe empty-list)))))))
+  (free (ignore-rule rule)))
+
+(deftype parser-always [v]
+  Parser
+  (recursive-descent [_]
+                     (state-maybe (list v))))
 
 (defn always [v]
-  (free (reify
-          Parser
-          (recursive-descent [_]
-            (state-maybe (list v))))))
+  (free (parser-always v)))
 
 (defn all [& rules]
   (apply* (pure comp) rules))
@@ -1153,30 +1161,36 @@ toccata-core
         _ (set-val :text (subs txt 1))]
     (list c)))
 
+(deftype parse-lower-alphas []
+  Parser
+  (recursive-descent [_]
+    (char-test (fn [c]
+                 (< (dec (char-code "a")) (char-code c) (inc (char-code "z")))))))
+
 (defn lower-alpha []
-  (free (reify
-          Parser
-          (recursive-descent [_]
-            (char-test (fn [c]
-                         (< (dec (char-code "a")) (char-code c) (inc (char-code "z")))))))))
+  (free (parse-lower-alphas)))
+
+(deftype parse-upper-alphas []
+  Parser
+  (recursive-descent [_]
+                     (char-test (fn [c]
+                                  (< (dec (char-code "A")) (char-code c) (inc (char-code "Z")))))))
 
 (defn upper-alpha []
-  (free (reify
-          Parser
-          (recursive-descent [_]
-            (char-test (fn [c]
-                         (< (dec (char-code "A")) (char-code c) (inc (char-code "Z")))))))))
+  (free (parse-upper-alphas)))
 
 (defn alpha []
   (comp (lower-alpha)
         (upper-alpha)))
 
+(deftype parse-digit []
+  Parser
+  (recursive-descent [_]
+    (char-test (fn [c]
+                 (< (dec (char-code "0")) (char-code c) (inc (char-code "9")))))))
+
 (defn digit []
-  (free (reify
-          Parser
-          (recursive-descent [_]
-            (char-test (fn [c]
-                         (< (dec (char-code "0")) (char-code c) (inc (char-code "9")))))))))
+  (free (parse-digit)))
 
 (defn one-of [coll]
   (let [coll (seq coll)]
@@ -1249,18 +1263,20 @@ toccata-core
        (ignore (backslash))
        (always (char 92))))
 
+(deftype parse-not-backslash []
+  Parser
+  (recursive-descent [_]
+    (for [txt (get-val :text "")
+          :let [x (subs txt 0 1)]
+          :when (cond
+                 (= x (char 92)) false
+                 (= x (char 34)) false
+                 true)
+          _ (set-val :text (subs txt 1))]
+      (list x))))
+
 (defn not-backslash []
-  (free (reify
-          Parser
-          (recursive-descent [_]
-            (for [txt (get-val :text "")
-                  :let [x (subs txt 0 1)]
-                  :when (cond
-                         (= x (char 92)) false
-                         (= x (char 34)) false
-                         true)
-                  _ (set-val :text (subs txt 1))]
-              (list x))))))
+  (free (parse-not-backslash)))
 
 (defn read-const-string []
   (all (ignore (term (char 34)))
@@ -1301,13 +1317,15 @@ toccata-core
             (optional (term "-"))
             (one-or-more (digit))))
 
+(deftype parse-sub-form []
+  Parser
+  (recursive-descent [_]
+                     (for [parser-fn (get-in-val (list :parser-fns "form") :blah)
+                           result (new-sm parser-fn)]
+                       result)))
+
 (defn read-sub-form []
-  (free (reify
-          Parser
-          (recursive-descent [_]
-            (for [parser-fn (get-in-val (list :parser-fns "form") :blah)
-                  result (new-sm parser-fn)]
-              result)))))
+  (free (parse-sub-form)))
 
 (defn read-list []
   (all (ignore (term "("))
@@ -1328,15 +1346,17 @@ toccata-core
             (none-or-more (read-sub-form))
             (ignore (term "]"))))
 
+(deftype parse-not-eol []
+  Parser
+  (recursive-descent [_]
+    (for [txt (get-val :text "")
+          :let [x (subs txt 0 1)]
+          :when (not (= x (char 10)))
+          _ (set-val :text (subs txt 1))]
+      (list x))))
+
 (defn not-eol []
-  (free (reify
-          Parser
-          (recursive-descent [_]
-            (for [txt (get-val :text "")
-                  :let [x (subs txt 0 1)]
-                  :when (not (= x (char 10)))
-                  _ (set-val :text (subs txt 1))]
-              (list x))))))
+  (free (parse-not-eol)))
 
 (defn read-comment []
   (all (term ";")
@@ -1511,15 +1531,17 @@ toccata-core
             (always 'quote)
             (read-sub-form)))
 
+(deftype parser-rule [name grammar]
+  Parser
+  (recursive-descent [_]
+                     (let [parser (evaluate grammar recursive-descent)
+                           parser-fn (fn [s] (parser s))]
+                       (for [_ (assoc-in-val (list :parser-fns name) parser-fn)
+                             result (new-sm parser-fn)]
+                         result))))
+
 (defn rule [name grammar]
-  (free (reify
-          Parser
-          (recursive-descent [_]
-            (let [parser (evaluate grammar recursive-descent)
-                  parser-fn (fn [s] (parser s))]
-              (for [_ (assoc-in-val (list :parser-fns name) parser-fn)
-                    result (new-sm parser-fn)]
-                result))))))
+  (free (parser-rule name grammar)))
 
 (defn read-form []
   (rule "form"
