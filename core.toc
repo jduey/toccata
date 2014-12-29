@@ -3298,6 +3298,13 @@ toccata-core
                                        (reified-type type-num impl-fns)))]
                  reified-result)))))))
 
+(defn replace-type [types type-val-num name]
+  (cond
+   (empty? types) (list (list name type-val-num))
+   (= (first (first types)) type-val-num) (cons (list name type-val-num)
+                                                (rest types))
+   (cons (first types) (replace-type (rest types) type-val-num name))))
+
 (defn type-ast [name fields impls]
   (free (reify
           AST
@@ -3319,9 +3326,9 @@ toccata-core
                   _ (static-values)
                   _ (set-expr curr-expr)
                   result (define-value name type-ast)
-                  ;; TODO: Do some surgery on :types to assoc the
-                  ;; correct name to type-val-num
-                  ]
+                  _ (update-in-val (list :types)
+                                   (fn [types]
+                                     (HashMap (replace-type (seq types) type-val-num name))))]
               result)))))
 
 (defn emit-proto-default [arity]
