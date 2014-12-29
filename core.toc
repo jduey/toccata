@@ -236,12 +236,50 @@ toccata-core
 (defn list* [arg & args]
   (list** arg args))
 
+(defn reduce [l result f]
+  (cond
+   (empty? l) result
+   (let [head (first l)
+         tail (rest l)
+         mapped-val (f result head)]
+     (cond
+      (empty? tail) mapped-val
+      (reduce tail mapped-val f)))))
+
+(defn filter [l f]
+  (cond
+   (empty? l) l
+   (let [head (new-list)]
+     (reduce l head
+             (fn [tail v]
+               (cond
+                (f v) (snoc head tail v)
+                tail)))
+     head)))
+
+(defn remove [l f]
+  (filter l (fn [v] (not (f v)))))
+
+(defn reverse [l]
+  (reduce l (empty l) conj))
+
+(defn identity [x]
+  x)
+
 (extend-type Function
   ;; Stringable
   ;; (string-list [f] (list "<Fn: " (fn-name f) ">"))
 
   ;; Serializable
   ;; (serialize [f] (list "<Fn: " (fn-name f) ">"))
+
+  Monoid
+  (zero [_] identity)
+  (comp* [f fs]
+    (fn [& args]
+      (reduce fs (apply f args)
+              (fn [x f]
+                (f x)))))
 
   Applicative
   (apply* [f args]
@@ -316,36 +354,9 @@ toccata-core
          (cons (apply v cars)
                (apply* zv cdrs)))))))
 
-(defn reduce [l result f]
-  (cond
-   (empty? l) result
-   (let [head (first l)
-         tail (rest l)
-         mapped-val (f result head)]
-     (cond
-      (empty? tail) mapped-val
-      (reduce tail mapped-val f)))))
-
-(defn filter [l f]
-  (cond
-   (empty? l) l
-   (let [head (new-list)]
-     (reduce l head
-             (fn [tail v]
-               (cond
-                (f v) (snoc head tail v)
-                tail)))
-     head)))
-
-(defn remove [l f]
-  (filter l (fn [v] (not (f v)))))
-
 (defn partial [f & args]
   (fn [& more-args]
     (apply f (comp args more-args))))
-
-(defn reverse [l]
-  (reduce l (empty l) conj))
 
 (defn comprehend [f mvs]
   (cond
