@@ -1,8 +1,8 @@
 
-./build &&
+scripts/build &&
 ./toccata core.toc > core.c &&
-./build &&
+scripts/build &&
 ./toccata core.toc > core.c &&
-./build &&
+scripts/build &&
 ./toccata core.toc > core.c &&
-./build
+scripts/build

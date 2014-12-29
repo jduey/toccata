@@ -1,0 +1,8 @@
+
+(main [argslist]
+      (println 9 ((comp inc (partial + 2)) 6))
+      (println 7 ((comp inc (zero inc)) 6))
+      (println 7 ((comp (zero inc) inc) 6))
+      (println ((comp inc (partial + 2) str) 6)
+               ((comp inc (comp (partial + 2) str)) 6)
+               ((comp (comp inc (partial + 2)) str) 6)))

@@ -1,0 +1,5 @@
+#!/bin/bash
+
+scripts/build
+./toccata core.toc > core.c &&
+scripts/build
