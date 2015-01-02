@@ -1214,9 +1214,9 @@ toccata-core
             rule))
 
 (defn symbol-start []
-  (comp (alpha) (one-of "_<>=+-*/")))
+  (comp (alpha) (one-of "._<>=+-*/")))
 
-(defn symbol-punct [] (one-of "_<>=*/+!-?"))
+(defn symbol-punct [] (one-of "._<>=*/+!-?"))
 
 (defn symbol-char [] (comp (alpha) (digit) (symbol-punct)))
 
@@ -1616,6 +1616,7 @@ toccata-core
 (def type-ast)
 (def protocol-ast)
 (def static-values)
+(def emit-proto-fn)
 
 (defn analyze-inline-text []
   (for [expr (is-expr (fn [x]
@@ -3306,30 +3307,45 @@ toccata-core
    (cons (first types) (replace-type (rest types) type-val-num name))))
 
 (defn type-ast [name fields impls]
-  (free (reify
-          AST
-          (emit-c [_]
-            (for [types (get-val :types {})
-                  :let [type-val-num (+ 2 (count (seq types)))]
+  (let [fields (rest fields)
+        impls (comp
+               (cons 'reify impls)
+               (cons 'BogusGetterProtocolName
+                     (map fields
+                          (fn [field]
+                            (list (symbol (str "." field)) (list 'vector '_)
+                                  field)))))]
+    (free (reify
+            AST
+            (emit-c [_]
+              (for [types (get-val :types {})
+                    :let [type-val-num (+ 2 (count (seq types)))]
 
-                  curr-expr (get-val :expr)
-                  _ (set-expr type-val-num)
-                  _ (analyze-number)
-                  _ (set-expr (list 'reify
-                                    'Type
-                                    (list 'instance? (list 'vector '_ 'v)
-                                          (list '= type-val-num (list 'get-type 'v)))
-                                    'Function
-                                    (list 'invoke (cons 'vector (cons '_ (rest fields)))
-                                          (cons 'reify impls))))
-                  type-ast (analyze-reify)
-                  _ (static-values)
-                  _ (set-expr curr-expr)
-                  result (define-value name type-ast)
-                  _ (update-in-val (list :types)
-                                   (fn [types]
-                                     (HashMap (replace-type (seq types) type-val-num name))))]
-              result)))))
+                    curr-expr (get-val :expr)
+                    _ (set-expr type-val-num)
+                    _ (analyze-number)
+                    _ (cond
+                       (empty? fields) (state-maybe "")
+                       (traverse fields
+                                 (fn [field]
+                                   (let [getter-name (symbol (str "." field))]
+                                     (comp (get-in-val (list :protocols getter-name))
+                                           (emit-proto-fn (list getter-name (list (list 1 {})))))))))
+                    _ (set-expr (list 'reify
+                                      'Type
+                                      (list 'instance? (list 'vector '_ 'v)
+                                            (list '= type-val-num (list 'get-type 'v)))
+                                      'Function
+                                      (list 'invoke (cons 'vector (cons '_ fields))
+                                            impls)))
+                    type-ast (analyze-reify)
+                    _ (static-values)
+                    _ (set-expr curr-expr)
+                    result (define-value name type-ast)
+                    _ (update-in-val (list :types)
+                                     (fn [types]
+                                       (HashMap (replace-type (seq types) type-val-num name))))]
+                result))))))
 
 (defn emit-proto-default [arity]
   (let [default-impl (get (nth arity 1 {}) :default :no-default)]
