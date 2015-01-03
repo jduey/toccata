@@ -1987,7 +1987,7 @@ toccata-core
 (def ValueType Int64)  ;; type of boxed values
 (def Value "typedef struct {int64_t type;} Value;\\n")
 (def Value* "Value *")
-(def NumberVal "typedef struct {int64_t type; int64_t numVal;} Number;\\n")
+(def NumberVal "typedef struct {int64_t type; int32_t refs; int64_t numVal;} Number;\\n")
 (def NumberVal* "Number *")
 (def SymKey "typedef struct {int64_t type; char *name;} SymKey;\\n")
 (def StringVal "typedef struct {int64_t type; int64_t len; char buffer[0];} String;\\n")
@@ -3429,9 +3429,9 @@ toccata-core
 
 (defn base-fns []
   (write-strs (list "\\n"
-                    "Number trueVal = {NumberType, 1};\\n"
+                    "Number trueVal = {NumberType, -1, 1};\\n"
                     "Value* true = (Value *)&trueVal;\\n"
-                    "Number falseVal = {NumberType, 0};\\n"
+                    "Number falseVal = {NumberType, -1, 0};\\n"
                     "Value* false = (Value *)&falseVal;\\n"
                     "\\n"
 
@@ -3645,7 +3645,7 @@ toccata-core
                              (nth num 1 "noNumber_sym")
                              " = {"
                              num-type
-                             ","
+                             ", -1, "
                              (nth num 0 "noNumber_val")
                              "};\\n"))))
 
