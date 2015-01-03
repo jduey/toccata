@@ -3338,10 +3338,12 @@ toccata-core
                                       'Function
                                       (list 'invoke (cons 'vector (cons '_ fields))
                                             impls)))
+                    _ (comp (get-in-val (list :defined-syms name))
+                            (forward-decl name :no-value))
                     type-ast (analyze-reify)
                     _ (static-values)
                     _ (set-expr curr-expr)
-                    result (define-value name type-ast)
+                    result (define-fwd-decl name type-ast)
                     _ (update-in-val (list :types)
                                      (fn [types]
                                        (HashMap (replace-type (seq types) type-val-num name))))]
