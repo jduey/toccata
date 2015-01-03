@@ -4,7 +4,7 @@
 
 typedef struct {int64_t type;} Value;
 typedef struct {int64_t type; int32_t refs; int64_t numVal;} Number;
-typedef struct {int64_t type; char *name;} SymKey;
+typedef struct {int64_t type; int32_t refs; char *name;} SymKey;
 typedef struct {int64_t type; int64_t len; char buffer[0];} String;
 typedef struct {int64_t type; int64_t len; Value *source; char *buffer;} SubString;
 typedef struct List {int64_t type; int64_t len; Value* head; struct List *tail;} List;
@@ -1996,8 +1996,8 @@ Function fn_244 = {3, "comp", 1, {&(FnArity){2, (List *)0, 1, arityImpl_245}}};
 struct {int64_t type;
    int64_t len;
    char buffer[24];} _str_13 = {1,23,"'get' not implemented: "};
-SymKey _kw_0 = {5,":m"};
-SymKey _kw_1 = {5,":k"};
+SymKey _kw_0 = {5, -1, ":m"};
+SymKey _kw_1 = {5, -1, ":k"};
 ProtoImpls *protoImpls_247;
 Value *protoFnImpl_250(List *closures, Value *arg0, Value *arg1, Value *arg2) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_247);
@@ -3141,7 +3141,7 @@ Function protoFn_342 = {3, ".v", 1, {&protoFnArity_345}};
 Value *var_346;
 
 Number _num_9 = {2, -1, 9};
-SymKey _kw_2 = {5,":nil"};
+SymKey _kw_2 = {5, -1, ":nil"};
 
 // --------- instance?_impl --------------
 Function fn_347;
@@ -6299,7 +6299,7 @@ return (cond0);
 
 // --------- map-get main body --------------
 Function fn_513 = {3, "map-get", 1, {&(FnArity){3, (List *)0, 0, arityImpl_514}}};
-SymKey _kw_3 = {5,":hm-nf"};
+SymKey _kw_3 = {5, -1, ":hm-nf"};
 
 // --------- hash-map= --------------
 Function fn_516;
@@ -7114,7 +7114,7 @@ return (rslt4);
 
 // --------- hash-map main body --------------
 Function fn_600 = {3, "hash-map", 1, {&(FnArity){2, (List *)0, 1, arityImpl_601}}};
-SymKey _kw_4 = {5,":not-found"};
+SymKey _kw_4 = {5, -1, ":not-found"};
 
 // --------- merge-with --------------
 Function fn_603;
@@ -7233,7 +7233,7 @@ return (cond0);
 
 // --------- merge-with main body --------------
 Function fn_603 = {3, "merge-with", 1, {&(FnArity){2, (List *)0, 1, arityImpl_604}}};
-SymKey _kw_5 = {5,":get-in-not-found"};
+SymKey _kw_5 = {5, -1, ":get-in-not-found"};
 
 // --------- get-in --------------
 Function fn_610;
@@ -7274,7 +7274,7 @@ return (cond0);
 
 // --------- get-in main body --------------
 Function fn_610 = {3, "get-in", 1, {&(FnArity){3, (List *)0, 0, arityImpl_611}}};
-SymKey _kw_6 = {5,":update-in-nil"};
+SymKey _kw_6 = {5, -1, ":update-in-nil"};
 
 // --------- update-in --------------
 Function fn_613;
@@ -7347,7 +7347,7 @@ return (cond0);
 
 // --------- update-in main body --------------
 Function fn_613 = {3, "update-in", 1, {&(FnArity){3, (List *)0, 0, arityImpl_614}}};
-SymKey _kw_7 = {5,":assoc-in-nil"};
+SymKey _kw_7 = {5, -1, ":assoc-in-nil"};
 
 // --------- assoc-in --------------
 Function fn_616;
@@ -11407,7 +11407,7 @@ Function protoFn_1015 = {3, ".term-str", 1, {&protoFnArity_1018}};
 Value *var_1019;
 
 Number _num_17 = {2, -1, 28};
-SymKey _kw_8 = {5,":text"};
+SymKey _kw_8 = {5, -1, ":text"};
 
 // --------- instance?_impl --------------
 Function fn_1020;
@@ -14626,8 +14626,8 @@ struct {int64_t type;
    int64_t len;
    char buffer[5];} _str_45 = {1,4,"form"};
 Number _num_30 = {2, -1, 44};
-SymKey _kw_9 = {5,":parser-fns"};
-SymKey _kw_10 = {5,":blah"};
+SymKey _kw_9 = {5, -1, ":parser-fns"};
+SymKey _kw_10 = {5, -1, ":blah"};
 
 // --------- instance?_impl --------------
 Function fn_1290;
@@ -14861,7 +14861,7 @@ return (rslt7);
 
 // --------- read-list main body --------------
 Function fn_1311 = {3, "read-list", 1, {&(FnArity){0, (List *)0, 0, arityImpl_1312}}};
-SymKey _sym_0 = {7,"hash-map"};
+SymKey _sym_0 = {7, -1, "hash-map"};
 
 // --------- read-hash-map --------------
 Function fn_1314;
@@ -14896,7 +14896,7 @@ struct {int64_t type;
 struct {int64_t type;
    int64_t len;
    char buffer[2];} _str_47 = {1,1,"]"};
-SymKey _sym_1 = {7,"vector"};
+SymKey _sym_1 = {7, -1, "vector"};
 
 // --------- read-vector --------------
 Function fn_1317;
@@ -15445,7 +15445,7 @@ Function fn_1354 = {3, "read-args", 1, {&(FnArity){0, (List *)0, 0, arityImpl_13
 struct {int64_t type;
    int64_t len;
    char buffer[5];} _str_51 = {1,4,"main"};
-SymKey _sym_2 = {7,"main"};
+SymKey _sym_2 = {7, -1, "main"};
 
 // --------- read-main --------------
 Function fn_1357;
@@ -15491,7 +15491,7 @@ return (rslt20);
 
 // --------- read-main main body --------------
 Function fn_1357 = {3, "read-main", 1, {&(FnArity){0, (List *)0, 0, arityImpl_1358}}};
-SymKey _sym_3 = {7,"fn-arity"};
+SymKey _sym_3 = {7, -1, "fn-arity"};
 
 // --------- read-single-arity --------------
 Function fn_1360;
@@ -15600,8 +15600,8 @@ Function fn_1368 = {3, "read-arities", 1, {&(FnArity){0, (List *)0, 0, arityImpl
 struct {int64_t type;
    int64_t len;
    char buffer[5];} _str_52 = {1,4,"defn"};
-SymKey _sym_4 = {7,"def"};
-SymKey _sym_5 = {7,"fn"};
+SymKey _sym_4 = {7, -1, "def"};
+SymKey _sym_5 = {7, -1, "fn"};
 
 // --------- read-defn --------------
 Function fn_1371;
@@ -15679,7 +15679,7 @@ Function fn_1371 = {3, "read-defn", 1, {&(FnArity){0, (List *)0, 0, arityImpl_13
 struct {int64_t type;
    int64_t len;
    char buffer[3];} _str_53 = {1,2,"fn"};
-SymKey _sym_6 = {7,"anon"};
+SymKey _sym_6 = {7, -1, "anon"};
 
 // --------- read-fn --------------
 Function fn_1376;
@@ -15769,7 +15769,7 @@ Function fn_1379 = {3, "read-let-binding", 1, {&(FnArity){0, (List *)0, 0, arity
 struct {int64_t type;
    int64_t len;
    char buffer[4];} _str_54 = {1,3,"let"};
-SymKey _sym_7 = {7,"let"};
+SymKey _sym_7 = {7, -1, "let"};
 
 // --------- read-let --------------
 Function fn_1382;
@@ -15825,7 +15825,7 @@ Function fn_1382 = {3, "read-let", 1, {&(FnArity){0, (List *)0, 0, arityImpl_138
 struct {int64_t type;
    int64_t len;
    char buffer[5];} _str_55 = {1,4,":let"};
-SymKey _kw_11 = {5,":let"};
+SymKey _kw_11 = {5, -1, ":let"};
 
 // --------- read-for-let --------------
 Function fn_1385;
@@ -15868,7 +15868,7 @@ Function fn_1385 = {3, "read-for-let", 1, {&(FnArity){0, (List *)0, 0, arityImpl
 struct {int64_t type;
    int64_t len;
    char buffer[6];} _str_56 = {1,5,":when"};
-SymKey _kw_12 = {5,":when"};
+SymKey _kw_12 = {5, -1, ":when"};
 
 // --------- read-for-when --------------
 Function fn_1388;
@@ -15926,11 +15926,11 @@ Function fn_1391 = {3, "read-for-binding", 1, {&(FnArity){0, (List *)0, 0, arity
 struct {int64_t type;
    int64_t len;
    char buffer[4];} _str_57 = {1,3,"for"};
-SymKey _sym_8 = {7,"some-unique-var"};
-SymKey _sym_9 = {7,"wrap"};
-SymKey _sym_10 = {7,"cond"};
-SymKey _sym_11 = {7,"zero"};
-SymKey _sym_12 = {7,"flat-map"};
+SymKey _sym_8 = {7, -1, "some-unique-var"};
+SymKey _sym_9 = {7, -1, "wrap"};
+SymKey _sym_10 = {7, -1, "cond"};
+SymKey _sym_11 = {7, -1, "zero"};
+SymKey _sym_12 = {7, -1, "flat-map"};
 
 // --------- read-for --------------
 Function fn_1394;
@@ -16173,7 +16173,7 @@ Function fn_1394 = {3, "read-for", 1, {&(FnArity){0, (List *)0, 0, arityImpl_139
 struct {int64_t type;
    int64_t len;
    char buffer[2];} _str_58 = {1,1,"'"};
-SymKey _sym_13 = {7,"quote"};
+SymKey _sym_13 = {7, -1, "quote"};
 
 // --------- read-quoted --------------
 Function fn_1401;
@@ -16680,7 +16680,7 @@ return (rslt3);
 
 // --------- make-parser main body --------------
 Function fn_1451 = {3, "make-parser", 1, {&(FnArity){0, (List *)0, 0, arityImpl_1452}}};
-SymKey _kw_13 = {5,":expr"};
+SymKey _kw_13 = {5, -1, ":expr"};
 
 // --------- set-expr --------------
 Function fn_1456;
@@ -16828,7 +16828,7 @@ Value *var_1484;
 // forward declaration for 'emit-proto-fn'
 Value *var_1485;
 
-SymKey _sym_14 = {7,"inline-text"};
+SymKey _sym_14 = {7, -1, "inline-text"};
 
 // --------- analyze-inline-text --------------
 Function fn_1486;
@@ -17015,7 +17015,7 @@ return (rslt2);
 
 // --------- analyze-symbol main body --------------
 Function fn_1493 = {3, "analyze-symbol", 1, {&(FnArity){0, (List *)0, 0, arityImpl_1494}}};
-SymKey _kw_14 = {5,":keywords"};
+SymKey _kw_14 = {5, -1, ":keywords"};
 
 // --------- keyword-already-defined? --------------
 Function fn_1498;
@@ -17035,7 +17035,7 @@ return (rslt2);
 
 // --------- keyword-already-defined? main body --------------
 Function fn_1498 = {3, "keyword-already-defined?", 1, {&(FnArity){1, (List *)0, 0, arityImpl_1499}}};
-SymKey _kw_15 = {5,":new-keywords"};
+SymKey _kw_15 = {5, -1, ":new-keywords"};
 
 // --------- keyword-recently-defined? --------------
 Function fn_1501;
@@ -17058,8 +17058,8 @@ Function fn_1501 = {3, "keyword-recently-defined?", 1, {&(FnArity){1, (List *)0,
 struct {int64_t type;
    int64_t len;
    char buffer[8];} _str_59 = {1,7,"SymKey "};
-SymKey _kw_16 = {5,":core-keywords"};
-SymKey _kw_17 = {5,":new-externs"};
+SymKey _kw_16 = {5, -1, ":core-keywords"};
+SymKey _kw_17 = {5, -1, ":new-externs"};
 
 // --------- keyword-defined-in-core --------------
 Function fn_1504;
@@ -17237,7 +17237,7 @@ Function fn_1504 = {3, "keyword-defined-in-core", 1, {&(FnArity){1, (List *)0, 0
 struct {int64_t type;
    int64_t len;
    char buffer[5];} _str_60 = {1,4,"_kw_"};
-SymKey _kw_18 = {5,":kw-count"};
+SymKey _kw_18 = {5, -1, ":kw-count"};
 
 // --------- make-static-keyword --------------
 Function fn_1515;
@@ -17474,7 +17474,7 @@ return (rslt2);
 
 // --------- analyze-keyword main body --------------
 Function fn_1524 = {3, "analyze-keyword", 1, {&(FnArity){0, (List *)0, 0, arityImpl_1525}}};
-SymKey _kw_19 = {5,":numbers"};
+SymKey _kw_19 = {5, -1, ":numbers"};
 
 // --------- number-already-defined? --------------
 Function fn_1531;
@@ -17494,7 +17494,7 @@ return (rslt2);
 
 // --------- number-already-defined? main body --------------
 Function fn_1531 = {3, "number-already-defined?", 1, {&(FnArity){1, (List *)0, 0, arityImpl_1532}}};
-SymKey _kw_20 = {5,":new-numbers"};
+SymKey _kw_20 = {5, -1, ":new-numbers"};
 
 // --------- number-recently-defined? --------------
 Function fn_1534;
@@ -17517,7 +17517,7 @@ Function fn_1534 = {3, "number-recently-defined?", 1, {&(FnArity){1, (List *)0, 
 struct {int64_t type;
    int64_t len;
    char buffer[8];} _str_61 = {1,7,"Number "};
-SymKey _kw_21 = {5,":core-numbers"};
+SymKey _kw_21 = {5, -1, ":core-numbers"};
 
 // --------- number-defined-in-core --------------
 Function fn_1537;
@@ -17692,7 +17692,7 @@ return (rslt4);
 
 // --------- number-defined-in-core main body --------------
 Function fn_1537 = {3, "number-defined-in-core", 1, {&(FnArity){1, (List *)0, 0, arityImpl_1538}}};
-SymKey _kw_22 = {5,":debug-on"};
+SymKey _kw_22 = {5, -1, ":debug-on"};
 
 // --------- debug --------------
 Function fn_1548;
@@ -17762,7 +17762,7 @@ Function fn_1548 = {3, "debug", 1, {&(FnArity){2, (List *)0, 1, arityImpl_1549}}
 struct {int64_t type;
    int64_t len;
    char buffer[6];} _str_62 = {1,5,"_num_"};
-SymKey _kw_23 = {5,":num-count"};
+SymKey _kw_23 = {5, -1, ":num-count"};
 
 // --------- make-static-number --------------
 Function fn_1553;
@@ -17999,7 +17999,7 @@ return (rslt2);
 
 // --------- analyze-number main body --------------
 Function fn_1562 = {3, "analyze-number", 1, {&(FnArity){0, (List *)0, 0, arityImpl_1563}}};
-SymKey _kw_24 = {5,":strings"};
+SymKey _kw_24 = {5, -1, ":strings"};
 
 // --------- string-already-defined? --------------
 Function fn_1569;
@@ -18019,7 +18019,7 @@ return (rslt2);
 
 // --------- string-already-defined? main body --------------
 Function fn_1569 = {3, "string-already-defined?", 1, {&(FnArity){1, (List *)0, 0, arityImpl_1570}}};
-SymKey _kw_25 = {5,":new-strings"};
+SymKey _kw_25 = {5, -1, ":new-strings"};
 
 // --------- string-recently-defined? --------------
 Function fn_1572;
@@ -18042,7 +18042,7 @@ Function fn_1572 = {3, "string-recently-defined?", 1, {&(FnArity){1, (List *)0, 
 struct {int64_t type;
    int64_t len;
    char buffer[8];} _str_63 = {1,7,"String "};
-SymKey _kw_26 = {5,":core-strings"};
+SymKey _kw_26 = {5, -1, ":core-strings"};
 
 // --------- string-defined-in-core --------------
 Function fn_1575;
@@ -18220,7 +18220,7 @@ Function fn_1575 = {3, "string-defined-in-core", 1, {&(FnArity){1, (List *)0, 0,
 struct {int64_t type;
    int64_t len;
    char buffer[6];} _str_64 = {1,5,"_str_"};
-SymKey _kw_27 = {5,":str-count"};
+SymKey _kw_27 = {5, -1, ":str-count"};
 
 // --------- make-static-string --------------
 Function fn_1586;
@@ -18833,7 +18833,7 @@ return (cond0);
 
 // --------- analyze-let-binding main body --------------
 Function fn_1611 = {3, "analyze-let-binding", 1, {&(FnArity){1, (List *)0, 0, arityImpl_1612}}};
-SymKey _kw_28 = {5,":not-let"};
+SymKey _kw_28 = {5, -1, ":not-let"};
 
 // --------- analyze-let --------------
 Function fn_1624;
@@ -19256,7 +19256,7 @@ return (rslt3);
 
 // --------- analyze-variadic main body --------------
 Function fn_1640 = {3, "analyze-variadic", 1, {&(FnArity){0, (List *)0, 0, arityImpl_1641}}};
-SymKey _kw_29 = {5,":file-name"};
+SymKey _kw_29 = {5, -1, ":file-name"};
 
 // --------- analyze-fn-arity --------------
 Function fn_1651;
@@ -19593,7 +19593,7 @@ return (rslt3);
 
 // --------- analyze-fn main body --------------
 Function fn_1662 = {3, "analyze-fn", 1, {&(FnArity){0, (List *)0, 0, arityImpl_1663}}};
-SymKey _kw_30 = {5,":default"};
+SymKey _kw_30 = {5, -1, ":default"};
 
 // --------- analyze-proto-arity --------------
 Function fn_1671;
@@ -19740,7 +19740,7 @@ return (cond0);
 
 // --------- analyze-proto-arity main body --------------
 Function fn_1671 = {3, "analyze-proto-arity", 1, {&(FnArity){1, (List *)0, 0, arityImpl_1672}}};
-SymKey _kw_31 = {5,":symbols"};
+SymKey _kw_31 = {5, -1, ":symbols"};
 
 // --------- sym-already-defined? --------------
 Function fn_1676;
@@ -19760,7 +19760,7 @@ return (rslt2);
 
 // --------- sym-already-defined? main body --------------
 Function fn_1676 = {3, "sym-already-defined?", 1, {&(FnArity){1, (List *)0, 0, arityImpl_1677}}};
-SymKey _kw_32 = {5,":new-symbols"};
+SymKey _kw_32 = {5, -1, ":new-symbols"};
 
 // --------- sym-recently-defined? --------------
 Function fn_1679;
@@ -19780,7 +19780,7 @@ return (rslt2);
 
 // --------- sym-recently-defined? main body --------------
 Function fn_1679 = {3, "sym-recently-defined?", 1, {&(FnArity){1, (List *)0, 0, arityImpl_1680}}};
-SymKey _kw_33 = {5,":core-symbols"};
+SymKey _kw_33 = {5, -1, ":core-symbols"};
 
 // --------- sym-defined-in-core --------------
 Function fn_1682;
@@ -19958,7 +19958,7 @@ Function fn_1682 = {3, "sym-defined-in-core", 1, {&(FnArity){1, (List *)0, 0, ar
 struct {int64_t type;
    int64_t len;
    char buffer[6];} _str_66 = {1,5,"_sym_"};
-SymKey _kw_34 = {5,":sym-count"};
+SymKey _kw_34 = {5, -1, ":sym-count"};
 
 // --------- make-static-symbol --------------
 Function fn_1693;
@@ -20246,10 +20246,10 @@ return (rslt3);
 
 // --------- analyze-quoted main body --------------
 Function fn_1705 = {3, "analyze-quoted", 1, {&(FnArity){0, (List *)0, 0, arityImpl_1706}}};
-SymKey _sym_15 = {7,"no-name"};
-SymKey _kw_35 = {5,":no-expr"};
-SymKey _kw_36 = {5,":not-def"};
-SymKey _kw_37 = {5,":no-value"};
+SymKey _sym_15 = {7, -1, "no-name"};
+SymKey _kw_35 = {5, -1, ":no-expr"};
+SymKey _kw_36 = {5, -1, ":not-def"};
+SymKey _kw_37 = {5, -1, ":no-value"};
 
 // --------- analyze-def --------------
 Function fn_1714;
@@ -21199,8 +21199,8 @@ return (rslt2);
 
 // --------- analyze-extensions main body --------------
 Function fn_1760 = {3, "analyze-extensions", 1, {&(FnArity){1, (List *)0, 0, arityImpl_1761}}};
-SymKey _sym_16 = {7,"extend-type"};
-SymKey _kw_38 = {5,":no-type"};
+SymKey _sym_16 = {7, -1, "extend-type"};
+SymKey _kw_38 = {5, -1, ":no-type"};
 
 // --------- analyze-extend-type --------------
 Function fn_1771;
@@ -21341,8 +21341,8 @@ return (rslt3);
 
 // --------- analyze-extend-type main body --------------
 Function fn_1771 = {3, "analyze-extend-type", 1, {&(FnArity){0, (List *)0, 0, arityImpl_1772}}};
-SymKey _sym_17 = {7,"reify"};
-SymKey _kw_39 = {5,":not-reify"};
+SymKey _sym_17 = {7, -1, "reify"};
+SymKey _kw_39 = {5, -1, ":not-reify"};
 
 // --------- analyze-reify --------------
 Function fn_1780;
@@ -21468,8 +21468,8 @@ return (rslt3);
 
 // --------- analyze-reify main body --------------
 Function fn_1780 = {3, "analyze-reify", 1, {&(FnArity){0, (List *)0, 0, arityImpl_1781}}};
-SymKey _sym_18 = {7,"defprotocol"};
-SymKey _kw_40 = {5,":no-name"};
+SymKey _sym_18 = {7, -1, "defprotocol"};
+SymKey _kw_40 = {5, -1, ":no-name"};
 
 // --------- analyze-protocol --------------
 Function fn_1789;
@@ -21619,7 +21619,7 @@ return (rslt3);
 
 // --------- analyze-protocol main body --------------
 Function fn_1789 = {3, "analyze-protocol", 1, {&(FnArity){0, (List *)0, 0, arityImpl_1790}}};
-SymKey _sym_19 = {7,"deftype"};
+SymKey _sym_19 = {7, -1, "deftype"};
 
 // --------- analyze-deftype --------------
 Function fn_1798;
@@ -21898,7 +21898,7 @@ Function fn_1805 = {3, "analyze-main", 1, {&(FnArity){0, (List *)0, 0, arityImpl
 struct {int64_t type;
    int64_t len;
    char buffer[18];} _str_69 = {1,17,"could not analyze"};
-SymKey _kw_41 = {5,":expr-nil"};
+SymKey _kw_41 = {5, -1, ":expr-nil"};
 
 // --------- expr-to-ast --------------
 Function fn_1814;
@@ -22100,13 +22100,13 @@ return (rslt2);
 // --------- analyze-expr main body --------------
 Function fn_1819 = {3, "analyze-expr", 1, {&(FnArity){1, (List *)0, 0, arityImpl_1820}}};
 Value *var_1464 = (Value *)&fn_1819;
-SymKey _sym_20 = {7,"String"};
-SymKey _sym_21 = {7,"Number"};
-SymKey _sym_22 = {7,"Function"};
-SymKey _sym_23 = {7,"List"};
-SymKey _sym_24 = {7,"Keyword"};
-SymKey _sym_25 = {7,"SubStr"};
-SymKey _sym_26 = {7,"Symbol"};
+SymKey _sym_20 = {7, -1, "String"};
+SymKey _sym_21 = {7, -1, "Number"};
+SymKey _sym_22 = {7, -1, "Function"};
+SymKey _sym_23 = {7, -1, "List"};
+SymKey _sym_24 = {7, -1, "Keyword"};
+SymKey _sym_25 = {7, -1, "SubStr"};
+SymKey _sym_26 = {7, -1, "Symbol"};
 
 // --------- types --------------
 Function fn_1829;
@@ -22166,7 +22166,7 @@ struct {int64_t type;
    char buffer[9];} _str_78 = {1,8,"Number *"};
 struct {int64_t type;
    int64_t len;
-   char buffer[53];} _str_79 = {1,52,"typedef struct {int64_t type; char *name;} SymKey;\n"};
+   char buffer[67];} _str_79 = {1,66,"typedef struct {int64_t type; int32_t refs; char *name;} SymKey;\n"};
 struct {int64_t type;
    int64_t len;
    char buffer[70];} _str_80 = {1,69,"typedef struct {int64_t type; int64_t len; char buffer[0];} String;\n"};
@@ -23062,7 +23062,7 @@ return (cond0);
 
 // --------- write-strs main body --------------
 Function fn_1923 = {3, "write-strs", 1, {&(FnArity){1, (List *)0, 0, arityImpl_1924}}};
-SymKey _kw_42 = {5,":gensym-count"};
+SymKey _kw_42 = {5, -1, ":gensym-count"};
 
 // --------- gensym --------------
 Function fn_1928;
@@ -23147,7 +23147,7 @@ return (rslt2);
 
 // --------- gensym main body --------------
 Function fn_1928 = {3, "gensym", 1, {&(FnArity){1, (List *)0, 0, arityImpl_1929}}};
-SymKey _kw_43 = {5,":local-sym-count"};
+SymKey _kw_43 = {5, -1, ":local-sym-count"};
 
 // --------- genlocal --------------
 Function fn_1935;
@@ -23393,7 +23393,7 @@ Function protoFn_1968 = {3, "invoke", 1, {&(FnArity){2, (List *)0, 0, protoImpl_
 
 ReifiedVal reified_1969 = {49, 2, {(Value *)&fn_1953, (Value *)&fn_1957}};
 Value *var_1465 = (Value *)&reified_1969;
-SymKey _kw_44 = {5,":local-syms"};
+SymKey _kw_44 = {5, -1, ":local-syms"};
 
 // --------- local-sym --------------
 Function fn_1970;
@@ -23448,8 +23448,8 @@ Function fn_1970 = {3, "local-sym", 1, {&(FnArity){1, (List *)0, 0, arityImpl_19
 struct {int64_t type;
    int64_t len;
    char buffer[4];} _str_93 = {1,3,"val"};
-SymKey _kw_45 = {5,":context"};
-SymKey _kw_46 = {5,":closed-over"};
+SymKey _kw_45 = {5, -1, ":context"};
+SymKey _kw_46 = {5, -1, ":closed-over"};
 
 // --------- closed-over-sym --------------
 Function fn_1975;
@@ -23702,7 +23702,7 @@ return (rslt4);
 
 // --------- closed-over-sym main body --------------
 Function fn_1975 = {3, "closed-over-sym", 1, {&(FnArity){1, (List *)0, 0, arityImpl_1976}}};
-SymKey _kw_47 = {5,":defined-syms"};
+SymKey _kw_47 = {5, -1, ":defined-syms"};
 
 // --------- defined-sym --------------
 Function fn_1992;
@@ -23755,7 +23755,7 @@ return (rslt4);
 
 // --------- defined-sym main body --------------
 Function fn_1992 = {3, "defined-sym", 1, {&(FnArity){1, (List *)0, 0, arityImpl_1993}}};
-SymKey _kw_48 = {5,":core-defined-syms"};
+SymKey _kw_48 = {5, -1, ":core-defined-syms"};
 
 // --------- core-def --------------
 Function fn_1997;
@@ -23907,7 +23907,7 @@ struct {int64_t type;
 struct {int64_t type;
    int64_t len;
    char buffer[3];} _str_95 = {1,2,"at"};
-SymKey _kw_49 = {5,":line-num"};
+SymKey _kw_49 = {5, -1, ":line-num"};
 
 // --------- lookup-sym --------------
 Function fn_2008;
@@ -24561,7 +24561,7 @@ FnArity protoFnArity_2093 = {1, (List *)0, 0, protoFnImpl_2092};
 Function protoFn_2090 = {3, ".const-str", 1, {&protoFnArity_2093}};
 
 Number _num_37 = {2, -1, 58};
-SymKey _kw_50 = {5,":no-static-str"};
+SymKey _kw_50 = {5, -1, ":no-static-str"};
 
 // --------- instance?_impl --------------
 Function fn_2094;
@@ -24712,8 +24712,8 @@ Function protoFn_2111 = {3, "invoke", 1, {&(FnArity){2, (List *)0, 0, protoImpl_
 
 ReifiedVal reified_2112 = {57, 2, {(Value *)&fn_2094, (Value *)&fn_2098}};
 Value *var_1469 = (Value *)&reified_2112;
-SymKey _kw_51 = {5,":curr-arity-fn-sym"};
-SymKey _kw_52 = {5,":curr-arg-count"};
+SymKey _kw_51 = {5, -1, ":curr-arity-fn-sym"};
+SymKey _kw_52 = {5, -1, ":curr-arg-count"};
 
 // --------- reset-fn-context --------------
 Function fn_2113;
@@ -25523,7 +25523,7 @@ struct {int64_t type;
 struct {int64_t type;
    int64_t len;
    char buffer[14];} _str_103 = {1,13,", (List *)0, "};
-SymKey _kw_53 = {5,":variadic"};
+SymKey _kw_53 = {5, -1, ":variadic"};
 
 // --------- static-arity --------------
 Function fn_2155;
@@ -25801,8 +25801,8 @@ Function fn_2158 = {3, "arity-closes-over", 1, {&(FnArity){5, (List *)0, 0, arit
 struct {int64_t type;
    int64_t len;
    char buffer[8];} _str_113 = {1,7,"extern "};
-SymKey _kw_54 = {5,":bootstrapping"};
-SymKey _kw_55 = {5,":new-static-fns"};
+SymKey _kw_54 = {5, -1, ":bootstrapping"};
+SymKey _kw_55 = {5, -1, ":new-static-fns"};
 
 // --------- emit-externs --------------
 Function fn_2167;
@@ -27607,7 +27607,7 @@ struct {int64_t type;
    int64_t len;
    char buffer[20];} _str_132 = {1,19,"\nreturn(0);\n}\n\n"};
 Number _num_40 = {2, -1, 64};
-SymKey _kw_56 = {5,":main-sym"};
+SymKey _kw_56 = {5, -1, ":main-sym"};
 
 // --------- instance?_impl --------------
 Function fn_2293;
@@ -28134,7 +28134,7 @@ Function protoFn_2336 = {3, "invoke", 1, {&(FnArity){3, (List *)0, 0, protoImpl_
 
 ReifiedVal reified_2337 = {63, 2, {(Value *)&fn_2293, (Value *)&fn_2297}};
 Value *var_1472 = (Value *)&reified_2337;
-SymKey _kw_57 = {5,":no-arg-sym"};
+SymKey _kw_57 = {5, -1, ":no-arg-sym"};
 
 // --------- eval-args --------------
 Function fn_2338;
@@ -28244,7 +28244,7 @@ return (cond0);
 
 // --------- eval-args main body --------------
 Function fn_2338 = {3, "eval-args", 1, {&(FnArity){1, (List *)0, 0, arityImpl_2339}}};
-SymKey _kw_58 = {5,":core-static-fns"};
+SymKey _kw_58 = {5, -1, ":core-static-fns"};
 
 // --------- core-static-fn --------------
 Function fn_2347;
@@ -28412,7 +28412,7 @@ return (rslt16);
 
 // --------- core-static-fn main body --------------
 Function fn_2347 = {3, "core-static-fn", 1, {&(FnArity){2, (List *)0, 0, arityImpl_2348}}};
-SymKey _kw_59 = {5,":static-fns"};
+SymKey _kw_59 = {5, -1, ":static-fns"};
 
 // --------- lookup-static-fn --------------
 Function fn_2358;
@@ -28538,8 +28538,8 @@ struct {int64_t type;
 struct {int64_t type;
    int64_t len;
    char buffer[23];} _str_164 = {1,22,");\n  abort();\n}\n}\n"};
-SymKey _sym_27 = {7,"invoke"};
-SymKey _kw_60 = {5,":no-fn-type"};
+SymKey _sym_27 = {7, -1, "invoke"};
+SymKey _kw_60 = {5, -1, ":no-fn-type"};
 
 // --------- call-dynamic-fn --------------
 Function fn_2361;
@@ -29090,7 +29090,7 @@ return (rslt7);
 
 // --------- call-dynamic-fn main body --------------
 Function fn_2361 = {3, "call-dynamic-fn", 1, {&(FnArity){2, (List *)0, 0, arityImpl_2362}}};
-SymKey _kw_61 = {5,":curr-fn-sym"};
+SymKey _kw_61 = {5, -1, ":curr-fn-sym"};
 
 // --------- call-recursive --------------
 Function fn_2378;
@@ -29352,7 +29352,7 @@ Function fn_2378 = {3, "call-recursive", 1, {&(FnArity){2, (List *)0, 0, arityIm
 struct {int64_t type;
    int64_t len;
    char buffer[9];} _str_165 = {1,8,"(List *)"};
-SymKey _sym_28 = {7,"empty-list"};
+SymKey _sym_28 = {7, -1, "empty-list"};
 
 // --------- call-static-fixed --------------
 Function fn_2389;
@@ -29937,7 +29937,7 @@ struct {int64_t type;
    int64_t len;
    char buffer[30];} _str_167 = {1,29,"could not emit callsite for '"};
 Number _num_41 = {2, -1, 66};
-SymKey _kw_62 = {5,":target"};
+SymKey _kw_62 = {5, -1, ":target"};
 
 // --------- instance?_impl --------------
 Function fn_2421;
@@ -31797,7 +31797,7 @@ Value *var_1476 = (Value *)&reified_2570;
 struct {int64_t type;
    int64_t len;
    char buffer[10];} _str_186 = {1,9,"not found"};
-SymKey _kw_63 = {5,":no-static-sym"};
+SymKey _kw_63 = {5, -1, ":no-static-sym"};
 
 // --------- emit-static-sym --------------
 Function fn_2571;
@@ -33501,8 +33501,8 @@ Function protoFn_2706 = {3, "invoke", 1, {&(FnArity){3, (List *)0, 0, protoImpl_
 
 ReifiedVal reified_2707 = {77, 2, {(Value *)&fn_2681, (Value *)&fn_2685}};
 Value *var_1479 = (Value *)&reified_2707;
-SymKey _kw_64 = {5,":protocols"};
-SymKey _kw_65 = {5,":impls"};
+SymKey _kw_64 = {5, -1, ":protocols"};
+SymKey _kw_65 = {5, -1, ":impls"};
 
 // --------- emit-extension --------------
 Function fn_2708;
@@ -33718,7 +33718,7 @@ FnArity protoFnArity_2730 = {1, (List *)0, 0, protoFnImpl_2729};
 Function protoFn_2727 = {3, ".impls", 1, {&protoFnArity_2730}};
 
 Number _num_48 = {2, -1, 80};
-SymKey _kw_66 = {5,":types"};
+SymKey _kw_66 = {5, -1, ":types"};
 
 // --------- instance?_impl --------------
 Function fn_2731;
@@ -33962,9 +33962,9 @@ struct {int64_t type;
 struct {int64_t type;
    int64_t len;
    char buffer[9];} _str_208 = {1,8,"}}};\n\n"};
-SymKey _kw_67 = {5,":no-name-ast"};
-SymKey _kw_68 = {5,":no-ast"};
-SymKey _kw_69 = {5,":nothing"};
+SymKey _kw_67 = {5, -1, ":no-name-ast"};
+SymKey _kw_68 = {5, -1, ":no-ast"};
+SymKey _kw_69 = {5, -1, ":nothing"};
 
 // --------- emit-reified-fn --------------
 Function fn_2756;
@@ -34785,7 +34785,7 @@ return (rslt2);
 // --------- static-reified main body --------------
 Function fn_2790 = {3, "static-reified", 1, {&(FnArity){2, (List *)0, 0, arityImpl_2791}}};
 Number _num_49 = {2, -1, 82};
-SymKey _kw_70 = {5,":no-impls"};
+SymKey _kw_70 = {5, -1, ":no-impls"};
 
 // --------- instance?_impl --------------
 Function fn_2799;
@@ -35170,12 +35170,12 @@ struct {int64_t type;
    int64_t len;
    char buffer[2];} _str_216 = {1,1,"."};
 Number _num_50 = {2, -1, 84};
-SymKey _sym_29 = {7,"Type"};
-SymKey _sym_30 = {7,"instance?"};
-SymKey _sym_31 = {7,"_"};
-SymKey _sym_32 = {7,"v"};
-SymKey _sym_33 = {7,"="};
-SymKey _sym_34 = {7,"get-type"};
+SymKey _sym_29 = {7, -1, "Type"};
+SymKey _sym_30 = {7, -1, "instance?"};
+SymKey _sym_31 = {7, -1, "_"};
+SymKey _sym_32 = {7, -1, "v"};
+SymKey _sym_33 = {7, -1, "="};
+SymKey _sym_34 = {7, -1, "get-type"};
 
 // --------- instance?_impl --------------
 Function fn_2837;
@@ -35919,7 +35919,7 @@ Function protoFn_2880 = {3, "invoke", 1, {&(FnArity){4, (List *)0, 0, protoImpl_
 
 ReifiedVal reified_2881 = {83, 2, {(Value *)&fn_2837, (Value *)&fn_2841}};
 Value *var_2836 = (Value *)&reified_2881;
-SymKey _sym_35 = {7,"BogusGetterProtocolName"};
+SymKey _sym_35 = {7, -1, "BogusGetterProtocolName"};
 
 // --------- type-ast --------------
 Function fn_2882;
@@ -36003,7 +36003,7 @@ return (rslt10);
 // --------- type-ast main body --------------
 Function fn_2882 = {3, "type-ast", 1, {&(FnArity){3, (List *)0, 0, arityImpl_2883}}};
 Value *var_1482 = (Value *)&fn_2882;
-SymKey _kw_71 = {5,":no-default"};
+SymKey _kw_71 = {5, -1, ":no-default"};
 
 // --------- emit-proto-default --------------
 Function fn_2886;
@@ -36468,8 +36468,8 @@ struct {int64_t type;
 struct {int64_t type;
    int64_t len;
    char buffer[17];} _str_240 = {1,16,"extern Function "};
-SymKey _kw_72 = {5,":impls-sym"};
-SymKey _kw_73 = {5,":extern-def"};
+SymKey _kw_72 = {5, -1, ":impls-sym"};
+SymKey _kw_73 = {5, -1, ":extern-def"};
 
 // --------- emit-proto-fn --------------
 Function fn_2906;
@@ -37272,10 +37272,10 @@ Function fn_2953 = {3, "extern-fn", 1, {&(FnArity){2, (List *)0, 1, arityImpl_29
 struct {int64_t type;
    int64_t len;
    char buffer[13];} _str_245 = {1,12,"const char *"};
-SymKey _sym_36 = {7,"abort"};
-SymKey _sym_37 = {7,"printf"};
-SymKey _sym_38 = {7,"GC_init"};
-SymKey _sym_39 = {7,"GC_malloc"};
+SymKey _sym_36 = {7, -1, "abort"};
+SymKey _sym_37 = {7, -1, "printf"};
+SymKey _sym_38 = {7, -1, "GC_init"};
+SymKey _sym_39 = {7, -1, "GC_malloc"};
 
 // --------- extern-functions --------------
 Function fn_2956;
@@ -38388,7 +38388,10 @@ struct {int64_t type;
    char buffer[14];} _str_359 = {1,13,"no_symbol_val"};
 struct {int64_t type;
    int64_t len;
-   char buffer[15];} _str_360 = {1,14,"no_symbol_name"};
+   char buffer[9];} _str_360 = {1,8,", -1, \""};
+struct {int64_t type;
+   int64_t len;
+   char buffer[15];} _str_361 = {1,14,"no_symbol_name"};
 
 // --------- static-syms --------------
 Function fn_2999;
@@ -38401,7 +38404,7 @@ if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
 Value *rslt0 = arityImpl_502((List *)var_31, arg0, (Value *)&_num_1, (Value *)&_str_359);
-Value *rslt2 = arityImpl_502((List *)var_31, arg0, (Value *)&_num_8, (Value *)&_str_360);
+Value *rslt2 = arityImpl_502((List *)var_31, arg0, (Value *)&_num_8, (Value *)&_str_361);
 List *varArgs3 = (List *)GC_malloc(sizeof(List));
 varArgs3->type  = ListType;
 varArgs3->len = 0;
@@ -38409,7 +38412,7 @@ varArgs3->head = (Value *)0;
 varArgs3->tail = (List *)0;
 varArgs3 = (List *)listCons((Value *)(Value *)&_str_358, varArgs3);
 varArgs3 = (List *)listCons((Value *)rslt2, varArgs3);
-varArgs3 = (List *)listCons((Value *)(Value *)&_str_357, varArgs3);
+varArgs3 = (List *)listCons((Value *)(Value *)&_str_360, varArgs3);
 varArgs3 = (List *)listCons((Value *)val1, varArgs3);
 varArgs3 = (List *)listCons((Value *)(Value *)&_str_173, varArgs3);
 varArgs3 = (List *)listCons((Value *)rslt0, varArgs3);
@@ -38451,13 +38454,13 @@ return (cond1);
 Function fn_2999 = {3, "static-syms", 1, {&(FnArity){2, (List *)0, 0, arityImpl_3000}}};
 struct {int64_t type;
    int64_t len;
-   char buffer[13];} _str_361 = {1,12,"noNumber_sym"};
+   char buffer[13];} _str_362 = {1,12,"noNumber_sym"};
 struct {int64_t type;
    int64_t len;
-   char buffer[7];} _str_362 = {1,6,", -1, "};
+   char buffer[7];} _str_363 = {1,6,", -1, "};
 struct {int64_t type;
    int64_t len;
-   char buffer[13];} _str_363 = {1,12,"noNumber_val"};
+   char buffer[13];} _str_364 = {1,12,"noNumber_val"};
 
 // --------- static-numbers --------------
 Function fn_3004;
@@ -38469,8 +38472,8 @@ Value *val1 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_502((List *)var_31, arg0, (Value *)&_num_1, (Value *)&_str_361);
-Value *rslt2 = arityImpl_502((List *)var_31, arg0, (Value *)&_num_8, (Value *)&_str_363);
+Value *rslt0 = arityImpl_502((List *)var_31, arg0, (Value *)&_num_1, (Value *)&_str_362);
+Value *rslt2 = arityImpl_502((List *)var_31, arg0, (Value *)&_num_8, (Value *)&_str_364);
 List *varArgs3 = (List *)GC_malloc(sizeof(List));
 varArgs3->type  = ListType;
 varArgs3->len = 0;
@@ -38478,7 +38481,7 @@ varArgs3->head = (Value *)0;
 varArgs3->tail = (List *)0;
 varArgs3 = (List *)listCons((Value *)(Value *)&_str_125, varArgs3);
 varArgs3 = (List *)listCons((Value *)rslt2, varArgs3);
-varArgs3 = (List *)listCons((Value *)(Value *)&_str_362, varArgs3);
+varArgs3 = (List *)listCons((Value *)(Value *)&_str_363, varArgs3);
 varArgs3 = (List *)listCons((Value *)val1, varArgs3);
 varArgs3 = (List *)listCons((Value *)(Value *)&_str_173, varArgs3);
 varArgs3 = (List *)listCons((Value *)rslt0, varArgs3);
@@ -38520,16 +38523,16 @@ return (cond1);
 Function fn_3004 = {3, "static-numbers", 1, {&(FnArity){2, (List *)0, 0, arityImpl_3005}}};
 struct {int64_t type;
    int64_t len;
-   char buffer[15];} _str_364 = {1,14,"no_String_type"};
+   char buffer[15];} _str_365 = {1,14,"no_String_type"};
 struct {int64_t type;
    int64_t len;
-   char buffer[15];} _str_365 = {1,14,"no_Number_type"};
+   char buffer[15];} _str_366 = {1,14,"no_Number_type"};
 struct {int64_t type;
    int64_t len;
-   char buffer[15];} _str_366 = {1,14,"no_Symbol_type"};
+   char buffer[15];} _str_367 = {1,14,"no_Symbol_type"};
 struct {int64_t type;
    int64_t len;
-   char buffer[16];} _str_367 = {1,15,"no_Keyword_type"};
+   char buffer[16];} _str_368 = {1,15,"no_Keyword_type"};
 
 // --------- static-values --------------
 Function fn_3009;
@@ -38651,7 +38654,7 @@ Value *val15 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt1 = protoFnImpl_256((List *)var_31, val0, (Value *)&_sym_24, (Value *)&_str_367);
+Value *rslt1 = protoFnImpl_256((List *)var_31, val0, (Value *)&_sym_24, (Value *)&_str_368);
 Value *rslt2 = arityImpl_3000((List *)var_31, arg0, rslt1);
 List *varArgs3 = (List *)GC_malloc(sizeof(List));
 varArgs3->type  = ListType;
@@ -38753,7 +38756,7 @@ Value *val15 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt1 = protoFnImpl_256((List *)var_31, val0, (Value *)&_sym_26, (Value *)&_str_366);
+Value *rslt1 = protoFnImpl_256((List *)var_31, val0, (Value *)&_sym_26, (Value *)&_str_367);
 Value *rslt2 = arityImpl_3000((List *)var_31, arg0, rslt1);
 List *varArgs3 = (List *)GC_malloc(sizeof(List));
 varArgs3->type  = ListType;
@@ -38856,7 +38859,7 @@ Value *val15 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt1 = protoFnImpl_256((List *)var_31, val0, (Value *)&_sym_21, (Value *)&_str_365);
+Value *rslt1 = protoFnImpl_256((List *)var_31, val0, (Value *)&_sym_21, (Value *)&_str_366);
 Value *rslt2 = arityImpl_3005((List *)var_31, arg0, rslt1);
 List *varArgs3 = (List *)GC_malloc(sizeof(List));
 varArgs3->type  = ListType;
@@ -38959,7 +38962,7 @@ Value *val15 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt1 = protoFnImpl_256((List *)var_31, val0, (Value *)&_sym_20, (Value *)&_str_364);
+Value *rslt1 = protoFnImpl_256((List *)var_31, val0, (Value *)&_sym_20, (Value *)&_str_365);
 Value *rslt2 = arityImpl_2995((List *)var_31, arg0, rslt1);
 List *varArgs3 = (List *)GC_malloc(sizeof(List));
 varArgs3->type  = ListType;
@@ -39052,74 +39055,74 @@ Function fn_3009 = {3, "static-values", 1, {&(FnArity){0, (List *)0, 0, arityImp
 Value *var_1484 = (Value *)&fn_3009;
 struct {int64_t type;
    int64_t len;
-   char buffer[12];} _str_368 = {1,11,"toccataMain"};
+   char buffer[12];} _str_369 = {1,11,"toccataMain"};
 struct {int64_t type;
    int64_t len;
-   char buffer[29];} _str_369 = {1,28,"(int argc, char *argv[]) {\n"};
+   char buffer[29];} _str_370 = {1,28,"(int argc, char *argv[]) {\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[17];} _str_370 = {1,16,"    GC_init();\n"};
+   char buffer[17];} _str_371 = {1,16,"    GC_init();\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[56];} _str_371 = {1,55,"     List *argList = (List *)GC_malloc(sizeof(List));\n"};
+   char buffer[56];} _str_372 = {1,55,"     List *argList = (List *)GC_malloc(sizeof(List));\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[34];} _str_372 = {1,33,"      argList->type = ListType;\n"};
+   char buffer[34];} _str_373 = {1,33,"      argList->type = ListType;\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[26];} _str_373 = {1,25,"      argList->len = 0;\n"};
+   char buffer[26];} _str_374 = {1,25,"      argList->len = 0;\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[36];} _str_374 = {1,35,"      argList->head = (Value *)0;\n"};
+   char buffer[36];} _str_375 = {1,35,"      argList->head = (Value *)0;\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[35];} _str_375 = {1,34,"      argList->tail = (List *)0;\n"};
+   char buffer[35];} _str_376 = {1,34,"      argList->tail = (List *)0;\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[30];} _str_376 = {1,29,"      List *tail = argList;\n"};
+   char buffer[30];} _str_377 = {1,29,"      List *tail = argList;\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[40];} _str_377 = {1,39,"      for(int i = 0; i < argc; i++) {\n"};
+   char buffer[40];} _str_378 = {1,39,"      for(int i = 0; i < argc; i++) {\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[46];} _str_378 = {1,45,"         tail->head = stringValue(argv[i]);\n"};
+   char buffer[46];} _str_379 = {1,45,"         tail->head = stringValue(argv[i]);\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[60];} _str_379 = {1,59,"         List *newTail = (List *)GC_malloc(sizeof(List));\n"};
+   char buffer[60];} _str_380 = {1,59,"         List *newTail = (List *)GC_malloc(sizeof(List));\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[37];} _str_380 = {1,36,"         newTail->type = ListType;\n"};
+   char buffer[37];} _str_381 = {1,36,"         newTail->type = ListType;\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[29];} _str_381 = {1,28,"         newTail->len = 0;\n"};
+   char buffer[29];} _str_382 = {1,28,"         newTail->len = 0;\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[38];} _str_382 = {1,37,"         newTail->tail = (List *)0;\n"};
+   char buffer[38];} _str_383 = {1,37,"         newTail->tail = (List *)0;\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[39];} _str_383 = {1,38,"         newTail->head = (Value *)0;\n"};
+   char buffer[39];} _str_384 = {1,38,"         newTail->head = (Value *)0;\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[33];} _str_384 = {1,32,"         tail->tail = newTail;\n"};
+   char buffer[33];} _str_385 = {1,32,"         tail->tail = newTail;\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[27];} _str_385 = {1,26,"         tail = newTail;\n"};
+   char buffer[27];} _str_386 = {1,26,"         tail = newTail;\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[30];} _str_386 = {1,29,"         argList->len++;\n}\n"};
+   char buffer[30];} _str_387 = {1,29,"         argList->len++;\n}\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[3];} _str_387 = {1,2,"  "};
+   char buffer[3];} _str_388 = {1,2,"  "};
 struct {int64_t type;
    int64_t len;
-   char buffer[5];} _str_388 = {1,4," = &"};
+   char buffer[5];} _str_389 = {1,4," = &"};
 struct {int64_t type;
    int64_t len;
-   char buffer[10];} _str_389 = {1,9,"  return("};
+   char buffer[10];} _str_390 = {1,9,"  return("};
 struct {int64_t type;
    int64_t len;
-   char buffer[27];} _str_390 = {1,26,"((Value *)argList));\n};\n"};
-SymKey _kw_74 = {5,":no-main"};
+   char buffer[27];} _str_391 = {1,26,"((Value *)argList));\n};\n"};
+SymKey _kw_74 = {5, -1, ":no-main"};
 
 // --------- emit-main --------------
 Function fn_3035;
@@ -39151,9 +39154,9 @@ varArgs2->head = (Value *)0;
 varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons((Value *)(Value *)&_str_109, varArgs2);
 varArgs2 = (List *)listCons((Value *)rslt1, varArgs2);
-varArgs2 = (List *)listCons((Value *)(Value *)&_str_388, varArgs2);
+varArgs2 = (List *)listCons((Value *)(Value *)&_str_389, varArgs2);
 varArgs2 = (List *)listCons((Value *)rslt0, varArgs2);
-varArgs2 = (List *)listCons((Value *)(Value *)&_str_387, varArgs2);
+varArgs2 = (List *)listCons((Value *)(Value *)&_str_388, varArgs2);
 Value *rslt3 = arityImpl_486((List *)var_31, (Value *)varArgs2);
 Value *rslt4 = arityImpl_1919((List *)var_31, rslt3);
 return (rslt4);
@@ -39191,9 +39194,9 @@ varArgs1->type  = ListType;
 varArgs1->len = 0;
 varArgs1->head = (Value *)0;
 varArgs1->tail = (List *)0;
-varArgs1 = (List *)listCons((Value *)(Value *)&_str_390, varArgs1);
+varArgs1 = (List *)listCons((Value *)(Value *)&_str_391, varArgs1);
 varArgs1 = (List *)listCons((Value *)val0, varArgs1);
-varArgs1 = (List *)listCons((Value *)(Value *)&_str_389, varArgs1);
+varArgs1 = (List *)listCons((Value *)(Value *)&_str_390, varArgs1);
 Value *rslt2 = arityImpl_486((List *)var_31, (Value *)varArgs1);
 Value *rslt3 = arityImpl_1919((List *)var_31, rslt2);
 FnArity *arity_4 = (FnArity *)GC_malloc(sizeof(FnArity));
@@ -39259,7 +39262,7 @@ varArgs1->type  = ListType;
 varArgs1->len = 0;
 varArgs1->head = (Value *)0;
 varArgs1->tail = (List *)0;
-varArgs1 = (List *)listCons((Value *)(Value *)&_str_369, varArgs1);
+varArgs1 = (List *)listCons((Value *)(Value *)&_str_370, varArgs1);
 varArgs1 = (List *)listCons((Value *)val0, varArgs1);
 varArgs1 = (List *)listCons((Value *)(Value *)&_str_130, varArgs1);
 Value *rslt2 = arityImpl_486((List *)var_31, (Value *)varArgs1);
@@ -39268,10 +39271,11 @@ varArgs3->type  = ListType;
 varArgs3->len = 0;
 varArgs3->head = (Value *)0;
 varArgs3->tail = (List *)0;
+varArgs3 = (List *)listCons((Value *)(Value *)&_str_387, varArgs3);
 varArgs3 = (List *)listCons((Value *)(Value *)&_str_386, varArgs3);
 varArgs3 = (List *)listCons((Value *)(Value *)&_str_385, varArgs3);
+varArgs3 = (List *)listCons((Value *)(Value *)&_str_379, varArgs3);
 varArgs3 = (List *)listCons((Value *)(Value *)&_str_384, varArgs3);
-varArgs3 = (List *)listCons((Value *)(Value *)&_str_378, varArgs3);
 varArgs3 = (List *)listCons((Value *)(Value *)&_str_383, varArgs3);
 varArgs3 = (List *)listCons((Value *)(Value *)&_str_382, varArgs3);
 varArgs3 = (List *)listCons((Value *)(Value *)&_str_381, varArgs3);
@@ -39285,7 +39289,6 @@ varArgs3 = (List *)listCons((Value *)(Value *)&_str_374, varArgs3);
 varArgs3 = (List *)listCons((Value *)(Value *)&_str_373, varArgs3);
 varArgs3 = (List *)listCons((Value *)(Value *)&_str_372, varArgs3);
 varArgs3 = (List *)listCons((Value *)(Value *)&_str_371, varArgs3);
-varArgs3 = (List *)listCons((Value *)(Value *)&_str_370, varArgs3);
 varArgs3 = (List *)listCons((Value *)rslt2, varArgs3);
 Value *rslt4 = arityImpl_114((List *)var_31, (Value *)varArgs3);
 Value *rslt5 = arityImpl_1924((List *)var_31, rslt4);
@@ -39318,7 +39321,7 @@ closures = closures->tail;
 Value *cond0;
 
 if (isTrue(arg0)) {
-cond0 = (Value *)&_str_368;
+cond0 = (Value *)&_str_369;
 } else {
 cond0 = (Value *)&_str_51;
 }
@@ -39576,70 +39579,70 @@ return (rslt11);
 Function fn_3057 = {3, "load-protocols", 1, {&(FnArity){0, (List *)0, 0, arityImpl_3058}}};
 struct {int64_t type;
    int64_t len;
-   char buffer[23];} _str_391 = {1,22,"Value *protocols() {\n"};
+   char buffer[23];} _str_392 = {1,22,"Value *protocols() {\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[29];} _str_392 = {1,28,"List *protos = empty_list;\n"};
+   char buffer[29];} _str_393 = {1,28,"List *protos = empty_list;\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[19];} _str_393 = {1,18,"List *protoInfo;\n"};
+   char buffer[19];} _str_394 = {1,18,"List *protoInfo;\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[15];} _str_394 = {1,14,"List *impls;\n"};
+   char buffer[15];} _str_395 = {1,14,"List *impls;\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[14];} _str_395 = {1,13,"List *impl;\n"};
+   char buffer[14];} _str_396 = {1,13,"List *impl;\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[26];} _str_396 = {1,25,"protoInfo = empty_list;\n"};
+   char buffer[26];} _str_397 = {1,25,"protoInfo = empty_list;\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[22];} _str_397 = {1,21,"impls = empty_list;\n"};
+   char buffer[22];} _str_398 = {1,21,"impls = empty_list;\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[21];} _str_398 = {1,20,"impl = empty_list;\n"};
+   char buffer[21];} _str_399 = {1,20,"impl = empty_list;\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[31];} _str_399 = {1,30,"impl = listCons(stringValue(\""};
+   char buffer[31];} _str_400 = {1,30,"impl = listCons(stringValue(\""};
 struct {int64_t type;
    int64_t len;
-   char buffer[14];} _str_400 = {1,13,"\"), impl);\n"};
+   char buffer[14];} _str_401 = {1,13,"\"), impl);\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[17];} _str_401 = {1,16,"impl = listCons("};
+   char buffer[17];} _str_402 = {1,16,"impl = listCons("};
 struct {int64_t type;
    int64_t len;
-   char buffer[27];} _str_402 = {1,26,"keywordValue(\":default\")"};
+   char buffer[27];} _str_403 = {1,26,"keywordValue(\":default\")"};
 struct {int64_t type;
    int64_t len;
-   char buffer[13];} _str_403 = {1,12,"numberValue("};
+   char buffer[13];} _str_404 = {1,12,"numberValue("};
 struct {int64_t type;
    int64_t len;
-   char buffer[11];} _str_404 = {1,10,", impl);\n"};
+   char buffer[11];} _str_405 = {1,10,", impl);\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[42];} _str_405 = {1,41,"impls = listCons((Value *)impl, impls);\n"};
+   char buffer[42];} _str_406 = {1,41,"impls = listCons((Value *)impl, impls);\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[51];} _str_406 = {1,50,"protoInfo = listCons((Value *)impls, protoInfo);\n"};
+   char buffer[51];} _str_407 = {1,50,"protoInfo = listCons((Value *)impls, protoInfo);\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[36];} _str_407 = {1,35,"protoInfo = listCons(stringValue(\""};
+   char buffer[36];} _str_408 = {1,35,"protoInfo = listCons(stringValue(\""};
 struct {int64_t type;
    int64_t len;
-   char buffer[19];} _str_408 = {1,18,"\"), protoInfo);\n"};
+   char buffer[19];} _str_409 = {1,18,"\"), protoInfo);\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[36];} _str_409 = {1,35,"protoInfo = listCons(symbolValue(\""};
+   char buffer[36];} _str_410 = {1,35,"protoInfo = listCons(symbolValue(\""};
 struct {int64_t type;
    int64_t len;
-   char buffer[49];} _str_410 = {1,48,"protos = listCons((Value *)protoInfo, protos);\n"};
+   char buffer[49];} _str_411 = {1,48,"protos = listCons((Value *)protoInfo, protos);\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[27];} _str_411 = {1,26,"return((Value *)protos);\n"};
+   char buffer[27];} _str_412 = {1,26,"return((Value *)protos);\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[6];} _str_412 = {1,5,"}\n\n"};
+   char buffer[6];} _str_413 = {1,5,"}\n\n"};
 
 // --------- serialize-protocols --------------
 Function fn_3066;
@@ -39674,7 +39677,7 @@ Value *cond2;
 Value *rslt5 = arityImpl_278((List *)var_31, (Value *)&_kw_30, rslt0);
 
 if (isTrue(rslt5)) {
-cond2 = (Value *)&_str_402;
+cond2 = (Value *)&_str_403;
 } else {
 List *varArgs3 = (List *)GC_malloc(sizeof(List));
 varArgs3->type  = ListType;
@@ -39683,7 +39686,7 @@ varArgs3->head = (Value *)0;
 varArgs3->tail = (List *)0;
 varArgs3 = (List *)listCons((Value *)(Value *)&_str_16, varArgs3);
 varArgs3 = (List *)listCons((Value *)rslt0, varArgs3);
-varArgs3 = (List *)listCons((Value *)(Value *)&_str_403, varArgs3);
+varArgs3 = (List *)listCons((Value *)(Value *)&_str_404, varArgs3);
 Value *rslt4 = arityImpl_486((List *)var_31, (Value *)varArgs3);
 cond2 = rslt4;
 }
@@ -39692,14 +39695,14 @@ varArgs6->type  = ListType;
 varArgs6->len = 0;
 varArgs6->head = (Value *)0;
 varArgs6->tail = (List *)0;
+varArgs6 = (List *)listCons((Value *)(Value *)&_str_406, varArgs6);
 varArgs6 = (List *)listCons((Value *)(Value *)&_str_405, varArgs6);
-varArgs6 = (List *)listCons((Value *)(Value *)&_str_404, varArgs6);
 varArgs6 = (List *)listCons((Value *)cond2, varArgs6);
+varArgs6 = (List *)listCons((Value *)(Value *)&_str_402, varArgs6);
 varArgs6 = (List *)listCons((Value *)(Value *)&_str_401, varArgs6);
-varArgs6 = (List *)listCons((Value *)(Value *)&_str_400, varArgs6);
 varArgs6 = (List *)listCons((Value *)rslt1, varArgs6);
+varArgs6 = (List *)listCons((Value *)(Value *)&_str_400, varArgs6);
 varArgs6 = (List *)listCons((Value *)(Value *)&_str_399, varArgs6);
-varArgs6 = (List *)listCons((Value *)(Value *)&_str_398, varArgs6);
 Value *rslt7 = arityImpl_486((List *)var_31, (Value *)varArgs6);
 return (rslt7);
 };
@@ -39729,20 +39732,20 @@ varArgs11->type  = ListType;
 varArgs11->len = 0;
 varArgs11->head = (Value *)0;
 varArgs11->tail = (List *)0;
-varArgs11 = (List *)listCons((Value *)(Value *)&_str_410, varArgs11);
-varArgs11 = (List *)listCons((Value *)(Value *)&_str_408, varArgs11);
-varArgs11 = (List *)listCons((Value *)rslt10, varArgs11);
+varArgs11 = (List *)listCons((Value *)(Value *)&_str_411, varArgs11);
 varArgs11 = (List *)listCons((Value *)(Value *)&_str_409, varArgs11);
-varArgs11 = (List *)listCons((Value *)(Value *)&_str_408, varArgs11);
+varArgs11 = (List *)listCons((Value *)rslt10, varArgs11);
+varArgs11 = (List *)listCons((Value *)(Value *)&_str_410, varArgs11);
+varArgs11 = (List *)listCons((Value *)(Value *)&_str_409, varArgs11);
 varArgs11 = (List *)listCons((Value *)rslt1, varArgs11);
-varArgs11 = (List *)listCons((Value *)(Value *)&_str_407, varArgs11);
 varArgs11 = (List *)listCons((Value *)(Value *)&_str_408, varArgs11);
+varArgs11 = (List *)listCons((Value *)(Value *)&_str_409, varArgs11);
 varArgs11 = (List *)listCons((Value *)rslt2, varArgs11);
+varArgs11 = (List *)listCons((Value *)(Value *)&_str_408, varArgs11);
 varArgs11 = (List *)listCons((Value *)(Value *)&_str_407, varArgs11);
-varArgs11 = (List *)listCons((Value *)(Value *)&_str_406, varArgs11);
 varArgs11 = (List *)listCons((Value *)rslt9, varArgs11);
+varArgs11 = (List *)listCons((Value *)(Value *)&_str_398, varArgs11);
 varArgs11 = (List *)listCons((Value *)(Value *)&_str_397, varArgs11);
-varArgs11 = (List *)listCons((Value *)(Value *)&_str_396, varArgs11);
 Value *rslt12 = arityImpl_486((List *)var_31, (Value *)varArgs11);
 return (rslt12);
 };
@@ -39773,7 +39776,7 @@ Value *val2 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_412);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_413);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -39794,7 +39797,7 @@ Value *val2 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_411);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_412);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -39846,7 +39849,7 @@ Value *val3 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_395);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_396);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -39872,7 +39875,7 @@ Value *val3 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_394);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_395);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -39898,7 +39901,7 @@ Value *val3 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_393);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_394);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -39924,7 +39927,7 @@ Value *val3 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_392);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_393);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -39946,7 +39949,7 @@ Value *val2 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_391);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_392);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -40077,55 +40080,55 @@ return (rslt7);
 Function fn_3094 = {3, "load-static-fns", 1, {&(FnArity){0, (List *)0, 0, arityImpl_3095}}};
 struct {int64_t type;
    int64_t len;
-   char buffer[24];} _str_413 = {1,23,"Value *static_fns() {\n"};
+   char buffer[24];} _str_414 = {1,23,"Value *static_fns() {\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[32];} _str_414 = {1,31,"List *staticFns = empty_list;\n"};
+   char buffer[32];} _str_415 = {1,31,"List *staticFns = empty_list;\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[16];} _str_415 = {1,15,"List *fnInfo;\n"};
+   char buffer[16];} _str_416 = {1,15,"List *fnInfo;\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[19];} _str_416 = {1,18,"List *arityInfo;\n"};
+   char buffer[19];} _str_417 = {1,18,"List *arityInfo;\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[23];} _str_417 = {1,22,"fnInfo = empty_list;\n"};
+   char buffer[23];} _str_418 = {1,22,"fnInfo = empty_list;\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[36];} _str_418 = {1,35,"arityInfo = listCons(stringValue(\""};
+   char buffer[36];} _str_419 = {1,35,"arityInfo = listCons(stringValue(\""};
 struct {int64_t type;
    int64_t len;
-   char buffer[20];} _str_419 = {1,19,"\"), empty_list);\n"};
+   char buffer[20];} _str_420 = {1,19,"\"), empty_list);\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[49];} _str_420 = {1,48,"arityInfo = listCons(keywordValue(\":variadic\")"};
+   char buffer[49];} _str_421 = {1,48,"arityInfo = listCons(keywordValue(\":variadic\")"};
 struct {int64_t type;
    int64_t len;
-   char buffer[16];} _str_421 = {1,15,", arityInfo);\n"};
+   char buffer[16];} _str_422 = {1,15,", arityInfo);\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[34];} _str_422 = {1,33,"arityInfo = listCons(numberValue("};
+   char buffer[34];} _str_423 = {1,33,"arityInfo = listCons(numberValue("};
 struct {int64_t type;
    int64_t len;
-   char buffer[17];} _str_423 = {1,16,"), arityInfo);\n"};
+   char buffer[17];} _str_424 = {1,16,"), arityInfo);\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[49];} _str_424 = {1,48,"fnInfo = listCons((Value *)arityInfo, fnInfo);\n"};
+   char buffer[49];} _str_425 = {1,48,"fnInfo = listCons((Value *)arityInfo, fnInfo);\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[50];} _str_425 = {1,49,"fnInfo = listCons((Value *)fnInfo, empty_list);\n"};
+   char buffer[50];} _str_426 = {1,49,"fnInfo = listCons((Value *)fnInfo, empty_list);\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[33];} _str_426 = {1,32,"fnInfo = listCons(stringValue(\""};
+   char buffer[33];} _str_427 = {1,32,"fnInfo = listCons(stringValue(\""};
 struct {int64_t type;
    int64_t len;
-   char buffer[16];} _str_427 = {1,15,"\"), fnInfo);\n"};
+   char buffer[16];} _str_428 = {1,15,"\"), fnInfo);\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[52];} _str_428 = {1,51,"staticFns = listCons((Value *)fnInfo, staticFns);\n"};
+   char buffer[52];} _str_429 = {1,51,"staticFns = listCons((Value *)fnInfo, staticFns);\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[30];} _str_429 = {1,29,"return((Value *)staticFns);\n"};
+   char buffer[30];} _str_430 = {1,29,"return((Value *)staticFns);\n"};
 
 // --------- serialize-static-fns --------------
 Function fn_3099;
@@ -40158,9 +40161,9 @@ varArgs2->type  = ListType;
 varArgs2->len = 0;
 varArgs2->head = (Value *)0;
 varArgs2->tail = (List *)0;
-varArgs2 = (List *)listCons((Value *)(Value *)&_str_419, varArgs2);
+varArgs2 = (List *)listCons((Value *)(Value *)&_str_420, varArgs2);
 varArgs2 = (List *)listCons((Value *)rslt1, varArgs2);
-varArgs2 = (List *)listCons((Value *)(Value *)&_str_418, varArgs2);
+varArgs2 = (List *)listCons((Value *)(Value *)&_str_419, varArgs2);
 Value *rslt3 = arityImpl_486((List *)var_31, (Value *)varArgs2);
 Value *cond4;
 Value *rslt7 = arityImpl_278((List *)var_31, (Value *)&_kw_53, rslt0);
@@ -40171,8 +40174,8 @@ varArgs8->type  = ListType;
 varArgs8->len = 0;
 varArgs8->head = (Value *)0;
 varArgs8->tail = (List *)0;
+varArgs8 = (List *)listCons((Value *)(Value *)&_str_422, varArgs8);
 varArgs8 = (List *)listCons((Value *)(Value *)&_str_421, varArgs8);
-varArgs8 = (List *)listCons((Value *)(Value *)&_str_420, varArgs8);
 Value *rslt9 = arityImpl_486((List *)var_31, (Value *)varArgs8);
 cond4 = rslt9;
 } else {
@@ -40181,9 +40184,9 @@ varArgs5->type  = ListType;
 varArgs5->len = 0;
 varArgs5->head = (Value *)0;
 varArgs5->tail = (List *)0;
-varArgs5 = (List *)listCons((Value *)(Value *)&_str_423, varArgs5);
+varArgs5 = (List *)listCons((Value *)(Value *)&_str_424, varArgs5);
 varArgs5 = (List *)listCons((Value *)rslt0, varArgs5);
-varArgs5 = (List *)listCons((Value *)(Value *)&_str_422, varArgs5);
+varArgs5 = (List *)listCons((Value *)(Value *)&_str_423, varArgs5);
 Value *rslt6 = arityImpl_486((List *)var_31, (Value *)varArgs5);
 cond4 = rslt6;
 }
@@ -40192,7 +40195,7 @@ varArgs10->type  = ListType;
 varArgs10->len = 0;
 varArgs10->head = (Value *)0;
 varArgs10->tail = (List *)0;
-varArgs10 = (List *)listCons((Value *)(Value *)&_str_424, varArgs10);
+varArgs10 = (List *)listCons((Value *)(Value *)&_str_425, varArgs10);
 Value *rslt11 = arityImpl_486((List *)var_31, (Value *)varArgs10);
 List *varArgs12 = (List *)GC_malloc(sizeof(List));
 varArgs12->type  = ListType;
@@ -40217,7 +40220,7 @@ varArgs2->type  = ListType;
 varArgs2->len = 0;
 varArgs2->head = (Value *)0;
 varArgs2->tail = (List *)0;
-varArgs2 = (List *)listCons((Value *)(Value *)&_str_417, varArgs2);
+varArgs2 = (List *)listCons((Value *)(Value *)&_str_418, varArgs2);
 Value *rslt3 = arityImpl_114((List *)var_31, (Value *)varArgs2);
 Value *rslt4 = protoFnImpl_209((List *)var_31, rslt1);
 Value *rslt6 = protoFnImpl_78((List *)var_31, rslt4, (Value *)&fn_3113);
@@ -40226,23 +40229,23 @@ varArgs7->type  = ListType;
 varArgs7->len = 0;
 varArgs7->head = (Value *)0;
 varArgs7->tail = (List *)0;
-varArgs7 = (List *)listCons((Value *)(Value *)&_str_425, varArgs7);
+varArgs7 = (List *)listCons((Value *)(Value *)&_str_426, varArgs7);
 Value *rslt8 = arityImpl_486((List *)var_31, (Value *)varArgs7);
 List *varArgs9 = (List *)GC_malloc(sizeof(List));
 varArgs9->type  = ListType;
 varArgs9->len = 0;
 varArgs9->head = (Value *)0;
 varArgs9->tail = (List *)0;
-varArgs9 = (List *)listCons((Value *)(Value *)&_str_427, varArgs9);
+varArgs9 = (List *)listCons((Value *)(Value *)&_str_428, varArgs9);
 varArgs9 = (List *)listCons((Value *)rslt0, varArgs9);
-varArgs9 = (List *)listCons((Value *)(Value *)&_str_426, varArgs9);
+varArgs9 = (List *)listCons((Value *)(Value *)&_str_427, varArgs9);
 Value *rslt10 = arityImpl_486((List *)var_31, (Value *)varArgs9);
 List *varArgs11 = (List *)GC_malloc(sizeof(List));
 varArgs11->type  = ListType;
 varArgs11->len = 0;
 varArgs11->head = (Value *)0;
 varArgs11->tail = (List *)0;
-varArgs11 = (List *)listCons((Value *)(Value *)&_str_428, varArgs11);
+varArgs11 = (List *)listCons((Value *)(Value *)&_str_429, varArgs11);
 Value *rslt12 = arityImpl_486((List *)var_31, (Value *)varArgs11);
 List *varArgs13 = (List *)GC_malloc(sizeof(List));
 varArgs13->type  = ListType;
@@ -40291,7 +40294,7 @@ Value *val2 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_412);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_413);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -40312,7 +40315,7 @@ Value *val2 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_429);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_430);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -40364,7 +40367,7 @@ Value *val3 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_416);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_417);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -40390,7 +40393,7 @@ Value *val3 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_415);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_416);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -40416,7 +40419,7 @@ Value *val3 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_414);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_415);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -40438,7 +40441,7 @@ Value *val2 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_413);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_414);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -40526,31 +40529,31 @@ return (rslt5);
 Function fn_3125 = {3, "load-defined-syms", 1, {&(FnArity){0, (List *)0, 0, arityImpl_3126}}};
 struct {int64_t type;
    int64_t len;
-   char buffer[26];} _str_430 = {1,25,"Value *defined_syms() {\n"};
+   char buffer[26];} _str_431 = {1,25,"Value *defined_syms() {\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[30];} _str_431 = {1,29,"List *defSyms = empty_list;\n"};
+   char buffer[30];} _str_432 = {1,29,"List *defSyms = empty_list;\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[17];} _str_432 = {1,16,"List *symInfo;\n"};
+   char buffer[17];} _str_433 = {1,16,"List *symInfo;\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[34];} _str_433 = {1,33,"symInfo = listCons(stringValue(\""};
+   char buffer[34];} _str_434 = {1,33,"symInfo = listCons(stringValue(\""};
 struct {int64_t type;
    int64_t len;
-   char buffer[17];} _str_434 = {1,16,"\"), symInfo);\n"};
+   char buffer[17];} _str_435 = {1,16,"\"), symInfo);\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[52];} _str_435 = {1,51,"symInfo = listCons((Value *)symInfo, empty_list);\n"};
+   char buffer[52];} _str_436 = {1,51,"symInfo = listCons((Value *)symInfo, empty_list);\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[34];} _str_436 = {1,33,"symInfo = listCons(symbolValue(\""};
+   char buffer[34];} _str_437 = {1,33,"symInfo = listCons(symbolValue(\""};
 struct {int64_t type;
    int64_t len;
-   char buffer[49];} _str_437 = {1,48,"defSyms = listCons((Value *)symInfo, defSyms);\n"};
+   char buffer[49];} _str_438 = {1,48,"defSyms = listCons((Value *)symInfo, defSyms);\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[28];} _str_438 = {1,27,"return((Value *)defSyms);\n"};
+   char buffer[28];} _str_439 = {1,27,"return((Value *)defSyms);\n"};
 
 // --------- serialize-defined-syms --------------
 Function fn_3128;
@@ -40579,41 +40582,41 @@ varArgs4->type  = ListType;
 varArgs4->len = 0;
 varArgs4->head = (Value *)0;
 varArgs4->tail = (List *)0;
-varArgs4 = (List *)listCons((Value *)(Value *)&_str_419, varArgs4);
+varArgs4 = (List *)listCons((Value *)(Value *)&_str_420, varArgs4);
 varArgs4 = (List *)listCons((Value *)rslt3, varArgs4);
-varArgs4 = (List *)listCons((Value *)(Value *)&_str_433, varArgs4);
+varArgs4 = (List *)listCons((Value *)(Value *)&_str_434, varArgs4);
 Value *rslt5 = arityImpl_486((List *)var_31, (Value *)varArgs4);
 List *varArgs6 = (List *)GC_malloc(sizeof(List));
 varArgs6->type  = ListType;
 varArgs6->len = 0;
 varArgs6->head = (Value *)0;
 varArgs6->tail = (List *)0;
-varArgs6 = (List *)listCons((Value *)(Value *)&_str_434, varArgs6);
+varArgs6 = (List *)listCons((Value *)(Value *)&_str_435, varArgs6);
 varArgs6 = (List *)listCons((Value *)rslt2, varArgs6);
-varArgs6 = (List *)listCons((Value *)(Value *)&_str_433, varArgs6);
+varArgs6 = (List *)listCons((Value *)(Value *)&_str_434, varArgs6);
 Value *rslt7 = arityImpl_486((List *)var_31, (Value *)varArgs6);
 List *varArgs8 = (List *)GC_malloc(sizeof(List));
 varArgs8->type  = ListType;
 varArgs8->len = 0;
 varArgs8->head = (Value *)0;
 varArgs8->tail = (List *)0;
-varArgs8 = (List *)listCons((Value *)(Value *)&_str_435, varArgs8);
+varArgs8 = (List *)listCons((Value *)(Value *)&_str_436, varArgs8);
 Value *rslt9 = arityImpl_486((List *)var_31, (Value *)varArgs8);
 List *varArgs10 = (List *)GC_malloc(sizeof(List));
 varArgs10->type  = ListType;
 varArgs10->len = 0;
 varArgs10->head = (Value *)0;
 varArgs10->tail = (List *)0;
-varArgs10 = (List *)listCons((Value *)(Value *)&_str_434, varArgs10);
+varArgs10 = (List *)listCons((Value *)(Value *)&_str_435, varArgs10);
 varArgs10 = (List *)listCons((Value *)rslt0, varArgs10);
-varArgs10 = (List *)listCons((Value *)(Value *)&_str_436, varArgs10);
+varArgs10 = (List *)listCons((Value *)(Value *)&_str_437, varArgs10);
 Value *rslt11 = arityImpl_486((List *)var_31, (Value *)varArgs10);
 List *varArgs12 = (List *)GC_malloc(sizeof(List));
 varArgs12->type  = ListType;
 varArgs12->len = 0;
 varArgs12->head = (Value *)0;
 varArgs12->tail = (List *)0;
-varArgs12 = (List *)listCons((Value *)(Value *)&_str_437, varArgs12);
+varArgs12 = (List *)listCons((Value *)(Value *)&_str_438, varArgs12);
 Value *rslt13 = arityImpl_486((List *)var_31, (Value *)varArgs12);
 List *varArgs14 = (List *)GC_malloc(sizeof(List));
 varArgs14->type  = ListType;
@@ -40655,7 +40658,7 @@ Value *val2 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_412);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_413);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -40676,7 +40679,7 @@ Value *val2 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_438);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_439);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -40728,7 +40731,7 @@ Value *val3 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_432);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_433);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -40754,7 +40757,7 @@ Value *val3 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_431);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_432);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -40776,7 +40779,7 @@ Value *val2 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_430);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_431);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -40876,28 +40879,28 @@ return (rslt10);
 Function fn_3150 = {3, "load-number-literals", 1, {&(FnArity){0, (List *)0, 0, arityImpl_3151}}};
 struct {int64_t type;
    int64_t len;
-   char buffer[29];} _str_439 = {1,28,"Value *number_literals() {\n"};
+   char buffer[29];} _str_440 = {1,28,"Value *number_literals() {\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[27];} _str_440 = {1,26,"List *nums = empty_list;\n"};
+   char buffer[27];} _str_441 = {1,26,"List *nums = empty_list;\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[17];} _str_441 = {1,16,"List *numInfo;\n"};
+   char buffer[17];} _str_442 = {1,16,"List *numInfo;\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[34];} _str_442 = {1,33,"numInfo = listCons(stringValue(\""};
+   char buffer[34];} _str_443 = {1,33,"numInfo = listCons(stringValue(\""};
 struct {int64_t type;
    int64_t len;
-   char buffer[32];} _str_443 = {1,31,"numInfo = listCons(numberValue("};
+   char buffer[32];} _str_444 = {1,31,"numInfo = listCons(numberValue("};
 struct {int64_t type;
    int64_t len;
-   char buffer[15];} _str_444 = {1,14,"), numInfo);\n"};
+   char buffer[15];} _str_445 = {1,14,"), numInfo);\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[43];} _str_445 = {1,42,"nums = listCons((Value *)numInfo, nums);\n"};
+   char buffer[43];} _str_446 = {1,42,"nums = listCons((Value *)numInfo, nums);\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[25];} _str_446 = {1,24,"return((Value *)nums);\n"};
+   char buffer[25];} _str_447 = {1,24,"return((Value *)nums);\n"};
 
 // --------- serialize-number-literals --------------
 Function fn_3153;
@@ -40924,25 +40927,25 @@ varArgs2->type  = ListType;
 varArgs2->len = 0;
 varArgs2->head = (Value *)0;
 varArgs2->tail = (List *)0;
-varArgs2 = (List *)listCons((Value *)(Value *)&_str_419, varArgs2);
+varArgs2 = (List *)listCons((Value *)(Value *)&_str_420, varArgs2);
 varArgs2 = (List *)listCons((Value *)rslt1, varArgs2);
-varArgs2 = (List *)listCons((Value *)(Value *)&_str_442, varArgs2);
+varArgs2 = (List *)listCons((Value *)(Value *)&_str_443, varArgs2);
 Value *rslt3 = arityImpl_486((List *)var_31, (Value *)varArgs2);
 List *varArgs4 = (List *)GC_malloc(sizeof(List));
 varArgs4->type  = ListType;
 varArgs4->len = 0;
 varArgs4->head = (Value *)0;
 varArgs4->tail = (List *)0;
-varArgs4 = (List *)listCons((Value *)(Value *)&_str_444, varArgs4);
+varArgs4 = (List *)listCons((Value *)(Value *)&_str_445, varArgs4);
 varArgs4 = (List *)listCons((Value *)rslt0, varArgs4);
-varArgs4 = (List *)listCons((Value *)(Value *)&_str_443, varArgs4);
+varArgs4 = (List *)listCons((Value *)(Value *)&_str_444, varArgs4);
 Value *rslt5 = arityImpl_486((List *)var_31, (Value *)varArgs4);
 List *varArgs6 = (List *)GC_malloc(sizeof(List));
 varArgs6->type  = ListType;
 varArgs6->len = 0;
 varArgs6->head = (Value *)0;
 varArgs6->tail = (List *)0;
-varArgs6 = (List *)listCons((Value *)(Value *)&_str_445, varArgs6);
+varArgs6 = (List *)listCons((Value *)(Value *)&_str_446, varArgs6);
 Value *rslt7 = arityImpl_486((List *)var_31, (Value *)varArgs6);
 List *varArgs8 = (List *)GC_malloc(sizeof(List));
 varArgs8->type  = ListType;
@@ -40982,7 +40985,7 @@ Value *val2 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_412);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_413);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -41003,7 +41006,7 @@ Value *val2 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_446);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_447);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -41055,7 +41058,7 @@ Value *val3 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_441);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_442);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -41081,7 +41084,7 @@ Value *val3 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_440);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_441);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -41103,7 +41106,7 @@ Value *val2 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_439);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_440);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -41203,25 +41206,25 @@ return (rslt9);
 Function fn_3175 = {3, "load-string-literals", 1, {&(FnArity){0, (List *)0, 0, arityImpl_3176}}};
 struct {int64_t type;
    int64_t len;
-   char buffer[29];} _str_447 = {1,28,"Value *string_literals() {\n"};
+   char buffer[29];} _str_448 = {1,28,"Value *string_literals() {\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[27];} _str_448 = {1,26,"List *strs = empty_list;\n"};
+   char buffer[27];} _str_449 = {1,26,"List *strs = empty_list;\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[17];} _str_449 = {1,16,"List *strInfo;\n"};
+   char buffer[17];} _str_450 = {1,16,"List *strInfo;\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[34];} _str_450 = {1,33,"strInfo = listCons(stringValue(\""};
+   char buffer[34];} _str_451 = {1,33,"strInfo = listCons(stringValue(\""};
 struct {int64_t type;
    int64_t len;
-   char buffer[17];} _str_451 = {1,16,"\"), strInfo);\n"};
+   char buffer[17];} _str_452 = {1,16,"\"), strInfo);\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[43];} _str_452 = {1,42,"strs = listCons((Value *)strInfo, strs);\n"};
+   char buffer[43];} _str_453 = {1,42,"strs = listCons((Value *)strInfo, strs);\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[25];} _str_453 = {1,24,"return((Value *)strs);\n"};
+   char buffer[25];} _str_454 = {1,24,"return((Value *)strs);\n"};
 
 // --------- serialize-string-literals --------------
 Function fn_3178;
@@ -41248,25 +41251,25 @@ varArgs2->type  = ListType;
 varArgs2->len = 0;
 varArgs2->head = (Value *)0;
 varArgs2->tail = (List *)0;
-varArgs2 = (List *)listCons((Value *)(Value *)&_str_419, varArgs2);
+varArgs2 = (List *)listCons((Value *)(Value *)&_str_420, varArgs2);
 varArgs2 = (List *)listCons((Value *)rslt1, varArgs2);
-varArgs2 = (List *)listCons((Value *)(Value *)&_str_450, varArgs2);
+varArgs2 = (List *)listCons((Value *)(Value *)&_str_451, varArgs2);
 Value *rslt3 = arityImpl_486((List *)var_31, (Value *)varArgs2);
 List *varArgs4 = (List *)GC_malloc(sizeof(List));
 varArgs4->type  = ListType;
 varArgs4->len = 0;
 varArgs4->head = (Value *)0;
 varArgs4->tail = (List *)0;
-varArgs4 = (List *)listCons((Value *)(Value *)&_str_451, varArgs4);
+varArgs4 = (List *)listCons((Value *)(Value *)&_str_452, varArgs4);
 varArgs4 = (List *)listCons((Value *)rslt0, varArgs4);
-varArgs4 = (List *)listCons((Value *)(Value *)&_str_450, varArgs4);
+varArgs4 = (List *)listCons((Value *)(Value *)&_str_451, varArgs4);
 Value *rslt5 = arityImpl_486((List *)var_31, (Value *)varArgs4);
 List *varArgs6 = (List *)GC_malloc(sizeof(List));
 varArgs6->type  = ListType;
 varArgs6->len = 0;
 varArgs6->head = (Value *)0;
 varArgs6->tail = (List *)0;
-varArgs6 = (List *)listCons((Value *)(Value *)&_str_452, varArgs6);
+varArgs6 = (List *)listCons((Value *)(Value *)&_str_453, varArgs6);
 Value *rslt7 = arityImpl_486((List *)var_31, (Value *)varArgs6);
 List *varArgs8 = (List *)GC_malloc(sizeof(List));
 varArgs8->type  = ListType;
@@ -41306,7 +41309,7 @@ Value *val2 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_412);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_413);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -41327,7 +41330,7 @@ Value *val2 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_453);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_454);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -41379,7 +41382,7 @@ Value *val3 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_449);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_450);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -41405,7 +41408,7 @@ Value *val3 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_448);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_449);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -41427,7 +41430,7 @@ Value *val2 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_447);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_448);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -41527,28 +41530,28 @@ return (rslt9);
 Function fn_3200 = {3, "load-keyword-literals", 1, {&(FnArity){0, (List *)0, 0, arityImpl_3201}}};
 struct {int64_t type;
    int64_t len;
-   char buffer[30];} _str_454 = {1,29,"Value *keyword_literals() {\n"};
+   char buffer[30];} _str_455 = {1,29,"Value *keyword_literals() {\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[26];} _str_455 = {1,25,"List *kws = empty_list;\n"};
+   char buffer[26];} _str_456 = {1,25,"List *kws = empty_list;\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[16];} _str_456 = {1,15,"List *kwInfo;\n"};
+   char buffer[16];} _str_457 = {1,15,"List *kwInfo;\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[33];} _str_457 = {1,32,"kwInfo = listCons(stringValue(\""};
+   char buffer[33];} _str_458 = {1,32,"kwInfo = listCons(stringValue(\""};
 struct {int64_t type;
    int64_t len;
-   char buffer[34];} _str_458 = {1,33,"kwInfo = listCons(keywordValue(\""};
+   char buffer[34];} _str_459 = {1,33,"kwInfo = listCons(keywordValue(\""};
 struct {int64_t type;
    int64_t len;
-   char buffer[16];} _str_459 = {1,15,"\"), kwInfo);\n"};
+   char buffer[16];} _str_460 = {1,15,"\"), kwInfo);\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[40];} _str_460 = {1,39,"kws = listCons((Value *)kwInfo, kws);\n"};
+   char buffer[40];} _str_461 = {1,39,"kws = listCons((Value *)kwInfo, kws);\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[24];} _str_461 = {1,23,"return((Value *)kws);\n"};
+   char buffer[24];} _str_462 = {1,23,"return((Value *)kws);\n"};
 
 // --------- serialize-keyword-literals --------------
 Function fn_3203;
@@ -41575,25 +41578,25 @@ varArgs2->type  = ListType;
 varArgs2->len = 0;
 varArgs2->head = (Value *)0;
 varArgs2->tail = (List *)0;
-varArgs2 = (List *)listCons((Value *)(Value *)&_str_419, varArgs2);
+varArgs2 = (List *)listCons((Value *)(Value *)&_str_420, varArgs2);
 varArgs2 = (List *)listCons((Value *)rslt1, varArgs2);
-varArgs2 = (List *)listCons((Value *)(Value *)&_str_457, varArgs2);
+varArgs2 = (List *)listCons((Value *)(Value *)&_str_458, varArgs2);
 Value *rslt3 = arityImpl_486((List *)var_31, (Value *)varArgs2);
 List *varArgs4 = (List *)GC_malloc(sizeof(List));
 varArgs4->type  = ListType;
 varArgs4->len = 0;
 varArgs4->head = (Value *)0;
 varArgs4->tail = (List *)0;
-varArgs4 = (List *)listCons((Value *)(Value *)&_str_459, varArgs4);
+varArgs4 = (List *)listCons((Value *)(Value *)&_str_460, varArgs4);
 varArgs4 = (List *)listCons((Value *)rslt0, varArgs4);
-varArgs4 = (List *)listCons((Value *)(Value *)&_str_458, varArgs4);
+varArgs4 = (List *)listCons((Value *)(Value *)&_str_459, varArgs4);
 Value *rslt5 = arityImpl_486((List *)var_31, (Value *)varArgs4);
 List *varArgs6 = (List *)GC_malloc(sizeof(List));
 varArgs6->type  = ListType;
 varArgs6->len = 0;
 varArgs6->head = (Value *)0;
 varArgs6->tail = (List *)0;
-varArgs6 = (List *)listCons((Value *)(Value *)&_str_460, varArgs6);
+varArgs6 = (List *)listCons((Value *)(Value *)&_str_461, varArgs6);
 Value *rslt7 = arityImpl_486((List *)var_31, (Value *)varArgs6);
 List *varArgs8 = (List *)GC_malloc(sizeof(List));
 varArgs8->type  = ListType;
@@ -41633,7 +41636,7 @@ Value *val2 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_412);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_413);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -41654,7 +41657,7 @@ Value *val2 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_461);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_462);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -41706,7 +41709,7 @@ Value *val3 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_456);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_457);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -41732,7 +41735,7 @@ Value *val3 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_455);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_456);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -41754,7 +41757,7 @@ Value *val2 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_454);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_455);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -41854,16 +41857,16 @@ return (rslt9);
 Function fn_3225 = {3, "load-symbol-literals", 1, {&(FnArity){0, (List *)0, 0, arityImpl_3226}}};
 struct {int64_t type;
    int64_t len;
-   char buffer[29];} _str_462 = {1,28,"Value *symbol_literals() {\n"};
+   char buffer[29];} _str_463 = {1,28,"Value *symbol_literals() {\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[27];} _str_463 = {1,26,"List *syms = empty_list;\n"};
+   char buffer[27];} _str_464 = {1,26,"List *syms = empty_list;\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[43];} _str_464 = {1,42,"syms = listCons((Value *)symInfo, syms);\n"};
+   char buffer[43];} _str_465 = {1,42,"syms = listCons((Value *)symInfo, syms);\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[25];} _str_465 = {1,24,"return((Value *)syms);\n"};
+   char buffer[25];} _str_466 = {1,24,"return((Value *)syms);\n"};
 
 // --------- serialize-symbol-literals --------------
 Function fn_3228;
@@ -41890,25 +41893,25 @@ varArgs2->type  = ListType;
 varArgs2->len = 0;
 varArgs2->head = (Value *)0;
 varArgs2->tail = (List *)0;
-varArgs2 = (List *)listCons((Value *)(Value *)&_str_419, varArgs2);
+varArgs2 = (List *)listCons((Value *)(Value *)&_str_420, varArgs2);
 varArgs2 = (List *)listCons((Value *)rslt1, varArgs2);
-varArgs2 = (List *)listCons((Value *)(Value *)&_str_433, varArgs2);
+varArgs2 = (List *)listCons((Value *)(Value *)&_str_434, varArgs2);
 Value *rslt3 = arityImpl_486((List *)var_31, (Value *)varArgs2);
 List *varArgs4 = (List *)GC_malloc(sizeof(List));
 varArgs4->type  = ListType;
 varArgs4->len = 0;
 varArgs4->head = (Value *)0;
 varArgs4->tail = (List *)0;
-varArgs4 = (List *)listCons((Value *)(Value *)&_str_434, varArgs4);
+varArgs4 = (List *)listCons((Value *)(Value *)&_str_435, varArgs4);
 varArgs4 = (List *)listCons((Value *)rslt0, varArgs4);
-varArgs4 = (List *)listCons((Value *)(Value *)&_str_436, varArgs4);
+varArgs4 = (List *)listCons((Value *)(Value *)&_str_437, varArgs4);
 Value *rslt5 = arityImpl_486((List *)var_31, (Value *)varArgs4);
 List *varArgs6 = (List *)GC_malloc(sizeof(List));
 varArgs6->type  = ListType;
 varArgs6->len = 0;
 varArgs6->head = (Value *)0;
 varArgs6->tail = (List *)0;
-varArgs6 = (List *)listCons((Value *)(Value *)&_str_464, varArgs6);
+varArgs6 = (List *)listCons((Value *)(Value *)&_str_465, varArgs6);
 Value *rslt7 = arityImpl_486((List *)var_31, (Value *)varArgs6);
 List *varArgs8 = (List *)GC_malloc(sizeof(List));
 varArgs8->type  = ListType;
@@ -41948,7 +41951,7 @@ Value *val2 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_412);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_413);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -41969,7 +41972,7 @@ Value *val2 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_465);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_466);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -42021,7 +42024,7 @@ Value *val3 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_432);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_433);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -42047,7 +42050,7 @@ Value *val3 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_463);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_464);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -42069,7 +42072,7 @@ Value *val2 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_462);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_463);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -42145,19 +42148,19 @@ return (rslt4);
 Function fn_3250 = {3, "load-counts", 1, {&(FnArity){0, (List *)0, 0, arityImpl_3251}}};
 struct {int64_t type;
    int64_t len;
-   char buffer[22];} _str_466 = {1,21,"\nValue *counts() {\n"};
+   char buffer[22];} _str_467 = {1,21,"\nValue *counts() {\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[27];} _str_467 = {1,26,"List *cnts = empty_list;\n"};
+   char buffer[27];} _str_468 = {1,26,"List *cnts = empty_list;\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[29];} _str_468 = {1,28,"cnts = listCons(numberValue("};
+   char buffer[29];} _str_469 = {1,28,"cnts = listCons(numberValue("};
 struct {int64_t type;
    int64_t len;
-   char buffer[12];} _str_469 = {1,11,"), cnts);\n"};
+   char buffer[12];} _str_470 = {1,11,"), cnts);\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[25];} _str_470 = {1,24,"return((Value *)cnts);\n"};
+   char buffer[25];} _str_471 = {1,24,"return((Value *)cnts);\n"};
 
 // --------- serialize-counts --------------
 Function fn_3253;
@@ -42193,7 +42196,7 @@ Value *val2 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_412);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_413);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -42214,7 +42217,7 @@ Value *val2 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_470);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_471);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -42244,9 +42247,9 @@ varArgs1->type  = ListType;
 varArgs1->len = 0;
 varArgs1->head = (Value *)0;
 varArgs1->tail = (List *)0;
-varArgs1 = (List *)listCons((Value *)(Value *)&_str_469, varArgs1);
+varArgs1 = (List *)listCons((Value *)(Value *)&_str_470, varArgs1);
 varArgs1 = (List *)listCons((Value *)val0, varArgs1);
-varArgs1 = (List *)listCons((Value *)(Value *)&_str_468, varArgs1);
+varArgs1 = (List *)listCons((Value *)(Value *)&_str_469, varArgs1);
 Value *rslt2 = arityImpl_486((List *)var_31, (Value *)varArgs1);
 Value *rslt3 = arityImpl_1919((List *)var_31, rslt2);
 FnArity *arity_4 = (FnArity *)GC_malloc(sizeof(FnArity));
@@ -42273,7 +42276,7 @@ Value *val3 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_467);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_468);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -42295,7 +42298,7 @@ Value *val2 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_466);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_467);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -42378,31 +42381,31 @@ return (rslt5);
 Function fn_3271 = {3, "load-types", 1, {&(FnArity){0, (List *)0, 0, arityImpl_3272}}};
 struct {int64_t type;
    int64_t len;
-   char buffer[19];} _str_471 = {1,18,"Value *types() {\n"};
+   char buffer[19];} _str_472 = {1,18,"Value *types() {\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[28];} _str_472 = {1,27,"List *types = empty_list;\n"};
+   char buffer[28];} _str_473 = {1,27,"List *types = empty_list;\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[18];} _str_473 = {1,17,"List *typeInfo;\n"};
+   char buffer[18];} _str_474 = {1,17,"List *typeInfo;\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[33];} _str_474 = {1,32,"typeInfo = listCons(numberValue("};
+   char buffer[33];} _str_475 = {1,32,"typeInfo = listCons(numberValue("};
 struct {int64_t type;
    int64_t len;
-   char buffer[18];} _str_475 = {1,17,"), empty_list);\n"};
+   char buffer[18];} _str_476 = {1,17,"), empty_list);\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[35];} _str_476 = {1,34,"typeInfo = listCons(symbolValue(\""};
+   char buffer[35];} _str_477 = {1,34,"typeInfo = listCons(symbolValue(\""};
 struct {int64_t type;
    int64_t len;
-   char buffer[18];} _str_477 = {1,17,"\"), typeInfo);\n"};
+   char buffer[18];} _str_478 = {1,17,"\"), typeInfo);\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[46];} _str_478 = {1,45,"types = listCons((Value *)typeInfo, types);\n"};
+   char buffer[46];} _str_479 = {1,45,"types = listCons((Value *)typeInfo, types);\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[26];} _str_479 = {1,25,"return((Value *)types);\n"};
+   char buffer[26];} _str_480 = {1,25,"return((Value *)types);\n"};
 
 // --------- serialize-types --------------
 Function fn_3274;
@@ -42429,25 +42432,25 @@ varArgs2->type  = ListType;
 varArgs2->len = 0;
 varArgs2->head = (Value *)0;
 varArgs2->tail = (List *)0;
-varArgs2 = (List *)listCons((Value *)(Value *)&_str_475, varArgs2);
+varArgs2 = (List *)listCons((Value *)(Value *)&_str_476, varArgs2);
 varArgs2 = (List *)listCons((Value *)rslt1, varArgs2);
-varArgs2 = (List *)listCons((Value *)(Value *)&_str_474, varArgs2);
+varArgs2 = (List *)listCons((Value *)(Value *)&_str_475, varArgs2);
 Value *rslt3 = arityImpl_486((List *)var_31, (Value *)varArgs2);
 List *varArgs4 = (List *)GC_malloc(sizeof(List));
 varArgs4->type  = ListType;
 varArgs4->len = 0;
 varArgs4->head = (Value *)0;
 varArgs4->tail = (List *)0;
-varArgs4 = (List *)listCons((Value *)(Value *)&_str_477, varArgs4);
+varArgs4 = (List *)listCons((Value *)(Value *)&_str_478, varArgs4);
 varArgs4 = (List *)listCons((Value *)rslt0, varArgs4);
-varArgs4 = (List *)listCons((Value *)(Value *)&_str_476, varArgs4);
+varArgs4 = (List *)listCons((Value *)(Value *)&_str_477, varArgs4);
 Value *rslt5 = arityImpl_486((List *)var_31, (Value *)varArgs4);
 List *varArgs6 = (List *)GC_malloc(sizeof(List));
 varArgs6->type  = ListType;
 varArgs6->len = 0;
 varArgs6->head = (Value *)0;
 varArgs6->tail = (List *)0;
-varArgs6 = (List *)listCons((Value *)(Value *)&_str_478, varArgs6);
+varArgs6 = (List *)listCons((Value *)(Value *)&_str_479, varArgs6);
 Value *rslt7 = arityImpl_486((List *)var_31, (Value *)varArgs6);
 List *varArgs8 = (List *)GC_malloc(sizeof(List));
 varArgs8->type  = ListType;
@@ -42487,7 +42490,7 @@ Value *val2 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_412);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_413);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -42508,7 +42511,7 @@ Value *val2 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_479);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_480);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -42560,7 +42563,7 @@ Value *val3 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_473);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_474);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -42586,7 +42589,7 @@ Value *val3 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_472);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_473);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -42608,7 +42611,7 @@ Value *val2 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_471);
+Value *rslt0 = arityImpl_1919((List *)var_31, (Value *)&_str_472);
 FnArity *arity_1 = (FnArity *)GC_malloc(sizeof(FnArity));
 arity_1->count = 1;
 arity_1->closures = empty_list;
@@ -42653,29 +42656,29 @@ return (rslt4);
 Function fn_3274 = {3, "serialize-types", 1, {&(FnArity){0, (List *)0, 0, arityImpl_3275}}};
 struct {int64_t type;
    int64_t len;
-   char buffer[28];} _str_480 = {1,27,"const int64_t NumberType = "};
+   char buffer[28];} _str_481 = {1,27,"const int64_t NumberType = "};
 struct {int64_t type;
    int64_t len;
-   char buffer[29];} _str_481 = {1,28,"const int64_t KeywordType = "};
+   char buffer[29];} _str_482 = {1,28,"const int64_t KeywordType = "};
 struct {int64_t type;
    int64_t len;
-   char buffer[28];} _str_482 = {1,27,"const int64_t SymbolType = "};
+   char buffer[28];} _str_483 = {1,27,"const int64_t SymbolType = "};
 struct {int64_t type;
    int64_t len;
-   char buffer[28];} _str_483 = {1,27,"const int64_t StringType = "};
+   char buffer[28];} _str_484 = {1,27,"const int64_t StringType = "};
 struct {int64_t type;
    int64_t len;
-   char buffer[31];} _str_484 = {1,30,"const int64_t SubStringType = "};
+   char buffer[31];} _str_485 = {1,30,"const int64_t SubStringType = "};
 struct {int64_t type;
    int64_t len;
-   char buffer[26];} _str_485 = {1,25,"const int64_t ListType = "};
+   char buffer[26];} _str_486 = {1,25,"const int64_t ListType = "};
 struct {int64_t type;
    int64_t len;
-   char buffer[30];} _str_486 = {1,29,"const int64_t FunctionType = "};
+   char buffer[30];} _str_487 = {1,29,"const int64_t FunctionType = "};
 struct {int64_t type;
    int64_t len;
-   char buffer[39];} _str_487 = {1,38,"List *empty_list = &(List){4,0,0,0};\n"};
-SymKey _sym_40 = {7,"toccata-core"};
+   char buffer[39];} _str_488 = {1,38,"List *empty_list = &(List){4,0,0,0};\n"};
+SymKey _sym_40 = {7, -1, "toccata-core"};
 
 // --------- bootstrap-toccata --------------
 Function fn_3293;
@@ -42744,7 +42747,7 @@ varArgs10->head = (Value *)0;
 varArgs10->tail = (List *)0;
 varArgs10 = (List *)listCons((Value *)(Value *)&_str_109, varArgs10);
 varArgs10 = (List *)listCons((Value *)rslt9, varArgs10);
-varArgs10 = (List *)listCons((Value *)(Value *)&_str_480, varArgs10);
+varArgs10 = (List *)listCons((Value *)(Value *)&_str_481, varArgs10);
 Value *rslt11 = arityImpl_486((List *)var_31, (Value *)varArgs10);
 Value *rslt12 = protoFnImpl_256((List *)var_31, val8, (Value *)&_sym_24, (Value *)&_num_8);
 List *varArgs13 = (List *)GC_malloc(sizeof(List));
@@ -42754,7 +42757,7 @@ varArgs13->head = (Value *)0;
 varArgs13->tail = (List *)0;
 varArgs13 = (List *)listCons((Value *)(Value *)&_str_109, varArgs13);
 varArgs13 = (List *)listCons((Value *)rslt12, varArgs13);
-varArgs13 = (List *)listCons((Value *)(Value *)&_str_481, varArgs13);
+varArgs13 = (List *)listCons((Value *)(Value *)&_str_482, varArgs13);
 Value *rslt14 = arityImpl_486((List *)var_31, (Value *)varArgs13);
 Value *rslt15 = protoFnImpl_256((List *)var_31, val8, (Value *)&_sym_26, (Value *)&_num_8);
 List *varArgs16 = (List *)GC_malloc(sizeof(List));
@@ -42764,7 +42767,7 @@ varArgs16->head = (Value *)0;
 varArgs16->tail = (List *)0;
 varArgs16 = (List *)listCons((Value *)(Value *)&_str_109, varArgs16);
 varArgs16 = (List *)listCons((Value *)rslt15, varArgs16);
-varArgs16 = (List *)listCons((Value *)(Value *)&_str_482, varArgs16);
+varArgs16 = (List *)listCons((Value *)(Value *)&_str_483, varArgs16);
 Value *rslt17 = arityImpl_486((List *)var_31, (Value *)varArgs16);
 Value *rslt18 = protoFnImpl_256((List *)var_31, val8, (Value *)&_sym_20, (Value *)&_num_8);
 List *varArgs19 = (List *)GC_malloc(sizeof(List));
@@ -42774,7 +42777,7 @@ varArgs19->head = (Value *)0;
 varArgs19->tail = (List *)0;
 varArgs19 = (List *)listCons((Value *)(Value *)&_str_109, varArgs19);
 varArgs19 = (List *)listCons((Value *)rslt18, varArgs19);
-varArgs19 = (List *)listCons((Value *)(Value *)&_str_483, varArgs19);
+varArgs19 = (List *)listCons((Value *)(Value *)&_str_484, varArgs19);
 Value *rslt20 = arityImpl_486((List *)var_31, (Value *)varArgs19);
 Value *rslt21 = protoFnImpl_256((List *)var_31, val8, (Value *)&_sym_25, (Value *)&_num_8);
 List *varArgs22 = (List *)GC_malloc(sizeof(List));
@@ -42784,7 +42787,7 @@ varArgs22->head = (Value *)0;
 varArgs22->tail = (List *)0;
 varArgs22 = (List *)listCons((Value *)(Value *)&_str_109, varArgs22);
 varArgs22 = (List *)listCons((Value *)rslt21, varArgs22);
-varArgs22 = (List *)listCons((Value *)(Value *)&_str_484, varArgs22);
+varArgs22 = (List *)listCons((Value *)(Value *)&_str_485, varArgs22);
 Value *rslt23 = arityImpl_486((List *)var_31, (Value *)varArgs22);
 Value *rslt24 = protoFnImpl_256((List *)var_31, val8, (Value *)&_sym_23, (Value *)&_num_8);
 List *varArgs25 = (List *)GC_malloc(sizeof(List));
@@ -42794,7 +42797,7 @@ varArgs25->head = (Value *)0;
 varArgs25->tail = (List *)0;
 varArgs25 = (List *)listCons((Value *)(Value *)&_str_109, varArgs25);
 varArgs25 = (List *)listCons((Value *)rslt24, varArgs25);
-varArgs25 = (List *)listCons((Value *)(Value *)&_str_485, varArgs25);
+varArgs25 = (List *)listCons((Value *)(Value *)&_str_486, varArgs25);
 Value *rslt26 = arityImpl_486((List *)var_31, (Value *)varArgs25);
 Value *rslt27 = protoFnImpl_256((List *)var_31, val8, (Value *)&_sym_22, (Value *)&_num_8);
 List *varArgs28 = (List *)GC_malloc(sizeof(List));
@@ -42804,14 +42807,14 @@ varArgs28->head = (Value *)0;
 varArgs28->tail = (List *)0;
 varArgs28 = (List *)listCons((Value *)(Value *)&_str_109, varArgs28);
 varArgs28 = (List *)listCons((Value *)rslt27, varArgs28);
-varArgs28 = (List *)listCons((Value *)(Value *)&_str_486, varArgs28);
+varArgs28 = (List *)listCons((Value *)(Value *)&_str_487, varArgs28);
 Value *rslt29 = arityImpl_486((List *)var_31, (Value *)varArgs28);
 List *varArgs30 = (List *)GC_malloc(sizeof(List));
 varArgs30->type  = ListType;
 varArgs30->len = 0;
 varArgs30->head = (Value *)0;
 varArgs30->tail = (List *)0;
-varArgs30 = (List *)listCons((Value *)(Value *)&_str_487, varArgs30);
+varArgs30 = (List *)listCons((Value *)(Value *)&_str_488, varArgs30);
 varArgs30 = (List *)listCons((Value *)rslt29, varArgs30);
 varArgs30 = (List *)listCons((Value *)rslt26, varArgs30);
 varArgs30 = (List *)listCons((Value *)rslt23, varArgs30);
@@ -43139,10 +43142,10 @@ return (rslt18);
 Function fn_3318 = {3, "compile-main", 1, {&(FnArity){2, (List *)0, 0, arityImpl_3319}}};
 struct {int64_t type;
    int64_t len;
-   char buffer[13];} _str_488 = {1,12,"Number _num_"};
+   char buffer[13];} _str_489 = {1,12,"Number _num_"};
 struct {int64_t type;
    int64_t len;
-   char buffer[16];} _str_489 = {1,15,"(Value *)&_num_"};
+   char buffer[16];} _str_490 = {1,15,"(Value *)&_num_"};
 
 // --------- compile-module --------------
 Function fn_3321;
@@ -43158,7 +43161,7 @@ varArgs2->len = 0;
 varArgs2->head = (Value *)0;
 varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons((Value *)rslt1, varArgs2);
-varArgs2 = (List *)listCons((Value *)(Value *)&_str_488, varArgs2);
+varArgs2 = (List *)listCons((Value *)(Value *)&_str_489, varArgs2);
 Value *rslt3 = arityImpl_486((List *)var_31, (Value *)varArgs2);
 Value *rslt4 = arityImpl_502((List *)var_31, arg1, (Value *)&_num_1, (Value *)&_num_8);
 List *varArgs5 = (List *)GC_malloc(sizeof(List));
@@ -43167,7 +43170,7 @@ varArgs5->len = 0;
 varArgs5->head = (Value *)0;
 varArgs5->tail = (List *)0;
 varArgs5 = (List *)listCons((Value *)rslt4, varArgs5);
-varArgs5 = (List *)listCons((Value *)(Value *)&_str_489, varArgs5);
+varArgs5 = (List *)listCons((Value *)(Value *)&_str_490, varArgs5);
 Value *rslt6 = arityImpl_486((List *)var_31, (Value *)varArgs5);
 List *varArgs7 = (List *)GC_malloc(sizeof(List));
 varArgs7->type  = ListType;
@@ -43986,7 +43989,7 @@ strInfo = listCons(stringValue("_str_78"), empty_list);
 strInfo = listCons(stringValue("Number *"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_79"), empty_list);
-strInfo = listCons(stringValue("typedef struct {int64_t type; char *name;} SymKey;\n"), strInfo);
+strInfo = listCons(stringValue("typedef struct {int64_t type; int32_t refs; char *name;} SymKey;\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_80"), empty_list);
 strInfo = listCons(stringValue("typedef struct {int64_t type; int64_t len; char buffer[0];} String;\n"), strInfo);
@@ -44830,393 +44833,396 @@ strInfo = listCons(stringValue("_str_359"), empty_list);
 strInfo = listCons(stringValue("no_symbol_val"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_360"), empty_list);
-strInfo = listCons(stringValue("no_symbol_name"), strInfo);
+strInfo = listCons(stringValue(", -1, \""), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_361"), empty_list);
-strInfo = listCons(stringValue("noNumber_sym"), strInfo);
+strInfo = listCons(stringValue("no_symbol_name"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_362"), empty_list);
-strInfo = listCons(stringValue(", -1, "), strInfo);
+strInfo = listCons(stringValue("noNumber_sym"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_363"), empty_list);
-strInfo = listCons(stringValue("noNumber_val"), strInfo);
+strInfo = listCons(stringValue(", -1, "), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_364"), empty_list);
-strInfo = listCons(stringValue("no_String_type"), strInfo);
+strInfo = listCons(stringValue("noNumber_val"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_365"), empty_list);
-strInfo = listCons(stringValue("no_Number_type"), strInfo);
+strInfo = listCons(stringValue("no_String_type"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_366"), empty_list);
-strInfo = listCons(stringValue("no_Symbol_type"), strInfo);
+strInfo = listCons(stringValue("no_Number_type"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_367"), empty_list);
-strInfo = listCons(stringValue("no_Keyword_type"), strInfo);
+strInfo = listCons(stringValue("no_Symbol_type"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_368"), empty_list);
-strInfo = listCons(stringValue("toccataMain"), strInfo);
+strInfo = listCons(stringValue("no_Keyword_type"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_369"), empty_list);
-strInfo = listCons(stringValue("(int argc, char *argv[]) {\n"), strInfo);
+strInfo = listCons(stringValue("toccataMain"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_370"), empty_list);
-strInfo = listCons(stringValue("    GC_init();\n"), strInfo);
+strInfo = listCons(stringValue("(int argc, char *argv[]) {\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_371"), empty_list);
-strInfo = listCons(stringValue("     List *argList = (List *)GC_malloc(sizeof(List));\n"), strInfo);
+strInfo = listCons(stringValue("    GC_init();\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_372"), empty_list);
-strInfo = listCons(stringValue("      argList->type = ListType;\n"), strInfo);
+strInfo = listCons(stringValue("     List *argList = (List *)GC_malloc(sizeof(List));\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_373"), empty_list);
-strInfo = listCons(stringValue("      argList->len = 0;\n"), strInfo);
+strInfo = listCons(stringValue("      argList->type = ListType;\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_374"), empty_list);
-strInfo = listCons(stringValue("      argList->head = (Value *)0;\n"), strInfo);
+strInfo = listCons(stringValue("      argList->len = 0;\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_375"), empty_list);
-strInfo = listCons(stringValue("      argList->tail = (List *)0;\n"), strInfo);
+strInfo = listCons(stringValue("      argList->head = (Value *)0;\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_376"), empty_list);
-strInfo = listCons(stringValue("      List *tail = argList;\n"), strInfo);
+strInfo = listCons(stringValue("      argList->tail = (List *)0;\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_377"), empty_list);
-strInfo = listCons(stringValue("      for(int i = 0; i < argc; i++) {\n"), strInfo);
+strInfo = listCons(stringValue("      List *tail = argList;\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_378"), empty_list);
-strInfo = listCons(stringValue("         tail->head = stringValue(argv[i]);\n"), strInfo);
+strInfo = listCons(stringValue("      for(int i = 0; i < argc; i++) {\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_379"), empty_list);
-strInfo = listCons(stringValue("         List *newTail = (List *)GC_malloc(sizeof(List));\n"), strInfo);
+strInfo = listCons(stringValue("         tail->head = stringValue(argv[i]);\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_380"), empty_list);
-strInfo = listCons(stringValue("         newTail->type = ListType;\n"), strInfo);
+strInfo = listCons(stringValue("         List *newTail = (List *)GC_malloc(sizeof(List));\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_381"), empty_list);
-strInfo = listCons(stringValue("         newTail->len = 0;\n"), strInfo);
+strInfo = listCons(stringValue("         newTail->type = ListType;\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_382"), empty_list);
-strInfo = listCons(stringValue("         newTail->tail = (List *)0;\n"), strInfo);
+strInfo = listCons(stringValue("         newTail->len = 0;\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_383"), empty_list);
-strInfo = listCons(stringValue("         newTail->head = (Value *)0;\n"), strInfo);
+strInfo = listCons(stringValue("         newTail->tail = (List *)0;\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_384"), empty_list);
-strInfo = listCons(stringValue("         tail->tail = newTail;\n"), strInfo);
+strInfo = listCons(stringValue("         newTail->head = (Value *)0;\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_385"), empty_list);
-strInfo = listCons(stringValue("         tail = newTail;\n"), strInfo);
+strInfo = listCons(stringValue("         tail->tail = newTail;\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_386"), empty_list);
-strInfo = listCons(stringValue("         argList->len++;\n}\n"), strInfo);
+strInfo = listCons(stringValue("         tail = newTail;\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_387"), empty_list);
-strInfo = listCons(stringValue("  "), strInfo);
+strInfo = listCons(stringValue("         argList->len++;\n}\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_388"), empty_list);
-strInfo = listCons(stringValue(" = &"), strInfo);
+strInfo = listCons(stringValue("  "), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_389"), empty_list);
-strInfo = listCons(stringValue("  return("), strInfo);
+strInfo = listCons(stringValue(" = &"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_390"), empty_list);
-strInfo = listCons(stringValue("((Value *)argList));\n};\n"), strInfo);
+strInfo = listCons(stringValue("  return("), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_391"), empty_list);
-strInfo = listCons(stringValue("Value *protocols() {\n"), strInfo);
+strInfo = listCons(stringValue("((Value *)argList));\n};\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_392"), empty_list);
-strInfo = listCons(stringValue("List *protos = empty_list;\n"), strInfo);
+strInfo = listCons(stringValue("Value *protocols() {\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_393"), empty_list);
-strInfo = listCons(stringValue("List *protoInfo;\n"), strInfo);
+strInfo = listCons(stringValue("List *protos = empty_list;\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_394"), empty_list);
-strInfo = listCons(stringValue("List *impls;\n"), strInfo);
+strInfo = listCons(stringValue("List *protoInfo;\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_395"), empty_list);
-strInfo = listCons(stringValue("List *impl;\n"), strInfo);
+strInfo = listCons(stringValue("List *impls;\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_396"), empty_list);
-strInfo = listCons(stringValue("protoInfo = empty_list;\n"), strInfo);
+strInfo = listCons(stringValue("List *impl;\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_397"), empty_list);
-strInfo = listCons(stringValue("impls = empty_list;\n"), strInfo);
+strInfo = listCons(stringValue("protoInfo = empty_list;\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_398"), empty_list);
-strInfo = listCons(stringValue("impl = empty_list;\n"), strInfo);
+strInfo = listCons(stringValue("impls = empty_list;\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_399"), empty_list);
-strInfo = listCons(stringValue("impl = listCons(stringValue(\""), strInfo);
+strInfo = listCons(stringValue("impl = empty_list;\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_400"), empty_list);
-strInfo = listCons(stringValue("\"), impl);\n"), strInfo);
+strInfo = listCons(stringValue("impl = listCons(stringValue(\""), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_401"), empty_list);
-strInfo = listCons(stringValue("impl = listCons("), strInfo);
+strInfo = listCons(stringValue("\"), impl);\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_402"), empty_list);
-strInfo = listCons(stringValue("keywordValue(\":default\")"), strInfo);
+strInfo = listCons(stringValue("impl = listCons("), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_403"), empty_list);
-strInfo = listCons(stringValue("numberValue("), strInfo);
+strInfo = listCons(stringValue("keywordValue(\":default\")"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_404"), empty_list);
-strInfo = listCons(stringValue(", impl);\n"), strInfo);
+strInfo = listCons(stringValue("numberValue("), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_405"), empty_list);
-strInfo = listCons(stringValue("impls = listCons((Value *)impl, impls);\n"), strInfo);
+strInfo = listCons(stringValue(", impl);\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_406"), empty_list);
-strInfo = listCons(stringValue("protoInfo = listCons((Value *)impls, protoInfo);\n"), strInfo);
+strInfo = listCons(stringValue("impls = listCons((Value *)impl, impls);\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_407"), empty_list);
-strInfo = listCons(stringValue("protoInfo = listCons(stringValue(\""), strInfo);
+strInfo = listCons(stringValue("protoInfo = listCons((Value *)impls, protoInfo);\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_408"), empty_list);
-strInfo = listCons(stringValue("\"), protoInfo);\n"), strInfo);
+strInfo = listCons(stringValue("protoInfo = listCons(stringValue(\""), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_409"), empty_list);
-strInfo = listCons(stringValue("protoInfo = listCons(symbolValue(\""), strInfo);
+strInfo = listCons(stringValue("\"), protoInfo);\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_410"), empty_list);
-strInfo = listCons(stringValue("protos = listCons((Value *)protoInfo, protos);\n"), strInfo);
+strInfo = listCons(stringValue("protoInfo = listCons(symbolValue(\""), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_411"), empty_list);
-strInfo = listCons(stringValue("return((Value *)protos);\n"), strInfo);
+strInfo = listCons(stringValue("protos = listCons((Value *)protoInfo, protos);\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_412"), empty_list);
-strInfo = listCons(stringValue("}\n\n"), strInfo);
+strInfo = listCons(stringValue("return((Value *)protos);\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_413"), empty_list);
-strInfo = listCons(stringValue("Value *static_fns() {\n"), strInfo);
+strInfo = listCons(stringValue("}\n\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_414"), empty_list);
-strInfo = listCons(stringValue("List *staticFns = empty_list;\n"), strInfo);
+strInfo = listCons(stringValue("Value *static_fns() {\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_415"), empty_list);
-strInfo = listCons(stringValue("List *fnInfo;\n"), strInfo);
+strInfo = listCons(stringValue("List *staticFns = empty_list;\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_416"), empty_list);
-strInfo = listCons(stringValue("List *arityInfo;\n"), strInfo);
+strInfo = listCons(stringValue("List *fnInfo;\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_417"), empty_list);
-strInfo = listCons(stringValue("fnInfo = empty_list;\n"), strInfo);
+strInfo = listCons(stringValue("List *arityInfo;\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_418"), empty_list);
-strInfo = listCons(stringValue("arityInfo = listCons(stringValue(\""), strInfo);
+strInfo = listCons(stringValue("fnInfo = empty_list;\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_419"), empty_list);
-strInfo = listCons(stringValue("\"), empty_list);\n"), strInfo);
+strInfo = listCons(stringValue("arityInfo = listCons(stringValue(\""), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_420"), empty_list);
-strInfo = listCons(stringValue("arityInfo = listCons(keywordValue(\":variadic\")"), strInfo);
+strInfo = listCons(stringValue("\"), empty_list);\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_421"), empty_list);
-strInfo = listCons(stringValue(", arityInfo);\n"), strInfo);
+strInfo = listCons(stringValue("arityInfo = listCons(keywordValue(\":variadic\")"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_422"), empty_list);
-strInfo = listCons(stringValue("arityInfo = listCons(numberValue("), strInfo);
+strInfo = listCons(stringValue(", arityInfo);\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_423"), empty_list);
-strInfo = listCons(stringValue("), arityInfo);\n"), strInfo);
+strInfo = listCons(stringValue("arityInfo = listCons(numberValue("), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_424"), empty_list);
-strInfo = listCons(stringValue("fnInfo = listCons((Value *)arityInfo, fnInfo);\n"), strInfo);
+strInfo = listCons(stringValue("), arityInfo);\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_425"), empty_list);
-strInfo = listCons(stringValue("fnInfo = listCons((Value *)fnInfo, empty_list);\n"), strInfo);
+strInfo = listCons(stringValue("fnInfo = listCons((Value *)arityInfo, fnInfo);\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_426"), empty_list);
-strInfo = listCons(stringValue("fnInfo = listCons(stringValue(\""), strInfo);
+strInfo = listCons(stringValue("fnInfo = listCons((Value *)fnInfo, empty_list);\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_427"), empty_list);
-strInfo = listCons(stringValue("\"), fnInfo);\n"), strInfo);
+strInfo = listCons(stringValue("fnInfo = listCons(stringValue(\""), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_428"), empty_list);
-strInfo = listCons(stringValue("staticFns = listCons((Value *)fnInfo, staticFns);\n"), strInfo);
+strInfo = listCons(stringValue("\"), fnInfo);\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_429"), empty_list);
-strInfo = listCons(stringValue("return((Value *)staticFns);\n"), strInfo);
+strInfo = listCons(stringValue("staticFns = listCons((Value *)fnInfo, staticFns);\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_430"), empty_list);
-strInfo = listCons(stringValue("Value *defined_syms() {\n"), strInfo);
+strInfo = listCons(stringValue("return((Value *)staticFns);\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_431"), empty_list);
-strInfo = listCons(stringValue("List *defSyms = empty_list;\n"), strInfo);
+strInfo = listCons(stringValue("Value *defined_syms() {\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_432"), empty_list);
-strInfo = listCons(stringValue("List *symInfo;\n"), strInfo);
+strInfo = listCons(stringValue("List *defSyms = empty_list;\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_433"), empty_list);
-strInfo = listCons(stringValue("symInfo = listCons(stringValue(\""), strInfo);
+strInfo = listCons(stringValue("List *symInfo;\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_434"), empty_list);
-strInfo = listCons(stringValue("\"), symInfo);\n"), strInfo);
+strInfo = listCons(stringValue("symInfo = listCons(stringValue(\""), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_435"), empty_list);
-strInfo = listCons(stringValue("symInfo = listCons((Value *)symInfo, empty_list);\n"), strInfo);
+strInfo = listCons(stringValue("\"), symInfo);\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_436"), empty_list);
-strInfo = listCons(stringValue("symInfo = listCons(symbolValue(\""), strInfo);
+strInfo = listCons(stringValue("symInfo = listCons((Value *)symInfo, empty_list);\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_437"), empty_list);
-strInfo = listCons(stringValue("defSyms = listCons((Value *)symInfo, defSyms);\n"), strInfo);
+strInfo = listCons(stringValue("symInfo = listCons(symbolValue(\""), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_438"), empty_list);
-strInfo = listCons(stringValue("return((Value *)defSyms);\n"), strInfo);
+strInfo = listCons(stringValue("defSyms = listCons((Value *)symInfo, defSyms);\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_439"), empty_list);
-strInfo = listCons(stringValue("Value *number_literals() {\n"), strInfo);
+strInfo = listCons(stringValue("return((Value *)defSyms);\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_440"), empty_list);
-strInfo = listCons(stringValue("List *nums = empty_list;\n"), strInfo);
+strInfo = listCons(stringValue("Value *number_literals() {\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_441"), empty_list);
-strInfo = listCons(stringValue("List *numInfo;\n"), strInfo);
+strInfo = listCons(stringValue("List *nums = empty_list;\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_442"), empty_list);
-strInfo = listCons(stringValue("numInfo = listCons(stringValue(\""), strInfo);
+strInfo = listCons(stringValue("List *numInfo;\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_443"), empty_list);
-strInfo = listCons(stringValue("numInfo = listCons(numberValue("), strInfo);
+strInfo = listCons(stringValue("numInfo = listCons(stringValue(\""), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_444"), empty_list);
-strInfo = listCons(stringValue("), numInfo);\n"), strInfo);
+strInfo = listCons(stringValue("numInfo = listCons(numberValue("), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_445"), empty_list);
-strInfo = listCons(stringValue("nums = listCons((Value *)numInfo, nums);\n"), strInfo);
+strInfo = listCons(stringValue("), numInfo);\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_446"), empty_list);
-strInfo = listCons(stringValue("return((Value *)nums);\n"), strInfo);
+strInfo = listCons(stringValue("nums = listCons((Value *)numInfo, nums);\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_447"), empty_list);
-strInfo = listCons(stringValue("Value *string_literals() {\n"), strInfo);
+strInfo = listCons(stringValue("return((Value *)nums);\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_448"), empty_list);
-strInfo = listCons(stringValue("List *strs = empty_list;\n"), strInfo);
+strInfo = listCons(stringValue("Value *string_literals() {\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_449"), empty_list);
-strInfo = listCons(stringValue("List *strInfo;\n"), strInfo);
+strInfo = listCons(stringValue("List *strs = empty_list;\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_450"), empty_list);
-strInfo = listCons(stringValue("strInfo = listCons(stringValue(\""), strInfo);
+strInfo = listCons(stringValue("List *strInfo;\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_451"), empty_list);
-strInfo = listCons(stringValue("\"), strInfo);\n"), strInfo);
+strInfo = listCons(stringValue("strInfo = listCons(stringValue(\""), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_452"), empty_list);
-strInfo = listCons(stringValue("strs = listCons((Value *)strInfo, strs);\n"), strInfo);
+strInfo = listCons(stringValue("\"), strInfo);\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_453"), empty_list);
-strInfo = listCons(stringValue("return((Value *)strs);\n"), strInfo);
+strInfo = listCons(stringValue("strs = listCons((Value *)strInfo, strs);\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_454"), empty_list);
-strInfo = listCons(stringValue("Value *keyword_literals() {\n"), strInfo);
+strInfo = listCons(stringValue("return((Value *)strs);\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_455"), empty_list);
-strInfo = listCons(stringValue("List *kws = empty_list;\n"), strInfo);
+strInfo = listCons(stringValue("Value *keyword_literals() {\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_456"), empty_list);
-strInfo = listCons(stringValue("List *kwInfo;\n"), strInfo);
+strInfo = listCons(stringValue("List *kws = empty_list;\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_457"), empty_list);
-strInfo = listCons(stringValue("kwInfo = listCons(stringValue(\""), strInfo);
+strInfo = listCons(stringValue("List *kwInfo;\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_458"), empty_list);
-strInfo = listCons(stringValue("kwInfo = listCons(keywordValue(\""), strInfo);
+strInfo = listCons(stringValue("kwInfo = listCons(stringValue(\""), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_459"), empty_list);
-strInfo = listCons(stringValue("\"), kwInfo);\n"), strInfo);
+strInfo = listCons(stringValue("kwInfo = listCons(keywordValue(\""), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_460"), empty_list);
-strInfo = listCons(stringValue("kws = listCons((Value *)kwInfo, kws);\n"), strInfo);
+strInfo = listCons(stringValue("\"), kwInfo);\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_461"), empty_list);
-strInfo = listCons(stringValue("return((Value *)kws);\n"), strInfo);
+strInfo = listCons(stringValue("kws = listCons((Value *)kwInfo, kws);\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_462"), empty_list);
-strInfo = listCons(stringValue("Value *symbol_literals() {\n"), strInfo);
+strInfo = listCons(stringValue("return((Value *)kws);\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_463"), empty_list);
-strInfo = listCons(stringValue("List *syms = empty_list;\n"), strInfo);
+strInfo = listCons(stringValue("Value *symbol_literals() {\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_464"), empty_list);
-strInfo = listCons(stringValue("syms = listCons((Value *)symInfo, syms);\n"), strInfo);
+strInfo = listCons(stringValue("List *syms = empty_list;\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_465"), empty_list);
-strInfo = listCons(stringValue("return((Value *)syms);\n"), strInfo);
+strInfo = listCons(stringValue("syms = listCons((Value *)symInfo, syms);\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_466"), empty_list);
-strInfo = listCons(stringValue("\nValue *counts() {\n"), strInfo);
+strInfo = listCons(stringValue("return((Value *)syms);\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_467"), empty_list);
-strInfo = listCons(stringValue("List *cnts = empty_list;\n"), strInfo);
+strInfo = listCons(stringValue("\nValue *counts() {\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_468"), empty_list);
-strInfo = listCons(stringValue("cnts = listCons(numberValue("), strInfo);
+strInfo = listCons(stringValue("List *cnts = empty_list;\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_469"), empty_list);
-strInfo = listCons(stringValue("), cnts);\n"), strInfo);
+strInfo = listCons(stringValue("cnts = listCons(numberValue("), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_470"), empty_list);
-strInfo = listCons(stringValue("return((Value *)cnts);\n"), strInfo);
+strInfo = listCons(stringValue("), cnts);\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_471"), empty_list);
-strInfo = listCons(stringValue("Value *types() {\n"), strInfo);
+strInfo = listCons(stringValue("return((Value *)cnts);\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_472"), empty_list);
-strInfo = listCons(stringValue("List *types = empty_list;\n"), strInfo);
+strInfo = listCons(stringValue("Value *types() {\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_473"), empty_list);
-strInfo = listCons(stringValue("List *typeInfo;\n"), strInfo);
+strInfo = listCons(stringValue("List *types = empty_list;\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_474"), empty_list);
-strInfo = listCons(stringValue("typeInfo = listCons(numberValue("), strInfo);
+strInfo = listCons(stringValue("List *typeInfo;\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_475"), empty_list);
-strInfo = listCons(stringValue("), empty_list);\n"), strInfo);
+strInfo = listCons(stringValue("typeInfo = listCons(numberValue("), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_476"), empty_list);
-strInfo = listCons(stringValue("typeInfo = listCons(symbolValue(\""), strInfo);
+strInfo = listCons(stringValue("), empty_list);\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_477"), empty_list);
-strInfo = listCons(stringValue("\"), typeInfo);\n"), strInfo);
+strInfo = listCons(stringValue("typeInfo = listCons(symbolValue(\""), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_478"), empty_list);
-strInfo = listCons(stringValue("types = listCons((Value *)typeInfo, types);\n"), strInfo);
+strInfo = listCons(stringValue("\"), typeInfo);\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_479"), empty_list);
-strInfo = listCons(stringValue("return((Value *)types);\n"), strInfo);
+strInfo = listCons(stringValue("types = listCons((Value *)typeInfo, types);\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_480"), empty_list);
-strInfo = listCons(stringValue("const int64_t NumberType = "), strInfo);
+strInfo = listCons(stringValue("return((Value *)types);\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_481"), empty_list);
-strInfo = listCons(stringValue("const int64_t KeywordType = "), strInfo);
+strInfo = listCons(stringValue("const int64_t NumberType = "), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_482"), empty_list);
-strInfo = listCons(stringValue("const int64_t SymbolType = "), strInfo);
+strInfo = listCons(stringValue("const int64_t KeywordType = "), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_483"), empty_list);
-strInfo = listCons(stringValue("const int64_t StringType = "), strInfo);
+strInfo = listCons(stringValue("const int64_t SymbolType = "), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_484"), empty_list);
-strInfo = listCons(stringValue("const int64_t SubStringType = "), strInfo);
+strInfo = listCons(stringValue("const int64_t StringType = "), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_485"), empty_list);
-strInfo = listCons(stringValue("const int64_t ListType = "), strInfo);
+strInfo = listCons(stringValue("const int64_t SubStringType = "), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_486"), empty_list);
-strInfo = listCons(stringValue("const int64_t FunctionType = "), strInfo);
+strInfo = listCons(stringValue("const int64_t ListType = "), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_487"), empty_list);
-strInfo = listCons(stringValue("List *empty_list = &(List){4,0,0,0};\n"), strInfo);
+strInfo = listCons(stringValue("const int64_t FunctionType = "), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_488"), empty_list);
-strInfo = listCons(stringValue("Number _num_"), strInfo);
+strInfo = listCons(stringValue("List *empty_list = &(List){4,0,0,0};\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_489"), empty_list);
+strInfo = listCons(stringValue("Number _num_"), strInfo);
+strs = listCons((Value *)strInfo, strs);
+strInfo = listCons(stringValue("_str_490"), empty_list);
 strInfo = listCons(stringValue("(Value *)&_num_"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 return((Value *)strs);

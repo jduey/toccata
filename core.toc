@@ -1989,7 +1989,7 @@ toccata-core
 (def Value* "Value *")
 (def NumberVal "typedef struct {int64_t type; int32_t refs; int64_t numVal;} Number;\\n")
 (def NumberVal* "Number *")
-(def SymKey "typedef struct {int64_t type; char *name;} SymKey;\\n")
+(def SymKey "typedef struct {int64_t type; int32_t refs; char *name;} SymKey;\\n")
 (def StringVal "typedef struct {int64_t type; int64_t len; char buffer[0];} String;\\n")
 (def StringVal* "String *")
 (def SubStringVal "typedef struct {int64_t type; int64_t len; Value *source; char *buffer;} SubString;\\n")
@@ -3629,7 +3629,7 @@ toccata-core
                              (nth sym 1 "no_symbol_val")
                              " = {"
                              sym-type
-                             ",\\\""
+                             ", -1, \\\""
                              (nth sym 0 "no_symbol_name")
                              "\\\"};\\n"))))
 
