@@ -767,6 +767,22 @@ toccata-core
       (= :assoc-in-nil curr-v) (assoc m k (assoc-in {} (rest path) v))
       (assoc m k (assoc-in curr-v (rest path) v))))))
 
+(deftype identity-val [v]
+  ;; Stringable
+  ;; (string-list [_]
+  ;;   (comp (list "<Id: ")
+  ;;         (string-list v)
+  ;;         (list ">")))
+
+  Applicative
+  (wrap [ev v] (invoke ev v))
+
+  Monad
+  (flat-map [mv f] (f v))
+
+  Comonad
+  (extract [wv] v))
+
 (def identity-m
   (reify
     Eq
@@ -778,21 +794,7 @@ toccata-core
 
     Fn
     (invoke [_ v]
-      (reify
-        ;; Stringable
-        ;; (string-list [_]
-        ;;   (comp (list "<Id: ")
-        ;;         (string-list v)
-        ;;         (list ">")))
-
-        Applicative
-        (wrap [ev v] (invoke ev v))
-
-        Monad
-        (flat-map [mv f] (f v))
-
-        Comonad
-        (extract [wv] v)))))
+      (identity-val v))))
 
 (defn symbol? [sym]
   (= Symbol (get-type sym)))
@@ -904,40 +906,30 @@ toccata-core
     (zero [ev] ev)
     (comp* [_ mvs] mvs)))
 
-(def free-plus
-  (reify
-    ;; Stringable
-    ;; (string-list [_] (list "<FreePlus>"))
+(deftype free-plus [alts]
+  ;; Stringable
+  ;; (string-list [_]
+  ;;   (comp (list "<FreePlus: ")
+  ;;         (string-list alts)
+  ;;         (list ">")))
 
-    Eq
-    (=* [x y] (type= x y))
+  FreeEval
+  (evaluate [free-val eval-endo]
+    (crush alts (fn [alt]
+                  (evaluate alt eval-endo))))
 
-    Fn
-    (invoke [free-plus alts]
-      (reify
-        ;; Stringable
-        ;; (string-list [_]
-        ;;   (comp (list "<FreePlus: ")
-        ;;         (string-list alts)
-        ;;         (list ">")))
+  Applicative
+  (wrap [_ v] (free-val v))
+  (apply* [fv args]
+    (free-app fv args))
 
-        FreeEval
-        (evaluate [free-val eval-endo]
-          (crush alts (fn [alt]
-                        (evaluate alt eval-endo))))
+  Comonad
+  (extract [_] alts)
 
-        Applicative
-        (wrap [_ v] (free-val v))
-        (apply* [fv args]
-          (free-app fv args))
-
-        Comonad
-        (extract [_] alts)
-
-        Monoid
-        (zero [ev] free-zero)
-        (comp* [mv mvs]
-          (invoke free-plus (cons mv mvs)))))))
+  Monoid
+  (zero [ev] free-zero)
+  (comp* [mv mvs]
+    (free-plus (cons mv mvs))))
 
 (deftype pure [arg]
   ;; Stringable
@@ -1780,7 +1772,7 @@ toccata-core
                          (not (< 1 (count x))) false
                          (= (first x) 'fn))))
         arities (traverse (nth expr 2 empty-list) analyze-expr)]
-    (fn-ast (nth expr 1 "no-name") arities)))
+    (free (fn-ast (nth expr 1 "no-name") arities))))
 
 (defn analyze-proto-arity [args]
   (cond
@@ -1830,7 +1822,7 @@ toccata-core
                          (not (= 2 (count x))) false
                          (= (first x) 'quote))))
         _ (make-symbols (nth expr 1))]
-    (quoted-ast (nth expr 1))))
+    (free (quoted-ast (nth expr 1)))))
 
 (defn analyze-def []
   (for [curr-expr (get-val :expr :no-expr)
@@ -1845,7 +1837,7 @@ toccata-core
         val-ast (cond
                  (= value :no-value) (state-maybe :no-value)
                  (analyze-expr value))]
-    (definition-ast name val-ast)))
+    (free (definition-ast name val-ast))))
 
 (defn analyze-cond []
   (for [expr (is-expr seq?)
@@ -1856,8 +1848,8 @@ toccata-core
     (let [clauses (partition-all clause-pairs 2)
           default (last clauses empty-list)]
       (cond
-       (= 1 (count default)) (cond-ast (butlast clauses)
-                                       (first default))
+       (= 1 (count default)) (free (cond-ast (butlast clauses)
+                                             (first default)))
        (print-err "cond must have a default clause")))))
 
 (defn next-form []
@@ -1878,9 +1870,9 @@ toccata-core
                           (< 2 (count x)))))
         body (traverse (drop expr 2) analyze-expr)]
     (list (nth expr 0 'no-name)
-          (fn-ast (str (nth expr 0 'no-name) "_impl")
-                  (list (free (fn-arity-ast (rest (nth expr 1 empty-list))
-                                            (apply* (pure list) body))))))))
+          (free (fn-ast (str (nth expr 0 'no-name) "_impl")
+                        (list (free (fn-arity-ast (rest (nth expr 1 empty-list))
+                                                  (apply* (pure list) body)))))))))
 
 (defn analyze-proto-impl []
   (for [name (is-form? symbol?)
@@ -1901,7 +1893,7 @@ toccata-core
                          (not (< 1 (count x))) false
                          (= 'extend-type (first x)))))
         proto-specs (analyze-extensions (drop expr 2))]
-    (extend-ast (nth expr 1 :no-type) proto-specs)))
+    (free (extend-ast (nth expr 1 :no-type) proto-specs))))
 
 ;; TODO: handle multi-arity reified fns
 (defn analyze-reify []
@@ -1910,7 +1902,7 @@ toccata-core
                          (not (seq? x)) false
                          (= 'reify (nth x 0 :not-reify)))))
         proto-specs (analyze-extensions (rest expr))]
-    (reify-ast proto-specs)))
+    (free (reify-ast proto-specs))))
 
 (defn analyze-protocol []
   (for [expr (is-expr (fn [x]
@@ -1920,8 +1912,8 @@ toccata-core
                          (= 'defprotocol (first x)))))
         ;; TODO: make this only accept fixed arities
         arities (traverse (drop expr 2) analyze-proto-arity)]
-    (protocol-ast (nth expr 1 :no-name)
-                  (apply merge-with comp arities))))
+    (free (protocol-ast (nth expr 1 :no-name)
+                        (apply merge-with comp arities)))))
 
 (defn analyze-deftype []
   (for [expr (is-expr (fn [x]
@@ -1929,9 +1921,9 @@ toccata-core
                          (not (seq? x)) false
                          (< (count x) 3) false
                          (= 'deftype (first x)))))]
-    (type-ast (nth expr 1) ;; name
-              (nth expr 2) ;; fields
-              (drop expr 3))))
+    (free (type-ast (nth expr 1) ;; name
+                    (nth expr 2) ;; fields
+                    (drop expr 3)))))
 
 (defn analyze-main []
   (for [expr (is-expr (fn [x]
@@ -3002,59 +2994,58 @@ toccata-core
         (list result-sym (comp binding-stmts body-stmts))))))
 
 (defprotocol FunctionAST
-  (arities [_]))
+  (fn-arities [_]))
 
-(defn fn-ast [name arities]
-  (free (reify
-          FunctionAST
-          (arities [_] (crush arities (fn [arity] (evaluate arity list))))
+(deftype fn-ast [name arities]
+  FunctionAST
+  (fn-arities [_] (crush arities (fn [arity] (evaluate arity list))))
 
-          AST
-          (emit-c [_]
-            (let [arity-count (count arities)]
-              (for [curr-fn-sym (get-val :curr-fn-sym "")
-                    fn-sym (gensym "fn_")
-                    _ (set-val :curr-fn-sym fn-sym)
-                    _ (write (str "\\n// --------- " name " --------------\\n"))
-                    _ (write (str "Function " fn-sym ";\\n"))
-                    ;; TODO: check for anon fn, save previous value of
-                    ;; :defined-sym and restore at end
-                    _ (assoc-in-val (list :defined-syms name) (list (str "Function " fn-sym)
-                                                                    (str "(Value *)&" fn-sym)))
-                    arity-vals (traverse arities (fn [arity]
-                                                   (evaluate arity emit-c)))
-                    :let [arity-syms (map arity-vals first)
-                          arity-init (crush arity-vals second)
-                          static-arities (crush arity-vals (fn [av]
-                                                             (nth av 2 {})))]
-                    _ (cond
-                       (= 0 (count arity-init))
-                       (apply-to list
-                                 (write (str "\\n// --------- " name " main body --------------\\n"))
-                                 (write (str "Function " fn-sym " = {"
-                                             (get (types) 'Function :no-fn-type) ", \\\""
-                                             name "\\\", " arity-count ", "
-                                             "{" (apply str (interpose arity-syms ", ")) "}};\\n"))
-                                 (assoc-in-val (list :static-fns (str "(Value *)&" fn-sym)) static-arities))
+  AST
+  (emit-c [_]
+    (let [arity-count (count arities)]
+      (for [curr-fn-sym (get-val :curr-fn-sym "")
+            fn-sym (gensym "fn_")
+            _ (set-val :curr-fn-sym fn-sym)
+            _ (write (str "\\n// --------- " name " --------------\\n"))
+            _ (write (str "Function " fn-sym ";\\n"))
+            ;; TODO: check for anon fn, save previous value of
+            ;; :defined-sym and restore at end
+            _ (assoc-in-val (list :defined-syms name) (list (str "Function " fn-sym)
+                                                            (str "(Value *)&" fn-sym)))
+            arity-vals (traverse arities (fn [arity]
+                                           (evaluate arity emit-c)))
+            :let [arity-syms (map arity-vals first)
+                  arity-init (crush arity-vals second)
+                  static-arities (crush arity-vals (fn [av]
+                                                     (nth av 2 {})))]
+            _ (cond
+               (= 0 (count arity-init))
+               (apply-to list
+                         (write (str "\\n// --------- " name " main body --------------\\n"))
+                         (write (str "Function " fn-sym " = {"
+                                     (get (types) 'Function :no-fn-type) ", \\\""
+                                     name "\\\", " arity-count ", "
+                                     "{" (apply str (interpose arity-syms ", ")) "}};\\n"))
+                         (assoc-in-val (list :static-fns (str "(Value *)&" fn-sym)) static-arities))
 
-                       (state-maybe ""))
-                    _ (set-val :curr-fn-sym curr-fn-sym)]
-                (cond
-                 (= 0 (count arity-init))
-                 (list (str "(Value *)&" fn-sym) empty-list (str "Function " fn-sym))
+               (state-maybe ""))
+            _ (set-val :curr-fn-sym curr-fn-sym)]
+        (cond
+         (= 0 (count arity-init))
+         (list (str "(Value *)&" fn-sym) empty-list (str "Function " fn-sym))
 
-                 (list (str "(Value *)" fn-sym)
-                       (comp arity-init
-                             (list* (str "Function *" fn-sym " = (Function *)GC_malloc(sizeof(Function)"
-                                         " + sizeof(FnArity *) * " arity-count ");\\n")
-                                    (str fn-sym "->type = " (get (types) 'Function :no-fn-type) ";\\n")
-                                    (str fn-sym "->name = \\\"" name "\\\";\\n")
-                                    (str fn-sym "->arityCount = " arity-count ";\\n")
-                                    (map (range arity-count)
-                                         (fn [index]
-                                           (str fn-sym "->arities[" index "] = "
-                                                (nth arity-syms index "") ";\\n")))))
-                       (str "Function " fn-sym)))))))))
+         (list (str "(Value *)" fn-sym)
+               (comp arity-init
+                     (list* (str "Function *" fn-sym " = (Function *)GC_malloc(sizeof(Function)"
+                                 " + sizeof(FnArity *) * " arity-count ");\\n")
+                            (str fn-sym "->type = " (get (types) 'Function :no-fn-type) ";\\n")
+                            (str fn-sym "->name = \\\"" name "\\\";\\n")
+                            (str fn-sym "->arityCount = " arity-count ";\\n")
+                            (map (range arity-count)
+                                 (fn [index]
+                                   (str fn-sym "->arities[" index "] = "
+                                        (nth arity-syms index "") ";\\n")))))
+               (str "Function " fn-sym)))))))
 
 (defn emit-static-sym [sym]
   (for [sym-val (get-in-val (list :symbols sym) :no-static-sym)]
@@ -3063,11 +3054,10 @@ toccata-core
              "")]
       (list (str "(Value *)&" sym-val) empty-list))))
 
-(defn quoted-ast [sym]
-  (free (reify
-          AST
-          (emit-c [_]
-            (emit-static-sym sym)))))
+(deftype quoted-ast [sym]
+  AST
+  (emit-c [_]
+    (emit-static-sym sym)))
 
 (defn forward-decl [name value]
   (cond
@@ -3126,14 +3116,13 @@ toccata-core
            (expression-definition name result-sym initialization extern-def))]
     ""))
 
-(defn definition-ast [name value]
-  (free (reify
-          AST
-          (emit-c [_]
-            (cond
-             (= :no-value value) (forward-decl name value)
-             (comp (define-fwd-decl name value)
-                   (define-value name value)))))))
+(deftype definition-ast [name value]
+  AST
+  (emit-c [_]
+    (cond
+     (= :no-value value) (forward-decl name value)
+     (comp (define-fwd-decl name value)
+           (define-value name value)))))
 
 (defn eval-cond-clause [clauses default cond-result]
   (cond
@@ -3161,16 +3150,15 @@ toccata-core
                      (nth cond-rest 1 empty-list)
                      (list "}\\n"))))))))
 
-(defn cond-ast [clauses default]
-  (free (reify
-          AST
-          (emit-c [_]
-            (for [cond-result (genlocal "cond")
-                  default (evaluate default emit-c)
-                  evalled-clauses (eval-cond-clause clauses default cond-result)]
-              (let [cond-stmts (nth evalled-clauses 1 empty-list)]
-                (list cond-result (cons (str "Value *" cond-result ";\\n")
-                                        cond-stmts))))))))
+(deftype cond-ast [clauses default]
+  AST
+  (emit-c [_]
+    (for [cond-result (genlocal "cond")
+          default (evaluate default emit-c)
+          evalled-clauses (eval-cond-clause clauses default cond-result)]
+      (let [cond-stmts (nth evalled-clauses 1 empty-list)]
+        (list cond-result (cons (str "Value *" cond-result ";\\n")
+                                cond-stmts))))))
 
 (defn emit-extension [type-num proto]
   (for [_ (traverse (nth proto 1 empty-list)
@@ -3184,22 +3172,20 @@ toccata-core
                           ""))))]
     (list "" empty-list)))
 
-(defn extend-ast [type impls]
-  (free (reify
-          AST
-          (emit-c [_]
-            (for [type-num (get-in-val (list :types type))
-                  _ (traverse (seq impls)
-                              (partial emit-extension type-num))]
-              "")))))
+(deftype extend-ast [type impls]
+  AST
+  (emit-c [_]
+    (for [type-num (get-in-val (list :types type))
+          _ (traverse (seq impls)
+                      (partial emit-extension type-num))]
+      "")))
 
 (defn emit-reified-fn [name-asts type-num index]
   (let [name-ast (nth name-asts index :no-name-ast)
         name (nth name-ast 0 "")
         ast (nth name-ast 1 :no-ast)
-        num-args (first (map (arities (evaluate ast (fn [a] a)))
-                             (fn [x]
-                               (count (.args x)))))]
+        num-args (first (map (fn-arities (evaluate ast identity))
+                             (fn [x] (count (.args x)))))]
     (for [evalled (evaluate ast emit-c)
           impl-sym (gensym "protoImpl_")
           fn-sym (gensym "protoFn_")
@@ -3252,29 +3238,28 @@ toccata-core
         _ (write (first reify-init))]
     (list (str "(Value *)&" reified-sym) empty-list reified-sym)))
 
-(defn reify-ast [impls]
-  (free (reify
-          AST
-          (emit-c [_]
-            (cond
-             (empty? impls) (let [_ (print-err :no-impls)]
-                              (list "" empty-list))
-             (let [name-asts (crush (seq impls)
-                                    (fn [proto]
-                                      (nth proto 1 empty-list)))]
-               (for [types (get-val :types {})
-                     :let [type-num (inc (count (seq types)))]
-                     _ (assoc-in-val (list :types type-num) type-num)
-                     impl-fns (traverse (range (count name-asts))
-                                        (partial emit-reified-fn name-asts type-num))
-                     reified-result (let [inits (crush impl-fns (fn [sym-inits]
-                                                                  (nth sym-inits 1 empty-list)))]
-                                      (cond
-                                       (= 0 (count inits))
-                                       (static-reified type-num impl-fns)
+(deftype reify-ast [impls]
+  AST
+  (emit-c [_]
+    (cond
+     (empty? impls) (let [_ (print-err :no-impls)]
+                      (list "" empty-list))
+     (let [name-asts (crush (seq impls)
+                            (fn [proto]
+                              (nth proto 1 empty-list)))]
+       (for [types (get-val :types {})
+             :let [type-num (inc (count (seq types)))]
+             _ (assoc-in-val (list :types type-num) type-num)
+             impl-fns (traverse (range (count name-asts))
+                                (partial emit-reified-fn name-asts type-num))
+             reified-result (let [inits (crush impl-fns (fn [sym-inits]
+                                                          (nth sym-inits 1 empty-list)))]
+                              (cond
+                               (= 0 (count inits))
+                               (static-reified type-num impl-fns)
 
-                                       (reified-type type-num impl-fns)))]
-                 reified-result)))))))
+                               (reified-type type-num impl-fns)))]
+         reified-result)))))
 
 (defn replace-type [types type-val-num name]
   (cond
@@ -3282,6 +3267,40 @@ toccata-core
    (= (first (first types)) type-val-num) (cons (list name type-val-num)
                                                 (rest types))
    (cons (first types) (replace-type (rest types) type-val-num name))))
+
+(deftype type-ast-val [name fields impls]
+  AST
+  (emit-c [_]
+    (for [types (get-val :types {})
+          :let [type-val-num (+ 2 (count (seq types)))]
+
+          curr-expr (get-val :expr)
+          _ (set-expr type-val-num)
+          _ (analyze-number)
+          _ (cond
+             (empty? fields) (state-maybe "")
+             (traverse fields
+                       (fn [field]
+                         (let [getter-name (symbol (str "." field))]
+                           (comp (get-in-val (list :protocols getter-name))
+                                 (emit-proto-fn (list getter-name (list (list 1 {})))))))))
+          _ (set-expr (list 'reify
+                            'Type
+                            (list 'instance? (list 'vector '_ 'v)
+                                  (list '= type-val-num (list 'get-type 'v)))
+                            'Function
+                            (list 'invoke (cons 'vector (cons '_ fields))
+                                  impls)))
+          _ (comp (get-in-val (list :defined-syms name))
+                  (forward-decl name :no-value))
+          type-ast (analyze-reify)
+          _ (static-values)
+          _ (set-expr curr-expr)
+          result (define-fwd-decl name type-ast)
+          _ (update-in-val (list :types)
+                           (fn [types]
+                             (HashMap (replace-type (seq types) type-val-num name))))]
+      result)))
 
 (defn type-ast [name fields impls]
   (let [fields (rest fields)
@@ -3292,39 +3311,7 @@ toccata-core
                           (fn [field]
                             (list (symbol (str "." field)) (list 'vector '_)
                                   field)))))]
-    (free (reify
-            AST
-            (emit-c [_]
-              (for [types (get-val :types {})
-                    :let [type-val-num (+ 2 (count (seq types)))]
-
-                    curr-expr (get-val :expr)
-                    _ (set-expr type-val-num)
-                    _ (analyze-number)
-                    _ (cond
-                       (empty? fields) (state-maybe "")
-                       (traverse fields
-                                 (fn [field]
-                                   (let [getter-name (symbol (str "." field))]
-                                     (comp (get-in-val (list :protocols getter-name))
-                                           (emit-proto-fn (list getter-name (list (list 1 {})))))))))
-                    _ (set-expr (list 'reify
-                                      'Type
-                                      (list 'instance? (list 'vector '_ 'v)
-                                            (list '= type-val-num (list 'get-type 'v)))
-                                      'Function
-                                      (list 'invoke (cons 'vector (cons '_ fields))
-                                            impls)))
-                    _ (comp (get-in-val (list :defined-syms name))
-                            (forward-decl name :no-value))
-                    type-ast (analyze-reify)
-                    _ (static-values)
-                    _ (set-expr curr-expr)
-                    result (define-fwd-decl name type-ast)
-                    _ (update-in-val (list :types)
-                                     (fn [types]
-                                       (HashMap (replace-type (seq types) type-val-num name))))]
-                result))))))
+    (type-ast-val name fields impls)))
 
 (defn emit-proto-default [arity]
   (let [default-impl (get (nth arity 1 {}) :default :no-default)]
@@ -3395,11 +3382,10 @@ toccata-core
                                                             :extern-def (str "extern Function " fn-sym ";")}))]
       fn-sym)))
 
-(defn protocol-ast [name prototypes]
-  (free (reify
-          AST
-          (emit-c [ast]
-            (traverse (seq prototypes) emit-proto-fn)))))
+(deftype protocol-ast [name prototypes]
+  AST
+  (emit-c [ast]
+    (traverse (seq prototypes) emit-proto-fn)))
 
 (defn fixed-fn-types []
   (traverse (range 10)
