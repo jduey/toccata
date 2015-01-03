@@ -3270,9 +3270,7 @@ toccata-core
     (for [types (get-val :types {})
           :let [type-val-num (+ 2 (count (seq types)))]
 
-          curr-expr (get-val :expr)
-          _ (set-expr type-val-num)
-          _ (analyze-number)
+          _ (analyze-expr type-val-num)
           _ (cond
              (empty? fields) (state-maybe "")
              (traverse fields
@@ -3280,18 +3278,16 @@ toccata-core
                          (let [getter-name (symbol (str "." field))]
                            (comp (get-in-val (list :protocols getter-name))
                                  (emit-proto-fn (list getter-name (list (list 1 {})))))))))
-          _ (set-expr (list 'reify
-                            'Type
-                            (list 'instance? (list 'vector '_ 'v)
-                                  (list '= type-val-num (list 'get-type 'v)))
-                            'Function
-                            (list 'invoke (cons 'vector (cons '_ fields))
-                                  impls)))
           _ (comp (get-in-val (list :defined-syms name))
                   (forward-decl name :no-value))
-          type-ast (analyze-reify)
+          type-ast (analyze-expr (list 'reify
+                                       'Type
+                                       (list 'instance? (list 'vector '_ 'v)
+                                             (list '= type-val-num (list 'get-type 'v)))
+                                       'Function
+                                       (list 'invoke (cons 'vector (cons '_ fields))
+                                             impls)))
           _ (static-values)
-          _ (set-expr curr-expr)
           result (define-fwd-decl name type-ast)
           _ (update-in-val (list :types)
                            (fn [types]
