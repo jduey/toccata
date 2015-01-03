@@ -2993,13 +2993,7 @@ toccata-core
             body-stmts (nth body-exprs 1 empty-list)]
         (list result-sym (comp binding-stmts body-stmts))))))
 
-(defprotocol FunctionAST
-  (fn-arities [_]))
-
 (deftype fn-ast [name arities]
-  FunctionAST
-  (fn-arities [_] (crush arities (fn [arity] (evaluate arity list))))
-
   AST
   (emit-c [_]
     (let [arity-count (count arities)]
@@ -3184,8 +3178,10 @@ toccata-core
   (let [name-ast (nth name-asts index :no-name-ast)
         name (nth name-ast 0 "")
         ast (nth name-ast 1 :no-ast)
-        num-args (first (map (fn-arities (evaluate ast identity))
-                             (fn [x] (count (.args x)))))]
+        ;; TODO: find a better way. Too tired right now
+        num-args (first (map (.arities (evaluate ast identity))
+                             (fn [x]
+                               (count (.args (evaluate x identity))))))]
     (for [evalled (evaluate ast emit-c)
           impl-sym (gensym "protoImpl_")
           fn-sym (gensym "protoFn_")
