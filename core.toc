@@ -121,12 +121,12 @@ toccata-core
 
 (defn prn [& vs]
   (map (interpose (flat-map vs serialize) " ")
-        pr*)
+       pr*)
   (pr* "\\n"))
 
 (defn print [& vs]
   (map (flat-map (interpose vs " ") string-list)
-        pr*))
+       pr*))
 
 (defn println [& vs]
   (map (flat-map (interpose vs " ") string-list) pr*)
@@ -341,18 +341,17 @@ toccata-core
    (pred (first coll)) 1
    (any? pred (rest coll))))
 
-(defn ZipList [v]
-  (reify
-    Applicative
-    (apply* [zv arg-lists]
-      (cond
-       (any? empty? arg-lists) empty-list
-       (let [cars (map arg-lists (fn [l] (cond
-                                          (empty? l) :nil
-                                          (first l))))
-             cdrs (map arg-lists rest)]
-         (cons (apply v cars)
-               (apply* zv cdrs)))))))
+(deftype ZipList [v]
+  Applicative
+  (apply* [zv arg-lists]
+    (cond
+     (any? empty? arg-lists) empty-list
+     (let [cars (map arg-lists (fn [l] (cond
+                                        (empty? l) :nil
+                                        (first l))))
+           cdrs (map arg-lists rest)]
+       (cons (apply v cars)
+             (apply* zv cdrs))))))
 
 (defn partial [f & args]
   (fn [& more-args]
@@ -370,7 +369,7 @@ toccata-core
                                 (flat-map new-mv (partial steps (cons x acc))))))]
      (cond
       (number= 1 (count mvs)) (flat-map (first mvs) (fn [x]
-                                                           (wrap mv (f x))))
+                                                      (wrap mv (f x))))
       (flat-map mv (partial rest-steps empty-list))))))
 
 (defn list-concat [l1 l2]
@@ -644,78 +643,77 @@ toccata-core
       (not (= v (get m k :hm-nf))) 0
       (hash-map= (rest a-list) m)))))
 
-(defn HashMap [a-list]
-  (reify
-    Seqable
-    (seq [_]
-      a-list)
-    (first [_]
-      (car a-list))
-    (rest [_]
-      (cdr a-list))
+(deftype HashMap [a-list]
+  Seqable
+  (seq [_]
+    a-list)
+  (first [_]
+    (car a-list))
+  (rest [_]
+    (cdr a-list))
 
-    Eq
-    (=* [x y]
-      (cond
-       (not (= (count a-list) (count (seq y)))) 0
-       (hash-map= a-list y)))
+  Eq
+  (=* [x y]
+    (cond
+     (not (= (count a-list) (count (seq y)))) 0
+     (hash-map= a-list y)))
 
-    Stringable
-    (string-list [m]
-      (cond
-       (list-empty? a-list) (list "{}")
-       (let [kv-strs (map a-list
-                           (fn [kv]
-                             (apply comp (interpose (map kv string-list)
-                                                    (list " ")))))
-             body-list (apply comp (interpose kv-strs (list ", ")))]
-         (comp (list "{")
-               body-list
-               (list "}")))))
+  Stringable
+  (string-list [m]
+    (cond
+     (list-empty? a-list) (list "{}")
+     (let [kv-strs (map a-list
+                        (fn [kv]
+                          (apply comp (interpose (map kv string-list)
+                                                 (list " ")))))
+           body-list (apply comp (interpose kv-strs (list ", ")))]
+       (comp (list "{")
+             body-list
+             (list "}")))))
 
-    ;; Serializable
-    ;; (serialize [m]
-    ;;   (cond
-    ;;    (list-empty? a-list) (list "{}")
-    ;;    (let [kv-strs (map a-list
-    ;;                        (fn [kv]
-    ;;                          (apply comp (interpose (map kv string-list)
-    ;;                                                 (list " ")))))
-    ;;          body-list (apply comp (interpose kv-strs (list ", ")))]
-    ;;      (comp (list "{")
-    ;;            body-list
-    ;;            (list "}")))))
+  ;; Serializable
+  ;; (serialize [m]
+  ;;   (cond
+  ;;    (list-empty? a-list) (list "{}")
+  ;;    (let [kv-strs (map a-list
+  ;;                        (fn [kv]
+  ;;                          (apply comp (interpose (map kv string-list)
+  ;;                                                 (list " ")))))
+  ;;          body-list (apply comp (interpose kv-strs (list ", ")))]
+  ;;      (comp (list "{")
+  ;;            body-list
+  ;;            (list "}")))))
 
-    Collection
-    (empty? [_]
-      (empty? a-list))
-    (count [_]
-      (count a-list))
+  Collection
+  (empty? [_]
+    (empty? a-list))
+  (count [_]
+    (count a-list))
 
-    Monoid
-    (zero [_]
-      (HashMap empty-list))
-    (comp* [hm ms]
-      (cond
-       (empty? ms) hm
-       (reduce ms hm
-               (fn [hm m]
-                 (reduce (seq m) hm
-                         (fn [hm kv]
-                           (assoc hm (nth kv 0) (nth kv 1))))))))
+  Monoid
+  (zero [_]
+    (HashMap empty-list))
+  (comp* [hm ms]
+    (cond
+     (empty? ms) hm
+     (reduce ms hm
+             (fn [hm m]
+               (reduce (seq m) hm
+                       (fn [hm kv]
+                         (assoc hm (nth kv 0) (nth kv 1))))))))
 
-    Associative
-    (assoc [_ k v]
-      (HashMap (map-assoc a-list k v)))
+  Associative
+  (assoc [_ k v]
+    (HashMap (map-assoc a-list k v)))
 
-    (get [_ k not-found]
-      (map-get a-list k not-found))
+  (get [_ k not-found]
+    (map-get a-list k not-found))
 
-    (keys [m]
-      (map a-list (fn [x] (first x))))
+  (keys [m]
+    (map a-list (fn [x] (first x))))
 
-    (vals [m]
-      (map a-list (fn [x] (nth x 1))))))
+  (vals [m]
+    (map a-list (fn [x] (nth x 1)))))
 
 (defn hash-map [& kv-pairs]
   (HashMap (partition kv-pairs 2)))
@@ -771,30 +769,30 @@ toccata-core
 
 (def identity-m
   (reify
-   Eq
-   (=* [x y] (type= x y))
+    Eq
+    (=* [x y] (type= x y))
 
-   ;; Stringable
-   ;; (string-list [_]
-   ;;   (list "<Id> "))
+    ;; Stringable
+    ;; (string-list [_]
+    ;;   (list "<Id> "))
 
-   Fn
-   (invoke [_ v]
-     (reify
-       ;; Stringable
-       ;; (string-list [_]
-       ;;   (comp (list "<Id: ")
-       ;;         (string-list v)
-       ;;         (list ">")))
+    Fn
+    (invoke [_ v]
+      (reify
+        ;; Stringable
+        ;; (string-list [_]
+        ;;   (comp (list "<Id: ")
+        ;;         (string-list v)
+        ;;         (list ">")))
 
-       Applicative
-       (wrap [ev v] (invoke ev v))
+        Applicative
+        (wrap [ev v] (invoke ev v))
 
-       Monad
-       (flat-map [mv f] (f v))
+        Monad
+        (flat-map [mv f] (f v))
 
-       Comonad
-       (extract [wv] v)))))
+        Comonad
+        (extract [wv] v)))))
 
 (defn symbol? [sym]
   (= Symbol (get-type sym)))
@@ -835,54 +833,53 @@ toccata-core
       (empty? v-s) v-s
       (sm-apply (rest l) head (snoc head tail (nth v-s 0)) (nth v-s 1))))))
 
-(defn new-sm [invoke-fn]
-  (reify
-    ;; Stringable
-    ;; (string-list [_]
-    ;;   (cond
-    ;;    (= identity-m effect) (comp (list "<State: ")
-    ;;                                val-string-list
-    ;;                                (list ">"))
-    ;;    (comp (list "<State ")
-    ;;          (string-list effect)
-    ;;          (list ": ")
-    ;;          val-string-list
-    ;;          (list ">"))))
+(deftype new-sm [invoke-fn]
+  ;; Stringable
+  ;; (string-list [_]
+  ;;   (cond
+  ;;    (= identity-m effect) (comp (list "<State: ")
+  ;;                                val-string-list
+  ;;                                (list ">"))
+  ;;    (comp (list "<State ")
+  ;;          (string-list effect)
+  ;;          (list ": ")
+  ;;          val-string-list
+  ;;          (list ">"))))
 
-    Fn
-    (invoke [ev s]
-      (invoke-fn s))
+  Fn
+  (invoke [ev s]
+    (invoke-fn s))
 
-    Applicative
-    (wrap [_ v]
-      (new-sm (fn [s]
-                (list v s))))
-    (apply* [fv args]
-      (new-sm (fn [s]
-                (let [head (new-list)]
-                  (sm-apply (cons fv args) head head s)))))
+  Applicative
+  (wrap [_ v]
+    (new-sm (fn [s]
+              (list v s))))
+  (apply* [fv args]
+    (new-sm (fn [s]
+              (let [head (new-list)]
+                (sm-apply (cons fv args) head head s)))))
 
-    Monad
-    (flat-map [ev f]
-      (new-sm (fn [s]
-                (let [v-ss (ev s)]
-                  (cond
-                   (empty? v-ss) v-ss
-                   (let [v (nth v-ss 0)
-                         ss (nth v-ss 1)]
-                     ((f v) ss)))))))
+  Monad
+  (flat-map [ev f]
+    (new-sm (fn [s]
+              (let [v-ss (ev s)]
+                (cond
+                 (empty? v-ss) v-ss
+                 (let [v (nth v-ss 0)
+                       ss (nth v-ss 1)]
+                   ((f v) ss)))))))
 
-    Monoid
-    (zero [_]
-      (new-sm (fn [s]
-                empty-list)))
-    (comp* [mv mvs]
-      (new-sm (fn [s]
-                (let [x (mv s)]
-                  (cond
-                   (empty? mvs) x
-                   (empty? x) ((comp* (first mvs) (rest mvs)) s)
-                   x)))))))
+  Monoid
+  (zero [_]
+    (new-sm (fn [s]
+              empty-list)))
+  (comp* [mv mvs]
+    (new-sm (fn [s]
+              (let [x (mv s)]
+                (cond
+                 (empty? mvs) x
+                 (empty? x) ((comp* (first mvs) (rest mvs)) s)
+                 x))))))
 
 (defprotocol FreeEval
   (evaluate [free-val eval-endo]))
@@ -892,162 +889,159 @@ toccata-core
 
 (def free-zero
   (reify
-   ;; Stringable
-   ;; (string-list [_] (list "<FreeZero>"))
-
-   Eq
-   (=* [x y] (type= x y))
-
-   Applicative
-   (wrap [_ v] (free-val v))
-   (apply* [fv args]
-           (free-app fv args))
-
-   Monoid
-   (zero [ev] ev)
-   (comp* [_ mvs] mvs)))
-
-(def free-plus
-  (reify
-   ;; Stringable
-   ;; (string-list [_] (list "<FreePlus>"))
-
-   Eq
-   (=* [x y] (type= x y))
-
-   Fn
-   (invoke [free-plus alts]
-           (reify
-             ;; Stringable
-             ;; (string-list [_]
-             ;;   (comp (list "<FreePlus: ")
-             ;;         (string-list alts)
-             ;;         (list ">")))
-
-             FreeEval
-             (evaluate [free-val eval-endo]
-               (crush alts (fn [alt]
-                             (evaluate alt eval-endo))))
-
-             Applicative
-             (wrap [_ v] (free-val v))
-             (apply* [fv args]
-               (free-app fv args))
-
-             Comonad
-             (extract [_] alts)
-
-             Monoid
-             (zero [ev] free-zero)
-             (comp* [mv mvs]
-               (invoke free-plus (cons mv mvs)))))))
-
-(defn pure [arg]
-  (reify
     ;; Stringable
-    ;; (string-list [_]
-    ;;   (comp (list "<Pure: ")
-    ;;         (string-list arg)
-    ;;         (list ">")))
-
-    FreeEval
-    (evaluate [pure-val eval-endo]
-      (eval-endo arg))
+    ;; (string-list [_] (list "<FreeZero>"))
 
     Eq
-    (=* [x y]
-      (and (type= x y)
-           (= arg (extract y))))
-
-    Applicative
-    (wrap [_ v] (pure v))
-    (apply* [fv args]
-      (free-app fv args))
-
-    Comonad
-    (extract [_] arg)
-
-    Monoid
-    (zero [ev] free-zero)
-    (comp* [mv mvs]
-      (free-plus (cons mv mvs)))))
-
-(defn free-app [fv args]
-  (reify
-    ;; Stringable
-    ;; (string-list [_]
-    ;;   (comp (list "<FreeApp: ")
-    ;;         (string-list fv)
-    ;;         (list " ")
-    ;;         (string-list args)
-    ;;         (list ">")))
-
-    FreeEval
-    (evaluate [free-val eval-endo]
-      (let [args (map args (fn [arg]
-                             (evaluate arg eval-endo)))
-            f (evaluate fv eval-endo)]
-        (apply* f args)))
-
-    Eq
-    (=* [x y]
-      (and (type= x y)
-           (= (list fv args)
-              (extract y))))
+    (=* [x y] (type= x y))
 
     Applicative
     (wrap [_ v] (free-val v))
     (apply* [fv args]
       (free-app fv args))
 
-    Comonad
-    (extract [_]
-      (list fv args))
-
     Monoid
-    (zero [ev]
-      free-zero)
-    (comp* [mv mvs]
-      (free-plus (cons mv mvs)))))
+    (zero [ev] ev)
+    (comp* [_ mvs] mvs)))
 
-(defn free [v]
+(def free-plus
   (reify
     ;; Stringable
-    ;; (string-list [_]
-    ;;   (comp (list "<Free: ")
-    ;;         (string-list v)
-    ;;         (list ">")))
-
-    FreeEval
-    (evaluate [free-val eval-endo]
-      (eval-endo v))
+    ;; (string-list [_] (list "<FreePlus>"))
 
     Eq
-    (=* [x y]
-      (and (type= x y)
-           (= v (extract y))))
+    (=* [x y] (type= x y))
 
-    Applicative
-    (wrap [_ v]
-      (free v))
-    (apply* [fv args]
-      (free-app fv args))
+    Fn
+    (invoke [free-plus alts]
+      (reify
+        ;; Stringable
+        ;; (string-list [_]
+        ;;   (comp (list "<FreePlus: ")
+        ;;         (string-list alts)
+        ;;         (list ">")))
 
-    Comonad
-    (extract [_] v)
+        FreeEval
+        (evaluate [free-val eval-endo]
+          (crush alts (fn [alt]
+                        (evaluate alt eval-endo))))
 
-    ;; Monad
-    ;; (flat-map [ev f]
-    ;;   (println :v v)
-    ;;   (invoke effect (map v (fn [inner-v]
-    ;;                           (println :inner-v inner-v)
-    ;;                           (flat-map inner-v f)))))
+        Applicative
+        (wrap [_ v] (free-val v))
+        (apply* [fv args]
+          (free-app fv args))
 
-    Monoid
-    (zero [_]
-      free-zero)
-    (comp* [mv mvs]
-      (free-plus (cons mv mvs)))))
+        Comonad
+        (extract [_] alts)
+
+        Monoid
+        (zero [ev] free-zero)
+        (comp* [mv mvs]
+          (invoke free-plus (cons mv mvs)))))))
+
+(deftype pure [arg]
+  ;; Stringable
+  ;; (string-list [_]
+  ;;   (comp (list "<Pure: ")
+  ;;         (string-list arg)
+  ;;         (list ">")))
+
+  FreeEval
+  (evaluate [pure-val eval-endo]
+    (eval-endo arg))
+
+  Eq
+  (=* [x y]
+    (and (type= x y)
+         (= arg (extract y))))
+
+  Applicative
+  (wrap [_ v] (pure v))
+  (apply* [fv args]
+    (free-app fv args))
+
+  Comonad
+  (extract [_] arg)
+
+  Monoid
+  (zero [ev] free-zero)
+  (comp* [mv mvs]
+    (free-plus (cons mv mvs))))
+
+(deftype free-app [fv args]
+  ;; Stringable
+  ;; (string-list [_]
+  ;;   (comp (list "<FreeApp: ")
+  ;;         (string-list fv)
+  ;;         (list " ")
+  ;;         (string-list args)
+  ;;         (list ">")))
+
+  FreeEval
+  (evaluate [free-val eval-endo]
+    (let [args (map args (fn [arg]
+                           (evaluate arg eval-endo)))
+          f (evaluate fv eval-endo)]
+      (apply* f args)))
+
+  Eq
+  (=* [x y]
+    (and (type= x y)
+         (= (list fv args)
+            (extract y))))
+
+  Applicative
+  (wrap [_ v] (free-val v))
+  (apply* [fv args]
+    (free-app fv args))
+
+  Comonad
+  (extract [_]
+    (list fv args))
+
+  Monoid
+  (zero [ev]
+    free-zero)
+  (comp* [mv mvs]
+    (free-plus (cons mv mvs))))
+
+(deftype free [v]
+  ;; Stringable
+  ;; (string-list [_]
+  ;;   (comp (list "<Free: ")
+  ;;         (string-list v)
+  ;;         (list ">")))
+
+  FreeEval
+  (evaluate [free-val eval-endo]
+    (eval-endo v))
+
+  Eq
+  (=* [x y]
+    (and (type= x y)
+         (= v (extract y))))
+
+  Applicative
+  (wrap [_ v]
+    (free v))
+  (apply* [fv args]
+    (free-app fv args))
+
+  Comonad
+  (extract [_] v)
+
+  ;; Monad
+  ;; (flat-map [ev f]
+  ;;   (println :v v)
+  ;;   (invoke effect (map v (fn [inner-v]
+  ;;                           (println :inner-v inner-v)
+  ;;                           (flat-map inner-v f)))))
+
+  Monoid
+  (zero [_]
+    free-zero)
+  (comp* [mv mvs]
+    (free-plus (cons mv mvs))))
 
 (defn free-val [v] (free v))
 
@@ -1148,7 +1142,7 @@ toccata-core
 (deftype parser-always [v]
   Parser
   (recursive-descent [_]
-                     (state-maybe (list v))))
+    (state-maybe (list v))))
 
 (defn always [v]
   (free (parser-always v)))
@@ -1184,8 +1178,8 @@ toccata-core
 (deftype parse-upper-alphas []
   Parser
   (recursive-descent [_]
-                     (char-test (fn [c]
-                                  (< (dec (char-code "A")) (char-code c) (inc (char-code "Z")))))))
+    (char-test (fn [c]
+                 (< (dec (char-code "A")) (char-code c) (inc (char-code "Z")))))))
 
 (defn upper-alpha []
   (free (parse-upper-alphas)))
@@ -1331,9 +1325,9 @@ toccata-core
 (deftype parse-sub-form []
   Parser
   (recursive-descent [_]
-                     (for [parser-fn (get-in-val (list :parser-fns "form") :blah)
-                           result (new-sm parser-fn)]
-                       result)))
+    (for [parser-fn (get-in-val (list :parser-fns "form") :blah)
+          result (new-sm parser-fn)]
+      result)))
 
 (defn read-sub-form []
   (free (parse-sub-form)))
@@ -1545,11 +1539,11 @@ toccata-core
 (deftype parser-rule [name grammar]
   Parser
   (recursive-descent [_]
-                     (let [parser (evaluate grammar recursive-descent)
-                           parser-fn (fn [s] (parser s))]
-                       (for [_ (assoc-in-val (list :parser-fns name) parser-fn)
-                             result (new-sm parser-fn)]
-                         result))))
+    (let [parser (evaluate grammar recursive-descent)
+          parser-fn (fn [s] (parser s))]
+      (for [_ (assoc-in-val (list :parser-fns name) parser-fn)
+            result (new-sm parser-fn)]
+        result))))
 
 (defn rule [name grammar]
   (free (parser-rule name grammar)))
@@ -1620,15 +1614,15 @@ toccata-core
 
 (defn analyze-inline-text []
   (for [expr (is-expr (fn [x]
-                       (cond
-                        (not (seq? x)) false
-                        (empty? x) false
-                        (= (first x) 'inline-text))))]
-    (inline-ast (nth expr 1 ""))))
+                        (cond
+                         (not (seq? x)) false
+                         (empty? x) false
+                         (= (first x) 'inline-text))))]
+    (free (inline-ast (nth expr 1 "")))))
 
 (defn analyze-symbol []
   (for [sym (is-expr symbol?)]
-    (symbol-ast sym)))
+    (free (symbol-ast sym))))
 
 (defn keyword-already-defined? [kw]
   (get-in-val (list :keywords kw)))
@@ -1657,7 +1651,7 @@ toccata-core
                 (keyword-recently-defined? kw)
                 (keyword-defined-in-core kw)
                 (make-static-keyword kw))]
-    (keyword-ast kw)))
+    (free (keyword-ast kw))))
 
 (defn number-already-defined? [num]
   (get-in-val (list :numbers num)))
@@ -1692,7 +1686,7 @@ toccata-core
                 (number-recently-defined? num)
                 (number-defined-in-core num)
                 (make-static-number num))]
-    (const-number-ast num)))
+    (free (const-number-ast num))))
 
 (defn string-already-defined? [str-val]
   (get-in-val (list :strings str-val)))
@@ -1721,12 +1715,12 @@ toccata-core
                 (string-recently-defined? str-val)
                 (string-defined-in-core str-val)
                 (make-static-string str-val))]
-    (const-string-ast str-val)))
+    (free (const-string-ast str-val))))
 
 (defn analyze-call []
   (for [expr (is-expr (fn [s] (not-empty? s)))
         asts (traverse expr analyze-expr)]
-    (call-ast (first asts) (rest asts))))
+    (free (call-ast (first asts) (rest asts)))))
 
 (defn analyze-let-binding [binding-pair]
   (cond
@@ -1738,7 +1732,7 @@ toccata-core
            binding (is-expr symbol?)
            ast (analyze-expr expr)
            _ (set-val :expr curr-expr)]
-       (binding-ast binding ast)))))
+       (free (binding-ast binding ast))))))
 
 (defn analyze-let []
   (for [expr (is-expr (fn [x]
@@ -1749,8 +1743,8 @@ toccata-core
         bindings (traverse (nth expr 1 empty-list)
                            analyze-let-binding)
         body (traverse (drop expr 2) analyze-expr)]
-    (let-ast (apply* (pure list) bindings)
-             (apply* (pure list) body))))
+    (free (let-ast (apply* (pure list) bindings)
+                   (apply* (pure list) body)))))
 
 (defn variadic? [expr]
   (let [args (nth expr 1 empty-list)]
@@ -1763,9 +1757,9 @@ toccata-core
                          (not (= (first x) 'fn-arity)) false
                          (variadic? x))))
         body (traverse (nth expr 2 empty-list) analyze-expr)]
-    (variadic-arity-ast (filter (nth expr 1 empty-list) (fn [arg]
-                                                          (not (= "&" arg))))
-                        (apply* (pure list) body))))
+    (free (variadic-arity-ast (filter (nth expr 1 empty-list) (fn [arg]
+                                                                (not (= "&" arg))))
+                              (apply* (pure list) body)))))
 
 (defn analyze-fn-arity []
   (for [expr (is-expr (fn [x]
@@ -1775,8 +1769,8 @@ toccata-core
                          (not (variadic? x)))))
         file-name (get-val :file-name "")
         body (traverse (nth expr 2 empty-list) analyze-expr)]
-    (fn-arity-ast (nth expr 1 empty-list)
-                  (apply* (pure list) body))))
+    (free (fn-arity-ast (nth expr 1 empty-list)
+                        (apply* (pure list) body)))))
 
 ;; TODO: let anonymous function closures reference themselves by name
 (defn analyze-fn []
@@ -1885,8 +1879,8 @@ toccata-core
         body (traverse (drop expr 2) analyze-expr)]
     (list (nth expr 0 'no-name)
           (fn-ast (str (nth expr 0 'no-name) "_impl")
-                  (list (fn-arity-ast (rest (nth expr 1 empty-list))
-                                      (apply* (pure list) body)))))))
+                  (list (free (fn-arity-ast (rest (nth expr 1 empty-list))
+                                            (apply* (pure list) body))))))))
 
 (defn analyze-proto-impl []
   (for [name (is-form? symbol?)
@@ -1946,8 +1940,8 @@ toccata-core
                          (not (< 2 (count x))) false
                          (= 'main (first x)))))
         body (traverse (drop expr 2) analyze-expr)]
-    (main-ast (nth expr 1 empty-list)
-              (apply* (pure list) body))))
+    (free (main-ast (nth expr 1 empty-list)
+                    (apply* (pure list) body)))))
 
 (defn expr-to-ast []
   (comp (analyze-symbol)
@@ -2023,7 +2017,7 @@ toccata-core
 
 (defn symkey-name [v]
   (inline-text
-     "return(stringValue(((SymKey *)arg0)->name));"))
+   "return(stringValue(((SymKey *)arg0)->name));"))
 
 (defn char-code [c]
   (inline-text "if (arg0->type == StringType) {
@@ -2568,11 +2562,10 @@ toccata-core
   (emit-c [ast]
     (state-maybe ast)))
 
-(defn inline-ast [txt]
-  (free (reify
-          AST
-          (emit-c [_]
-            (state-maybe (list "" (list txt)))))))
+(deftype inline-ast [txt]
+  AST
+  (emit-c [_]
+    (state-maybe (list "" (list txt)))))
 
 (defn local-sym [sym]
   (for [sym-val (get-in-val (list :local-syms sym))]
@@ -2620,36 +2613,32 @@ toccata-core
                   (print-err "Undefined symbol:" sym "at" (get s :file-name "") ":" (get s :line-num ""))
                   (abort)))))
 
-(defn symbol-ast [sym]
-  (free (reify
-          Stringable
-          (string-list [f] (list (str sym)))
+(deftype symbol-ast [sym]
+  Stringable
+  (string-list [f] (list (str sym)))
 
-          AST
-          (emit-c [_]
-            (lookup-sym sym)))))
+  AST
+  (emit-c [_]
+    (lookup-sym sym)))
 
-(defn keyword-ast [kw]
-  (free (reify
-          AST
-          (emit-c [_]
-            (for [static-kw (get-in-val (list :keywords kw))]
-              (list (str "(Value *)&" static-kw) empty-list))))))
+(deftype keyword-ast [kw]
+  AST
+  (emit-c [_]
+    (for [static-kw (get-in-val (list :keywords kw))]
+      (list (str "(Value *)&" static-kw) empty-list))))
 
-(defn const-number-ast [num]
-  (free (reify
-          AST
-          (emit-c [_]
-            (for [static-num (comp (get-in-val (list :numbers num))
-                                   (get-in-val (list :new-numbers num)))]
-              (list (str "(Value *)&" static-num) empty-list))))))
+(deftype const-number-ast [num]
+  AST
+  (emit-c [_]
+    (for [static-num (comp (get-in-val (list :numbers num))
+                           (get-in-val (list :new-numbers num)))]
+      (list (str "(Value *)&" static-num) empty-list))))
 
-(defn const-string-ast [const-str]
-  (free (reify
-          AST
-          (emit-c [ast]
-            (for [static-str (get-in-val (list :strings const-str) :no-static-str)]
-              (list (str "(Value *)&" static-str) empty-list))))))
+(deftype const-string-ast [const-str]
+  AST
+  (emit-c [ast]
+    (for [static-str (get-in-val (list :strings const-str) :no-static-str)]
+      (list (str "(Value *)&" static-str) empty-list))))
 
 (defn reset-fn-context [arity-fn-sym num-args]
   (for [locals (get-val :local-syms {})
@@ -2754,97 +2743,88 @@ toccata-core
 
    (state-maybe empty-list)))
 
-(defn variadic-arity-ast [args body]
-  (free (reify
-          AST
-          (emit-c [_]
-            (let [c-args (list "closures" "varArgs")
-                  arg-count (count args)]
-              (for [arity-fn-sym (gensym "arityImpl_")
-                    arity-sym (genlocal "arity_")
-                    fn-context (reset-fn-context arity-fn-sym arg-count)
-                    arg-syms (gen-arg-syms args)
-                    body-exprs (eval-exprs body)
-                    _ (emit-externs)
+(deftype variadic-arity-ast [args body]
+  AST
+  (emit-c [_]
+    (let [c-args (list "closures" "varArgs")
+          arg-count (count args)]
+      (for [arity-fn-sym (gensym "arityImpl_")
+            arity-sym (genlocal "arity_")
+            fn-context (reset-fn-context arity-fn-sym arg-count)
+            arg-syms (gen-arg-syms args)
+            body-exprs (eval-exprs body)
+            _ (emit-externs)
 
-                    _ (write-strs (list*
-                                   (str "Value *" arity-fn-sym "(List *closures, Value *varArgs) {\\n")
-                                   "List *argsList = (List *)varArgs;\\n"
-                                   (map (range arg-count)
-                                        (fn [index]
-                                          (let [c-sym (nth arg-syms index "")]
-                                            (cond
-                                             (< (inc index) arg-count)
-                                             (str "Value *" c-sym
-                                                  " = argsList->head;\\n"
-                                                  "if (argsList->tail) argsList->tail->len = argsList->len - 1;\\n"
-                                                  "argsList = argsList->tail;\\n")
+            _ (write-strs (list*
+                           (str "Value *" arity-fn-sym "(List *closures, Value *varArgs) {\\n")
+                           "List *argsList = (List *)varArgs;\\n"
+                           (map (range arg-count)
+                                (fn [index]
+                                  (let [c-sym (nth arg-syms index "")]
+                                    (cond
+                                     (< (inc index) arg-count)
+                                     (str "Value *" c-sym
+                                          " = argsList->head;\\n"
+                                          "if (argsList->tail) argsList->tail->len = argsList->len - 1;\\n"
+                                          "argsList = argsList->tail;\\n")
 
-                                             (str "Value *" c-sym " = (Value *)argsList;\\n")))))))
+                                     (str "Value *" c-sym " = (Value *)argsList;\\n")))))))
 
-                    _ (apply-to list
-                                (emit-closures)
-                                (emit-body body-exprs)
-                                (write "};\\n"))
-                    closures (get-val :closed-over empty-list)
-                    _ (restore-fn-context fn-context)
-                    result (cond
-                            (< 0 (count closures)) (arity-closes-over arity-sym arity-fn-sym
-                                                                      c-args closures 1)
-                            (static-arity arity-fn-sym c-args 1))]
-                result))))))
+            _ (apply-to list
+                        (emit-closures)
+                        (emit-body body-exprs)
+                        (write "};\\n"))
+            closures (get-val :closed-over empty-list)
+            _ (restore-fn-context fn-context)
+            result (cond
+                    (< 0 (count closures)) (arity-closes-over arity-sym arity-fn-sym
+                                                              c-args closures 1)
+                    (static-arity arity-fn-sym c-args 1))]
+        result))))
 
-(defprotocol FunctionArityAST
-  (fn-args [_]))
+(deftype fn-arity-ast [args body]
+  AST
+  (emit-c [_]
+    (for [arity-sym (genlocal "arity_")
+          arity-fn-sym (gensym "arityImpl_")
+          fn-context (reset-fn-context arity-fn-sym (count args))
+          arg-syms (gen-arg-syms args)
+          body-exprs (eval-exprs body)
+          _ (emit-externs)
 
-(defn fn-arity-ast [args body]
-  (free (reify
-          FunctionArityAST
-          (fn-args [_] args)
+          _ (apply-to list
+                      (write (str "Value *" arity-fn-sym "("))
+                      (write-strs (interpose (cons "List *closures"
+                                                   (map arg-syms (fn [arg] (str "Value *" arg))))
+                                             ", "))
+                      (write ") {\\n")
+                      (emit-closures)
+                      (emit-body body-exprs)
+                      (write "};\\n\\n"))
+          closures (get-val :closed-over empty-list)
+          _ (restore-fn-context fn-context)
+          result (cond
+                  (< 0 (count closures)) (arity-closes-over arity-sym arity-fn-sym
+                                                            arg-syms closures 0)
+                  (static-arity arity-fn-sym arg-syms 0))]
+      result)))
 
-          AST
-          (emit-c [_]
-            (for [arity-sym (genlocal "arity_")
-                  arity-fn-sym (gensym "arityImpl_")
-                  fn-context (reset-fn-context arity-fn-sym (count args))
-                  arg-syms (gen-arg-syms args)
-                  body-exprs (eval-exprs body)
-                  _ (emit-externs)
-
-                  _ (apply-to list
-                              (write (str "Value *" arity-fn-sym "("))
-                              (write-strs (interpose (cons "List *closures"
-                                                           (map arg-syms (fn [arg] (str "Value *" arg))))
-                                                     ", "))
-                              (write ") {\\n")
-                              (emit-closures)
-                              (emit-body body-exprs)
-                              (write "};\\n\\n"))
-                  closures (get-val :closed-over empty-list)
-                  _ (restore-fn-context fn-context)
-                  result (cond
-                          (< 0 (count closures)) (arity-closes-over arity-sym arity-fn-sym
-                                                                    arg-syms closures 0)
-                          (static-arity arity-fn-sym arg-syms 0))]
-              result)))))
-
-(defn main-ast [args body]
-  (free (reify
-          AST
-          (emit-c [_]
-            (for [main-sym (gensym "main_")
-                  _ (set-val :main-sym main-sym)
-                  arg-syms (gen-arg-syms args)
-                  _ (set-val :local-sym-count 0)
-                  body (eval-exprs body)
-                  _ (emit-externs)
-                  _ (write (str "\\nint " main-sym " ("))
-                  _ (write-strs (interpose (map arg-syms (fn [arg] (str "Value *" arg)))
-                                            ", "))
-                  _ (write ") {\\n")
-                  _ (write-strs (nth body 1 empty-list))
-                  _ (write "\\nreturn(0);\\n}\\n\\n")]
-              "")))))
+(deftype main-ast [args body]
+  AST
+  (emit-c [_]
+    (for [main-sym (gensym "main_")
+          _ (set-val :main-sym main-sym)
+          arg-syms (gen-arg-syms args)
+          _ (set-val :local-sym-count 0)
+          body (eval-exprs body)
+          _ (emit-externs)
+          _ (write (str "\\nint " main-sym " ("))
+          _ (write-strs (interpose (map arg-syms (fn [arg] (str "Value *" arg)))
+                                   ", "))
+          _ (write ") {\\n")
+          _ (write-strs (nth body 1 empty-list))
+          _ (write "\\nreturn(0);\\n}\\n\\n")]
+      "")))
 
 (defn eval-args [args]
   (cond
@@ -2983,46 +2963,43 @@ toccata-core
                                Value* result-sym " = " arity-sym "(" (first arg-syms) ", (Value *)"
                                variadic-sym ");\\n"))))))))
 
-(defn call-ast [callee params]
-  (free (reify
-          AST
-          (emit-c [_]
-            (for [target (evaluate callee emit-c)
-                  args (eval-args params)
-                  result (comp (call-static-fixed target args)
-                               (call-static-variadic target args)
-                               (call-recursive target args)
-                               (call-dynamic-fn target args)
-                               (new-sm (fn [s]
-                                         (print-err (str "could not emit callsite for '"
-                                                         (first (evaluate callee string-list))
-                                                         "'"))
-                                         (print-err :target (first target))
-                                         (abort))))]
-              result)))))
+(deftype call-ast [callee params]
+  AST
+  (emit-c [_]
+    (for [target (evaluate callee emit-c)
+          args (eval-args params)
+          result (comp (call-static-fixed target args)
+                       (call-static-variadic target args)
+                       (call-recursive target args)
+                       (call-dynamic-fn target args)
+                       (new-sm (fn [s]
+                                 (print-err (str "could not emit callsite for '"
+                                                 (first (evaluate callee string-list))
+                                                 "'"))
+                                 (print-err :target (first target))
+                                 (abort))))]
+      result)))
 
-(defn binding-ast [binding val]
-  (free (reify
-          AST
-          (emit-c [_]
-            (for [evalled (evaluate val emit-c)
-                  _ (assoc-in-val (list :local-syms binding) (nth evalled 0 ""))]
-              (list "" (nth evalled 1 empty-list)))))))
+(deftype binding-ast [binding val]
+  AST
+  (emit-c [_]
+    (for [evalled (evaluate val emit-c)
+          _ (assoc-in-val (list :local-syms binding) (nth evalled 0 ""))]
+      (list "" (nth evalled 1 empty-list)))))
 
-(defn let-ast [bindings body]
-  (free (reify
-          AST
-          (emit-c [_]
-            (for [locals (get-val :local-syms {})
-                  bindings (evaluate bindings emit-c)
-                  body-exprs (eval-exprs body)
-                  _ (set-val :local-syms locals)]
-              (let [binding-stmts (crush bindings
-                                         (fn [binding]
-                                           (nth binding 1 empty-list)))
-                    result-sym (nth body-exprs 0 "")
-                    body-stmts (nth body-exprs 1 empty-list)]
-                (list result-sym (comp binding-stmts body-stmts))))))))
+(deftype let-ast [bindings body]
+  AST
+  (emit-c [_]
+    (for [locals (get-val :local-syms {})
+          bindings (evaluate bindings emit-c)
+          body-exprs (eval-exprs body)
+          _ (set-val :local-syms locals)]
+      (let [binding-stmts (crush bindings
+                                 (fn [binding]
+                                   (nth binding 1 empty-list)))
+            result-sym (nth body-exprs 0 "")
+            body-stmts (nth body-exprs 1 empty-list)]
+        (list result-sym (comp binding-stmts body-stmts))))))
 
 (defprotocol FunctionAST
   (arities [_]))
@@ -3222,7 +3199,7 @@ toccata-core
         ast (nth name-ast 1 :no-ast)
         num-args (first (map (arities (evaluate ast (fn [a] a)))
                              (fn [x]
-                               (count (fn-args x)))))]
+                               (count (.args x)))))]
     (for [evalled (evaluate ast emit-c)
           impl-sym (gensym "protoImpl_")
           fn-sym (gensym "protoFn_")
