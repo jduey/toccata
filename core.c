@@ -957,15 +957,28 @@ return (arg0);
 Function fn_113 = {3, "list", 1, {&(FnArity){2, (List *)0, 1, arityImpl_114}}};
 ProtoImpls *protoImpls_116;
 Value *arityImpl_119(List *closures, Value *arg0, Value *arg1) {
-Value *rslt0 = protoFnImpl_95((List *)var_31, arg0, arg1);
+Value *rslt3;
+if((arg1)->type != 3) {
+rslt3 = protoFnImpl_5(empty_list, arg1, arg0);
+} else {
+FnArity *arity0 = findFnArity(arg1, 1);
+if(arity0 != (FnArity *)0 && !arity0->variadic) {
+FnType1 *fn2 = (FnType1 *)arity0->fn;
+rslt3 = fn2(arity0->closures, arg0);
+} else if(arity0 != (FnArity *)0 && arity0->variadic) {
+FnType1 *fn2 = (FnType1 *)arity0->fn;
 List *varArgs1 = (List *)GC_malloc(sizeof(List));
 varArgs1->type  = ListType;
 varArgs1->len = 0;
 varArgs1->head = (Value *)0;
 varArgs1->tail = (List *)0;
-varArgs1 = (List *)listCons((Value *)arg0, varArgs1);
-Value *rslt2 = arityImpl_114((List *)var_31, (Value *)varArgs1);
-Value *rslt3 = protoFnImpl_105((List *)var_31, rslt0, rslt2);
+varArgs1 = (List *)listCons(arg0, varArgs1);
+rslt3 = fn2(arity0->closures, (Value *)varArgs1);
+} else {
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)arg1)->name);
+  abort();
+}
+}
 return (rslt3);
 };
 

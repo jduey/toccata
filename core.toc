@@ -91,7 +91,7 @@ toccata-core
 
 (defprotocol Functor
   (map [v f]
-    (apply* (wrap v f) (list v))))
+    (f v)))
 
 (defprotocol Named
   (name [value]
