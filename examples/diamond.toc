@@ -37,7 +37,7 @@
 ;; and then creating the upper half, then the lower half of the diamond. 
 (defn diamond [c]
   (let [l (a->n c)]
-    (list-concat
+    (comp
       (for [i (range (inc l))] (str (spaces (- l i)) (n->a i) (gap i) (cond (< i 1) "" (n->a i))))
       (for [i (reverse (range  l))] (str (spaces (- l i)) (n->a i) (gap i) (cond (< i 1) "" (n->a i)))))))
 
@@ -52,5 +52,5 @@
       
 ;; Main. Try it with "A"->"Z"
 (main [arg-list]
- (print-all (diamond "Z")))
+  (print-all (diamond "Z")))
 
