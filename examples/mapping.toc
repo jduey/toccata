@@ -1,0 +1,41 @@
+
+(deftype maybe-value [v])
+
+(extend-type maybe-value
+  Stringable
+  (string-list [mv]
+    (comp (list "<maybe ")
+          (string-list (.v mv))
+          (list ">"))))
+
+(extend-type maybe-value
+  Functor
+  (map [mv f]
+    (maybe-value (f (.v mv)))))
+
+(deftype TreeVal [children]
+  Stringable
+  (string-list [_] (string-list children))
+
+  Functor
+  (map [_ f]
+    (TreeVal (map children (fn [child]
+                             (map child f))))))
+
+(defn tree [& children]
+  (TreeVal children))
+
+(main [_]
+      (println :char-code-A (char-code "A"))
+      (println (maybe-value 10) (instance? maybe-value (maybe-value 8)))
+      (let [mv (maybe-value 8)]
+        (println (maybe-value (inc (.v mv)))))
+      (println (map (maybe-value 3) inc))
+      (let [int-list (list 9 8 3 7 5)]
+        (println :map-list (map int-list inc))
+        (println :nested-map (map (map int-list inc) str))
+        (println :comped-map (map int-list (comp inc str))))
+
+      (println)
+      (let [t1 (tree 5 1 (tree -4 2 9) 8 (tree (tree (maybe-value 0) 3) -8))]
+        (println (map t1 inc))))
