@@ -41,16 +41,7 @@
       (for [i (range (inc l))] (str (spaces (- l i)) (n->a i) (gap i) (cond (< i 1) "" (n->a i))))
       (for [i (reverse (range  l))] (str (spaces (- l i)) (n->a i) (gap i) (cond (< i 1) "" (n->a i)))))))
 
-;; This prints out all the elements of a sequence, one element per line
-(defn print-all [s]
-  (cond (list-empty? s) 
-    (println)
-    (let [h (first s)
-          r (rest s)]
-      (println h)
-      (print-all r))))
-      
 ;; Main. Try it with "A"->"Z"
 (main [arg-list]
-  (print-all (diamond "Z")))
+  (map (diamond "Z") println))
 
