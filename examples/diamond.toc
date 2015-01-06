@@ -1,0 +1,47 @@
+;; The Diamond Kata
+;;
+;; This problem came up on the Google Clojure Group, and I was curious to give it a go. The problem is desribed at:
+;; http://alistair.cockburn.us/Thinking+before+programming
+;; but essentially you call a function with a character from \A to \Z and it prints out a diamond with the letters.
+;; (diamond "A") prints
+;; A
+;; (diamond "C" prints
+;;   A
+;;  B  B
+;; C    C
+;;  B  B
+;;   A
+;;
+;; The key observation is that its doesn't matter how many letters you are doing, a given letter is
+;; always followed by a fixed number of spaces. So A has no spaces, but C has six spaces. This is 
+;; independant of the size of the diamond. I was particularly taken with the size and simplicity of this
+;; solution compared with other languages.
+;;
+;; The code itself is a set of four trivial helper functions followed by the diamond function that does
+;; most of the work. and a print function that dumps the final solution. Unlike the original clojure version
+;; this one does not yet guard against bad inputs so if you try (diamond "a") you are on your own.
+ 
+;; Create a string with a given number of spaces. 
+(defn spaces [n] (cond (< n 1) "" (apply str (repeat n " "))))
+ 
+;; Given a number between 0 and 25 return a character, "A" is 0, "Z" is 25
+(defn n->a [n] (nth "ABCDEFGHIJKLMNOPQRSTUVWXYZ" n))
+ 
+;; Given a character between "A" and "Z", return its numeric index where "A" is 0 and "Z" is 25
+(defn a->n [a] (- (char-code a) (char-code "A")))
+ 
+;; Return a string of 2n-1 spaces for a given n
+(defn gap [n] (spaces (dec (* 2 n))))
+ 
+;; The diamond function works by calculating the index of the selected character
+;; and then creating the upper half, then the lower half of the diamond. 
+(defn diamond [c]
+  (let [l (a->n c)]
+    (comp
+      (for [i (range (inc l))] (str (spaces (- l i)) (n->a i) (gap i) (cond (< i 1) "" (n->a i))))
+      (for [i (reverse (range  l))] (str (spaces (- l i)) (n->a i) (gap i) (cond (< i 1) "" (n->a i)))))))
+
+;; Main. Try it with "A"->"Z"
+(main [arg-list]
+  (map (diamond "Z") println))
+
