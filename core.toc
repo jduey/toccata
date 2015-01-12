@@ -49,7 +49,7 @@ toccata-core
     return(true);\n"))
 
 ;; @jneen_
-(defprotocol Variant
+(defprotocol Variant ;; is CoProduct or Tagged Union
   (bippity [_])
   (match* [_]
     (pr* ":match*-one-arg"))
@@ -66,7 +66,8 @@ toccata-core
 
 (defprotocol Comonad
   (extract [wv])
-  (extend [wv f]))
+  (extend [wv f])
+  (duplicate [wv]))
 
 (def comprehend)
 
@@ -1749,8 +1750,8 @@ toccata-core
                          (not (= (first x) 'fn-arity)) false
                          (variadic? x))))
         body (traverse (nth expr 2 empty-list) analyze-expr)]
-    (free (variadic-arity-ast (filter (nth expr 1 empty-list) (fn [arg]
-                                                                (not (= "&" arg))))
+    (free (variadic-arity-ast (remove (nth expr 1 empty-list) (fn [arg]
+                                                                (= "&" arg)))
                               (apply* (pure list) body)))))
 
 (defn analyze-fn-arity []

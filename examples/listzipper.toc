@@ -1,0 +1,88 @@
+
+(def move-left)
+(def move-right)
+
+(defn extend-side
+  ([f context move side]
+     (let [new-side (new-list)]
+       (extend-side f new-side move (move context) new-side side)))
+  ([f new-side move context new-tail side]
+     (cond
+      (empty? side) new-side
+      (extend-side f
+                   new-side
+                   move
+                   (move context)
+                   (snoc new-side new-tail (f context))
+                   (rest side)))))
+
+(deftype list-zipper-val [left focus right]
+  Stringable
+  (string-list [_]
+    (comp (list "<list-zipper ")
+          (interpose (apply comp (map (reverse left) string-list)) " ")
+          (list " ")
+          (string-list focus)
+          (list " ")
+          (interpose (apply comp (map right string-list)) " ")
+          (list ">")))
+
+  Eq
+  (=* [x y]
+    (cond
+     (not (instance? list-zipper-val y)) false
+     (and (= left (.left y))
+          (= focus (.focus y))
+          (= right (.right y)))))
+
+  Seqable
+  (seq? [_] true)
+  (seq [_] (comp (reverse left) (cons focus right)))
+  (first [_] (first (reverse left)))
+  (rest [lz] (rest (seq lz)))
+
+  Functor
+  (map [_ f] (list-zipper-val (map left f)
+                              (f focus)
+                              (map right f)))
+
+  Comonad
+  (extract [_]
+    focus)
+  (extend [lz f]
+    (list-zipper-val (extend-side f lz move-left left)
+                     (f lz)
+                     (extend-side f lz move-right right))))
+
+(defn move-left [lz]
+  (cond
+   (empty? (.left lz)) lz
+   (list-zipper-val (rest (.left lz))
+                    (first (.left lz))
+                    (cons (.focus lz) (.right lz)))))
+
+(defn move-right [lz]
+  (cond
+   (empty? (.right lz)) lz
+   (list-zipper-val (cons (.focus lz) (.left lz))
+                    (first (.right lz))
+                    (rest (.right lz)))))
+
+(defn f [lz]
+  (inc (extract lz)))
+
+(defn g [lz]
+  (* 2 (extract lz)))
+
+(main [_]
+      (let [lz (list-zipper-val (list 5 4 3) 8 (list 1 2 9))]
+        (println :lz lz)
+        (println :focus (extract lz))
+        (println :map (map lz inc))
+        (println :extend (extend lz (comp extract inc)))
+        (println :first-law (= (extend lz extract) lz))
+        (println :second-law (= (extract (extend lz f))
+                                (f lz)))
+        (println :third-law (= (extend (extend lz g) f)
+                               (extend lz (fn [x]
+                                            (f (extend x g))))))))
