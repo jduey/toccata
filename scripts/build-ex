@@ -5,6 +5,7 @@ if [ $# -eq 0 ]
   then
     echo "Usage: 'build-ex hello' or 'build-ex hello diamond' please supply an arguments without a trailing suffixes."
     echo "build-ex -R ex1 ex2... forces the core to recompile first."
+    echo "This relies on the initial toccata command being available."
     exit
 fi
 
