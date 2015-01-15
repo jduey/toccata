@@ -823,9 +823,8 @@ toccata-core
 
 (defn repeat [n v]
   (cond
-   (= 0 n) empty-list
-   (map (range* (dec n))
-        (fn [_] v))))
+   (< n 1) empty-list
+   (map (range* (dec n)) (fn [_] v))))
 
 
 ;; parser effect
