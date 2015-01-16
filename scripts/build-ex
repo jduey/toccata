@@ -1,0 +1,24 @@
+#!/bin/sh
+# build-ex build examples the examples directory
+
+if [ $# -eq 0 ]
+  then
+    echo "Usage: 'build-ex hello' or 'build-ex hello diamond' please supply an arguments without a trailing suffixes."
+    echo "build-ex -R ex1 ex2... forces the core to recompile first."
+    echo "This relies on the initial toccata command being available."
+    exit
+fi
+
+if [ $1 == "-R" ]
+  then
+    ./toccata core.toc > core.c
+    clang -g -c -o core.a core.c 
+    clang ~/boehm/lib/libgc.a core.c -g -o toccata toccata.c 
+    shift 1
+fi
+
+for var in "$@"
+do
+    ./toccata examples/"$var".toc > "$var".c
+    clang ~/boehm/lib/libgc.a core.a -g -o "$var" "$var.c"
+done
