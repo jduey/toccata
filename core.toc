@@ -2183,6 +2183,26 @@ toccata-core
     } else
       return(numberValue(((Number *)arg0)->numVal * ((Number *)arg1)->numVal));\n"))
 
+(defn rem [x y]
+  (inline-text
+   "if (arg0->type != NumberType ||
+        arg1->type != NumberType) {
+      printf(\"\\ninvalid types for 'rem'\\n\");
+      abort();
+    } else
+      return(numberValue(((Number *)arg0)->numVal %
+                         ((Number *)arg1)->numVal));\n"))
+
+(defn quot [x y]
+  (inline-text
+   "if (arg0->type != NumberType ||
+        arg1->type != NumberType) {
+      printf(\"\\ninvalid types for 'quot'\\n\");
+      abort();
+    } else
+      return(numberValue(((Number *)arg0)->numVal /
+                         ((Number *)arg1)->numVal));\n"))
+
 (def empty-list
   (inline-text "(Value *)&(List){4,0,0,0};"))
 
