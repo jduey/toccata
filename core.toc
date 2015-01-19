@@ -268,11 +268,8 @@ toccata-core
   x)
 
 (extend-type Function
-  ;; Stringable
-  ;; (string-list [f] (list "<Fn: " (fn-name f) ">"))
-
-  ;; Serializable
-  ;; (serialize [f] (list "<Fn: " (fn-name f) ">"))
+  Stringable
+  (string-list [f] (list "<Fn: " (fn-name f) ">"))
 
   Monoid
   (zero [_] identity)
@@ -298,11 +295,7 @@ toccata-core
   (<* [x y] (number-less-than x y))
 
   Stringable
-  (string-list [v] (list (number-str v)))
-
-  ;; Serializable
-  ;; (serialize [v] (list (number-str v)))
-  )
+  (string-list [v] (list (number-str v))))
 
 (extend-type Symbol
   Eq
@@ -314,11 +307,7 @@ toccata-core
     (symkey-name v))
 
   Stringable
-  (string-list [v] (list (name v)))
-
-  ;; Serializable
-  ;; (serialize [v] (list (name v)))
-  )
+  (string-list [v] (list (name v))))
 
 (extend-type Keyword
   Eq
@@ -330,11 +319,7 @@ toccata-core
     (symkey-name v))
 
   Stringable
-  (string-list [v] (list (name v)))
-
-  ;; Serializable
-  ;; (serialize [v] (list (name v)))
-  )
+  (string-list [v] (list (name v))))
 
 (defn any? [pred coll]
   (cond
@@ -409,12 +394,6 @@ toccata-core
     (comp (list "(")
           (flat-map (interpose l ", ") string-list)
           (list ")")))
-
-  ;; Serializable
-  ;; (serialize [l]
-  ;;   (comp (list "(")
-  ;;         (flat-map (interpose l ", ") string-list)
-  ;;         (list ")")))
 
   Collection
   (empty? [coll] (number= 0 (list-count coll)))
@@ -514,9 +493,6 @@ toccata-core
   Stringable
   (string-list [v] (list v))
 
-  ;; Serializable
-  ;; (serialize [v] (list (char 34) v (char 34)))
-
   Monoid
   (comp* [s ss]
     (cond
@@ -528,9 +504,6 @@ toccata-core
 (extend-type SubStr
   Stringable
   (string-list [v] (list v))
-
-  ;; Serializable
-  ;; (serialize [v] (list (char 34) v (char 34)))
 
   Eq
   (=* [x y] (str= x y))
@@ -672,19 +645,6 @@ toccata-core
              body-list
              (list "}")))))
 
-  ;; Serializable
-  ;; (serialize [m]
-  ;;   (cond
-  ;;    (list-empty? a-list) (list "{}")
-  ;;    (let [kv-strs (map a-list
-  ;;                        (fn [kv]
-  ;;                          (apply comp (interpose (map kv string-list)
-  ;;                                                 (list " ")))))
-  ;;          body-list (apply comp (interpose kv-strs (list ", ")))]
-  ;;      (comp (list "{")
-  ;;            body-list
-  ;;            (list "}")))))
-
   Collection
   (empty? [_]
     (empty? a-list))
@@ -768,34 +728,14 @@ toccata-core
       (= :assoc-in-nil curr-v) (assoc m k (assoc-in {} (rest path) v))
       (assoc m k (assoc-in curr-v (rest path) v))))))
 
-(deftype identity-val [v]
-  ;; Stringable
-  ;; (string-list [_]
-  ;;   (comp (list "<Id: ")
-  ;;         (string-list v)
-  ;;         (list ">")))
-
-  Applicative
-  (wrap [ev v] (invoke ev v))
-
-  Monad
-  (flat-map [mv f] (f v))
-
-  Comonad
-  (extract [wv] v))
-
 (def identity-m
   (reify
     Eq
     (=* [x y] (type= x y))
 
-    ;; Stringable
-    ;; (string-list [_]
-    ;;   (list "<Id> "))
-
-    Fn
-    (invoke [_ v]
-      (identity-val v))))
+    Stringable
+    (string-list [_]
+      (list "<Id>"))))
 
 (defn symbol? [sym]
   (= Symbol (get-type sym)))
@@ -838,18 +778,6 @@ toccata-core
       (sm-apply (rest l) head (snoc head tail (nth v-s 0)) (nth v-s 1))))))
 
 (deftype new-sm [invoke-fn]
-  ;; Stringable
-  ;; (string-list [_]
-  ;;   (cond
-  ;;    (= identity-m effect) (comp (list "<State: ")
-  ;;                                val-string-list
-  ;;                                (list ">"))
-  ;;    (comp (list "<State ")
-  ;;          (string-list effect)
-  ;;          (list ": ")
-  ;;          val-string-list
-  ;;          (list ">"))))
-
   Fn
   (invoke [ev s]
     (invoke-fn s))
@@ -893,8 +821,8 @@ toccata-core
 
 (def free-zero
   (reify
-    ;; Stringable
-    ;; (string-list [_] (list "<FreeZero>"))
+    Stringable
+    (string-list [_] (list "<FreeZero>"))
 
     Eq
     (=* [x y] (type= x y))
@@ -909,11 +837,11 @@ toccata-core
     (comp* [_ mvs] mvs)))
 
 (deftype free-plus [alts]
-  ;; Stringable
-  ;; (string-list [_]
-  ;;   (comp (list "<FreePlus: ")
-  ;;         (string-list alts)
-  ;;         (list ">")))
+  Stringable
+  (string-list [_]
+    (comp (list "<FreePlus: ")
+          (string-list alts)
+          (list ">")))
 
   FreeEval
   (evaluate [free-val eval-endo]
@@ -934,11 +862,11 @@ toccata-core
     (free-plus (cons mv mvs))))
 
 (deftype pure [arg]
-  ;; Stringable
-  ;; (string-list [_]
-  ;;   (comp (list "<Pure: ")
-  ;;         (string-list arg)
-  ;;         (list ">")))
+  Stringable
+  (string-list [_]
+    (comp (list "<Pure: ")
+          (string-list arg)
+          (list ">")))
 
   FreeEval
   (evaluate [pure-val eval-endo]
@@ -963,13 +891,13 @@ toccata-core
     (free-plus (cons mv mvs))))
 
 (deftype free-app [fv args]
-  ;; Stringable
-  ;; (string-list [_]
-  ;;   (comp (list "<FreeApp: ")
-  ;;         (string-list fv)
-  ;;         (list " ")
-  ;;         (string-list args)
-  ;;         (list ">")))
+  Stringable
+  (string-list [_]
+    (comp (list "<FreeApp: ")
+          (string-list fv)
+          (list " ")
+          (string-list args)
+          (list ">")))
 
   FreeEval
   (evaluate [free-val eval-endo]
@@ -1000,11 +928,11 @@ toccata-core
     (free-plus (cons mv mvs))))
 
 (deftype free [v]
-  ;; Stringable
-  ;; (string-list [_]
-  ;;   (comp (list "<Free: ")
-  ;;         (string-list v)
-  ;;         (list ">")))
+  Stringable
+  (string-list [_]
+    (comp (list "<Free: ")
+          (string-list v)
+          (list ">")))
 
   FreeEval
   (evaluate [free-val eval-endo]
