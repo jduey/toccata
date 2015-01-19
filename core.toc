@@ -4033,5 +4033,66 @@ toccata-core
                                                    (str "(Value *)&_num_" (nth type 1 0))))))
                    :num-count (inc (count (seq (types))))})))
 
+(def nothing
+  (reify
+    Stringable
+    (string-list [_] (list "<nothing>"))
+
+    Eq
+    (=* [nv x] (type= nv x))
+
+    Functor
+    (map [nv f] nv)
+
+    Applicative
+    (wrap [nv x] nv)
+    (apply* [nv _] nv)
+
+    Monad
+    (flat-map [nv _] nv)))
+
+(deftype maybe-value [v]
+  Stringable
+  (string-list [mv]
+    (comp (list "<maybe ")
+          (string-list (.v mv))
+          (list ">")))
+
+  Eq
+  (=* [mv x]
+    (cond
+     (type= v x) (= mv (.v x))
+     false))
+
+  Functor
+  (map [mv f]
+    (maybe-value (f (.v mv))))
+
+  Applicative
+  (wrap [_ x] (maybe-value x))
+  (apply* [fv args]
+    (let [nothings (filter args (fn [arg] (= nothing arg)))]
+      (cond
+       (empty? nothings) (maybe-value (apply (.v fv) (map args .v)))
+       nothing)))
+
+  Monad
+  (flat-map [_ f]
+    (f v)))
+
+(def maybe
+  (reify
+    Type
+    (instance? [_ mv]
+      (instance? maybe-value mv))
+
+    Function
+    (invoke [_ v]
+      (maybe-value v))
+
+    Monoid
+    (zero [_] nothing)))
+
+
 (main [argList]
       (compile-module (rest argList)))
