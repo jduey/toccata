@@ -728,6 +728,16 @@ toccata-core
       (= :assoc-in-nil curr-v) (assoc m k (assoc-in {} (rest path) v))
       (assoc m k (assoc-in curr-v (rest path) v))))))
 
+(extend-type Keyword
+  Fn
+  (invoke [kw hm not-found]
+    (get hm kw not-found)))
+
+(extend-type Symbol
+  Fn
+  (invoke [sym-lit hm not-found]
+    (get hm sym-lit not-found)))
+
 (def identity-m
   (reify
     Eq
@@ -4086,13 +4096,12 @@ toccata-core
     (instance? [_ mv]
       (instance? maybe-value mv))
 
-    Function
+    Fn
     (invoke [_ v]
       (maybe-value v))
 
     Monoid
     (zero [_] nothing)))
-
 
 (main [argList]
       (compile-module (rest argList)))
