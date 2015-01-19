@@ -4055,25 +4055,25 @@ toccata-core
   Stringable
   (string-list [mv]
     (comp (list "<maybe ")
-          (string-list (.v mv))
+          (string-list v)
           (list ">")))
 
   Eq
   (=* [mv x]
     (cond
-     (type= v x) (= mv (.v x))
+     (type= v x) (= v (.v x))
      false))
 
   Functor
   (map [mv f]
-    (maybe-value (f (.v mv))))
+    (maybe-value (f v)))
 
   Applicative
   (wrap [_ x] (maybe-value x))
   (apply* [fv args]
     (let [nothings (filter args (fn [arg] (= nothing arg)))]
       (cond
-       (empty? nothings) (maybe-value (apply (.v fv) (map args .v)))
+       (empty? nothings) (maybe-value (apply v (map args .v)))
        nothing)))
 
   Monad
