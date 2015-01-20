@@ -1,0 +1,65 @@
+;; Fizzbuzz
+;; --------
+;;
+;; Fizzbuzz is a word game sometimes used by teachers trying to teach 
+;; division. The basic idea is that everyone sits in a circle and the 
+;; first player says 'one', the next 'two' and so on. As the count passes 
+;; round the circle each player has to say the next number unless the 
+;; number is divisible by three in which case the player has to say 'fizz' 
+;; instead. If the number is divisble by five the player has to say 'buzz'.
+;; If the number is divisible by three and five, the player has to say
+;; 'fizzbuzz'.
+;;
+;; Programmers tend to use this exercise as a basic test of being able
+;; to put together a simple program. A surprising number of people can get
+;; get through a course on programming and yet be unable to produce 
+;; a fizzbuzz example on request.  See [Using FizzBuzz to Find Developers 
+;; who Grok Coding] (http://imranontech.com/2007/01/24/using-fizzbuzz-to-find-developers-who-grok-coding/) 
+;; for a discussion on this subject.
+;;
+;; This particular version produces both the number and its fizzbuzz
+;; substitution for the numbers 1-100.
+
+(defn zero? [x]
+  (= x 0))
+
+(defn divisible-by-three? [x]
+  (zero? (rem x 3)))
+
+(defn divisible-by-five? [x]
+  (zero? (rem x 5)))
+
+(defn fizzbuzz [x]
+  (let [d3? (divisible-by-three? x)
+        d5? (divisible-by-five? x)]
+    (cond (and d3? d5?) (str x " - fizzbuzz")
+          d3? (str x " - fizz")
+          d5? (str x " - buzz")
+          (str x))))
+
+;; Tests
+;; -----
+;;  (println "(zero? -10)" (zero? -10))
+;;  (println "(zero? 1)" (zero? 1))
+;;  (println "(zero? 0)" (zero? 0))
+;;  (println "(rem -3 3)" (rem -3 3))
+;;  (println "(rem 0 3)" (rem 0 3))
+;;  (println "(rem 1 3)" (rem 1 3))
+;;  (println "(rem 3 3)" (rem 3 3))
+;;  (println "(rem 4 3)" (rem 4 3))
+;;  (println "(rem 6 3)" (rem 6 3))
+;;  (println "(divisible-by-three? -1)" (divisible-by-three? -1))
+;;  (println "(divisible-by-three? 0)" (divisible-by-three? 0))
+;;  (println "(divisible-by-three? 12)" (divisible-by-three? 12))
+;;  (println "(divisible-by-three? 11)" (divisible-by-three? 11))
+;;  (println "(divisible-by-five? 5)" (divisible-by-five? 5))
+;;  (println "(divisible-by-five? 6)" (divisible-by-five? 6))
+;;  (println "(fizzbuzz 0)" (fizzbuzz 0))
+;;  (println "(fizzbuzz 1)" (fizzbuzz 1))
+;;  (println "(fizzbuzz 3)" (fizzbuzz 3))
+;;  (println "(fizzbuzz 5)" (fizzbuzz 5))
+;;  (println "(fizzbuzz 11)" (fizzbuzz 11))
+;;  (println "(fizzbuzz 15)" (fizzbuzz 15))
+
+(main [arglist]
+  (map (range 100) (fn [n] (println (fizzbuzz (inc n))))))
