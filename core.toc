@@ -738,15 +738,6 @@ toccata-core
   (invoke [sym-lit hm not-found]
     (get hm sym-lit not-found)))
 
-(def identity-m
-  (reify
-    Eq
-    (=* [x y] (type= x y))
-
-    Stringable
-    (string-list [_]
-      (list "<Id>"))))
-
 (defn symbol? [sym]
   (= Symbol (get-type sym)))
 
@@ -2120,6 +2111,16 @@ toccata-core
       abort();
     } else
       return(numberValue(((Number *)arg0)->numVal * ((Number *)arg1)->numVal));\n"))
+
+(defn rem [x y]
+  (inline-text
+   "if (arg0->type != NumberType ||
+        arg1->type != NumberType) {
+      printf(\"\\ninvalid types for 'rem'\\n\");
+      abort();
+    } else
+      return(numberValue(((Number *)arg0)->numVal %
+                         ((Number *)arg1)->numVal));\n"))
 
 (def empty-list
   (inline-text "(Value *)&(List){4,0,0,0};"))
@@ -4071,7 +4072,7 @@ toccata-core
   Eq
   (=* [mv x]
     (cond
-     (type= v x) (= v (.v x))
+     (type= mv x) (= v (.v x))
      false))
 
   Functor
