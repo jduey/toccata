@@ -1,0 +1,79 @@
+
+(deftype thunk-value [invoke-fn]
+  Stringable
+  (string-list [_]
+    (list "<thunk>"))
+
+  Fn
+  (invoke [_]
+    (invoke-fn))
+
+  Functor
+  (map [_ f]
+    (thunk-value (fn []
+                   (f (invoke-fn)))))
+
+  Applicative
+  (wrap [_ v]
+    (thunk-value (fn []
+                   (println "un-thunking" v)
+                   v)))
+  (apply* [fv args]
+    (thunk-value (fn []
+                   (apply (invoke-fn) (map args invoke))))))
+
+(def thunk
+  (reify
+    Fn
+    (invoke [_ v]
+      (thunk-value (fn []
+                     (println "un-thunking" v)
+                     v)))
+
+    Type
+    (instance? [_ mv]
+      (instance? thunk-value mv))))
+
+(defn double [x]
+  (* 2 x))
+
+(main [_]
+      ;; check the functor and applicative laws for thunk
+      (println :thunk)
+      (println :functor-1 (= (invoke (map (thunk 5) identity))
+                             (invoke (thunk 5))))
+      (println :functor-2 (= (invoke (map (map (thunk 2) inc) double))
+                             (invoke (map (thunk 2) (comp inc double)))))
+      (println :apply-1 (= (invoke (map (thunk 5) inc))
+                           (invoke (apply-to inc (thunk 5)))))
+      (println :apply-2 (= (invoke (thunk 5))
+                           (invoke (apply-to identity (thunk 5)))))
+      (let [v1 (thunk "first ")
+            v2 (thunk "second ")
+            v3 (thunk "third")]
+        (println :apply-3 (= (invoke (apply-to comp (apply-to comp v1 v2) v3))
+                             (invoke (apply-to comp v1 (apply-to comp v2 v3)))
+                             (invoke (apply-to comp v1 v2 v3)))))
+      (println)
+
+      (let [tv1 (thunk 1)
+            tv5 (thunk 5)]
+        (println :tv1 tv1)
+        (println)
+        (println :tv5 tv5)
+        (println)
+        (println :tv1-invoked (invoke tv1))
+        (println)
+        (println :tv1-invoked (tv1))
+        (println)
+        (println :map (map tv1 (fn [x]
+                                 (println :incrementing x)
+                                 (inc x))))
+        (println)
+        (println :mapped (invoke (map tv1 (fn [x]
+                                            (println :incrementing x)
+                                            (inc x)))))
+        (println)
+        (println :apply (apply-to + tv1 tv5))
+        (println)
+        (println :applied (invoke (apply-to + tv1 tv5)))))
