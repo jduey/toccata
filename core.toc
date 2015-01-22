@@ -297,30 +297,6 @@ toccata-core
   Stringable
   (string-list [v] (list (number-str v))))
 
-(extend-type Symbol
-  Eq
-  (=* [x y]
-    (symkey= x y))
-
-  Named
-  (name [v]
-    (symkey-name v))
-
-  Stringable
-  (string-list [v] (list (name v))))
-
-(extend-type Keyword
-  Eq
-  (=* [x y]
-    (symkey= x y))
-
-  Named
-  (name [v]
-    (symkey-name v))
-
-  Stringable
-  (string-list [v] (list (name v))))
-
 (defn any? [pred coll]
   (cond
    (empty? coll) 0
@@ -729,11 +705,34 @@ toccata-core
       (assoc m k (assoc-in curr-v (rest path) v))))))
 
 (extend-type Keyword
+  Eq
+  (=* [x y]
+    (symkey= x y))
+
+  Named
+  (name [v]
+    (symkey-name v))
+
+  Stringable
+  (string-list [v] (list (name v)))
+
   Fn
   (invoke [kw hm not-found]
     (get hm kw not-found)))
 
+
 (extend-type Symbol
+  Eq
+  (=* [x y]
+    (symkey= x y))
+
+  Named
+  (name [v]
+    (symkey-name v))
+
+  Stringable
+  (string-list [v] (list (name v)))
+
   Fn
   (invoke [sym-lit hm not-found]
     (get hm sym-lit not-found)))
@@ -3971,7 +3970,7 @@ toccata-core
                                                                     (list (inc num-args) {}))))))]
       "")))
 
-(defn compile-source [parser text]
+(defn compile-source [parser]
   (recur (for [expr parser
                ast (analyze-expr expr)
                _ (static-values)
@@ -3990,7 +3989,7 @@ toccata-core
             (bootstrap-toccata parser)
             (set-val :bootstrapping true)
             (set-val :debug-on true)
-            (compile-source parser text)
+            (compile-source parser)
             (emit-main)
             (serialize-symbol-literals)
             (serialize-number-literals)
@@ -4019,7 +4018,7 @@ toccata-core
             (load-protocols)
             (load-static-fns)
             (load-types)
-            (compile-source parser text)
+            (compile-source parser)
             (emit-main)))
 
 (defn compile-module [src-files]
