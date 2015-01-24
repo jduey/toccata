@@ -704,6 +704,12 @@ toccata-core
       (= :assoc-in-nil curr-v) (assoc m k (assoc-in {} (rest path) v))
       (assoc m k (assoc-in curr-v (rest path) v))))))
 
+(def not-found
+  (reify
+    Eq
+    (=* [x y]
+      (= (get-type x) (get-type y)))))
+
 (extend-type Keyword
   Eq
   (=* [x y]
@@ -717,9 +723,14 @@ toccata-core
   (string-list [v] (list (name v)))
 
   Fn
+  (invoke [kw hm]
+    (let [v (get hm kw not-found)]
+      (cond
+       (= not-found v) (let [_ (print-err "Could not look up " kw)]
+                         (abort))
+       v)))
   (invoke [kw hm not-found]
     (get hm kw not-found)))
-
 
 (extend-type Symbol
   Eq
@@ -734,6 +745,12 @@ toccata-core
   (string-list [v] (list (name v)))
 
   Fn
+  (invoke [sym-lit hm]
+    (let [v (get hm sym-lit not-found)]
+      (cond
+       (= not-found v) (let [_ (print-err "Could not look up " sym-lit)]
+                         (abort))
+       v)))
   (invoke [sym-lit hm not-found]
     (get hm sym-lit not-found)))
 
@@ -974,12 +991,6 @@ toccata-core
 (defn update-state [f]
   (new-sm (fn [s]
             (list s (f s)))))
-
-(def not-found
-  (reify
-    Eq
-    (=* [x y]
-      (= (get-type x) (get-type y)))))
 
 (defn get-val
   ([k]
@@ -4180,6 +4191,37 @@ toccata-core
     Fn
     (invoke [_ v]
       (valid-value v))))
+
+(deftype reader-value [invoke-fn]
+  Stringable
+  (string-list [_]
+    (list "<reader>"))
+
+  Fn
+  (invoke [_ env]
+    (invoke-fn env))
+
+  Functor
+  (map [_ f]
+    (reader-value (fn [env]
+                   (f (invoke-fn env)))))
+
+  Applicative
+  (wrap [_ v]
+    (reader-value (fn [_] v)))
+  (apply* [fv args]
+    (reader-value (fn [env]
+                   (apply (invoke-fn env) (map args (fn [rv] (rv env))))))))
+
+(def reader
+  (reify
+    Fn
+    (invoke [_ v]
+      (reader-value (fn [_] v)))
+
+    Type
+    (instance? [_ mv]
+      (instance? reader-value mv))))
 
 (main [argList]
       (compile-module (rest argList)))
