@@ -1935,14 +1935,14 @@ toccata-core
 (def StringVal* "String *")
 (def SubStringVal "typedef struct {int64_t type; int64_t len; Value *source; char *buffer;} SubString;\\n")
 (def SubStringVal* "SubString *")
-(def ListVal "typedef struct List {int64_t type; int64_t len; Value* head; struct List *tail;} List;\\n")
+(def ListVal "typedef struct List {int64_t type; int32_t refs; int64_t len; Value* head; struct List *tail;} List;\\n")
 (def ListVal* "List *")
 (def FnArity "typedef struct {int count; List *closures; int variadic; void *fn;} FnArity;\\n")
 (def FnArity* "FnArity *")
-(def FunctionVal "typedef struct {int64_t type; char *name; int64_t arityCount; FnArity *arities[];} Function;\\n")
+(def FunctionVal "typedef struct {int64_t type; int32_t refs; char *name; int64_t arityCount; FnArity *arities[];} Function;\\n")
 (def ProtoImpl "typedef struct {int64_t type; Value *implFn;} ProtoImpl;\\n")
 (def ProtoImpls "typedef struct {int64_t implCount; Value *defaultImpl; ProtoImpl impls[];} ProtoImpls;\\n")
-(def ReifiedVal "typedef struct {int64_t type; int implCount; Value* impls[];} ReifiedVal;\\n")
+(def ReifiedVal "typedef struct {int64_t type; int32_t refs; int implCount; Value* impls[];} ReifiedVal;\\n")
 (def ReifiedVal* "ReifiedVal *")
 
 (def true (inline-text "(Value *)&trueVal;"))
@@ -2133,7 +2133,7 @@ toccata-core
                          ((Number *)arg1)->numVal));\n"))
 
 (def empty-list
-  (inline-text "(Value *)&(List){4,0,0,0};"))
+  (inline-text "(Value *)&(List){4,-1,0,0,0};"))
 
 (defn cons
   ([x]
@@ -2968,7 +2968,7 @@ toccata-core
                (apply-to list
                          (write (str "\\n// --------- " name " main body --------------\\n"))
                          (write (str "Function " fn-sym " = {"
-                                     (get (types) 'Function :no-fn-type) ", \\\""
+                                     (get (types) 'Function :no-fn-type) ", -1, \\\""
                                      name "\\\", " arity-count ", "
                                      "{" (apply str (interpose arity-syms ", ")) "}};\\n"))
                          (assoc-in-val (list :static-fns (str "(Value *)&" fn-sym)) static-arities))
@@ -3149,7 +3149,8 @@ toccata-core
                         FnArity* "arityPtr = ((Function *)((ReifiedVal *)arg0)->impls["
                         index "])->arities[0];\\n"
                         "return (((FnType" num-args " *)arityPtr->fn)(arityPtr->" args "));\\n};\\n\\n"))
-          _ (write (str "Function " fn-sym " = {3, \\\"" name
+          _ (write (str "Function " fn-sym " = {" (get (types) 'Function :no-fn-type)
+                        ", -1, \\\"" name
                         "\\\", 1, {&(FnArity){" num-args
                         ", (List *)0, 0, " impl-sym"}}};\\n\\n"))
           _ (assoc-in-val (list :protocols name :impls type-num) (str "(Value *)&" fn-sym))]
@@ -3179,7 +3180,7 @@ toccata-core
         :let [fns-init (map impl-fns (fn [impl-fn]
                                        (first impl-fn)))
               reify-init (list (str "ReifiedVal " reified-sym " = {"
-                                    type-num ", " (count impl-fns) ", {"
+                                    type-num ", -1, " (count impl-fns) ", {"
                                     (apply str (interpose fns-init ", "))
                                     "}};\\n"))]
         _ (write (first reify-init))]
@@ -3309,12 +3310,12 @@ toccata-core
           _ (apply-to list
                       (cond
                        (empty? default-syms) (state-maybe "")
-                       (write (str "Function " default-fn-sym " = {3, \\\"" name
-                                   "\\\", " (count default-syms)
+                       (write (str "Function " default-fn-sym " = {" (get (types) 'Function :no-fn-type)
+                                   ", -1, \\\"" name "\\\", " (count default-syms)
                                    ", {" (apply str (interpose default-syms ",\\n"))
                                    "}};\\n\\n")))
-                      (write-strs (list "Function " (str fn-sym)  " = {3, \\\"" (str name)
-                                        "\\\", " (count arity-syms)
+                      (write-strs (list "Function " (str fn-sym)  " = {" (get (types) 'Function :no-fn-type)
+                                        ", -1, \\\"" (str name) "\\\", " (count arity-syms)
                                         ", {" (apply str (interpose arity-syms ",\\n")) "}};\\n\\n"))
                       (assoc-in-val (list :defined-syms name) (list (str "Function " fn-sym)
                                                                     (str "(Value *)&" fn-sym)))
@@ -3975,7 +3976,7 @@ toccata-core
                         (str "const int64_t SubStringType = " (get types 'SubStr 0) ";\\n")
                         (str "const int64_t ListType = " (get types 'List 0) ";\\n")
                         (str "const int64_t FunctionType = " (get types 'Function 0) ";\\n")
-                        "List *empty_list = &(List){4,0,0,0};\\n"))
+                        "List *empty_list = &(List){4,-1,0,0,0};\\n"))
                       (base-fns)
                       (emit-proto-fn (list 'invoke (map (range 8) (fn [num-args]
                                                                     (list (inc num-args) {}))))))]
