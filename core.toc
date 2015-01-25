@@ -3431,6 +3431,8 @@ toccata-core
 
 (defn core-base-fns []
   (write-strs (list "\n"
+                    "long long malloc_count;\n"
+                    "long long free_count;\n"
                     "Value* true;\n"
                     "Value* false;\n"
                     "Number trueVal;\n"
@@ -3452,9 +3454,12 @@ toccata-core
                     "Value* true = (Value *)&trueVal;\n"
                     "Number falseVal = {NumberType, -1, 0};\n"
                     "Value* false = (Value *)&falseVal;\n"
+                    "long long malloc_count = 0;\n"
+                    "long long free_count = 0;\n"
                     "\n"
 
                     "Value *my_malloc(int64_t sz) {\n"
+                    "  malloc_count++;"
                     "  // if (sz > 10000)\n"
                     "  //   fprintf(stderr, \"malloc: %lld\\n\", sz);\n"
                     "  return(GC_malloc(sz));\n"
@@ -3744,7 +3749,9 @@ toccata-core
                       (let [impls-sym (nth proto-sym 0 "")
                             local-sym (nth proto-sym 1 "")]
                         (write (str "  " impls-sym " = &" local-sym ";\n")))))
-        _ (write (str "  return(" main-sym "((Value *)argList));\n};\n"))]
+        _ (write (str "  int the_final_answer = " main-sym "((Value *)argList);\n"))
+        _ (write (str "  fprintf(stderr, \"malloc count: %lld  free count: %lld\\n\", malloc_count, free_count);\n"))
+        _ (write (str "  return(the_final_answer);\n};\n"))]
     ""))
 
 (defn protocols []
