@@ -1997,9 +1997,9 @@ toccata-core
 (def NumberVal "typedef struct {int64_t type; int32_t refs; int64_t numVal;} Number;\n")
 (def NumberVal* "Number *")
 (def SymKey "typedef struct {int64_t type; int32_t refs; char *name;} SymKey;\n")
-(def StringVal "typedef struct {int64_t type; int64_t len; char buffer[0];} String;\n")
+(def StringVal "typedef struct {int64_t type; int32_t refs; int64_t len; char buffer[0];} String;\n")
 (def StringVal* "String *")
-(def SubStringVal "typedef struct {int64_t type; int64_t len; Value *source; char *buffer;} SubString;\n")
+(def SubStringVal "typedef struct {int64_t type; int32_t refs; int64_t len; Value *source; char *buffer;} SubString;\n")
 (def SubStringVal* "SubString *")
 (def ListVal "typedef struct List {int64_t type; int32_t refs; int64_t len; Value* head; struct List *tail;} List;\n")
 (def ListVal* "List *")
@@ -3455,6 +3455,8 @@ toccata-core
                     "\n"
 
                     "Value *my_malloc(int64_t sz) {\n"
+                    "  // if (sz > 10000)\n"
+                    "  //   fprintf(stderr, \"malloc: %lld\\n\", sz);\n"
                     "  return(GC_malloc(sz));\n"
                     "}\n\n"
 
@@ -3635,9 +3637,9 @@ toccata-core
      (traverse strs (fn [const-str]
                       (let [str-ptr (nth const-str 1 "noString_ptr")
                             str-val (nth const-str 0 "noString_name")]
-                        (write (str "struct {int64_t type;\n   int64_t len;\n   char buffer["
+                        (write (str "struct {int64_t type;\n int32_t refs;\n   int64_t len;\n   char buffer["
                                     (inc (count str-val))
-                                    "];} " str-ptr " = {" type ","
+                                    "];} " str-ptr " = {" type ", -1, "
                                     (count str-val) ",\"" (escape-chars str-val) "\"};\n")))))
 
      (state-maybe ""))))
