@@ -3435,6 +3435,7 @@ toccata-core
                     "Value* false;\n"
                     "Number trueVal;\n"
                     "Number falseVal;\n"
+                    "Value *my_malloc(int64_t);\n"
                     "int isTrue(Value *boolVal);\n"
                     "Value *findProtoImpl(int64_t type, ProtoImpls *impls);\n"
                     "FnArity *findFnArity(Value *fnVal, int argCount);\n"
@@ -3452,6 +3453,10 @@ toccata-core
                     "Number falseVal = {NumberType, -1, 0};\n"
                     "Value* false = (Value *)&falseVal;\n"
                     "\n"
+
+                    "Value *my_malloc(int64_t sz) {\n"
+                    "  return(GC_malloc(sz));\n"
+                    "}\n"
 
                     "int isTrue(Value *boolVal) {\n"
                     "if (boolVal->type != " (get (types) 'Number 99) ") {\n"
