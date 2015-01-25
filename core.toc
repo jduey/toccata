@@ -1548,7 +1548,7 @@ toccata-core
 (defn escape-chars [c]
   (inline-text "if (arg0->type == StringType) {
                   String *s = (String *)arg0;
-                  char *resultBuffer = (char *)GC_malloc(s->len * 2 + 5);
+                  char *resultBuffer = (char *)my_malloc(s->len * 2 + 5);
                   int resultIndex = 0;
                   for(int i = 0; i < s->len; i++) {
                     if (s->buffer[i] == 10) {
@@ -1579,7 +1579,7 @@ toccata-core
                   return(stringValue(resultBuffer));
                 } else if (arg0->type == SubStringType) {
                   SubString *s = (SubString *)arg0;
-                  char *resultBuffer = (char *)GC_malloc(s->len * 2 + 5);
+                  char *resultBuffer = (char *)my_malloc(s->len * 2 + 5);
                   int resultIndex = 0;
                   for(int i = 0; i < s->len; i++) {
                     if (s->buffer[i] == 10) {
@@ -2030,7 +2030,7 @@ toccata-core
 
 (defn symbol [sym-str]
   (inline-text
-   "SymKey *sym = (SymKey *)GC_malloc(sizeof(SymKey));
+   "SymKey *sym = (SymKey *)my_malloc(sizeof(SymKey));
     sym->type = SymbolType;
     if(arg0->type == StringType)
       sym->name = ((String *)arg0)->buffer;
@@ -2040,7 +2040,7 @@ toccata-core
 
 (defn new-keyword [kw-str]
   (inline-text
-   "SymKey *sym = (SymKey *)GC_malloc(sizeof(SymKey));
+   "SymKey *sym = (SymKey *)my_malloc(sizeof(SymKey));
     sym->type = KeywordType;
     if(arg0->type == StringType)
       sym->name = ((String *)arg0)->buffer;
@@ -2068,7 +2068,7 @@ toccata-core
      (inline-text "int64_t idx = ((Number *)arg1)->numVal;
                    if (arg0->type == StringType) {
                      String *s = (String *)arg0;
-                     SubString *subStr = (SubString *)GC_malloc(sizeof(SubString));
+                     SubString *subStr = (SubString *)my_malloc(sizeof(SubString));
                      subStr->type = SubStringType;
                      if (idx < s->len) {
                        subStr->len = s->len - idx;
@@ -2083,7 +2083,7 @@ toccata-core
                      return((Value *)subStr);
                    } else if (arg0->type == SubStringType) {
                      SubString *s = (SubString *)arg0;
-                     SubString *subStr = (SubString *)GC_malloc(sizeof(SubString));
+                     SubString *subStr = (SubString *)my_malloc(sizeof(SubString));
                      subStr->type = SubStringType;
                      if (idx < s->len) {
                        subStr->len = s->len - idx;
@@ -2103,7 +2103,7 @@ toccata-core
                    int64_t len = ((Number *)arg2)->numVal;
                    if (arg0->type == StringType) {
                      String *s = (String *)arg0;
-                     SubString *subStr = (SubString *)GC_malloc(sizeof(SubString));
+                     SubString *subStr = (SubString *)my_malloc(sizeof(SubString));
                      subStr->type = SubStringType;
                      if (idx + len <= s->len) {
                        subStr->len = len;
@@ -2118,7 +2118,7 @@ toccata-core
                      return((Value *)subStr);
                    } else if (arg0->type == SubStringType) {
                      SubString *s = (SubString *)arg0;
-                     SubString *subStr = (SubString *)GC_malloc(sizeof(SubString));
+                     SubString *subStr = (SubString *)my_malloc(sizeof(SubString));
                      subStr->type = SubStringType;
                      if (idx + len <= s->len) {
                        subStr->len = len;
@@ -2137,7 +2137,7 @@ toccata-core
 ;; this function assumes the type of 'n' has already been checked
 (defn number-str [n]
   (inline-text
-   "char *buffer = (char *)GC_malloc(10);
+   "char *buffer = (char *)my_malloc(10);
     snprintf(buffer, 9, \"%lld\", ((Number *)arg0)->numVal);
     return(stringValue(buffer));\n"))
 
@@ -2250,7 +2250,7 @@ toccata-core
 
 (defn new-list []
   (inline-text
-   "List *newList = (List *)GC_malloc(sizeof(List));
+   "List *newList = (List *)my_malloc(sizeof(List));
     newList->type = ListType;
     newList->len = 0;
     newList->head = (Value *)0;
@@ -2264,7 +2264,7 @@ toccata-core
       abort();
     }
 
-    List *newTail = (List *)GC_malloc(sizeof(List));
+    List *newTail = (List *)my_malloc(sizeof(List));
     newTail->type = ListType;
     newTail->len = 0;
     newTail->head = (Value *)0;
@@ -2283,7 +2283,7 @@ toccata-core
       printf(\"\\ninvalid type for 'char'\\n\");
       abort();
     }
-    String *strVal = (String *)GC_malloc(sizeof(String) + 2);
+    String *strVal = (String *)my_malloc(sizeof(String) + 2);
     strVal->type = StringType;
     strVal->len = 1;
     strVal->buffer[0] = ((Number *)arg0)->numVal;
@@ -2348,7 +2348,7 @@ toccata-core
 
 (defn str-malloc [len]
   (inline-text
-   "String *strVal = (String *)GC_malloc(sizeof(String) + ((Number *)arg0)->numVal);
+   "String *strVal = (String *)my_malloc(sizeof(String) + ((Number *)arg0)->numVal);
     strVal->type = StringType;
     strVal->len = 0;
     strVal->buffer[0] = 0;
@@ -2387,7 +2387,7 @@ toccata-core
 
 (defn slurp [fileName]
   (inline-text
-   "char *arg0Str = (char *)GC_malloc(((String *)arg0)->len + 5);
+   "char *arg0Str = (char *)my_malloc(((String *)arg0)->len + 5);
     if (arg0->type == StringType)
       snprintf(arg0Str, ((String *)arg0)->len + 1, \"%s\", ((String *)arg0)->buffer);
     else if (arg0->type == SubStringType)
@@ -2401,7 +2401,7 @@ toccata-core
     fseek(file, 0, SEEK_END);
     int64_t buffSize = ftell(file);
     fseek(file, 0, SEEK_SET);
-    String *strVal = (String *)GC_malloc(sizeof(String) + buffSize + 10);
+    String *strVal = (String *)my_malloc(sizeof(String) + buffSize + 10);
     strVal->type = StringType;
     strVal->len = buffSize;
     fread(strVal->buffer, 1, buffSize, file);
@@ -2714,7 +2714,7 @@ toccata-core
                                        (first c-sym)
                                        ", (List *)" arity-sym "->closures);\n"))))]
     (list arity-sym
-          (list* (str "FnArity *" arity-sym " = (FnArity *)GC_malloc(sizeof(FnArity));\n")
+          (list* (str "FnArity *" arity-sym " = (FnArity *)my_malloc(sizeof(FnArity));\n")
                  (str arity-sym "->count = " (count arg-syms) ";\n")
                  (str arity-sym "->closures = empty_list;\n")
                  (str arity-sym "->variadic = " variadic ";\n")
@@ -2895,7 +2895,7 @@ toccata-core
                           result-sym " = " fn-sym "(" (apply str (interpose arg-syms ", ")) ");\n"
                           "} else if(" arity-sym " != (FnArity *)0 && " arity-sym "->variadic) {\n"
                           "FnType1 *" fn-sym " = (FnType1 *)" arity-sym "->fn;\n"
-                          "List *" variadic-sym " = (List *)GC_malloc(sizeof(List));\n"
+                          "List *" variadic-sym " = (List *)my_malloc(sizeof(List));\n"
                           variadic-sym "->type  = ListType;\n"
                           variadic-sym "->len = 0;\n"
                           variadic-sym "->head = (Value *)0;\n"
@@ -2958,7 +2958,7 @@ toccata-core
         (list result-sym
               (comp target-stmts
                     arg-stmts
-                    (list (str "List *" variadic-sym " = (List *)GC_malloc(sizeof(List));\n"
+                    (list (str "List *" variadic-sym " = (List *)my_malloc(sizeof(List));\n"
                                variadic-sym "->type  = ListType;\n"
                                variadic-sym "->len = 0;\n"
                                variadic-sym "->head = (Value *)0;\n"
@@ -3047,7 +3047,7 @@ toccata-core
 
          (list (str "(Value *)" fn-sym)
                (comp arity-init
-                     (list* (str "Function *" fn-sym " = (Function *)GC_malloc(sizeof(Function)"
+                     (list* (str "Function *" fn-sym " = (Function *)my_malloc(sizeof(Function)"
                                  " + sizeof(FnArity *) * " arity-count ");\n")
                             (str fn-sym "->type = " (get (types) 'Function :no-fn-type) ";\n")
                             (str fn-sym "->name = \"" name "\";\n")
@@ -3228,7 +3228,7 @@ toccata-core
     (let [inits (crush impl-fns (fn [sym-inits]
                                   (nth sym-inits 1 empty-list)))
           impls-syms (map impl-fns (fn [sym-inits] (nth sym-inits 0 "")))
-          reify-init (list* (str ReifiedVal* reified-sym " = (ReifiedVal *)GC_malloc(sizeof("
+          reify-init (list* (str ReifiedVal* reified-sym " = (ReifiedVal *)my_malloc(sizeof("
                                  "ReifiedVal) + sizeof(Function *) * "
                                  (count impls-syms) ");\n")
                             (str reified-sym "->type = " type-num ";\n")
@@ -3456,7 +3456,7 @@ toccata-core
 
                     "Value *my_malloc(int64_t sz) {\n"
                     "  return(GC_malloc(sz));\n"
-                    "}\n"
+                    "}\n\n"
 
                     "int isTrue(Value *boolVal) {\n"
                     "if (boolVal->type != " (get (types) 'Number 99) ") {\n"
@@ -3495,7 +3495,7 @@ toccata-core
                     "\n"
 
                     "Value *symbolValue(char *s) {\n"
-                    "SymKey *sym = (SymKey *)GC_malloc(sizeof(SymKey));\n"
+                    "SymKey *sym = (SymKey *)my_malloc(sizeof(SymKey));\n"
                     "sym->type = SymbolType;\n"
                     "sym->name = s;\n"
                     "return((Value *)sym);\n"
@@ -3503,7 +3503,7 @@ toccata-core
                     "\n"
 
                     "Value *keywordValue(char *s) {\n"
-                    "SymKey *kw = (SymKey *)GC_malloc(sizeof(SymKey));\n"
+                    "SymKey *kw = (SymKey *)my_malloc(sizeof(SymKey));\n"
                     "kw->type = KeywordType;\n"
                     "kw->name = s;\n"
                     "return((Value *)kw);\n"
@@ -3512,7 +3512,7 @@ toccata-core
 
                     "Value *stringValue(char *s) {\n"
                     "int64_t len = strlen(s);\n"
-                    "String *strVal = (String *)GC_malloc(sizeof(String) + len + 4);\n"
+                    "String *strVal = (String *)my_malloc(sizeof(String) + len + 4);\n"
                     "strVal->type = StringType;\n"
                     "strVal->len = strlen(s);\n"
                     "strncpy(strVal->buffer, s, len);\n"
@@ -3521,7 +3521,7 @@ toccata-core
                     "\n"
 
                     "Value *makeSubstr(int64_t len, Value *str, char *subsStart) {\n"
-                    "SubString *subStr = (SubString *)GC_malloc(sizeof(SubString));\n"
+                    "SubString *subStr = (SubString *)my_malloc(sizeof(SubString));\n"
                     "subStr->type = SubStringType;\n"
                     "subStr->len = len;\n"
                     "subStr->source = str;\n"
@@ -3530,7 +3530,7 @@ toccata-core
                     "\n"
 
                     "Value *numberValue(int64_t n) {\n"
-                    "Number *numVal = (Number *)GC_malloc(sizeof(Number));\n"
+                    "Number *numVal = (Number *)my_malloc(sizeof(Number));\n"
                     "numVal->type = NumberType;\n"
                     "numVal->numVal = n;\n"
                     "return((Value *)numVal);\n"
@@ -3542,7 +3542,7 @@ toccata-core
                     "printf(\"'cons' requires a list\\n\");\n"
                     "abort();\n"
                     "}\n"
-                    "List *newList = (List *)GC_malloc(sizeof(List));\n"
+                    "List *newList = (List *)my_malloc(sizeof(List));\n"
                     "List *oldList = (List *)l;\n"
                     "newList->type = ListType;\n"
                     "newList->len = oldList->len + 1;\n"
@@ -3720,7 +3720,7 @@ toccata-core
         proto-syms (finalize-protocols)
         _ (write-strs (list (str  "\nint " main-name "(int argc, char *argv[]) {\n")
                             "    GC_init();\n"
-                            "     List *argList = (List *)GC_malloc(sizeof(List));\n"
+                            "     List *argList = (List *)my_malloc(sizeof(List));\n"
                             "      argList->type = ListType;\n"
                             "      argList->len = 0;\n"
                             "      argList->head = (Value *)0;\n"
@@ -3728,7 +3728,7 @@ toccata-core
                             "      List *tail = argList;\n"
                             "      for(int i = 0; i < argc; i++) {\n"
                             "         tail->head = stringValue(argv[i]);\n"
-                            "         List *newTail = (List *)GC_malloc(sizeof(List));\n"
+                            "         List *newTail = (List *)my_malloc(sizeof(List));\n"
                             "         newTail->type = ListType;\n"
                             "         newTail->len = 0;\n"
                             "         newTail->tail = (List *)0;\n"
