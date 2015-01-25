@@ -123,7 +123,7 @@ toccata-core
 (defn prn [& vs]
   (map (interpose (flat-map vs serialize) " ")
        pr*)
-  (pr* "\\n"))
+  (pr* "\n"))
 
 (defn print [& vs]
   (map (flat-map (interpose vs " ") string-list)
@@ -131,12 +131,12 @@ toccata-core
 
 (defn println [& vs]
   (map (flat-map (interpose vs " ") string-list) pr*)
-  (pr* "\\n"))
+  (pr* "\n"))
 
 (defn print-err [& vs]
-  (pr-err* "\\n*** ")
+  (pr-err* "\n*** ")
   (map (flat-map (interpose vs " ") string-list) pr-err*)
-  (pr-err* "\\n"))
+  (pr-err* "\n"))
 
 (defprotocol Eq
   (=* [x y]
@@ -1545,6 +1545,72 @@ toccata-core
 (def static-values)
 (def emit-proto-fn)
 
+(defn escape-chars [c]
+  (inline-text "if (arg0->type == StringType) {
+                  String *s = (String *)arg0;
+                  char *resultBuffer = (char *)GC_malloc(s->len * 2 + 5);
+                  int resultIndex = 0;
+                  for(int i = 0; i < s->len; i++) {
+                    if (s->buffer[i] == 10) {
+                      resultBuffer[resultIndex++] = 92;
+                      resultBuffer[resultIndex++] = 110;
+                    } else if (s->buffer[i] == 13) {
+                      resultBuffer[resultIndex++] = 92;
+                      resultBuffer[resultIndex++] = 114;
+                    } else if (s->buffer[i] == 12) {
+                      resultBuffer[resultIndex++] = 92;
+                      resultBuffer[resultIndex++] = 102;
+                    } else if (s->buffer[i] == 8) {
+                      resultBuffer[resultIndex++] = 92;
+                      resultBuffer[resultIndex++] = 98;
+                    } else if (s->buffer[i] == 9) {
+                      resultBuffer[resultIndex++] = 92;
+                      resultBuffer[resultIndex++] = 116;
+                    } else if (s->buffer[i] == 34) {
+                      resultBuffer[resultIndex++] = 92;
+                      resultBuffer[resultIndex++] = 34;
+                    } else if (s->buffer[i] == 92) {
+                      resultBuffer[resultIndex++] = 92;
+                      resultBuffer[resultIndex++] = 92;
+                    } else
+                      resultBuffer[resultIndex++] = s->buffer[i];
+                  }
+                  resultBuffer[resultIndex] = 0;
+                  return(stringValue(resultBuffer));
+                } else if (arg0->type == SubStringType) {
+                  SubString *s = (SubString *)arg0;
+                  char *resultBuffer = (char *)GC_malloc(s->len * 2 + 5);
+                  int resultIndex = 0;
+                  for(int i = 0; i < s->len; i++) {
+                    if (s->buffer[i] == 10) {
+                      resultBuffer[resultIndex++] = 92;
+                      resultBuffer[resultIndex++] = 110;
+                    } else if (s->buffer[i] == 13) {
+                      resultBuffer[resultIndex++] = 92;
+                      resultBuffer[resultIndex++] = 114;
+                    } else if (s->buffer[i] == 12) {
+                      resultBuffer[resultIndex++] = 92;
+                      resultBuffer[resultIndex++] = 102;
+                    } else if (s->buffer[i] == 8) {
+                      resultBuffer[resultIndex++] = 92;
+                      resultBuffer[resultIndex++] = 98;
+                    } else if (s->buffer[i] == 9) {
+                      resultBuffer[resultIndex++] = 92;
+                      resultBuffer[resultIndex++] = 116;
+                    } else if (s->buffer[i] == 34) {
+                      resultBuffer[resultIndex++] = 92;
+                      resultBuffer[resultIndex++] = 34;
+                    } else if (s->buffer[i] == 92) {
+                      resultBuffer[resultIndex++] = 92;
+                      resultBuffer[resultIndex++] = 92;
+                    } else
+                      resultBuffer[resultIndex++] = s->buffer[i];
+                  }
+                  resultBuffer[resultIndex] = 0;
+                  return(stringValue(resultBuffer));
+                } else
+                  abort();\n "))
+
 (defn analyze-inline-text []
   (for [expr (is-expr (fn [x]
                         (cond
@@ -1926,23 +1992,23 @@ toccata-core
 (def Int32 "int")
 (def Int64 "int64_t")
 (def ValueType Int64)  ;; type of boxed values
-(def Value "typedef struct {int64_t type;} Value;\\n")
+(def Value "typedef struct {int64_t type;} Value;\n")
 (def Value* "Value *")
-(def NumberVal "typedef struct {int64_t type; int32_t refs; int64_t numVal;} Number;\\n")
+(def NumberVal "typedef struct {int64_t type; int32_t refs; int64_t numVal;} Number;\n")
 (def NumberVal* "Number *")
-(def SymKey "typedef struct {int64_t type; int32_t refs; char *name;} SymKey;\\n")
-(def StringVal "typedef struct {int64_t type; int64_t len; char buffer[0];} String;\\n")
+(def SymKey "typedef struct {int64_t type; int32_t refs; char *name;} SymKey;\n")
+(def StringVal "typedef struct {int64_t type; int64_t len; char buffer[0];} String;\n")
 (def StringVal* "String *")
-(def SubStringVal "typedef struct {int64_t type; int64_t len; Value *source; char *buffer;} SubString;\\n")
+(def SubStringVal "typedef struct {int64_t type; int64_t len; Value *source; char *buffer;} SubString;\n")
 (def SubStringVal* "SubString *")
-(def ListVal "typedef struct List {int64_t type; int32_t refs; int64_t len; Value* head; struct List *tail;} List;\\n")
+(def ListVal "typedef struct List {int64_t type; int32_t refs; int64_t len; Value* head; struct List *tail;} List;\n")
 (def ListVal* "List *")
-(def FnArity "typedef struct {int count; List *closures; int variadic; void *fn;} FnArity;\\n")
+(def FnArity "typedef struct {int count; List *closures; int variadic; void *fn;} FnArity;\n")
 (def FnArity* "FnArity *")
-(def FunctionVal "typedef struct {int64_t type; int32_t refs; char *name; int64_t arityCount; FnArity *arities[];} Function;\\n")
-(def ProtoImpl "typedef struct {int64_t type; Value *implFn;} ProtoImpl;\\n")
-(def ProtoImpls "typedef struct {int64_t implCount; Value *defaultImpl; ProtoImpl impls[];} ProtoImpls;\\n")
-(def ReifiedVal "typedef struct {int64_t type; int32_t refs; int implCount; Value* impls[];} ReifiedVal;\\n")
+(def FunctionVal "typedef struct {int64_t type; int32_t refs; char *name; int64_t arityCount; FnArity *arities[];} Function;\n")
+(def ProtoImpl "typedef struct {int64_t type; Value *implFn;} ProtoImpl;\n")
+(def ProtoImpls "typedef struct {int64_t implCount; Value *defaultImpl; ProtoImpl impls[];} ProtoImpls;\n")
+(def ReifiedVal "typedef struct {int64_t type; int32_t refs; int implCount; Value* impls[];} ReifiedVal;\n")
 (def ReifiedVal* "ReifiedVal *")
 
 (def true (inline-text "(Value *)&trueVal;"))
@@ -2619,9 +2685,9 @@ toccata-core
         _ (write-strs (flat-map (reverse closures)
                                 (fn [closure]
                                   (list "Value *" (first closure)
-                                        " = closures->head;\\n"
-                                        "if (closures->tail)\\nclosures->tail->len = closures->len - 1;\\n"
-                                        "closures = closures->tail;\\n"))))]
+                                        " = closures->head;\n"
+                                        "if (closures->tail)\nclosures->tail->len = closures->len - 1;\n"
+                                        "closures = closures->tail;\n"))))]
     ""))
 
 (defn emit-body [body-exprs]
@@ -2631,7 +2697,7 @@ toccata-core
               (write-strs stmts)
               (cond
                (= result-sym "") (state-maybe "")
-               (write (str "return (" result-sym ");\\n"))))))
+               (write (str "return (" result-sym ");\n"))))))
 
 (defn static-arity [arity-fn-sym arg-syms variadic]
   (state-maybe (list (str "&(FnArity){" (count arg-syms) ", (List *)0, " variadic ", " arity-fn-sym "}")
@@ -2646,19 +2712,19 @@ toccata-core
                                 (for [c-sym (lookup-sym (nth closure 1 ""))]
                                   (str arity-sym "->closures = listCons((Value *)"
                                        (first c-sym)
-                                       ", (List *)" arity-sym "->closures);\\n"))))]
+                                       ", (List *)" arity-sym "->closures);\n"))))]
     (list arity-sym
-          (list* (str "FnArity *" arity-sym " = (FnArity *)GC_malloc(sizeof(FnArity));\\n")
-                 (str arity-sym "->count = " (count arg-syms) ";\\n")
-                 (str arity-sym "->closures = empty_list;\\n")
-                 (str arity-sym "->variadic = " variadic ";\\n")
-                 (str arity-sym "->fn = " arity-fn-sym ";\\n")
+          (list* (str "FnArity *" arity-sym " = (FnArity *)GC_malloc(sizeof(FnArity));\n")
+                 (str arity-sym "->count = " (count arg-syms) ";\n")
+                 (str arity-sym "->closures = empty_list;\n")
+                 (str arity-sym "->variadic = " variadic ";\n")
+                 (str arity-sym "->fn = " arity-fn-sym ";\n")
                  closed-over))))
 
 (defn emit-externs []
   (for [bootstrapping (get-val :bootstrapping false)
         externs (get-val :new-externs empty-list)
-        _ (write-strs (map externs (fn [ext] (str "extern " ext ";\\n"))))
+        _ (write-strs (map externs (fn [ext] (str "extern " ext ";\n"))))
         _ (set-val :new-externs empty-list)
 
         static-fns (get-val :new-static-fns empty-list)
@@ -2699,24 +2765,24 @@ toccata-core
             _ (emit-externs)
 
             _ (write-strs (list*
-                           (str "Value *" arity-fn-sym "(List *closures, Value *varArgs) {\\n")
-                           "List *argsList = (List *)varArgs;\\n"
+                           (str "Value *" arity-fn-sym "(List *closures, Value *varArgs) {\n")
+                           "List *argsList = (List *)varArgs;\n"
                            (map (range arg-count)
                                 (fn [index]
                                   (let [c-sym (nth arg-syms index "")]
                                     (cond
                                      (< (inc index) arg-count)
                                      (str "Value *" c-sym
-                                          " = argsList->head;\\n"
-                                          "if (argsList->tail) argsList->tail->len = argsList->len - 1;\\n"
-                                          "argsList = argsList->tail;\\n")
+                                          " = argsList->head;\n"
+                                          "if (argsList->tail) argsList->tail->len = argsList->len - 1;\n"
+                                          "argsList = argsList->tail;\n")
 
-                                     (str "Value *" c-sym " = (Value *)argsList;\\n")))))))
+                                     (str "Value *" c-sym " = (Value *)argsList;\n")))))))
 
             _ (apply-to list
                         (emit-closures)
                         (emit-body body-exprs)
-                        (write "};\\n"))
+                        (write "};\n"))
             closures (get-val :closed-over empty-list)
             _ (restore-fn-context fn-context)
             result (cond
@@ -2740,10 +2806,10 @@ toccata-core
                       (write-strs (interpose (cons "List *closures"
                                                    (map arg-syms (fn [arg] (str "Value *" arg))))
                                              ", "))
-                      (write ") {\\n")
+                      (write ") {\n")
                       (emit-closures)
                       (emit-body body-exprs)
-                      (write "};\\n\\n"))
+                      (write "};\n\n"))
           closures (get-val :closed-over empty-list)
           _ (restore-fn-context fn-context)
           result (cond
@@ -2761,12 +2827,12 @@ toccata-core
           _ (set-val :local-sym-count 0)
           body (eval-exprs body)
           _ (emit-externs)
-          _ (write (str "\\nint " main-sym " ("))
+          _ (write (str "\nint " main-sym " ("))
           _ (write-strs (interpose (map arg-syms (fn [arg] (str "Value *" arg)))
                                    ", "))
-          _ (write ") {\\n")
+          _ (write ") {\n")
           _ (write-strs (nth body 1 empty-list))
-          _ (write "\\nreturn(0);\\n}\\n\\n")]
+          _ (write "\nreturn(0);\n}\n\n")]
       "")))
 
 (defn eval-args [args]
@@ -2793,7 +2859,7 @@ toccata-core
     (for [arity-sym (get-in-val (list :core-static-fns target-sym num-args))
           _ (update-in-val (list :new-static-fns)
                            (fn [s-fns]
-                             (cons (str "Value *" arity-sym "(" args ");\\n") s-fns)))]
+                             (cons (str "Value *" arity-sym "(" args ");\n") s-fns)))]
       arity-sym)))
 
 (defn lookup-static-fn [target-sym num-args]
@@ -2816,33 +2882,33 @@ toccata-core
         (list result-sym
               (comp target-stmts
                     arg-stmts
-                    (list "Value *" result-sym ";\\n"
-                          "if((" target-sym ")->type != " (get (types) 'Function :no-fn-type) ") {\\n"
+                    (list "Value *" result-sym ";\n"
+                          "if((" target-sym ")->type != " (get (types) 'Function :no-fn-type) ") {\n"
 
                           result-sym " = " invoke-arity-sym "(empty_list, "
                           (apply str (interpose (cons target-sym args) ", "))
-                          ");\\n} else {\\n"
+                          ");\n} else {\n"
 
-                          "FnArity *" arity-sym " = findFnArity(" target-sym ", " num-args ");\\n"
-                          "if(" arity-sym " != (FnArity *)0 && !" arity-sym "->variadic) {\\n"
-                          "FnType" num-args " *" fn-sym " = (FnType" num-args " *)" arity-sym "->fn;\\n"
-                          result-sym " = " fn-sym "(" (apply str (interpose arg-syms ", ")) ");\\n"
-                          "} else if(" arity-sym " != (FnArity *)0 && " arity-sym "->variadic) {\\n"
-                          "FnType1 *" fn-sym " = (FnType1 *)" arity-sym "->fn;\\n"
-                          "List *" variadic-sym " = (List *)GC_malloc(sizeof(List));\\n"
-                          variadic-sym "->type  = ListType;\\n"
-                          variadic-sym "->len = 0;\\n"
-                          variadic-sym "->head = (Value *)0;\\n"
-                          variadic-sym "->tail = (List *)0;\\n"
+                          "FnArity *" arity-sym " = findFnArity(" target-sym ", " num-args ");\n"
+                          "if(" arity-sym " != (FnArity *)0 && !" arity-sym "->variadic) {\n"
+                          "FnType" num-args " *" fn-sym " = (FnType" num-args " *)" arity-sym "->fn;\n"
+                          result-sym " = " fn-sym "(" (apply str (interpose arg-syms ", ")) ");\n"
+                          "} else if(" arity-sym " != (FnArity *)0 && " arity-sym "->variadic) {\n"
+                          "FnType1 *" fn-sym " = (FnType1 *)" arity-sym "->fn;\n"
+                          "List *" variadic-sym " = (List *)GC_malloc(sizeof(List));\n"
+                          variadic-sym "->type  = ListType;\n"
+                          variadic-sym "->len = 0;\n"
+                          variadic-sym "->head = (Value *)0;\n"
+                          variadic-sym "->tail = (List *)0;\n"
                           (reduce (reverse (rest arg-syms)) ""
                                   (fn [arg-list arg-sym]
                                     (str arg-list
                                          variadic-sym " = (List *)listCons("
-                                         arg-sym ", " variadic-sym ");\\n")))
-                          result-sym " = " fn-sym "(" (first arg-syms) ", (Value *)" variadic-sym ");\\n"
-                          "} else {\\nfprintf(stderr, \\\"\\\\n*** no arity found for '%s'.\\\\n\\\", "
+                                         arg-sym ", " variadic-sym ");\n")))
+                          result-sym " = " fn-sym "(" (first arg-syms) ", (Value *)" variadic-sym ");\n"
+                          "} else {\nfprintf(stderr, \"\\\n*** no arity found for '%s'.\\\n\", "
                           "((Function *)" target-sym ")->name"
-                          ");\\n  abort();\\n}\\n}\\n")))))))
+                          ");\n  abort();\n}\n}\n")))))))
 
 (defn call-recursive [target args]
   (let [target-stmts (nth target 1 empty-list)
@@ -2858,7 +2924,7 @@ toccata-core
             (comp target-stmts
                   arg-stmts
                   (list "Value *" result-sym " = " curr-arity-fn-sym
-                        "(" (apply str (interpose (cons "closures" args) ", ")) ");\\n"))))))
+                        "(" (apply str (interpose (cons "closures" args) ", ")) ");\n"))))))
 
 (defn call-static-fixed [target args]
   (let [target-sym (nth target 0 "")
@@ -2875,7 +2941,7 @@ toccata-core
               (comp target-stmts
                     arg-stmts
                     (list (str Value* result-sym " = " arity-sym "("
-                               (apply str (interpose arg-syms ", ")) ");\\n"))))))))
+                               (apply str (interpose arg-syms ", ")) ");\n"))))))))
 
 (defn call-static-variadic [target args]
   (let [target-sym (nth target 0 "")
@@ -2892,19 +2958,19 @@ toccata-core
         (list result-sym
               (comp target-stmts
                     arg-stmts
-                    (list (str "List *" variadic-sym " = (List *)GC_malloc(sizeof(List));\\n"
-                               variadic-sym "->type  = ListType;\\n"
-                               variadic-sym "->len = 0;\\n"
-                               variadic-sym "->head = (Value *)0;\\n"
-                               variadic-sym "->tail = (List *)0;\\n"
+                    (list (str "List *" variadic-sym " = (List *)GC_malloc(sizeof(List));\n"
+                               variadic-sym "->type  = ListType;\n"
+                               variadic-sym "->len = 0;\n"
+                               variadic-sym "->head = (Value *)0;\n"
+                               variadic-sym "->tail = (List *)0;\n"
                                (reduce (reverse (rest arg-syms)) ""
                                        (fn [arg-list arg-sym]
                                          (str arg-list
                                               variadic-sym " = (List *)listCons("
                                               "(Value *)" arg-sym
-                                              ", " variadic-sym ");\\n")))
+                                              ", " variadic-sym ");\n")))
                                Value* result-sym " = " arity-sym "(" (first arg-syms) ", (Value *)"
-                               variadic-sym ");\\n"))))))))
+                               variadic-sym ");\n"))))))))
 
 (deftype call-ast [callee params]
   AST
@@ -2951,8 +3017,8 @@ toccata-core
       (for [curr-fn-sym (get-val :curr-fn-sym "")
             fn-sym (gensym "fn_")
             _ (set-val :curr-fn-sym fn-sym)
-            _ (write (str "\\n// --------- " name " --------------\\n"))
-            _ (write (str "Function " fn-sym ";\\n"))
+            _ (write (str "\n// --------- " name " --------------\n"))
+            _ (write (str "Function " fn-sym ";\n"))
             ;; TODO: check for anon fn, save previous value of
             ;; :defined-sym and restore at end
             _ (assoc-in-val (list :defined-syms name) (list (str "Function " fn-sym)
@@ -2966,11 +3032,11 @@ toccata-core
             _ (cond
                (= 0 (count arity-init))
                (apply-to list
-                         (write (str "\\n// --------- " name " main body --------------\\n"))
+                         (write (str "\n// --------- " name " main body --------------\n"))
                          (write (str "Function " fn-sym " = {"
-                                     (get (types) 'Function :no-fn-type) ", -1, \\\""
-                                     name "\\\", " arity-count ", "
-                                     "{" (apply str (interpose arity-syms ", ")) "}};\\n"))
+                                     (get (types) 'Function :no-fn-type) ", -1, \""
+                                     name "\", " arity-count ", "
+                                     "{" (apply str (interpose arity-syms ", ")) "}};\n"))
                          (assoc-in-val (list :static-fns (str "(Value *)&" fn-sym)) static-arities))
 
                (state-maybe ""))
@@ -2982,14 +3048,14 @@ toccata-core
          (list (str "(Value *)" fn-sym)
                (comp arity-init
                      (list* (str "Function *" fn-sym " = (Function *)GC_malloc(sizeof(Function)"
-                                 " + sizeof(FnArity *) * " arity-count ");\\n")
-                            (str fn-sym "->type = " (get (types) 'Function :no-fn-type) ";\\n")
-                            (str fn-sym "->name = \\\"" name "\\\";\\n")
-                            (str fn-sym "->arityCount = " arity-count ";\\n")
+                                 " + sizeof(FnArity *) * " arity-count ");\n")
+                            (str fn-sym "->type = " (get (types) 'Function :no-fn-type) ";\n")
+                            (str fn-sym "->name = \"" name "\";\n")
+                            (str fn-sym "->arityCount = " arity-count ";\n")
                             (map (range arity-count)
                                  (fn [index]
                                    (str fn-sym "->arities[" index "] = "
-                                        (nth arity-syms index "") ";\\n")))))
+                                        (nth arity-syms index "") ";\n")))))
                (str "Function " fn-sym)))))))
 
 (defn emit-static-sym [sym]
@@ -3008,8 +3074,8 @@ toccata-core
   (cond
    (= :no-value value)
    (for [c-name (gensym "var_")
-         _ (write-strs (list (str "// forward declaration for '" name "'\\n")
-                             (str Value* c-name ";\\n\\n")))
+         _ (write-strs (list (str "// forward declaration for '" name "'\n")
+                             (str Value* c-name ";\n\n")))
          _ (assoc-in-val (list :defined-syms name) (list (str "Value *" c-name) c-name))]
      "")
 
@@ -3031,12 +3097,12 @@ toccata-core
                                            (abort)))
            (apply-to list
                      (write (first initialization))
-                     (write (str Value* c-name " = " result-sym ";\\n"))))]
+                     (write (str Value* c-name " = " result-sym ";\n"))))]
     ""))
 
 (defn inline-text-definition [name initialization]
   (for [c-name (gensym "var_")
-        _ (write (str Value* c-name " = " (first initialization) ";\\n"))
+        _ (write (str Value* c-name " = " (first initialization) ";\n"))
         _ (assoc-in-val (list :defined-syms name) (list (str "Value *" c-name ";")
                                                         c-name))]
     c-name))
@@ -3077,7 +3143,7 @@ toccata-core
           default-stmts (nth default 1 empty-list)]
       (list cond-result
             (comp default-stmts
-                  (list (str cond-result " = " (nth default 0 "") ";\\n"))))))
+                  (list (str cond-result " = " (nth default 0 "") ";\n"))))))
 
    (let [clause (first clauses)]
      (for [test (evaluate (first clause) emit-c)
@@ -3089,11 +3155,11 @@ toccata-core
              clause-stmts (nth clause-result 1 empty-list)]
          (list cond-result
                (comp test-stmts
-                     (list (str "\\nif (isTrue(" test-sym ")) {\\n"))
+                     (list (str "\nif (isTrue(" test-sym ")) {\n"))
                      clause-stmts
-                     (list (str cond-result " = " clause-sym ";\\n} else {\\n"))
+                     (list (str cond-result " = " clause-sym ";\n} else {\n"))
                      (nth cond-rest 1 empty-list)
-                     (list "}\\n"))))))))
+                     (list "}\n"))))))))
 
 (deftype cond-ast [clauses default]
   AST
@@ -3102,7 +3168,7 @@ toccata-core
           default (evaluate default emit-c)
           evalled-clauses (eval-cond-clause clauses default cond-result)]
       (let [cond-stmts (nth evalled-clauses 1 empty-list)]
-        (list cond-result (cons (str "Value *" cond-result ";\\n")
+        (list cond-result (cons (str "Value *" cond-result ";\n")
                                 cond-stmts))))))
 
 (defn emit-extension [type-num proto]
@@ -3145,14 +3211,14 @@ toccata-core
                                                       (map args (fn [arg] (str Value* arg))))
                                                 ", "))
                 args (apply str (interpose (cons "closures" args) ", "))]
-          _ (write (str Value* impl-sym "(" arg-decls ") {\\n"
+          _ (write (str Value* impl-sym "(" arg-decls ") {\n"
                         FnArity* "arityPtr = ((Function *)((ReifiedVal *)arg0)->impls["
-                        index "])->arities[0];\\n"
-                        "return (((FnType" num-args " *)arityPtr->fn)(arityPtr->" args "));\\n};\\n\\n"))
+                        index "])->arities[0];\n"
+                        "return (((FnType" num-args " *)arityPtr->fn)(arityPtr->" args "));\n};\n\n"))
           _ (write (str "Function " fn-sym " = {" (get (types) 'Function :no-fn-type)
-                        ", -1, \\\"" name
-                        "\\\", 1, {&(FnArity){" num-args
-                        ", (List *)0, 0, " impl-sym"}}};\\n\\n"))
+                        ", -1, \"" name
+                        "\", 1, {&(FnArity){" num-args
+                        ", (List *)0, 0, " impl-sym"}}};\n\n"))
           _ (assoc-in-val (list :protocols name :impls type-num) (str "(Value *)&" fn-sym))]
       evalled)))
 
@@ -3164,14 +3230,14 @@ toccata-core
           impls-syms (map impl-fns (fn [sym-inits] (nth sym-inits 0 "")))
           reify-init (list* (str ReifiedVal* reified-sym " = (ReifiedVal *)GC_malloc(sizeof("
                                  "ReifiedVal) + sizeof(Function *) * "
-                                 (count impls-syms) ");\\n")
-                            (str reified-sym "->type = " type-num ";\\n")
-                            (str reified-sym "->implCount = " (count impl-fns) ";\\n")
+                                 (count impls-syms) ");\n")
+                            (str reified-sym "->type = " type-num ";\n")
+                            (str reified-sym "->implCount = " (count impl-fns) ";\n")
                             (map (range (count impl-fns))
                                  (fn [index]
                                    (let [sym-init (nth impl-fns index empty-list)
                                          sym (nth sym-init 0 "")]
-                                     (str reified-sym "->impls[" index "] = " sym ";\\n")))))]
+                                     (str reified-sym "->impls[" index "] = " sym ";\n")))))]
       (list (str "(Value *)" reified-sym)
             (comp inits reify-init)))))
 
@@ -3182,7 +3248,7 @@ toccata-core
               reify-init (list (str "ReifiedVal " reified-sym " = {"
                                     type-num ", -1, " (count impl-fns) ", {"
                                     (apply str (interpose fns-init ", "))
-                                    "}};\\n"))]
+                                    "}};\n"))]
         _ (write (first reify-init))]
     (list (str "(Value *)&" reified-sym) empty-list reified-sym)))
 
@@ -3277,24 +3343,24 @@ toccata-core
                        (interpose (cons "List *closures" (map args (fn [arg] (str "Value *" arg))))
                                   ", "))
                       (write-strs
-                       (list ") {\\n"
+                       (list ") {\n"
                              "  Function *implFn = (Function *)findProtoImpl(arg0->type, "
-                             impls-sym ");\\n"
-                             "  if(implFn == (Function *)0) {\\n"
-                             "   fprintf(stderr, \\\"\\\\n*** Could not find proto impl for '"
-                             name "' %lld\\\\n\\\", arg0->type);\\nabort();\\n}\\n"
-                             "  FnArity *_arity = findFnArity((Value *)implFn, " num-args ");\\n"
-                             "  if(_arity == (FnArity *)0 || _arity->variadic) {\\n"
-                             "    fprintf(stderr, \\\"\\\\n*** Invalid number of args in call to '"
-                             name "'\\\\n\\\");\\n"
-                             "    abort();\\n}\\n"
-                             "  FnType" num-args " *_fn = (FnType" num-args " *)_arity->fn;\\n"
+                             impls-sym ");\n"
+                             "  if(implFn == (Function *)0) {\n"
+                             "   fprintf(stderr, \"\\\n*** Could not find proto impl for '"
+                             name "' %lld\\\n\", arg0->type);\nabort();\n}\n"
+                             "  FnArity *_arity = findFnArity((Value *)implFn, " num-args ");\n"
+                             "  if(_arity == (FnArity *)0 || _arity->variadic) {\n"
+                             "    fprintf(stderr, \"\\\n*** Invalid number of args in call to '"
+                             name "'\\\n\");\n"
+                             "    abort();\n}\n"
+                             "  FnType" num-args " *_fn = (FnType" num-args " *)_arity->fn;\n"
                              "  return(_fn("))
                       (write-strs (interpose (cons "_arity->closures" args) ", "))
-                      (write-strs (list "));\\n}\\n"
+                      (write-strs (list "));\n}\n"
                                         "FnArity "
                                         (str arity-sym) " = {" (str num-args) ", (List *)0, 0, "
-                                        (str c-name) "};\\n"))
+                                        (str c-name) "};\n"))
                       (assoc-in-val (list :static-fns (str "(Value *)&" fn-sym) num-args) c-name))]
       (str "&" arity-sym))))
 
@@ -3304,19 +3370,19 @@ toccata-core
     (for [impls-sym (gensym "protoImpls_")
           fn-sym (gensym "protoFn_")
           default-fn-sym (gensym "defaultFn_")
-          _ (write (str "ProtoImpls *" impls-sym ";\\n"))
+          _ (write (str "ProtoImpls *" impls-sym ";\n"))
           default-syms (crush arities emit-proto-default)
           arity-syms (traverse arities (partial emit-proto-arity name fn-sym impls-sym))
           _ (apply-to list
                       (cond
                        (empty? default-syms) (state-maybe "")
                        (write (str "Function " default-fn-sym " = {" (get (types) 'Function :no-fn-type)
-                                   ", -1, \\\"" name "\\\", " (count default-syms)
-                                   ", {" (apply str (interpose default-syms ",\\n"))
-                                   "}};\\n\\n")))
+                                   ", -1, \"" name "\", " (count default-syms)
+                                   ", {" (apply str (interpose default-syms ",\n"))
+                                   "}};\n\n")))
                       (write-strs (list "Function " (str fn-sym)  " = {" (get (types) 'Function :no-fn-type)
-                                        ", -1, \\\"" (str name) "\\\", " (count arity-syms)
-                                        ", {" (apply str (interpose arity-syms ",\\n")) "}};\\n\\n"))
+                                        ", -1, \"" (str name) "\", " (count arity-syms)
+                                        ", {" (apply str (interpose arity-syms ",\n")) "}};\n\n"))
                       (assoc-in-val (list :defined-syms name) (list (str "Function " fn-sym)
                                                                     (str "(Value *)&" fn-sym)))
                       (assoc-in-val (list :protocols name) {:impls-sym impls-sym
@@ -3336,14 +3402,14 @@ toccata-core
             (fn [arg-count]
               (cond
                (= arg-count 0)
-               (write (str "typedef Value *(FnType0)(List *);\\n"))
+               (write (str "typedef Value *(FnType0)(List *);\n"))
 
                (apply-to list
                          (write (str "typedef Value *(FnType" arg-count ")("))
                          (write-strs (interpose (cons "List *"
                                                       (repeat arg-count "Value *"))
                                                 ", "))
-                         (write ");\\n"))))))
+                         (write ");\n"))))))
 
 (defn extern-fn [name variadic return-type & arg-types]
   (let [arg-types (comp arg-types
@@ -3353,132 +3419,132 @@ toccata-core
     (apply-to list
               (write (str "extern " return-type " " name "("))
               (write-strs (interpose arg-types ", "))
-              (write ");\\n"))))
+              (write ");\n"))))
 
 (defn extern-functions []
   (apply-to list
-            (write "\\n")
+            (write "\n")
             (extern-fn 'abort 0 VoidT)
             (extern-fn 'printf 1 Int32 "const char *")
             (extern-fn 'GC_init 0 VoidT)
             (extern-fn 'GC_malloc 0 Value* Int64)))
 
 (defn core-base-fns []
-  (write-strs (list "\\n"
-                    "Value* true;\\n"
-                    "Value* false;\\n"
-                    "Number trueVal;\\n"
-                    "Number falseVal;\\n"
-                    "int isTrue(Value *boolVal);\\n"
-                    "Value *findProtoImpl(int64_t type, ProtoImpls *impls);\\n"
-                    "FnArity *findFnArity(Value *fnVal, int argCount);\\n"
-                    "Value *symbolValue(char *s);\\n"
-                    "Value *keywordValue(char *s);\\n"
-                    "Value *stringValue(char *s);\\n"
-                    "Value *makeSubstr(int64_t len, Value *str, char *subsStart);\\n"
-                    "Value *numberValue(int64_t n);\\n"
-                    "List *listCons(Value *x, List *l);\\n")))
+  (write-strs (list "\n"
+                    "Value* true;\n"
+                    "Value* false;\n"
+                    "Number trueVal;\n"
+                    "Number falseVal;\n"
+                    "int isTrue(Value *boolVal);\n"
+                    "Value *findProtoImpl(int64_t type, ProtoImpls *impls);\n"
+                    "FnArity *findFnArity(Value *fnVal, int argCount);\n"
+                    "Value *symbolValue(char *s);\n"
+                    "Value *keywordValue(char *s);\n"
+                    "Value *stringValue(char *s);\n"
+                    "Value *makeSubstr(int64_t len, Value *str, char *subsStart);\n"
+                    "Value *numberValue(int64_t n);\n"
+                    "List *listCons(Value *x, List *l);\n")))
 
 (defn base-fns []
-  (write-strs (list "\\n"
-                    "Number trueVal = {NumberType, -1, 1};\\n"
-                    "Value* true = (Value *)&trueVal;\\n"
-                    "Number falseVal = {NumberType, -1, 0};\\n"
-                    "Value* false = (Value *)&falseVal;\\n"
-                    "\\n"
+  (write-strs (list "\n"
+                    "Number trueVal = {NumberType, -1, 1};\n"
+                    "Value* true = (Value *)&trueVal;\n"
+                    "Number falseVal = {NumberType, -1, 0};\n"
+                    "Value* false = (Value *)&falseVal;\n"
+                    "\n"
 
-                    "int isTrue(Value *boolVal) {\\n"
-                    "if (boolVal->type != " (get (types) 'Number 99) ") {\\n"
-                    "printf(\\\"Invalid boolean value\\\\n"
-                    "\\\");\\nabort();\\n}\\nelse\\nreturn (((Number *)boolVal)->numVal);\\n}\\n"
-                    "\\n"
+                    "int isTrue(Value *boolVal) {\n"
+                    "if (boolVal->type != " (get (types) 'Number 99) ") {\n"
+                    "printf(\"Invalid boolean value\\\n"
+                    "\");\nabort();\n}\nelse\nreturn (((Number *)boolVal)->numVal);\n}\n"
+                    "\n"
 
-                    "Value *findProtoImpl(int64_t type, ProtoImpls *impls) {\\n"
-                    "int64_t implIndex = 0;\\n"
-                    "while(implIndex < impls->implCount) {\\n"
-                    "if (type != impls->impls[implIndex].type) {\\n"
-                    "implIndex++;\\n"
-                    "} else\\n"
-                    "return(impls->impls[implIndex].implFn);\\n"
-                    "}\\n"
-                    "return(impls->defaultImpl);\\n"
-                    "};\\n\\n"
+                    "Value *findProtoImpl(int64_t type, ProtoImpls *impls) {\n"
+                    "int64_t implIndex = 0;\n"
+                    "while(implIndex < impls->implCount) {\n"
+                    "if (type != impls->impls[implIndex].type) {\n"
+                    "implIndex++;\n"
+                    "} else\n"
+                    "return(impls->impls[implIndex].implFn);\n"
+                    "}\n"
+                    "return(impls->defaultImpl);\n"
+                    "};\n\n"
 
-                    "FnArity *findFnArity(Value *fnVal, int argCount) {\\n"
-                    "Function *fn = (Function *)fnVal;\\n"
-                    "int arityIndex = 0;\\n"
-                    "FnArity *arity = (FnArity *)fn->arities[arityIndex];\\n"
-                    "FnArity *variadic = (FnArity *)0;\\n"
-                    "while(arityIndex < fn->arityCount) {\\n"
-                    "arity = (FnArity *)fn->arities[arityIndex];\\n"
-                    "if (arity->variadic) {\\n"
-                    "variadic = arity;\\n"
-                    "arityIndex++;\\n"
-                    "} else if (arity->count != argCount) {\\n"
-                    "arityIndex++;\\n"
-                    "} else\\n"
-                    "return(arity);\\n"
-                    "}\\n"
-                    "return(variadic);\\n"
-                    "};\\n\\n"
-                    "\\n"
+                    "FnArity *findFnArity(Value *fnVal, int argCount) {\n"
+                    "Function *fn = (Function *)fnVal;\n"
+                    "int arityIndex = 0;\n"
+                    "FnArity *arity = (FnArity *)fn->arities[arityIndex];\n"
+                    "FnArity *variadic = (FnArity *)0;\n"
+                    "while(arityIndex < fn->arityCount) {\n"
+                    "arity = (FnArity *)fn->arities[arityIndex];\n"
+                    "if (arity->variadic) {\n"
+                    "variadic = arity;\n"
+                    "arityIndex++;\n"
+                    "} else if (arity->count != argCount) {\n"
+                    "arityIndex++;\n"
+                    "} else\n"
+                    "return(arity);\n"
+                    "}\n"
+                    "return(variadic);\n"
+                    "};\n\n"
+                    "\n"
 
-                    "Value *symbolValue(char *s) {\\n"
-                    "SymKey *sym = (SymKey *)GC_malloc(sizeof(SymKey));\\n"
-                    "sym->type = SymbolType;\\n"
-                    "sym->name = s;\\n"
-                    "return((Value *)sym);\\n"
-                    "};\\n"
-                    "\\n"
+                    "Value *symbolValue(char *s) {\n"
+                    "SymKey *sym = (SymKey *)GC_malloc(sizeof(SymKey));\n"
+                    "sym->type = SymbolType;\n"
+                    "sym->name = s;\n"
+                    "return((Value *)sym);\n"
+                    "};\n"
+                    "\n"
 
-                    "Value *keywordValue(char *s) {\\n"
-                    "SymKey *kw = (SymKey *)GC_malloc(sizeof(SymKey));\\n"
-                    "kw->type = KeywordType;\\n"
-                    "kw->name = s;\\n"
-                    "return((Value *)kw);\\n"
-                    "};\\n"
-                    "\\n"
+                    "Value *keywordValue(char *s) {\n"
+                    "SymKey *kw = (SymKey *)GC_malloc(sizeof(SymKey));\n"
+                    "kw->type = KeywordType;\n"
+                    "kw->name = s;\n"
+                    "return((Value *)kw);\n"
+                    "};\n"
+                    "\n"
 
-                    "Value *stringValue(char *s) {\\n"
-                    "int64_t len = strlen(s);\\n"
-                    "String *strVal = (String *)GC_malloc(sizeof(String) + len + 4);\\n"
-                    "strVal->type = StringType;\\n"
-                    "strVal->len = strlen(s);\\n"
-                    "strncpy(strVal->buffer, s, len);\\n"
-                    "return((Value *)strVal);\\n"
-                    "};\\n"
-                    "\\n"
+                    "Value *stringValue(char *s) {\n"
+                    "int64_t len = strlen(s);\n"
+                    "String *strVal = (String *)GC_malloc(sizeof(String) + len + 4);\n"
+                    "strVal->type = StringType;\n"
+                    "strVal->len = strlen(s);\n"
+                    "strncpy(strVal->buffer, s, len);\n"
+                    "return((Value *)strVal);\n"
+                    "};\n"
+                    "\n"
 
-                    "Value *makeSubstr(int64_t len, Value *str, char *subsStart) {\\n"
-                    "SubString *subStr = (SubString *)GC_malloc(sizeof(SubString));\\n"
-                    "subStr->type = SubStringType;\\n"
-                    "subStr->len = len;\\n"
-                    "subStr->source = str;\\n"
-                    "subStr->buffer = subsStart;\\n"
-                    "return((Value *)subStr);}\\n"
-                    "\\n"
+                    "Value *makeSubstr(int64_t len, Value *str, char *subsStart) {\n"
+                    "SubString *subStr = (SubString *)GC_malloc(sizeof(SubString));\n"
+                    "subStr->type = SubStringType;\n"
+                    "subStr->len = len;\n"
+                    "subStr->source = str;\n"
+                    "subStr->buffer = subsStart;\n"
+                    "return((Value *)subStr);}\n"
+                    "\n"
 
-                    "Value *numberValue(int64_t n) {\\n"
-                    "Number *numVal = (Number *)GC_malloc(sizeof(Number));\\n"
-                    "numVal->type = NumberType;\\n"
-                    "numVal->numVal = n;\\n"
-                    "return((Value *)numVal);\\n"
-                    "};\\n"
-                    "\\n"
+                    "Value *numberValue(int64_t n) {\n"
+                    "Number *numVal = (Number *)GC_malloc(sizeof(Number));\n"
+                    "numVal->type = NumberType;\n"
+                    "numVal->numVal = n;\n"
+                    "return((Value *)numVal);\n"
+                    "};\n"
+                    "\n"
 
-                    "List *listCons(Value *x, List *l) {\\n"
-                    "if (l->type != ListType) {\\n"
-                    "printf(\\\"'cons' requires a list\\\n\\\");\\n"
-                    "abort();\\n"
-                    "}\\n"
-                    "List *newList = (List *)GC_malloc(sizeof(List));\\n"
-                    "List *oldList = (List *)l;\\n"
-                    "newList->type = ListType;\\n"
-                    "newList->len = oldList->len + 1;\\n"
-                    "newList->head = (Value *)x;\\n"
-                    "newList->tail = oldList;\\n"
-                    "return(newList);\\n"
-                    "};\\n")))
+                    "List *listCons(Value *x, List *l) {\n"
+                    "if (l->type != ListType) {\n"
+                    "printf(\"'cons' requires a list\\\n\");\n"
+                    "abort();\n"
+                    "}\n"
+                    "List *newList = (List *)GC_malloc(sizeof(List));\n"
+                    "List *oldList = (List *)l;\n"
+                    "newList->type = ListType;\n"
+                    "newList->len = oldList->len + 1;\n"
+                    "newList->head = (Value *)x;\n"
+                    "newList->tail = oldList;\n"
+                    "return(newList);\n"
+                    "};\n")))
 
 (defn emit-impl [default impls]
   (let [default-sym (cond
@@ -3489,7 +3555,7 @@ toccata-core
     (apply-to list
               (write (str "{" (count impls-strs) ", " default-sym ", {"))
               (write-strs (interpose impls-strs ", "))
-              (write "}};\\n"))))
+              (write "}};\n"))))
 
 (defn finalize-protocols []
   (for [protocols (get-val :protocols {})
@@ -3513,7 +3579,7 @@ toccata-core
                               (for [local-sym (gensym "localImpls_")
                                     _ (cond
                                        bootstrapping (state-maybe "")
-                                       (write (str "extern ProtoImpls *" impls-sym ";\\n")))
+                                       (write (str "extern ProtoImpls *" impls-sym ";\n")))
                                     _ (write (str "ProtoImpls " local-sym " = "))
                                     _ (emit-impl default impls)]
                                 (list impls-sym local-sym))))))]
@@ -3522,9 +3588,9 @@ toccata-core
 (defn base-types []
   (let [types (types)]
     (write-strs (list
-                 "#include <sys/types.h>\\n"
-                 "#include <stdio.h>\\n"
-                 "#include <string.h>\\n\\n"
+                 "#include <sys/types.h>\n"
+                 "#include <stdio.h>\n"
+                 "#include <string.h>\n\n"
                  Value
                  NumberVal
                  SymKey
@@ -3536,26 +3602,26 @@ toccata-core
                  ProtoImpl
                  ProtoImpls
                  ReifiedVal
-                 "List *listCons(Value *x, List *l);\\n"
-                 "Value *stringValue(char *s);\\n"
-                 "const int64_t NumberType;\\n"
-                 "const int64_t KeywordType;\\n"
-                 "const int64_t SymbolType;\\n"
-                 "const int64_t StringType;\\n"
-                 "const int64_t SubStringType;\\n"
-                 "const int64_t ListType;\\n"
-                 "const int64_t FunctionType;\\n"
-                 "List *empty_list;\\n"
-                 "Value *number_literals();\\n"
-                 "Value *counts();\\n"
-                 "Value *types();\\n"
-                 "Value *symbol_literals();\\n"
-                 "Value *keyword_literals();\\n"
-                 "Value *string_literals();\\n"
-                 "Value *defined_syms();\\n"
-                 "Value *static_fns();\\n"
-                 "Value *protocols();\\n"
-                 "\\n"))))
+                 "List *listCons(Value *x, List *l);\n"
+                 "Value *stringValue(char *s);\n"
+                 "const int64_t NumberType;\n"
+                 "const int64_t KeywordType;\n"
+                 "const int64_t SymbolType;\n"
+                 "const int64_t StringType;\n"
+                 "const int64_t SubStringType;\n"
+                 "const int64_t ListType;\n"
+                 "const int64_t FunctionType;\n"
+                 "List *empty_list;\n"
+                 "Value *number_literals();\n"
+                 "Value *counts();\n"
+                 "Value *types();\n"
+                 "Value *symbol_literals();\n"
+                 "Value *keyword_literals();\n"
+                 "Value *string_literals();\n"
+                 "Value *defined_syms();\n"
+                 "Value *static_fns();\n"
+                 "Value *protocols();\n"
+                 "\n"))))
 
 (defn const-strings [strs type]
   (let [strs (seq strs)]
@@ -3564,10 +3630,10 @@ toccata-core
      (traverse strs (fn [const-str]
                       (let [str-ptr (nth const-str 1 "noString_ptr")
                             str-val (nth const-str 0 "noString_name")]
-                        (write (str "struct {int64_t type;\\n   int64_t len;\\n   char buffer["
+                        (write (str "struct {int64_t type;\n   int64_t len;\n   char buffer["
                                     (inc (count str-val))
                                     "];} " str-ptr " = {" type ","
-                                    (count str-val) ",\\\"" str-val "\\\"};\\n")))))
+                                    (count str-val) ",\"" (escape-chars str-val) "\"};\n")))))
 
      (state-maybe ""))))
 
@@ -3581,9 +3647,9 @@ toccata-core
                              (nth sym 1 "no_symbol_val")
                              " = {"
                              sym-type
-                             ", -1, \\\""
+                             ", -1, \""
                              (nth sym 0 "no_symbol_name")
-                             "\\\"};\\n"))))
+                             "\"};\n"))))
 
      (state-maybe ""))))
 
@@ -3599,7 +3665,7 @@ toccata-core
                              num-type
                              ", -1, "
                              (nth num 0 "noNumber_val")
-                             "};\\n"))))
+                             "};\n"))))
 
      (state-maybe ""))))
 
@@ -3647,31 +3713,31 @@ toccata-core
                          bootstrapping "toccataMain"
                          "main")]
         proto-syms (finalize-protocols)
-        _ (write-strs (list (str  "\\nint " main-name "(int argc, char *argv[]) {\\n")
-                            "    GC_init();\\n"
-                            "     List *argList = (List *)GC_malloc(sizeof(List));\\n"
-                            "      argList->type = ListType;\\n"
-                            "      argList->len = 0;\\n"
-                            "      argList->head = (Value *)0;\\n"
-                            "      argList->tail = (List *)0;\\n"
-                            "      List *tail = argList;\\n"
-                            "      for(int i = 0; i < argc; i++) {\\n"
-                            "         tail->head = stringValue(argv[i]);\\n"
-                            "         List *newTail = (List *)GC_malloc(sizeof(List));\\n"
-                            "         newTail->type = ListType;\\n"
-                            "         newTail->len = 0;\\n"
-                            "         newTail->tail = (List *)0;\\n"
-                            "         newTail->head = (Value *)0;\\n"
-                            "         tail->head = stringValue(argv[i]);\\n"
-                            "         tail->tail = newTail;\\n"
-                            "         tail = newTail;\\n"
-                            "         argList->len++;\\n}\\n"))
+        _ (write-strs (list (str  "\nint " main-name "(int argc, char *argv[]) {\n")
+                            "    GC_init();\n"
+                            "     List *argList = (List *)GC_malloc(sizeof(List));\n"
+                            "      argList->type = ListType;\n"
+                            "      argList->len = 0;\n"
+                            "      argList->head = (Value *)0;\n"
+                            "      argList->tail = (List *)0;\n"
+                            "      List *tail = argList;\n"
+                            "      for(int i = 0; i < argc; i++) {\n"
+                            "         tail->head = stringValue(argv[i]);\n"
+                            "         List *newTail = (List *)GC_malloc(sizeof(List));\n"
+                            "         newTail->type = ListType;\n"
+                            "         newTail->len = 0;\n"
+                            "         newTail->tail = (List *)0;\n"
+                            "         newTail->head = (Value *)0;\n"
+                            "         tail->head = stringValue(argv[i]);\n"
+                            "         tail->tail = newTail;\n"
+                            "         tail = newTail;\n"
+                            "         argList->len++;\n}\n"))
         _ (traverse proto-syms
                     (fn [proto-sym]
                       (let [impls-sym (nth proto-sym 0 "")
                             local-sym (nth proto-sym 1 "")]
-                        (write (str "  " impls-sym " = &" local-sym ";\\n")))))
-        _ (write (str "  return(" main-sym "((Value *)argList));\\n};\\n"))]
+                        (write (str "  " impls-sym " = &" local-sym ";\n")))))
+        _ (write (str "  return(" main-sym "((Value *)argList));\n};\n"))]
     ""))
 
 (defn protocols []
@@ -3697,45 +3763,45 @@ toccata-core
                              (empty? impls) (state-maybe "")
                              (traverse (seq impls)
                                        (fn [impl]
-                                         (write (str "extern Function " (subs (nth impl 1) 10) ";\\n")))))))))))
+                                         (write (str "extern Function " (subs (nth impl 1) 10) ";\n")))))))))))
 
 (defn serialize-protocols []
   (for [protos (get-val :protocols {})
-        _ (write "Value *protocols() {\\n")
-        _ (write "List *protos = empty_list;\\n")
-        _ (write "List *protoInfo;\\n")
-        _ (write "List *impls;\\n")
-        _ (write "List *impl;\\n")
+        _ (write "Value *protocols() {\n")
+        _ (write "List *protos = empty_list;\n")
+        _ (write "List *protoInfo;\n")
+        _ (write "List *impls;\n")
+        _ (write "List *impl;\n")
         _ (write-strs (map (seq protos)
                            (fn [proto-inf]
                              (let [impls-info (nth proto-inf 1 empty-list)
                                    impls-sym (get impls-info :impls-sym "")
                                    extern-def (get impls-info :extern-def "")
                                    impls (seq (get impls-info :impls empty-list))]
-                               (str "protoInfo = empty_list;\\n"
-                                    "impls = empty_list;\\n"
+                               (str "protoInfo = empty_list;\n"
+                                    "impls = empty_list;\n"
                                     (apply str (map (seq impls)
                                                     (fn [impl]
                                                       (let [impl-type (nth impl 0 0)]
-                                                        (str "impl = empty_list;\\n"
-                                                             "impl = listCons(stringValue(\\\"" (nth impl 1 "")
-                                                             "\\\"), impl);\\n"
+                                                        (str "impl = empty_list;\n"
+                                                             "impl = listCons(stringValue(\"" (nth impl 1 "")
+                                                             "\"), impl);\n"
                                                              "impl = listCons("
                                                              (cond
                                                               (= :default impl-type)
-                                                              "keywordValue(\\\":default\\\")"
+                                                              "keywordValue(\":default\")"
 
                                                               (str "numberValue(" impl-type ")"))
-                                                             ", impl);\\n"
-                                                             "impls = listCons((Value *)impl, impls);\\n")))))
-                                    "protoInfo = listCons((Value *)impls, protoInfo);\\n"
-                                    "protoInfo = listCons(stringValue(\\\"" extern-def "\\\"), protoInfo);\\n"
-                                    "protoInfo = listCons(stringValue(\\\"" impls-sym "\\\"), protoInfo);\\n"
-                                    "protoInfo = listCons(symbolValue(\\\"" (first proto-inf)
-                                    "\\\"), protoInfo);\\n"
-                                    "protos = listCons((Value *)protoInfo, protos);\\n")))))
-        _ (write "return((Value *)protos);\\n")
-        _ (write "}\\n\\n")]
+                                                             ", impl);\n"
+                                                             "impls = listCons((Value *)impl, impls);\n")))))
+                                    "protoInfo = listCons((Value *)impls, protoInfo);\n"
+                                    "protoInfo = listCons(stringValue(\"" extern-def "\"), protoInfo);\n"
+                                    "protoInfo = listCons(stringValue(\"" impls-sym "\"), protoInfo);\n"
+                                    "protoInfo = listCons(symbolValue(\"" (first proto-inf)
+                                    "\"), protoInfo);\n"
+                                    "protos = listCons((Value *)protoInfo, protos);\n")))))
+        _ (write "return((Value *)protos);\n")
+        _ (write "}\n\n")]
     ""))
 
 (defn static-fns []
@@ -3752,37 +3818,37 @@ toccata-core
 
 (defn serialize-static-fns []
   (for [s-fns (get-val :static-fns {})
-        _ (write "Value *static_fns() {\\n")
-        _ (write "List *staticFns = empty_list;\\n")
-        _ (write "List *fnInfo;\\n")
-        _ (write "List *arityInfo;\\n")
+        _ (write "Value *static_fns() {\n")
+        _ (write "List *staticFns = empty_list;\n")
+        _ (write "List *fnInfo;\n")
+        _ (write "List *arityInfo;\n")
         _ (write-strs (flat-map (seq s-fns)
                                 (fn [static-fn]
                                   (let [name (nth static-fn 0)
                                         arities (nth static-fn 1)]
                                     (comp
-                                     (list "fnInfo = empty_list;\\n")
+                                     (list "fnInfo = empty_list;\n")
                                      (flat-map (seq arities)
                                                (fn [arity]
                                                  (let [arg-count (nth arity 0)
                                                        arity-sym (nth arity 1)]
                                                    (list
-                                                    (str "arityInfo = listCons(stringValue(\\\"" arity-sym
-                                                         "\\\"), empty_list);\\n")
+                                                    (str "arityInfo = listCons(stringValue(\"" arity-sym
+                                                         "\"), empty_list);\n")
                                                     (cond
                                                      (= :variadic arg-count)
-                                                     (str "arityInfo = listCons(keywordValue(\\\":variadic\\\")"
-                                                          ", arityInfo);\\n")
+                                                     (str "arityInfo = listCons(keywordValue(\":variadic\")"
+                                                          ", arityInfo);\n")
 
                                                      (str "arityInfo = listCons(numberValue(" arg-count
-                                                          "), arityInfo);\\n"))
-                                                    (str "fnInfo = listCons((Value *)arityInfo, fnInfo);\\n")))))
+                                                          "), arityInfo);\n"))
+                                                    (str "fnInfo = listCons((Value *)arityInfo, fnInfo);\n")))))
                                      (list
-                                      (str "fnInfo = listCons((Value *)fnInfo, empty_list);\\n")
-                                      (str "fnInfo = listCons(stringValue(\\\"" name "\\\"), fnInfo);\\n")
-                                      (str "staticFns = listCons((Value *)fnInfo, staticFns);\\n")))))))
-        _ (write "return((Value *)staticFns);\\n")
-        _ (write "}\\n\\n")]
+                                      (str "fnInfo = listCons((Value *)fnInfo, empty_list);\n")
+                                      (str "fnInfo = listCons(stringValue(\"" name "\"), fnInfo);\n")
+                                      (str "staticFns = listCons((Value *)fnInfo, staticFns);\n")))))))
+        _ (write "return((Value *)staticFns);\n")
+        _ (write "}\n\n")]
     ""))
 
 (defn defined-syms []
@@ -3794,9 +3860,9 @@ toccata-core
 
 (defn serialize-defined-syms []
   (for [def-syms (get-val :defined-syms {})
-        _ (write "Value *defined_syms() {\\n")
-        _ (write "List *defSyms = empty_list;\\n")
-        _ (write "List *symInfo;\\n")
+        _ (write "Value *defined_syms() {\n")
+        _ (write "List *defSyms = empty_list;\n")
+        _ (write "List *symInfo;\n")
         _ (write-strs (flat-map (seq def-syms)
                                 (fn [def]
                                   (let [sym (nth def 0)
@@ -3804,13 +3870,13 @@ toccata-core
                                         ext (nth ext-ref 0)
                                         ref (nth ext-ref 1)]
                                     (list
-                                     (str "symInfo = listCons(stringValue(\\\"" ref "\\\"), empty_list);\\n")
-                                     (str "symInfo = listCons(stringValue(\\\"" ext "\\\"), symInfo);\\n")
-                                     (str "symInfo = listCons((Value *)symInfo, empty_list);\\n")
-                                     (str "symInfo = listCons(symbolValue(\\\"" sym "\\\"), symInfo);\\n")
-                                     (str "defSyms = listCons((Value *)symInfo, defSyms);\\n"))))))
-        _ (write "return((Value *)defSyms);\\n")
-        _ (write "}\\n\\n")]
+                                     (str "symInfo = listCons(stringValue(\"" ref "\"), empty_list);\n")
+                                     (str "symInfo = listCons(stringValue(\"" ext "\"), symInfo);\n")
+                                     (str "symInfo = listCons((Value *)symInfo, empty_list);\n")
+                                     (str "symInfo = listCons(symbolValue(\"" sym "\"), symInfo);\n")
+                                     (str "defSyms = listCons((Value *)symInfo, defSyms);\n"))))))
+        _ (write "return((Value *)defSyms);\n")
+        _ (write "}\n\n")]
     ""))
 
 (defn number-literals []
@@ -3824,19 +3890,19 @@ toccata-core
 
 (defn serialize-number-literals []
   (for [nums (get-val :numbers {})
-        _ (write "Value *number_literals() {\\n")
-        _ (write "List *nums = empty_list;\\n")
-        _ (write "List *numInfo;\\n")
+        _ (write "Value *number_literals() {\n")
+        _ (write "List *nums = empty_list;\n")
+        _ (write "List *numInfo;\n")
         _ (write-strs (flat-map (seq nums)
                                 (fn [num-lit]
                                   (let [num (nth num-lit 0)
                                         ref (nth num-lit 1)]
                                     (list
-                                     (str "numInfo = listCons(stringValue(\\\"" ref "\\\"), empty_list);\\n")
-                                     (str "numInfo = listCons(numberValue(" num "), numInfo);\\n")
-                                     (str "nums = listCons((Value *)numInfo, nums);\\n"))))))
-        _ (write "return((Value *)nums);\\n")
-        _ (write "}\\n\\n")]
+                                     (str "numInfo = listCons(stringValue(\"" ref "\"), empty_list);\n")
+                                     (str "numInfo = listCons(numberValue(" num "), numInfo);\n")
+                                     (str "nums = listCons((Value *)numInfo, nums);\n"))))))
+        _ (write "return((Value *)nums);\n")
+        _ (write "}\n\n")]
     ""))
 
 (defn string-literals []
@@ -3850,19 +3916,20 @@ toccata-core
 
 (defn serialize-string-literals []
   (for [strs (get-val :strings {})
-        _ (write "Value *string_literals() {\\n")
-        _ (write "List *strs = empty_list;\\n")
-        _ (write "List *strInfo;\\n")
+        _ (write "Value *string_literals() {\n")
+        _ (write "List *strs = empty_list;\n")
+        _ (write "List *strInfo;\n")
         _ (write-strs (flat-map (seq strs)
                                 (fn [str-lit]
                                   (let [str-val (nth str-lit 0)
                                         ref (nth str-lit 1)]
                                     (list
-                                     (str "strInfo = listCons(stringValue(\\\"" ref "\\\"), empty_list);\\n")
-                                     (str "strInfo = listCons(stringValue(\\\"" str-val "\\\"), strInfo);\\n")
-                                     (str "strs = listCons((Value *)strInfo, strs);\\n"))))))
-        _ (write "return((Value *)strs);\\n")
-        _ (write "}\\n\\n")]
+                                     (str "strInfo = listCons(stringValue(\"" ref "\"), empty_list);\n")
+                                     (str "strInfo = listCons(stringValue(\"" (escape-chars str-val)
+                                          "\"), strInfo);\n")
+                                     (str "strs = listCons((Value *)strInfo, strs);\n"))))))
+        _ (write "return((Value *)strs);\n")
+        _ (write "}\n\n")]
     ""))
 
 (defn keyword-literals []
@@ -3876,19 +3943,19 @@ toccata-core
 
 (defn serialize-keyword-literals []
   (for [kws (get-val :keywords {})
-        _ (write "Value *keyword_literals() {\\n")
-        _ (write "List *kws = empty_list;\\n")
-        _ (write "List *kwInfo;\\n")
+        _ (write "Value *keyword_literals() {\n")
+        _ (write "List *kws = empty_list;\n")
+        _ (write "List *kwInfo;\n")
         _ (write-strs (flat-map (seq kws)
                                 (fn [kw-lit]
                                   (let [kw (nth kw-lit 0)
                                         ref (nth kw-lit 1)]
                                     (list
-                                     (str "kwInfo = listCons(stringValue(\\\"" ref "\\\"), empty_list);\\n")
-                                     (str "kwInfo = listCons(keywordValue(\\\"" kw "\\\"), kwInfo);\\n")
-                                     (str "kws = listCons((Value *)kwInfo, kws);\\n"))))))
-        _ (write "return((Value *)kws);\\n")
-        _ (write "}\\n\\n")]
+                                     (str "kwInfo = listCons(stringValue(\"" ref "\"), empty_list);\n")
+                                     (str "kwInfo = listCons(keywordValue(\"" kw "\"), kwInfo);\n")
+                                     (str "kws = listCons((Value *)kwInfo, kws);\n"))))))
+        _ (write "return((Value *)kws);\n")
+        _ (write "}\n\n")]
     ""))
 
 (defn symbol-literals []
@@ -3902,19 +3969,19 @@ toccata-core
 
 (defn serialize-symbol-literals []
   (for [syms (get-val :symbols {})
-        _ (write "Value *symbol_literals() {\\n")
-        _ (write "List *syms = empty_list;\\n")
-        _ (write "List *symInfo;\\n")
+        _ (write "Value *symbol_literals() {\n")
+        _ (write "List *syms = empty_list;\n")
+        _ (write "List *symInfo;\n")
         _ (write-strs (flat-map (seq syms)
                                 (fn [sym-lit]
                                   (let [sym (nth sym-lit 0)
                                         ref (nth sym-lit 1)]
                                     (list
-                                     (str "symInfo = listCons(stringValue(\\\"" ref "\\\"), empty_list);\\n")
-                                     (str "symInfo = listCons(symbolValue(\\\"" sym "\\\"), symInfo);\\n")
-                                     (str "syms = listCons((Value *)symInfo, syms);\\n"))))))
-        _ (write "return((Value *)syms);\\n")
-        _ (write "}\\n\\n")]
+                                     (str "symInfo = listCons(stringValue(\"" ref "\"), empty_list);\n")
+                                     (str "symInfo = listCons(symbolValue(\"" sym "\"), symInfo);\n")
+                                     (str "syms = listCons((Value *)symInfo, syms);\n"))))))
+        _ (write "return((Value *)syms);\n")
+        _ (write "}\n\n")]
     ""))
 
 (defn counts []
@@ -3927,11 +3994,11 @@ toccata-core
 
 (defn serialize-counts []
   (for [gensym-count (get-val :gensym-count 0)
-        _ (write "\\nValue *counts() {\\n")
-        _ (write "List *cnts = empty_list;\\n")
-        _ (write (str "cnts = listCons(numberValue(" gensym-count "), cnts);\\n"))
-        _ (write "return((Value *)cnts);\\n")
-        _ (write "}\\n\\n")]
+        _ (write "\nValue *counts() {\n")
+        _ (write "List *cnts = empty_list;\n")
+        _ (write (str "cnts = listCons(numberValue(" gensym-count "), cnts);\n"))
+        _ (write "return((Value *)cnts);\n")
+        _ (write "}\n\n")]
     ""))
 
 (defn types* []
@@ -3943,19 +4010,19 @@ toccata-core
 
 (defn serialize-types []
   (for [types (get-val :types {})
-        _ (write "Value *types() {\\n")
-        _ (write "List *types = empty_list;\\n")
-        _ (write "List *typeInfo;\\n")
+        _ (write "Value *types() {\n")
+        _ (write "List *types = empty_list;\n")
+        _ (write "List *typeInfo;\n")
         _ (write-strs (flat-map (seq types)
                                 (fn [type]
                                   (let [type-sym (nth type 0)
                                         type-num (nth type 1)]
                                     (list
-                                     (str "typeInfo = listCons(numberValue(" type-num "), empty_list);\\n")
-                                     (str "typeInfo = listCons(symbolValue(\\\"" type-sym "\\\"), typeInfo);\\n")
-                                     (str "types = listCons((Value *)typeInfo, types);\\n"))))))
-        _ (write "return((Value *)types);\\n")
-        _ (write "}\\n\\n")]
+                                     (str "typeInfo = listCons(numberValue(" type-num "), empty_list);\n")
+                                     (str "typeInfo = listCons(symbolValue(\"" type-sym "\"), typeInfo);\n")
+                                     (str "types = listCons((Value *)typeInfo, types);\n"))))))
+        _ (write "return((Value *)types);\n")
+        _ (write "}\n\n")]
     ""))
 
 (defn bootstrap-toccata [parser]
@@ -3969,14 +4036,14 @@ toccata-core
                       (fixed-fn-types)
                       (write-strs
                        (list
-                        (str "const int64_t NumberType = " (get types 'Number 0) ";\\n")
-                        (str "const int64_t KeywordType = " (get types 'Keyword 0) ";\\n")
-                        (str "const int64_t SymbolType = " (get types 'Symbol 0) ";\\n")
-                        (str "const int64_t StringType = " (get types 'String 0) ";\\n")
-                        (str "const int64_t SubStringType = " (get types 'SubStr 0) ";\\n")
-                        (str "const int64_t ListType = " (get types 'List 0) ";\\n")
-                        (str "const int64_t FunctionType = " (get types 'Function 0) ";\\n")
-                        "List *empty_list = &(List){4,-1,0,0,0};\\n"))
+                        (str "const int64_t NumberType = " (get types 'Number 0) ";\n")
+                        (str "const int64_t KeywordType = " (get types 'Keyword 0) ";\n")
+                        (str "const int64_t SymbolType = " (get types 'Symbol 0) ";\n")
+                        (str "const int64_t StringType = " (get types 'String 0) ";\n")
+                        (str "const int64_t SubStringType = " (get types 'SubStr 0) ";\n")
+                        (str "const int64_t ListType = " (get types 'List 0) ";\n")
+                        (str "const int64_t FunctionType = " (get types 'Function 0) ";\n")
+                        "List *empty_list = &(List){4,-1,0,0,0};\n"))
                       (base-fns)
                       (emit-proto-fn (list 'invoke (map (range 8) (fn [num-args]
                                                                     (list (inc num-args) {}))))))]
