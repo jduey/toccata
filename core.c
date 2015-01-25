@@ -71,8 +71,7 @@ Value* false = (Value *)&falseVal;
 
 int isTrue(Value *boolVal) {
 if (boolVal->type != 2) {
-printf("Invalid boolean value\
-");
+printf("Invalid boolean value\n");
 abort();
 }
 else
@@ -149,8 +148,7 @@ return((Value *)numVal);
 
 List *listCons(Value *x, List *l) {
 if (l->type != ListType) {
-printf("'cons' requires a list\
-");
+printf("'cons' requires a list\n");
 abort();
 }
 List *newList = (List *)GC_malloc(sizeof(List));
@@ -165,16 +163,12 @@ ProtoImpls *protoImpls_0;
 Value *protoFnImpl_3(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_0);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'invoke' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'invoke' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'invoke'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'invoke'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -184,16 +178,12 @@ FnArity protoFnArity_4 = {1, (List *)0, 0, protoFnImpl_3};
 Value *protoFnImpl_5(List *closures, Value *arg0, Value *arg1) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_0);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'invoke' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'invoke' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 2);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'invoke'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'invoke'\n");
     abort();
 }
   FnType2 *_fn = (FnType2 *)_arity->fn;
@@ -203,16 +193,12 @@ FnArity protoFnArity_6 = {2, (List *)0, 0, protoFnImpl_5};
 Value *protoFnImpl_7(List *closures, Value *arg0, Value *arg1, Value *arg2) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_0);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'invoke' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'invoke' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 3);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'invoke'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'invoke'\n");
     abort();
 }
   FnType3 *_fn = (FnType3 *)_arity->fn;
@@ -222,16 +208,12 @@ FnArity protoFnArity_8 = {3, (List *)0, 0, protoFnImpl_7};
 Value *protoFnImpl_9(List *closures, Value *arg0, Value *arg1, Value *arg2, Value *arg3) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_0);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'invoke' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'invoke' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 4);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'invoke'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'invoke'\n");
     abort();
 }
   FnType4 *_fn = (FnType4 *)_arity->fn;
@@ -241,16 +223,12 @@ FnArity protoFnArity_10 = {4, (List *)0, 0, protoFnImpl_9};
 Value *protoFnImpl_11(List *closures, Value *arg0, Value *arg1, Value *arg2, Value *arg3, Value *arg4) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_0);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'invoke' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'invoke' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 5);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'invoke'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'invoke'\n");
     abort();
 }
   FnType5 *_fn = (FnType5 *)_arity->fn;
@@ -260,16 +238,12 @@ FnArity protoFnArity_12 = {5, (List *)0, 0, protoFnImpl_11};
 Value *protoFnImpl_13(List *closures, Value *arg0, Value *arg1, Value *arg2, Value *arg3, Value *arg4, Value *arg5) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_0);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'invoke' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'invoke' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 6);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'invoke'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'invoke'\n");
     abort();
 }
   FnType6 *_fn = (FnType6 *)_arity->fn;
@@ -279,16 +253,12 @@ FnArity protoFnArity_14 = {6, (List *)0, 0, protoFnImpl_13};
 Value *protoFnImpl_15(List *closures, Value *arg0, Value *arg1, Value *arg2, Value *arg3, Value *arg4, Value *arg5, Value *arg6) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_0);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'invoke' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'invoke' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 7);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'invoke'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'invoke'\n");
     abort();
 }
   FnType7 *_fn = (FnType7 *)_arity->fn;
@@ -298,16 +268,12 @@ FnArity protoFnArity_16 = {7, (List *)0, 0, protoFnImpl_15};
 Value *protoFnImpl_17(List *closures, Value *arg0, Value *arg1, Value *arg2, Value *arg3, Value *arg4, Value *arg5, Value *arg6, Value *arg7) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_0);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'invoke' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'invoke' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 8);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'invoke'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'invoke'\n");
     abort();
 }
   FnType8 *_fn = (FnType8 *)_arity->fn;
@@ -453,16 +419,12 @@ ProtoImpls *protoImpls_56;
 Value *protoFnImpl_59(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_56);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'bippity' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'bippity' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'bippity'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'bippity'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -480,16 +442,12 @@ return (rslt0);
 Value *protoFnImpl_65(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_61);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'match*' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'match*' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'match*'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'match*'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -499,16 +457,12 @@ FnArity protoFnArity_66 = {1, (List *)0, 0, protoFnImpl_65};
 Value *protoFnImpl_67(List *closures, Value *arg0, Value *arg1) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_61);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'match*' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'match*' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 2);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'match*'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'match*'\n");
     abort();
 }
   FnType2 *_fn = (FnType2 *)_arity->fn;
@@ -524,16 +478,12 @@ ProtoImpls *protoImpls_69;
 Value *protoFnImpl_72(List *closures, Value *arg0, Value *arg1) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_69);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'instance?' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'instance?' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 2);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'instance?'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'instance?'\n");
     abort();
 }
   FnType2 *_fn = (FnType2 *)_arity->fn;
@@ -565,9 +515,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons((Value *)&_str_2, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_48)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_48)->name);
   abort();
 }
 }
@@ -588,9 +536,7 @@ varArgs5->head = (Value *)0;
 varArgs5->tail = (List *)0;
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_21)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_21)->name);
   abort();
 }
 }
@@ -600,16 +546,12 @@ return (rslt7);
 Value *protoFnImpl_78(List *closures, Value *arg0, Value *arg1) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_74);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'flat-map' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'flat-map' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 2);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'flat-map'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'flat-map'\n");
     abort();
 }
   FnType2 *_fn = (FnType2 *)_arity->fn;
@@ -624,16 +566,12 @@ ProtoImpls *protoImpls_80;
 Value *protoFnImpl_83(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_80);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'extract' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'extract' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'extract'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'extract'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -646,16 +584,12 @@ ProtoImpls *protoImpls_85;
 Value *protoFnImpl_88(List *closures, Value *arg0, Value *arg1) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_85);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'extend' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'extend' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 2);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'extend'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'extend'\n");
     abort();
 }
   FnType2 *_fn = (FnType2 *)_arity->fn;
@@ -668,16 +602,12 @@ ProtoImpls *protoImpls_90;
 Value *protoFnImpl_93(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_90);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'duplicate' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'duplicate' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'duplicate'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'duplicate'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -713,9 +643,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons((Value *)&_str_3, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_48)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_48)->name);
   abort();
 }
 }
@@ -725,16 +653,12 @@ return (rslt3);
 Value *protoFnImpl_100(List *closures, Value *arg0, Value *arg1) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_96);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'wrap' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'wrap' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 2);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'wrap'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'wrap'\n");
     abort();
 }
   FnType2 *_fn = (FnType2 *)_arity->fn;
@@ -773,9 +697,7 @@ varArgs2 = (List *)listCons(val0, varArgs2);
 varArgs2 = (List *)listCons(arg0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_95)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_95)->name);
   abort();
 }
 }
@@ -807,9 +729,7 @@ varArgs2->head = (Value *)0;
 varArgs2->tail = (List *)0;
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)arg0)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)arg0)->name);
   abort();
 }
 }
@@ -837,9 +757,7 @@ varArgs4->tail = (List *)0;
 varArgs4 = (List *)listCons(arg1, varArgs4);
 rslt6 = fn5(arity3->closures, (Value *)varArgs4);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_33)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_33)->name);
   abort();
 }
 }
@@ -862,9 +780,7 @@ varArgs8 = (List *)listCons(rslt6, varArgs8);
 varArgs8 = (List *)listCons((Value *)&_num_8, varArgs8);
 rslt10 = fn9(arity7->closures, (Value *)varArgs8);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_26)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_26)->name);
   abort();
 }
 }
@@ -904,16 +820,12 @@ return (cond0);
 Value *protoFnImpl_110(List *closures, Value *arg0, Value *arg1) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_102);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'apply*' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'apply*' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 2);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'apply*'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'apply*'\n");
     abort();
 }
   FnType2 *_fn = (FnType2 *)_arity->fn;
@@ -967,9 +879,7 @@ varArgs8->tail = (List *)0;
 varArgs8 = (List *)listCons(arg1, varArgs8);
 rslt10 = fn9(arity7->closures, (Value *)varArgs8);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_33)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_33)->name);
   abort();
 }
 }
@@ -992,9 +902,7 @@ varArgs12 = (List *)listCons(rslt10, varArgs12);
 varArgs12 = (List *)listCons((Value *)&_num_8, varArgs12);
 rslt14 = fn13(arity11->closures, (Value *)varArgs12);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_26)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_26)->name);
   abort();
 }
 }
@@ -1017,9 +925,7 @@ varArgs16->head = (Value *)0;
 varArgs16->tail = (List *)0;
 rslt18 = fn17(arity15->closures, (Value *)varArgs16);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)arg0)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)arg0)->name);
   abort();
 }
 }
@@ -1043,9 +949,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons(arg1, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_34)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_34)->name);
   abort();
 }
 }
@@ -1089,9 +993,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)arg1)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)arg1)->name);
   abort();
 }
 }
@@ -1101,16 +1003,12 @@ return (rslt3);
 Value *protoFnImpl_125(List *closures, Value *arg0, Value *arg1) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_121);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'map' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'map' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 2);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'map'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'map'\n");
     abort();
 }
   FnType2 *_fn = (FnType2 *)_arity->fn;
@@ -1144,9 +1042,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_22)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_22)->name);
   abort();
 }
 }
@@ -1169,9 +1065,7 @@ varArgs5 = (List *)listCons(rslt3, varArgs5);
 varArgs5 = (List *)listCons((Value *)&_str_4, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_48)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_48)->name);
   abort();
 }
 }
@@ -1192,9 +1086,7 @@ varArgs9->head = (Value *)0;
 varArgs9->tail = (List *)0;
 rslt11 = fn10(arity8->closures, (Value *)varArgs9);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_21)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_21)->name);
   abort();
 }
 }
@@ -1204,16 +1096,12 @@ return (rslt11);
 Value *protoFnImpl_131(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_127);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'name' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'name' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'name'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'name'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -1247,9 +1135,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_22)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_22)->name);
   abort();
 }
 }
@@ -1272,9 +1158,7 @@ varArgs5 = (List *)listCons(rslt3, varArgs5);
 varArgs5 = (List *)listCons((Value *)&_str_5, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_48)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_48)->name);
   abort();
 }
 }
@@ -1295,9 +1179,7 @@ varArgs9->head = (Value *)0;
 varArgs9->tail = (List *)0;
 rslt11 = fn10(arity8->closures, (Value *)varArgs9);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_21)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_21)->name);
   abort();
 }
 }
@@ -1307,16 +1189,12 @@ return (rslt11);
 Value *protoFnImpl_137(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_133);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'string-list' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'string-list' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'string-list'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'string-list'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -1350,9 +1228,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_22)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_22)->name);
   abort();
 }
 }
@@ -1375,9 +1251,7 @@ varArgs5 = (List *)listCons(rslt3, varArgs5);
 varArgs5 = (List *)listCons((Value *)&_str_6, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_48)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_48)->name);
   abort();
 }
 }
@@ -1398,9 +1272,7 @@ varArgs9->head = (Value *)0;
 varArgs9->tail = (List *)0;
 rslt11 = fn10(arity8->closures, (Value *)varArgs9);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_21)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_21)->name);
   abort();
 }
 }
@@ -1410,16 +1282,12 @@ return (rslt11);
 Value *protoFnImpl_143(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_139);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'serialize' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'serialize' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'serialize'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'serialize'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -1452,9 +1320,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_33)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_33)->name);
   abort();
 }
 }
@@ -1477,9 +1343,7 @@ varArgs5 = (List *)listCons(rslt3, varArgs5);
 varArgs5 = (List *)listCons((Value *)&_num_8, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_26)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_26)->name);
   abort();
 }
 }
@@ -1536,9 +1400,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons(arg0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_34)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_34)->name);
   abort();
 }
 }
@@ -1560,9 +1422,7 @@ varArgs6->tail = (List *)0;
 varArgs6 = (List *)listCons(arg0, varArgs6);
 rslt8 = fn7(arity5->closures, (Value *)varArgs6);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_35)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_35)->name);
   abort();
 }
 }
@@ -1597,9 +1457,7 @@ varArgs12 = (List *)listCons(rslt10, varArgs12);
 varArgs12 = (List *)listCons(rslt4, varArgs12);
 rslt14 = fn13(arity11->closures, (Value *)varArgs12);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_32)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_32)->name);
   abort();
 }
 }
@@ -1688,9 +1546,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons((Value *)&_str_9, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_45)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_45)->name);
   abort();
 }
 }
@@ -1715,9 +1571,7 @@ varArgs8->tail = (List *)0;
 varArgs8 = (List *)listCons((Value *)&_str_8, varArgs8);
 rslt10 = fn9(arity7->closures, (Value *)varArgs8);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_45)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_45)->name);
   abort();
 }
 }
@@ -1757,9 +1611,7 @@ varArgs3->head = (Value *)0;
 varArgs3->tail = (List *)0;
 rslt5 = fn4(arity2->closures, (Value *)varArgs3);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_21)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_21)->name);
   abort();
 }
 }
@@ -1769,16 +1621,12 @@ return (rslt5);
 Value *protoFnImpl_168(List *closures, Value *arg0, Value *arg1) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_164);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for '=*' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for '=*' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 2);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to '=*'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to '=*'\n");
     abort();
 }
   FnType2 *_fn = (FnType2 *)_arity->fn;
@@ -1819,9 +1667,7 @@ varArgs3->head = (Value *)0;
 varArgs3->tail = (List *)0;
 rslt5 = fn4(arity2->closures, (Value *)varArgs3);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_21)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_21)->name);
   abort();
 }
 }
@@ -1831,16 +1677,12 @@ return (rslt5);
 Value *protoFnImpl_174(List *closures, Value *arg0, Value *arg1) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_170);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for '<*' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for '<*' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 2);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to '<*'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to '<*'\n");
     abort();
 }
   FnType2 *_fn = (FnType2 *)_arity->fn;
@@ -1858,16 +1700,12 @@ ProtoImpls *protoImpls_176;
 Value *protoFnImpl_179(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_176);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'empty?' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'empty?' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'empty?'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'empty?'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -1880,16 +1718,12 @@ ProtoImpls *protoImpls_181;
 Value *protoFnImpl_184(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_181);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'empty' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'empty' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'empty'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'empty'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -1902,16 +1736,12 @@ ProtoImpls *protoImpls_186;
 Value *protoFnImpl_189(List *closures, Value *arg0, Value *arg1) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_186);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'destruct' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'destruct' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 2);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'destruct'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'destruct'\n");
     abort();
 }
   FnType2 *_fn = (FnType2 *)_arity->fn;
@@ -1947,9 +1777,7 @@ varArgs3->head = (Value *)0;
 varArgs3->tail = (List *)0;
 rslt5 = fn4(arity2->closures, (Value *)varArgs3);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_21)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_21)->name);
   abort();
 }
 }
@@ -1959,16 +1787,12 @@ return (rslt5);
 Value *protoFnImpl_195(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_191);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'count' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'count' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'count'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'count'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -1983,16 +1807,12 @@ ProtoImpls *protoImpls_197;
 Value *protoFnImpl_200(List *closures, Value *arg0, Value *arg1) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_197);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'conj' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'conj' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 2);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'conj'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'conj'\n");
     abort();
 }
   FnType2 *_fn = (FnType2 *)_arity->fn;
@@ -2027,16 +1847,12 @@ return (var_20);
 Value *protoFnImpl_209(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_205);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'seq?' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'seq?' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'seq?'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'seq?'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -2051,16 +1867,12 @@ ProtoImpls *protoImpls_211;
 Value *protoFnImpl_214(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_211);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'seq' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'seq' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'seq'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'seq'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -2073,16 +1885,12 @@ ProtoImpls *protoImpls_216;
 Value *protoFnImpl_219(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_216);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'first' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'first' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'first'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'first'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -2095,16 +1903,12 @@ ProtoImpls *protoImpls_221;
 Value *protoFnImpl_224(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_221);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'rest' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'rest' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'rest'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'rest'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -2129,16 +1933,12 @@ ProtoImpls *protoImpls_229;
 Value *protoFnImpl_232(List *closures, Value *arg0, Value *arg1) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_229);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'traverse' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'traverse' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 2);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'traverse'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'traverse'\n");
     abort();
 }
   FnType2 *_fn = (FnType2 *)_arity->fn;
@@ -2151,16 +1951,12 @@ ProtoImpls *protoImpls_234;
 Value *protoFnImpl_237(List *closures, Value *arg0, Value *arg1) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_234);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'crush' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'crush' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 2);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'crush'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'crush'\n");
     abort();
 }
   FnType2 *_fn = (FnType2 *)_arity->fn;
@@ -2173,16 +1969,12 @@ ProtoImpls *protoImpls_239;
 Value *protoFnImpl_242(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_239);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'zero' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'zero' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'zero'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'zero'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -2195,16 +1987,12 @@ ProtoImpls *protoImpls_244;
 Value *protoFnImpl_247(List *closures, Value *arg0, Value *arg1) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_244);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'comp*' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'comp*' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 2);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'comp*'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'comp*'\n");
     abort();
 }
   FnType2 *_fn = (FnType2 *)_arity->fn;
@@ -2245,16 +2033,12 @@ ProtoImpls *protoImpls_252;
 Value *protoFnImpl_255(List *closures, Value *arg0, Value *arg1, Value *arg2) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_252);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'assoc' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'assoc' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 3);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'assoc'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'assoc'\n");
     abort();
 }
   FnType3 *_fn = (FnType3 *)_arity->fn;
@@ -2293,9 +2077,7 @@ varArgs3->head = (Value *)0;
 varArgs3->tail = (List *)0;
 rslt5 = fn4(arity2->closures, (Value *)varArgs3);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_21)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_21)->name);
   abort();
 }
 }
@@ -2305,16 +2087,12 @@ return (rslt5);
 Value *protoFnImpl_261(List *closures, Value *arg0, Value *arg1, Value *arg2) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_257);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'get' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'get' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 3);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'get'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'get'\n");
     abort();
 }
   FnType3 *_fn = (FnType3 *)_arity->fn;
@@ -2329,16 +2107,12 @@ ProtoImpls *protoImpls_263;
 Value *protoFnImpl_266(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_263);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'keys' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'keys' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'keys'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'keys'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -2351,16 +2125,12 @@ ProtoImpls *protoImpls_268;
 Value *protoFnImpl_271(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_268);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'vals' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'vals' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'vals'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'vals'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -2501,9 +2271,7 @@ varArgs9 = (List *)listCons(rslt7, varArgs9);
 varArgs9 = (List *)listCons((Value *)&_num_1, varArgs9);
 rslt11 = fn10(arity8->closures, (Value *)varArgs9);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_26)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_26)->name);
   abort();
 }
 }
@@ -2575,9 +2343,7 @@ varArgs9 = (List *)listCons(rslt7, varArgs9);
 varArgs9 = (List *)listCons((Value *)&_num_1, varArgs9);
 rslt11 = fn10(arity8->closures, (Value *)varArgs9);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_26)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_26)->name);
   abort();
 }
 }
@@ -2634,9 +2400,7 @@ varArgs5 = (List *)listCons(rslt3, varArgs5);
 varArgs5 = (List *)listCons(arg0, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_32)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_32)->name);
   abort();
 }
 }
@@ -2694,9 +2458,7 @@ varArgs4 = (List *)listCons(rslt1, varArgs4);
 varArgs4 = (List *)listCons(arg1, varArgs4);
 rslt6 = fn5(arity3->closures, (Value *)varArgs4);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)arg2)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)arg2)->name);
   abort();
 }
 }
@@ -2751,9 +2513,7 @@ varArgs3->tail = (List *)0;
 varArgs3 = (List *)listCons(arg1, varArgs3);
 rslt5 = fn4(arity2->closures, (Value *)varArgs3);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)val1)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)val1)->name);
   abort();
 }
 }
@@ -2779,9 +2539,7 @@ varArgs8 = (List *)listCons(arg0, varArgs8);
 varArgs8 = (List *)listCons(val6, varArgs8);
 rslt10 = fn9(arity7->closures, (Value *)varArgs8);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_38)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_38)->name);
   abort();
 }
 }
@@ -2816,9 +2574,7 @@ varArgs2->head = (Value *)0;
 varArgs2->tail = (List *)0;
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_37)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_37)->name);
   abort();
 }
 }
@@ -2872,9 +2628,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons(arg0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)val0)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)val0)->name);
   abort();
 }
 }
@@ -2951,9 +2705,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_36)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_36)->name);
   abort();
 }
 }
@@ -3010,9 +2762,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)arg1)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)arg1)->name);
   abort();
 }
 }
@@ -3088,9 +2838,7 @@ varArgs10->head = (Value *)0;
 varArgs10->tail = (List *)0;
 rslt12 = fn11(arity9->closures, (Value *)varArgs10);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)arg0)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)arg0)->name);
   abort();
 }
 }
@@ -3118,9 +2866,7 @@ varArgs5 = (List *)listCons(rslt3, varArgs5);
 varArgs5 = (List *)listCons(arg0, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_47)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_47)->name);
   abort();
 }
 }
@@ -3155,9 +2901,7 @@ varArgs1 = (List *)listCons(arg1, varArgs1);
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_26)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_26)->name);
   abort();
 }
 }
@@ -3190,9 +2934,7 @@ varArgs1 = (List *)listCons(arg1, varArgs1);
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_27)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_27)->name);
   abort();
 }
 }
@@ -3224,9 +2966,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_25)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_25)->name);
   abort();
 }
 }
@@ -3272,9 +3012,7 @@ varArgs6->tail = (List *)0;
 varArgs6 = (List *)listCons(rslt4, varArgs6);
 rslt8 = fn7(arity5->closures, (Value *)varArgs6);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)arg0)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)arg0)->name);
   abort();
 }
 }
@@ -3297,16 +3035,12 @@ ProtoImpls *protoImpls_336;
 Value *protoFnImpl_339(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_336);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for '.v' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for '.v' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to '.v'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to '.v'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -3342,9 +3076,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg1, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_22)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_22)->name);
   abort();
 }
 }
@@ -3428,9 +3160,7 @@ varArgs9 = (List *)listCons(rslt7, varArgs9);
 varArgs9 = (List *)listCons(rslt6, varArgs9);
 rslt11 = fn10(arity8->closures, (Value *)varArgs9);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_32)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_32)->name);
   abort();
 }
 }
@@ -3599,9 +3329,7 @@ varArgs3 = (List *)listCons(arg0, varArgs3);
 varArgs3 = (List *)listCons(arg1, varArgs3);
 rslt5 = fn4(arity2->closures, (Value *)varArgs3);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_32)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_32)->name);
   abort();
 }
 }
@@ -3652,9 +3380,7 @@ varArgs3 = (List *)listCons(arg0, varArgs3);
 varArgs3 = (List *)listCons(arg1, varArgs3);
 rslt5 = fn4(arity2->closures, (Value *)varArgs3);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_32)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_32)->name);
   abort();
 }
 }
@@ -3719,9 +3445,7 @@ varArgs3->tail = (List *)0;
 varArgs3 = (List *)listCons(arg0, varArgs3);
 rslt5 = fn4(arity2->closures, (Value *)varArgs3);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)val1)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)val1)->name);
   abort();
 }
 }
@@ -3751,9 +3475,7 @@ varArgs21->head = (Value *)0;
 varArgs21->tail = (List *)0;
 rslt23 = fn22(arity20->closures, (Value *)varArgs21);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)arg0)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)arg0)->name);
   abort();
 }
 }
@@ -3796,9 +3518,7 @@ varArgs13 = (List *)listCons(rslt11, varArgs13);
 varArgs13 = (List *)listCons((Value *)&_num_1, varArgs13);
 rslt15 = fn14(arity12->closures, (Value *)varArgs13);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_26)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_26)->name);
   abort();
 }
 }
@@ -3868,9 +3588,7 @@ varArgs16->tail = (List *)0;
 varArgs16 = (List *)listCons(arg0, varArgs16);
 rslt18 = fn17(arity15->closures, (Value *)varArgs16);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_35)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_35)->name);
   abort();
 }
 }
@@ -3895,9 +3613,7 @@ varArgs21->tail = (List *)0;
 varArgs21 = (List *)listCons(arg0, varArgs21);
 rslt23 = fn22(arity20->closures, (Value *)varArgs21);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_34)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_34)->name);
   abort();
 }
 }
@@ -3920,9 +3636,7 @@ varArgs25 = (List *)listCons(arg1, varArgs25);
 varArgs25 = (List *)listCons(rslt23, varArgs25);
 rslt27 = fn26(arity24->closures, (Value *)varArgs25);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_32)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_32)->name);
   abort();
 }
 }
@@ -3946,9 +3660,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons(arg0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_34)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_34)->name);
   abort();
 }
 }
@@ -3970,9 +3682,7 @@ varArgs6->tail = (List *)0;
 varArgs6 = (List *)listCons(arg0, varArgs6);
 rslt8 = fn7(arity5->closures, (Value *)varArgs6);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_35)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_35)->name);
   abort();
 }
 }
@@ -3996,9 +3706,7 @@ varArgs11 = (List *)listCons(rslt9, varArgs11);
 varArgs11 = (List *)listCons(rslt4, varArgs11);
 rslt13 = fn12(arity10->closures, (Value *)varArgs11);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_32)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_32)->name);
   abort();
 }
 }
@@ -4102,9 +3810,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons(arg1, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)val0)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)val0)->name);
   abort();
 }
 }
@@ -4138,9 +3844,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_35)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_35)->name);
   abort();
 }
 }
@@ -4162,9 +3866,7 @@ varArgs5->tail = (List *)0;
 varArgs5 = (List *)listCons(arg0, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_34)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_34)->name);
   abort();
 }
 }
@@ -4186,9 +3888,7 @@ varArgs9->tail = (List *)0;
 varArgs9 = (List *)listCons(rslt7, varArgs9);
 rslt11 = fn10(arity8->closures, (Value *)varArgs9);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)arg1)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)arg1)->name);
   abort();
 }
 }
@@ -4247,9 +3947,7 @@ varArgs5->tail = (List *)0;
 varArgs5 = (List *)listCons(arg0, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_22)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_22)->name);
   abort();
 }
 }
@@ -4271,9 +3969,7 @@ varArgs9->tail = (List *)0;
 varArgs9 = (List *)listCons(arg1, varArgs9);
 rslt11 = fn10(arity8->closures, (Value *)varArgs9);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_22)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_22)->name);
   abort();
 }
 }
@@ -4304,9 +4000,7 @@ varArgs17 = (List *)listCons(rslt15, varArgs17);
 varArgs17 = (List *)listCons(rslt14, varArgs17);
 rslt19 = fn18(arity16->closures, (Value *)varArgs17);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_26)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_26)->name);
   abort();
 }
 }
@@ -4390,9 +4084,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_33)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_33)->name);
   abort();
 }
 }
@@ -4415,9 +4107,7 @@ varArgs5 = (List *)listCons(rslt3, varArgs5);
 varArgs5 = (List *)listCons((Value *)&_num_8, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_26)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_26)->name);
   abort();
 }
 }
@@ -4460,9 +4150,7 @@ varArgs1 = (List *)listCons(arg0, varArgs1);
 varArgs1 = (List *)listCons(arg1, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_32)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_32)->name);
   abort();
 }
 }
@@ -4494,9 +4182,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_33)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_33)->name);
   abort();
 }
 }
@@ -4548,9 +4234,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_34)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_34)->name);
   abort();
 }
 }
@@ -4582,9 +4266,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_35)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_35)->name);
   abort();
 }
 }
@@ -4659,9 +4341,7 @@ varArgs3->tail = (List *)0;
 varArgs3 = (List *)listCons(arg1, varArgs3);
 rslt5 = fn4(arity2->closures, (Value *)varArgs3);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)val1)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)val1)->name);
   abort();
 }
 }
@@ -4685,9 +4365,7 @@ varArgs7 = (List *)listCons(arg0, varArgs7);
 varArgs7 = (List *)listCons(val0, varArgs7);
 rslt9 = fn8(arity6->closures, (Value *)varArgs7);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_38)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_38)->name);
   abort();
 }
 }
@@ -4718,9 +4396,7 @@ varArgs2->head = (Value *)0;
 varArgs2->tail = (List *)0;
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_37)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_37)->name);
   abort();
 }
 }
@@ -4791,9 +4467,7 @@ varArgs3->tail = (List *)0;
 varArgs3 = (List *)listCons(rslt0, varArgs3);
 rslt5 = fn4(arity2->closures, (Value *)varArgs3);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_34)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_34)->name);
   abort();
 }
 }
@@ -4815,9 +4489,7 @@ varArgs7->tail = (List *)0;
 varArgs7 = (List *)listCons(rslt0, varArgs7);
 rslt9 = fn8(arity6->closures, (Value *)varArgs7);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_35)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_35)->name);
   abort();
 }
 }
@@ -4859,9 +4531,7 @@ varArgs6->tail = (List *)0;
 varArgs6 = (List *)listCons(rslt4, varArgs6);
 rslt8 = fn7(arity5->closures, (Value *)varArgs6);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)arg0)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)arg0)->name);
   abort();
 }
 }
@@ -4903,9 +4573,7 @@ varArgs1 = (List *)listCons((Value *)&_num_1, varArgs1);
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_28)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_28)->name);
   abort();
 }
 }
@@ -4978,9 +4646,7 @@ varArgs1 = (List *)listCons((Value *)&_num_1, varArgs1);
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_29)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_29)->name);
   abort();
 }
 }
@@ -5046,9 +4712,7 @@ varArgs1 = (List *)listCons(arg1, varArgs1);
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_41)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_41)->name);
   abort();
 }
 }
@@ -5080,9 +4744,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_40)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_40)->name);
   abort();
 }
 }
@@ -5125,9 +4787,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_40)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_40)->name);
   abort();
 }
 }
@@ -5194,9 +4854,7 @@ varArgs2 = (List *)listCons((Value *)&_num_8, varArgs2);
 varArgs2 = (List *)listCons(arg0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_24)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_24)->name);
   abort();
 }
 }
@@ -5219,9 +4877,7 @@ varArgs6 = (List *)listCons((Value *)&_num_1, varArgs6);
 varArgs6 = (List *)listCons(arg0, varArgs6);
 rslt8 = fn7(arity5->closures, (Value *)varArgs6);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_24)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_24)->name);
   abort();
 }
 }
@@ -5245,9 +4901,7 @@ varArgs11 = (List *)listCons(rslt9, varArgs11);
 varArgs11 = (List *)listCons(rslt4, varArgs11);
 rslt13 = fn12(arity10->closures, (Value *)varArgs11);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_32)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_32)->name);
   abort();
 }
 }
@@ -5284,9 +4938,7 @@ varArgs7->head = (Value *)0;
 varArgs7->tail = (List *)0;
 rslt9 = fn8(arity6->closures, (Value *)varArgs7);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_21)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_21)->name);
   abort();
 }
 }
@@ -5312,9 +4964,7 @@ varArgs2 = (List *)listCons((Value *)&_num_8, varArgs2);
 varArgs2 = (List *)listCons(arg0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_24)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_24)->name);
   abort();
 }
 }
@@ -5349,9 +4999,7 @@ varArgs1 = (List *)listCons((Value *)&_num_1, varArgs1);
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_24)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_24)->name);
   abort();
 }
 }
@@ -5407,9 +5055,7 @@ varArgs2 = (List *)listCons(arg1, varArgs2);
 varArgs2 = (List *)listCons(arg0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_32)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_32)->name);
   abort();
 }
 }
@@ -5441,9 +5087,7 @@ varArgs10->tail = (List *)0;
 varArgs10 = (List *)listCons(rslt8, varArgs10);
 rslt12 = fn11(arity9->closures, (Value *)varArgs10);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_43)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_43)->name);
   abort();
 }
 }
@@ -5496,9 +5140,7 @@ varArgs1 = (List *)listCons(arg1, varArgs1);
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_41)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_41)->name);
   abort();
 }
 }
@@ -5530,9 +5172,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_40)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_40)->name);
   abort();
 }
 }
@@ -5575,9 +5215,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_40)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_40)->name);
   abort();
 }
 }
@@ -5644,9 +5282,7 @@ varArgs2 = (List *)listCons((Value *)&_num_8, varArgs2);
 varArgs2 = (List *)listCons(arg0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_24)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_24)->name);
   abort();
 }
 }
@@ -5669,9 +5305,7 @@ varArgs6 = (List *)listCons((Value *)&_num_1, varArgs6);
 varArgs6 = (List *)listCons(arg0, varArgs6);
 rslt8 = fn7(arity5->closures, (Value *)varArgs6);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_24)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_24)->name);
   abort();
 }
 }
@@ -5695,9 +5329,7 @@ varArgs11 = (List *)listCons(rslt9, varArgs11);
 varArgs11 = (List *)listCons(rslt4, varArgs11);
 rslt13 = fn12(arity10->closures, (Value *)varArgs11);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_32)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_32)->name);
   abort();
 }
 }
@@ -5734,9 +5366,7 @@ varArgs7->head = (Value *)0;
 varArgs7->tail = (List *)0;
 rslt9 = fn8(arity6->closures, (Value *)varArgs7);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_21)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_21)->name);
   abort();
 }
 }
@@ -5762,9 +5392,7 @@ varArgs2 = (List *)listCons((Value *)&_num_8, varArgs2);
 varArgs2 = (List *)listCons(arg0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_24)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_24)->name);
   abort();
 }
 }
@@ -5799,9 +5427,7 @@ varArgs1 = (List *)listCons((Value *)&_num_1, varArgs1);
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_24)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_24)->name);
   abort();
 }
 }
@@ -5840,9 +5466,7 @@ varArgs2 = (List *)listCons(arg1, varArgs2);
 varArgs2 = (List *)listCons(arg0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_32)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_32)->name);
   abort();
 }
 }
@@ -5874,9 +5498,7 @@ varArgs10->tail = (List *)0;
 varArgs10 = (List *)listCons(rslt8, varArgs10);
 rslt12 = fn11(arity9->closures, (Value *)varArgs10);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_43)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_43)->name);
   abort();
 }
 }
@@ -5948,9 +5570,7 @@ varArgs6 = (List *)listCons(rslt4, varArgs6);
 varArgs6 = (List *)listCons(rslt1, varArgs6);
 rslt8 = fn7(arity5->closures, (Value *)varArgs6);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_32)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_32)->name);
   abort();
 }
 }
@@ -6017,9 +5637,7 @@ varArgs5 = (List *)listCons(rslt3, varArgs5);
 varArgs5 = (List *)listCons(rslt1, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_32)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_32)->name);
   abort();
 }
 }
@@ -6071,9 +5689,7 @@ varArgs5 = (List *)listCons(rslt3, varArgs5);
 varArgs5 = (List *)listCons(rslt1, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_32)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_32)->name);
   abort();
 }
 }
@@ -6120,9 +5736,7 @@ varArgs9->head = (Value *)0;
 varArgs9->tail = (List *)0;
 rslt11 = fn10(arity8->closures, (Value *)varArgs9);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_21)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_21)->name);
   abort();
 }
 }
@@ -6223,9 +5837,7 @@ varArgs5 = (List *)listCons(rslt3, varArgs5);
 varArgs5 = (List *)listCons(rslt1, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_32)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_32)->name);
   abort();
 }
 }
@@ -6281,9 +5893,7 @@ varArgs20->tail = (List *)0;
 varArgs20 = (List *)listCons(arg0, varArgs20);
 rslt22 = fn21(arity19->closures, (Value *)varArgs20);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_34)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_34)->name);
   abort();
 }
 }
@@ -6305,9 +5915,7 @@ varArgs24->tail = (List *)0;
 varArgs24 = (List *)listCons(rslt22, varArgs24);
 rslt26 = fn25(arity23->closures, (Value *)varArgs24);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_34)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_34)->name);
   abort();
 }
 }
@@ -6340,9 +5948,7 @@ varArgs31->tail = (List *)0;
 varArgs31 = (List *)listCons(arg0, varArgs31);
 rslt33 = fn32(arity30->closures, (Value *)varArgs31);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_35)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_35)->name);
   abort();
 }
 }
@@ -6365,9 +5971,7 @@ varArgs35 = (List *)listCons(rslt33, varArgs35);
 varArgs35 = (List *)listCons(rslt29, varArgs35);
 rslt37 = fn36(arity34->closures, (Value *)varArgs35);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_32)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_32)->name);
   abort();
 }
 }
@@ -6391,9 +5995,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons(arg0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_34)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_34)->name);
   abort();
 }
 }
@@ -6415,9 +6017,7 @@ varArgs6->tail = (List *)0;
 varArgs6 = (List *)listCons(arg0, varArgs6);
 rslt8 = fn7(arity5->closures, (Value *)varArgs6);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_35)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_35)->name);
   abort();
 }
 }
@@ -6441,9 +6041,7 @@ varArgs11 = (List *)listCons(rslt9, varArgs11);
 varArgs11 = (List *)listCons(rslt4, varArgs11);
 rslt13 = fn12(arity10->closures, (Value *)varArgs11);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_32)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_32)->name);
   abort();
 }
 }
@@ -6484,9 +6082,7 @@ varArgs8->tail = (List *)0;
 varArgs8 = (List *)listCons(arg0, varArgs8);
 rslt10 = fn9(arity7->closures, (Value *)varArgs8);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_34)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_34)->name);
   abort();
 }
 }
@@ -6508,9 +6104,7 @@ varArgs12->tail = (List *)0;
 varArgs12 = (List *)listCons(rslt10, varArgs12);
 rslt14 = fn13(arity11->closures, (Value *)varArgs12);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_34)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_34)->name);
   abort();
 }
 }
@@ -6535,9 +6129,7 @@ varArgs17->tail = (List *)0;
 varArgs17 = (List *)listCons(arg0, varArgs17);
 rslt19 = fn18(arity16->closures, (Value *)varArgs17);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_34)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_34)->name);
   abort();
 }
 }
@@ -6559,9 +6151,7 @@ varArgs21->tail = (List *)0;
 varArgs21 = (List *)listCons(rslt19, varArgs21);
 rslt23 = fn22(arity20->closures, (Value *)varArgs21);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_35)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_35)->name);
   abort();
 }
 }
@@ -6583,9 +6173,7 @@ varArgs25->tail = (List *)0;
 varArgs25 = (List *)listCons(rslt23, varArgs25);
 rslt27 = fn26(arity24->closures, (Value *)varArgs25);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_34)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_34)->name);
   abort();
 }
 }
@@ -6609,9 +6197,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons(arg0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_35)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_35)->name);
   abort();
 }
 }
@@ -6676,16 +6262,12 @@ ProtoImpls *protoImpls_514;
 Value *protoFnImpl_517(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_514);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for '.a-list' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for '.a-list' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to '.a-list'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to '.a-list'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -6729,9 +6311,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg1, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_22)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_22)->name);
   abort();
 }
 }
@@ -6796,9 +6376,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons(val0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_34)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_34)->name);
   abort();
 }
 }
@@ -6838,9 +6416,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons(val0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_35)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_35)->name);
   abort();
 }
 }
@@ -7045,9 +6621,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(var_31, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_519)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_519)->name);
   abort();
 }
 }
@@ -7142,9 +6716,7 @@ varArgs3->tail = (List *)0;
 varArgs3 = (List *)listCons(rslt1, varArgs3);
 rslt5 = fn4(arity2->closures, (Value *)varArgs3);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_519)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_519)->name);
   abort();
 }
 }
@@ -7445,9 +7017,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons(rslt0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_519)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_519)->name);
   abort();
 }
 }
@@ -7508,9 +7078,7 @@ varArgs7 = (List *)listCons(rslt2, varArgs7);
 varArgs7 = (List *)listCons(rslt3, varArgs7);
 rslt9 = fn8(arity6->closures, (Value *)varArgs7);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)val5)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)val5)->name);
   abort();
 }
 }
@@ -7660,9 +7228,7 @@ varArgs16->tail = (List *)0;
 varArgs16 = (List *)listCons(rslt13, varArgs16);
 rslt18 = fn17(arity15->closures, (Value *)varArgs16);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)arg2)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)arg2)->name);
   abort();
 }
 }
@@ -7766,9 +7332,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_22)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_22)->name);
   abort();
 }
 }
@@ -7790,9 +7354,7 @@ varArgs5->tail = (List *)0;
 varArgs5 = (List *)listCons(arg1, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_22)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_22)->name);
   abort();
 }
 }
@@ -7837,9 +7399,7 @@ varArgs1 = (List *)listCons(arg1, varArgs1);
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_42)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_42)->name);
   abort();
 }
 }
@@ -7871,9 +7431,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_49)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_49)->name);
   abort();
 }
 }
@@ -7935,9 +7493,7 @@ varArgs6->head = (Value *)0;
 varArgs6->tail = (List *)0;
 rslt8 = fn7(arity5->closures, (Value *)varArgs6);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_21)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_21)->name);
   abort();
 }
 }
@@ -7985,9 +7541,7 @@ varArgs1 = (List *)listCons(arg1, varArgs1);
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_42)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_42)->name);
   abort();
 }
 }
@@ -8019,9 +7573,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_49)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_49)->name);
   abort();
 }
 }
@@ -8083,9 +7635,7 @@ varArgs6->head = (Value *)0;
 varArgs6->tail = (List *)0;
 rslt8 = fn7(arity5->closures, (Value *)varArgs6);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_21)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_21)->name);
   abort();
 }
 }
@@ -8132,9 +7682,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_22)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_22)->name);
   abort();
 }
 }
@@ -8178,9 +7726,7 @@ varArgs3->tail = (List *)0;
 varArgs3 = (List *)listCons(rslt1, varArgs3);
 rslt5 = fn4(arity2->closures, (Value *)varArgs3);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_51)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_51)->name);
   abort();
 }
 }
@@ -8212,9 +7758,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_22)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_22)->name);
   abort();
 }
 }
@@ -8247,9 +7791,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_22)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_22)->name);
   abort();
 }
 }
@@ -8282,9 +7824,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_22)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_22)->name);
   abort();
 }
 }
@@ -8307,9 +7847,7 @@ varArgs6->tail = (List *)0;
 varArgs6 = (List *)listCons(arg0, varArgs6);
 rslt8 = fn7(arity5->closures, (Value *)varArgs6);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_22)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_22)->name);
   abort();
 }
 }
@@ -8366,9 +7904,7 @@ varArgs4 = (List *)listCons(rslt2, varArgs4);
 varArgs4 = (List *)listCons(arg0, varArgs4);
 rslt6 = fn5(arity3->closures, (Value *)varArgs4);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_32)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_32)->name);
   abort();
 }
 }
@@ -8483,9 +8019,7 @@ varArgs3->tail = (List *)0;
 varArgs3 = (List *)listCons(arg3, varArgs3);
 rslt5 = fn4(arity2->closures, (Value *)varArgs3);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)rslt1)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)rslt1)->name);
   abort();
 }
 }
@@ -8517,9 +8051,7 @@ varArgs10 = (List *)listCons(arg2, varArgs10);
 varArgs10 = (List *)listCons(arg1, varArgs10);
 rslt12 = fn11(arity9->closures, (Value *)varArgs10);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_38)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_38)->name);
   abort();
 }
 }
@@ -8539,16 +8071,12 @@ ProtoImpls *protoImpls_669;
 Value *protoFnImpl_672(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_669);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for '.invoke-fn' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for '.invoke-fn' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to '.invoke-fn'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to '.invoke-fn'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -8583,9 +8111,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg1, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_22)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_22)->name);
   abort();
 }
 }
@@ -8632,9 +8158,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons(arg1, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)val0)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)val0)->name);
   abort();
 }
 }
@@ -8700,9 +8224,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons((Value *)fn_687, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_674)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_674)->name);
   abort();
 }
 }
@@ -8751,9 +8273,7 @@ varArgs1->head = (Value *)0;
 varArgs1->tail = (List *)0;
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_37)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_37)->name);
   abort();
 }
 }
@@ -8776,9 +8296,7 @@ varArgs7 = (List *)listCons(val5, varArgs7);
 varArgs7 = (List *)listCons(val4, varArgs7);
 rslt9 = fn8(arity6->closures, (Value *)varArgs7);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_32)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_32)->name);
   abort();
 }
 }
@@ -8817,9 +8335,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons((Value *)fn_693, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_674)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_674)->name);
   abort();
 }
 }
@@ -8869,9 +8385,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons(arg0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)val0)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)val0)->name);
   abort();
 }
 }
@@ -8901,9 +8415,7 @@ varArgs10->tail = (List *)0;
 varArgs10 = (List *)listCons(rslt6, varArgs10);
 rslt12 = fn11(arity9->closures, (Value *)varArgs10);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)val8)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)val8)->name);
   abort();
 }
 }
@@ -8925,9 +8437,7 @@ varArgs14->tail = (List *)0;
 varArgs14 = (List *)listCons(rslt7, varArgs14);
 rslt16 = fn15(arity13->closures, (Value *)varArgs14);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)rslt12)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)rslt12)->name);
   abort();
 }
 }
@@ -8967,9 +8477,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons((Value *)fn_699, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_674)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_674)->name);
   abort();
 }
 }
@@ -9018,9 +8526,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons((Value *)&fn_705, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_674)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_674)->name);
   abort();
 }
 }
@@ -9070,9 +8576,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons(arg0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)val0)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)val0)->name);
   abort();
 }
 }
@@ -9106,9 +8610,7 @@ varArgs13->tail = (List *)0;
 varArgs13 = (List *)listCons(arg0, varArgs13);
 rslt15 = fn14(arity12->closures, (Value *)varArgs13);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)rslt11)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)rslt11)->name);
   abort();
 }
 }
@@ -9151,9 +8653,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons((Value *)fn_711, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_674)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_674)->name);
   abort();
 }
 }
@@ -9240,16 +8740,12 @@ ProtoImpls *protoImpls_722;
 Value *protoFnImpl_725(List *closures, Value *arg0, Value *arg1) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_722);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'evaluate' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'evaluate' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 2);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'evaluate'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'evaluate'\n");
     abort();
 }
   FnType2 *_fn = (FnType2 *)_arity->fn;
@@ -9314,9 +8810,7 @@ varArgs1 = (List *)listCons(arg1, varArgs1);
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_23)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_23)->name);
   abort();
 }
 }
@@ -9355,9 +8849,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg1, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_727)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_727)->name);
   abort();
 }
 }
@@ -9397,9 +8889,7 @@ varArgs1 = (List *)listCons(arg1, varArgs1);
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_728)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_728)->name);
   abort();
 }
 }
@@ -9455,16 +8945,12 @@ ProtoImpls *protoImpls_755;
 Value *protoFnImpl_758(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_755);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for '.alts' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for '.alts' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to '.alts'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to '.alts'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -9502,9 +8988,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg1, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_22)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_22)->name);
   abort();
 }
 }
@@ -9631,9 +9115,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg1, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_727)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_727)->name);
   abort();
 }
 }
@@ -9673,9 +9155,7 @@ varArgs1 = (List *)listCons(arg1, varArgs1);
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_728)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_728)->name);
   abort();
 }
 }
@@ -9750,9 +9230,7 @@ varArgs1 = (List *)listCons(arg1, varArgs1);
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_32)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_32)->name);
   abort();
 }
 }
@@ -9774,9 +9252,7 @@ varArgs5->tail = (List *)0;
 varArgs5 = (List *)listCons(rslt3, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_760)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_760)->name);
   abort();
 }
 }
@@ -9886,16 +9362,12 @@ ProtoImpls *protoImpls_804;
 Value *protoFnImpl_807(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_804);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for '.arg' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for '.arg' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to '.arg'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to '.arg'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -9933,9 +9405,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg1, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_22)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_22)->name);
   abort();
 }
 }
@@ -10024,9 +9494,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons(val0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)arg1)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)arg1)->name);
   abort();
 }
 }
@@ -10067,9 +9535,7 @@ varArgs1 = (List *)listCons(arg1, varArgs1);
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_23)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_23)->name);
   abort();
 }
 }
@@ -10115,9 +9581,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg1, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_809)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_809)->name);
   abort();
 }
 }
@@ -10157,9 +9621,7 @@ varArgs1 = (List *)listCons(arg1, varArgs1);
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_728)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_728)->name);
   abort();
 }
 }
@@ -10234,9 +9696,7 @@ varArgs1 = (List *)listCons(arg1, varArgs1);
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_32)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_32)->name);
   abort();
 }
 }
@@ -10258,9 +9718,7 @@ varArgs5->tail = (List *)0;
 varArgs5 = (List *)listCons(rslt3, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_760)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_760)->name);
   abort();
 }
 }
@@ -10382,16 +9840,12 @@ ProtoImpls *protoImpls_855;
 Value *protoFnImpl_858(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_855);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for '.fv' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for '.fv' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to '.fv'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to '.fv'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -10404,16 +9858,12 @@ ProtoImpls *protoImpls_860;
 Value *protoFnImpl_863(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_860);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for '.args' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for '.args' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to '.args'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to '.args'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -10448,9 +9898,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg1, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_22)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_22)->name);
   abort();
 }
 }
@@ -10606,9 +10054,7 @@ varArgs1 = (List *)listCons(arg1, varArgs1);
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_23)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_23)->name);
   abort();
 }
 }
@@ -10662,9 +10108,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg1, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_727)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_727)->name);
   abort();
 }
 }
@@ -10704,9 +10148,7 @@ varArgs1 = (List *)listCons(arg1, varArgs1);
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_728)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_728)->name);
   abort();
 }
 }
@@ -10793,9 +10235,7 @@ varArgs1 = (List *)listCons(arg1, varArgs1);
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_32)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_32)->name);
   abort();
 }
 }
@@ -10817,9 +10257,7 @@ varArgs5->tail = (List *)0;
 varArgs5 = (List *)listCons(rslt3, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_760)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_760)->name);
   abort();
 }
 }
@@ -11000,9 +10438,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg1, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_22)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_22)->name);
   abort();
 }
 }
@@ -11091,9 +10527,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons(val0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)arg1)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)arg1)->name);
   abort();
 }
 }
@@ -11134,9 +10568,7 @@ varArgs1 = (List *)listCons(arg1, varArgs1);
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_23)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_23)->name);
   abort();
 }
 }
@@ -11182,9 +10614,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg1, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_916)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_916)->name);
   abort();
 }
 }
@@ -11224,9 +10654,7 @@ varArgs1 = (List *)listCons(arg1, varArgs1);
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_728)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_728)->name);
   abort();
 }
 }
@@ -11301,9 +10729,7 @@ varArgs1 = (List *)listCons(arg1, varArgs1);
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_32)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_32)->name);
   abort();
 }
 }
@@ -11325,9 +10751,7 @@ varArgs5->tail = (List *)0;
 varArgs5 = (List *)listCons(rslt3, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_760)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_760)->name);
   abort();
 }
 }
@@ -11467,9 +10891,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_916)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_916)->name);
   abort();
 }
 }
@@ -11532,9 +10954,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons((Value *)fn_966, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_674)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_674)->name);
   abort();
 }
 }
@@ -11573,9 +10993,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons(arg0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)val0)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)val0)->name);
   abort();
 }
 }
@@ -11620,9 +11038,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons((Value *)fn_971, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_674)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_674)->name);
   abort();
 }
 }
@@ -11693,9 +11109,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons((Value *)fn_976, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_674)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_674)->name);
   abort();
 }
 }
@@ -11757,9 +11171,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons((Value *)fn_979, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_674)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_674)->name);
   abort();
 }
 }
@@ -11828,9 +11240,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons((Value *)fn_984, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_674)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_674)->name);
   abort();
 }
 }
@@ -11901,9 +11311,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons((Value *)fn_989, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_674)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_674)->name);
   abort();
 }
 }
@@ -11965,9 +11373,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons((Value *)fn_992, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_674)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_674)->name);
   abort();
 }
 }
@@ -12035,9 +11441,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons((Value *)fn_997, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_674)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_674)->name);
   abort();
 }
 }
@@ -12106,9 +11510,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons((Value *)fn_1002, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_674)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_674)->name);
   abort();
 }
 }
@@ -12167,16 +11569,12 @@ return (rslt1);
 Value *protoFnImpl_1011(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_1005);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'recursive-descent' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'recursive-descent' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'recursive-descent'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'recursive-descent'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -12191,16 +11589,12 @@ ProtoImpls *protoImpls_1013;
 Value *protoFnImpl_1016(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_1013);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for '.term-str' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for '.term-str' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to '.term-str'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to '.term-str'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -12236,9 +11630,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg1, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_22)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_22)->name);
   abort();
 }
 }
@@ -12325,9 +11717,7 @@ varArgs9 = (List *)listCons((Value *)&_num_8, varArgs9);
 varArgs9 = (List *)listCons(arg0, varArgs9);
 rslt11 = fn10(arity8->closures, (Value *)varArgs9);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_24)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_24)->name);
   abort();
 }
 }
@@ -12361,9 +11751,7 @@ varArgs16 = (List *)listCons(val4, varArgs16);
 varArgs16 = (List *)listCons(arg0, varArgs16);
 rslt18 = fn17(arity15->closures, (Value *)varArgs16);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_24)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_24)->name);
   abort();
 }
 }
@@ -12503,9 +11891,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_1018)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_1018)->name);
   abort();
 }
 }
@@ -12527,9 +11913,7 @@ varArgs5->tail = (List *)0;
 varArgs5 = (List *)listCons(rslt3, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_916)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_916)->name);
   abort();
 }
 }
@@ -12576,9 +11960,7 @@ varArgs3 = (List *)listCons(arg0, varArgs3);
 varArgs3 = (List *)listCons(val1, varArgs3);
 rslt5 = fn4(arity2->closures, (Value *)varArgs3);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_32)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_32)->name);
   abort();
 }
 }
@@ -12613,9 +11995,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons(val0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)(Value *)&fn_1043)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)(Value *)&fn_1043)->name);
   abort();
 }
 }
@@ -12668,16 +12048,12 @@ ProtoImpls *protoImpls_1050;
 Value *protoFnImpl_1053(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_1050);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for '.rule' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for '.rule' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to '.rule'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to '.rule'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -12712,9 +12088,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg1, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_22)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_22)->name);
   abort();
 }
 }
@@ -12865,9 +12239,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_1055)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_1055)->name);
   abort();
 }
 }
@@ -12889,9 +12261,7 @@ varArgs5->tail = (List *)0;
 varArgs5 = (List *)listCons(rslt3, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_916)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_916)->name);
   abort();
 }
 }
@@ -12927,9 +12297,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg1, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_22)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_22)->name);
   abort();
 }
 }
@@ -13064,9 +12432,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_1078)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_1078)->name);
   abort();
 }
 }
@@ -13088,9 +12454,7 @@ varArgs5->tail = (List *)0;
 varArgs5 = (List *)listCons(rslt3, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_916)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_916)->name);
   abort();
 }
 }
@@ -13126,9 +12490,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg1, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_22)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_22)->name);
   abort();
 }
 }
@@ -13258,9 +12620,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_1101)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_1101)->name);
   abort();
 }
 }
@@ -13282,9 +12642,7 @@ varArgs5->tail = (List *)0;
 varArgs5 = (List *)listCons(rslt3, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_916)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_916)->name);
   abort();
 }
 }
@@ -13318,9 +12676,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons((Value *)&fn_249, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_809)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_809)->name);
   abort();
 }
 }
@@ -13427,9 +12783,7 @@ varArgs1 = (List *)listCons((Value *)&_num_8, varArgs1);
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_24)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_24)->name);
   abort();
 }
 }
@@ -13457,9 +12811,7 @@ varArgs12->tail = (List *)0;
 varArgs12 = (List *)listCons(rslt3, varArgs12);
 rslt14 = fn13(arity11->closures, (Value *)varArgs12);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)val10)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)val10)->name);
   abort();
 }
 }
@@ -13488,9 +12840,7 @@ varArgs16 = (List *)listCons((Value *)&_num_1, varArgs16);
 varArgs16 = (List *)listCons(arg0, varArgs16);
 rslt18 = fn17(arity15->closures, (Value *)varArgs16);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_24)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_24)->name);
   abort();
 }
 }
@@ -13569,9 +12919,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg1, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_22)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_22)->name);
   abort();
 }
 }
@@ -13617,9 +12965,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons((Value *)&_str_31, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_52)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_52)->name);
   abort();
 }
 }
@@ -13642,9 +12988,7 @@ varArgs6->tail = (List *)0;
 varArgs6 = (List *)listCons(arg0, varArgs6);
 rslt8 = fn7(arity5->closures, (Value *)varArgs6);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_52)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_52)->name);
   abort();
 }
 }
@@ -13666,9 +13010,7 @@ varArgs10->tail = (List *)0;
 varArgs10 = (List *)listCons((Value *)&_str_32, varArgs10);
 rslt12 = fn11(arity9->closures, (Value *)varArgs10);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_52)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_52)->name);
   abort();
 }
 }
@@ -13741,9 +13083,7 @@ varArgs1->head = (Value *)0;
 varArgs1->tail = (List *)0;
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_1138)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_1138)->name);
   abort();
 }
 }
@@ -13765,9 +13105,7 @@ varArgs5->tail = (List *)0;
 varArgs5 = (List *)listCons(rslt3, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_916)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_916)->name);
   abort();
 }
 }
@@ -13809,9 +13147,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg1, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_22)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_22)->name);
   abort();
 }
 }
@@ -13857,9 +13193,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons((Value *)&_str_33, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_52)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_52)->name);
   abort();
 }
 }
@@ -13882,9 +13216,7 @@ varArgs6->tail = (List *)0;
 varArgs6 = (List *)listCons(arg0, varArgs6);
 rslt8 = fn7(arity5->closures, (Value *)varArgs6);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_52)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_52)->name);
   abort();
 }
 }
@@ -13906,9 +13238,7 @@ varArgs10->tail = (List *)0;
 varArgs10 = (List *)listCons((Value *)&_str_34, varArgs10);
 rslt12 = fn11(arity9->closures, (Value *)varArgs10);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_52)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_52)->name);
   abort();
 }
 }
@@ -13981,9 +13311,7 @@ varArgs1->head = (Value *)0;
 varArgs1->tail = (List *)0;
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_1158)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_1158)->name);
   abort();
 }
 }
@@ -14005,9 +13333,7 @@ varArgs5->tail = (List *)0;
 varArgs5 = (List *)listCons(rslt3, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_916)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_916)->name);
   abort();
 }
 }
@@ -14069,9 +13395,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg1, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_22)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_22)->name);
   abort();
 }
 }
@@ -14117,9 +13441,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons((Value *)&_str_35, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_52)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_52)->name);
   abort();
 }
 }
@@ -14142,9 +13464,7 @@ varArgs6->tail = (List *)0;
 varArgs6 = (List *)listCons(arg0, varArgs6);
 rslt8 = fn7(arity5->closures, (Value *)varArgs6);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_52)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_52)->name);
   abort();
 }
 }
@@ -14166,9 +13486,7 @@ varArgs10->tail = (List *)0;
 varArgs10 = (List *)listCons((Value *)&_str_36, varArgs10);
 rslt12 = fn11(arity9->closures, (Value *)varArgs10);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_52)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_52)->name);
   abort();
 }
 }
@@ -14241,9 +13559,7 @@ varArgs1->head = (Value *)0;
 varArgs1->tail = (List *)0;
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_1181)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_1181)->name);
   abort();
 }
 }
@@ -14265,9 +13581,7 @@ varArgs5->tail = (List *)0;
 varArgs5 = (List *)listCons(rslt3, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_916)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_916)->name);
   abort();
 }
 }
@@ -14426,9 +13740,7 @@ varArgs1 = (List *)listCons(arg1, varArgs1);
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_32)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_32)->name);
   abort();
 }
 }
@@ -14458,9 +13770,7 @@ varArgs7->tail = (List *)0;
 varArgs7 = (List *)listCons(rslt5, varArgs7);
 rslt9 = fn8(arity6->closures, (Value *)varArgs7);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_50)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_50)->name);
   abort();
 }
 }
@@ -14514,9 +13824,7 @@ varArgs1 = (List *)listCons(arg1, varArgs1);
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_32)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_32)->name);
   abort();
 }
 }
@@ -14579,9 +13887,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons((Value *)&_num_23, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_39)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_39)->name);
   abort();
 }
 }
@@ -14622,9 +13928,7 @@ varArgs5->tail = (List *)0;
 varArgs5 = (List *)listCons((Value *)&_num_24, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_39)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_39)->name);
   abort();
 }
 }
@@ -14673,9 +13977,7 @@ varArgs5->tail = (List *)0;
 varArgs5 = (List *)listCons((Value *)&_num_9, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_39)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_39)->name);
   abort();
 }
 }
@@ -14725,9 +14027,7 @@ varArgs5->tail = (List *)0;
 varArgs5 = (List *)listCons((Value *)&_num_25, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_39)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_39)->name);
   abort();
 }
 }
@@ -14777,9 +14077,7 @@ varArgs5->tail = (List *)0;
 varArgs5 = (List *)listCons((Value *)&_num_26, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_39)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_39)->name);
   abort();
 }
 }
@@ -14829,9 +14127,7 @@ varArgs5->tail = (List *)0;
 varArgs5 = (List *)listCons((Value *)&_num_27, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_39)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_39)->name);
   abort();
 }
 }
@@ -14876,9 +14172,7 @@ varArgs3->tail = (List *)0;
 varArgs3 = (List *)listCons((Value *)&_num_28, varArgs3);
 rslt5 = fn4(arity2->closures, (Value *)varArgs3);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_39)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_39)->name);
   abort();
 }
 }
@@ -14902,9 +14196,7 @@ varArgs9->tail = (List *)0;
 varArgs9 = (List *)listCons((Value *)&_num_28, varArgs9);
 rslt11 = fn10(arity8->closures, (Value *)varArgs9);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_39)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_39)->name);
   abort();
 }
 }
@@ -14950,9 +14242,7 @@ varArgs5->tail = (List *)0;
 varArgs5 = (List *)listCons((Value *)&_num_23, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_39)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_39)->name);
   abort();
 }
 }
@@ -14998,9 +14288,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg1, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_22)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_22)->name);
   abort();
 }
 }
@@ -15075,9 +14363,7 @@ varArgs1 = (List *)listCons((Value *)&_num_8, varArgs1);
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_24)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_24)->name);
   abort();
 }
 }
@@ -15101,9 +14387,7 @@ varArgs9->tail = (List *)0;
 varArgs9 = (List *)listCons((Value *)&_num_23, varArgs9);
 rslt11 = fn10(arity8->closures, (Value *)varArgs9);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_39)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_39)->name);
   abort();
 }
 }
@@ -15130,9 +14414,7 @@ varArgs14->tail = (List *)0;
 varArgs14 = (List *)listCons((Value *)&_num_28, varArgs14);
 rslt16 = fn15(arity13->closures, (Value *)varArgs14);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_39)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_39)->name);
   abort();
 }
 }
@@ -15165,9 +14447,7 @@ varArgs19 = (List *)listCons((Value *)&_num_1, varArgs19);
 varArgs19 = (List *)listCons(arg0, varArgs19);
 rslt21 = fn20(arity18->closures, (Value *)varArgs19);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_24)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_24)->name);
   abort();
 }
 }
@@ -15258,9 +14538,7 @@ varArgs1->head = (Value *)0;
 varArgs1->tail = (List *)0;
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_1255)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_1255)->name);
   abort();
 }
 }
@@ -15282,9 +14560,7 @@ varArgs5->tail = (List *)0;
 varArgs5 = (List *)listCons(rslt3, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_916)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_916)->name);
   abort();
 }
 }
@@ -15316,9 +14592,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons((Value *)&_num_28, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_39)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_39)->name);
   abort();
 }
 }
@@ -15366,9 +14640,7 @@ varArgs19->tail = (List *)0;
 varArgs19 = (List *)listCons((Value *)&_num_28, varArgs19);
 rslt21 = fn20(arity18->closures, (Value *)varArgs19);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_39)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_39)->name);
   abort();
 }
 }
@@ -15580,9 +14852,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg1, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_22)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_22)->name);
   abort();
 }
 }
@@ -15644,9 +14914,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_674)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_674)->name);
   abort();
 }
 }
@@ -15738,9 +15006,7 @@ varArgs1->head = (Value *)0;
 varArgs1->tail = (List *)0;
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_1288)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_1288)->name);
   abort();
 }
 }
@@ -15762,9 +15028,7 @@ varArgs5->tail = (List *)0;
 varArgs5 = (List *)listCons(rslt3, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_916)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_916)->name);
   abort();
 }
 }
@@ -15889,9 +15153,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg1, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_22)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_22)->name);
   abort();
 }
 }
@@ -15966,9 +15228,7 @@ varArgs1 = (List *)listCons((Value *)&_num_8, varArgs1);
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_24)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_24)->name);
   abort();
 }
 }
@@ -15991,9 +15251,7 @@ varArgs8->tail = (List *)0;
 varArgs8 = (List *)listCons((Value *)&_num_24, varArgs8);
 rslt10 = fn9(arity7->closures, (Value *)varArgs8);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_39)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_39)->name);
   abort();
 }
 }
@@ -16020,9 +15278,7 @@ varArgs14 = (List *)listCons((Value *)&_num_1, varArgs14);
 varArgs14 = (List *)listCons(arg0, varArgs14);
 rslt16 = fn15(arity13->closures, (Value *)varArgs14);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_24)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_24)->name);
   abort();
 }
 }
@@ -16113,9 +15369,7 @@ varArgs1->head = (Value *)0;
 varArgs1->tail = (List *)0;
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_1319)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_1319)->name);
   abort();
 }
 }
@@ -16137,9 +15391,7 @@ varArgs5->tail = (List *)0;
 varArgs5 = (List *)listCons(rslt3, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_916)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_916)->name);
   abort();
 }
 }
@@ -16178,9 +15430,7 @@ varArgs5->tail = (List *)0;
 varArgs5 = (List *)listCons((Value *)&_num_24, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_39)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_39)->name);
   abort();
 }
 }
@@ -16226,9 +15476,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons((Value *)&_num_9, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_39)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_39)->name);
   abort();
 }
 }
@@ -16251,9 +15499,7 @@ varArgs7->tail = (List *)0;
 varArgs7 = (List *)listCons((Value *)&_num_26, varArgs7);
 rslt9 = fn8(arity6->closures, (Value *)varArgs7);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_39)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_39)->name);
   abort();
 }
 }
@@ -16276,9 +15522,7 @@ varArgs12->tail = (List *)0;
 varArgs12 = (List *)listCons((Value *)&_num_24, varArgs12);
 rslt14 = fn13(arity11->closures, (Value *)varArgs12);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_39)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_39)->name);
   abort();
 }
 }
@@ -17025,9 +16269,7 @@ varArgs3 = (List *)listCons(arg2, varArgs3);
 varArgs3 = (List *)listCons(rslt1, varArgs3);
 rslt5 = fn4(arity2->closures, (Value *)varArgs3);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_32)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_32)->name);
   abort();
 }
 }
@@ -17162,16 +16404,12 @@ ProtoImpls *protoImpls_1403;
 Value *protoFnImpl_1406(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_1403);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for '.name' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for '.name' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to '.name'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to '.name'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -17184,16 +16422,12 @@ ProtoImpls *protoImpls_1408;
 Value *protoFnImpl_1411(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_1408);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for '.grammar' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for '.grammar' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to '.grammar'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to '.grammar'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -17228,9 +16462,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg1, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_22)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_22)->name);
   abort();
 }
 }
@@ -17280,9 +16512,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons(arg0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)val0)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)val0)->name);
   abort();
 }
 }
@@ -17331,9 +16561,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons(val0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_674)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_674)->name);
   abort();
 }
 }
@@ -17520,9 +16748,7 @@ varArgs1 = (List *)listCons(arg1, varArgs1);
 varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_1413)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_1413)->name);
   abort();
 }
 }
@@ -17544,9 +16770,7 @@ varArgs5->tail = (List *)0;
 varArgs5 = (List *)listCons(rslt3, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_916)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_916)->name);
   abort();
 }
 }
@@ -17704,9 +16928,7 @@ varArgs5->tail = (List *)0;
 varArgs5 = (List *)listCons(arg0, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)val3)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)val3)->name);
   abort();
 }
 }
@@ -17820,24 +17042,24 @@ if (arg0->type == StringType) {
                     if (s->buffer[i] == 10) {
                       resultBuffer[resultIndex++] = 92;
                       resultBuffer[resultIndex++] = 110;
-                    } else if (s->buffer[i] == 13) {
-                      resultBuffer[resultIndex++] = 92;
-                      resultBuffer[resultIndex++] = 114;
-                    } else if (s->buffer[i] == 12) {
-                      resultBuffer[resultIndex++] = 92;
-                      resultBuffer[resultIndex++] = 102;
-                    } else if (s->buffer[i] == 8) {
-                      resultBuffer[resultIndex++] = 92;
-                      resultBuffer[resultIndex++] = 98;
-                    } else if (s->buffer[i] == 9) {
-                      resultBuffer[resultIndex++] = 92;
-                      resultBuffer[resultIndex++] = 116;
                     } else if (s->buffer[i] == 34) {
                       resultBuffer[resultIndex++] = 92;
                       resultBuffer[resultIndex++] = 34;
-                    } else if (s->buffer[i] == 92) {
-                      resultBuffer[resultIndex++] = 92;
-                      resultBuffer[resultIndex++] = 92;
+                       } else if (s->buffer[i] == 13) {
+                         resultBuffer[resultIndex++] = 92;
+                         resultBuffer[resultIndex++] = 114;
+                       } else if (s->buffer[i] == 12) {
+                         resultBuffer[resultIndex++] = 92;
+                         resultBuffer[resultIndex++] = 102;
+                       } else if (s->buffer[i] == 8) {
+                         resultBuffer[resultIndex++] = 92;
+                         resultBuffer[resultIndex++] = 98;
+                       } else if (s->buffer[i] == 9) {
+                         resultBuffer[resultIndex++] = 92;
+                         resultBuffer[resultIndex++] = 116;
+                       } else if (s->buffer[i] == 92) {
+                         resultBuffer[resultIndex++] = 92;
+                         resultBuffer[resultIndex++] = 92;
                     } else
                       resultBuffer[resultIndex++] = s->buffer[i];
                   }
@@ -17851,24 +17073,24 @@ if (arg0->type == StringType) {
                     if (s->buffer[i] == 10) {
                       resultBuffer[resultIndex++] = 92;
                       resultBuffer[resultIndex++] = 110;
-                    } else if (s->buffer[i] == 13) {
-                      resultBuffer[resultIndex++] = 92;
-                      resultBuffer[resultIndex++] = 114;
-                    } else if (s->buffer[i] == 12) {
-                      resultBuffer[resultIndex++] = 92;
-                      resultBuffer[resultIndex++] = 102;
-                    } else if (s->buffer[i] == 8) {
-                      resultBuffer[resultIndex++] = 92;
-                      resultBuffer[resultIndex++] = 98;
-                    } else if (s->buffer[i] == 9) {
-                      resultBuffer[resultIndex++] = 92;
-                      resultBuffer[resultIndex++] = 116;
                     } else if (s->buffer[i] == 34) {
                       resultBuffer[resultIndex++] = 92;
                       resultBuffer[resultIndex++] = 34;
-                    } else if (s->buffer[i] == 92) {
-                      resultBuffer[resultIndex++] = 92;
-                      resultBuffer[resultIndex++] = 92;
+                       } else if (s->buffer[i] == 13) {
+                         resultBuffer[resultIndex++] = 92;
+                         resultBuffer[resultIndex++] = 114;
+                       } else if (s->buffer[i] == 12) {
+                         resultBuffer[resultIndex++] = 92;
+                         resultBuffer[resultIndex++] = 102;
+                       } else if (s->buffer[i] == 8) {
+                         resultBuffer[resultIndex++] = 92;
+                         resultBuffer[resultIndex++] = 98;
+                       } else if (s->buffer[i] == 9) {
+                         resultBuffer[resultIndex++] = 92;
+                         resultBuffer[resultIndex++] = 116;
+                       } else if (s->buffer[i] == 92) {
+                         resultBuffer[resultIndex++] = 92;
+                         resultBuffer[resultIndex++] = 92;
                     } else
                       resultBuffer[resultIndex++] = s->buffer[i];
                   }
@@ -17939,9 +17161,7 @@ varArgs3->tail = (List *)0;
 varArgs3 = (List *)listCons(rslt1, varArgs3);
 rslt5 = fn4(arity2->closures, (Value *)varArgs3);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_1464)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_1464)->name);
   abort();
 }
 }
@@ -17963,9 +17183,7 @@ varArgs7->tail = (List *)0;
 varArgs7 = (List *)listCons(rslt5, varArgs7);
 rslt9 = fn8(arity6->closures, (Value *)varArgs7);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_916)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_916)->name);
   abort();
 }
 }
@@ -18022,9 +17240,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons(arg0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_1465)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_1465)->name);
   abort();
 }
 }
@@ -18046,9 +17262,7 @@ varArgs6->tail = (List *)0;
 varArgs6 = (List *)listCons(rslt4, varArgs6);
 rslt8 = fn7(arity5->closures, (Value *)varArgs6);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_916)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_916)->name);
   abort();
 }
 }
@@ -18165,9 +17379,7 @@ varArgs4 = (List *)listCons(arg0, varArgs4);
 varArgs4 = (List *)listCons(rslt2, varArgs4);
 rslt6 = fn5(arity3->closures, (Value *)varArgs4);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_32)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_32)->name);
   abort();
 }
 }
@@ -18452,9 +17664,7 @@ varArgs3->tail = (List *)0;
 varArgs3 = (List *)listCons(val1, varArgs3);
 rslt5 = fn4(arity2->closures, (Value *)varArgs3);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_1466)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_1466)->name);
   abort();
 }
 }
@@ -18476,9 +17686,7 @@ varArgs7->tail = (List *)0;
 varArgs7 = (List *)listCons(rslt5, varArgs7);
 rslt9 = fn8(arity6->closures, (Value *)varArgs7);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_916)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_916)->name);
   abort();
 }
 }
@@ -18629,9 +17837,7 @@ varArgs4 = (List *)listCons(arg0, varArgs4);
 varArgs4 = (List *)listCons(rslt2, varArgs4);
 rslt6 = fn5(arity3->closures, (Value *)varArgs4);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_32)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_32)->name);
   abort();
 }
 }
@@ -18983,9 +18189,7 @@ varArgs3->tail = (List *)0;
 varArgs3 = (List *)listCons(val1, varArgs3);
 rslt5 = fn4(arity2->closures, (Value *)varArgs3);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_1467)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_1467)->name);
   abort();
 }
 }
@@ -19007,9 +18211,7 @@ varArgs7->tail = (List *)0;
 varArgs7 = (List *)listCons(rslt5, varArgs7);
 rslt9 = fn8(arity6->closures, (Value *)varArgs7);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_916)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_916)->name);
   abort();
 }
 }
@@ -19160,9 +18362,7 @@ varArgs4 = (List *)listCons(arg0, varArgs4);
 varArgs4 = (List *)listCons(rslt2, varArgs4);
 rslt6 = fn5(arity3->closures, (Value *)varArgs4);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_32)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_32)->name);
   abort();
 }
 }
@@ -19447,9 +18647,7 @@ varArgs3->tail = (List *)0;
 varArgs3 = (List *)listCons(val1, varArgs3);
 rslt5 = fn4(arity2->closures, (Value *)varArgs3);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_1468)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_1468)->name);
   abort();
 }
 }
@@ -19471,9 +18669,7 @@ varArgs7->tail = (List *)0;
 varArgs7 = (List *)listCons(rslt5, varArgs7);
 rslt9 = fn8(arity6->closures, (Value *)varArgs7);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_916)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_916)->name);
   abort();
 }
 }
@@ -19582,9 +18778,7 @@ varArgs4 = (List *)listCons(rslt2, varArgs4);
 varArgs4 = (List *)listCons(rslt1, varArgs4);
 rslt6 = fn5(arity3->closures, (Value *)varArgs4);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_1472)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_1472)->name);
   abort();
 }
 }
@@ -19606,9 +18800,7 @@ varArgs8->tail = (List *)0;
 varArgs8 = (List *)listCons(rslt6, varArgs8);
 rslt10 = fn9(arity7->closures, (Value *)varArgs8);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_916)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_916)->name);
   abort();
 }
 }
@@ -19707,9 +18899,7 @@ varArgs4 = (List *)listCons(val2, varArgs4);
 varArgs4 = (List *)listCons(val1, varArgs4);
 rslt6 = fn5(arity3->closures, (Value *)varArgs4);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_1473)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_1473)->name);
   abort();
 }
 }
@@ -19731,9 +18921,7 @@ varArgs8->tail = (List *)0;
 varArgs8 = (List *)listCons(rslt6, varArgs8);
 rslt10 = fn9(arity7->closures, (Value *)varArgs8);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_916)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_916)->name);
   abort();
 }
 }
@@ -19803,9 +18991,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons(val0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_1463)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_1463)->name);
   abort();
 }
 }
@@ -19991,9 +19177,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons((Value *)&fn_118, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_809)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_809)->name);
   abort();
 }
 }
@@ -20016,9 +19200,7 @@ varArgs8->tail = (List *)0;
 varArgs8 = (List *)listCons((Value *)&fn_118, varArgs8);
 rslt10 = fn9(arity7->closures, (Value *)varArgs8);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_809)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_809)->name);
   abort();
 }
 }
@@ -20042,9 +19224,7 @@ varArgs13 = (List *)listCons(rslt11, varArgs13);
 varArgs13 = (List *)listCons(rslt6, varArgs13);
 rslt15 = fn14(arity12->closures, (Value *)varArgs13);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_1474)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_1474)->name);
   abort();
 }
 }
@@ -20066,9 +19246,7 @@ varArgs17->tail = (List *)0;
 varArgs17 = (List *)listCons(rslt15, varArgs17);
 rslt19 = fn18(arity16->closures, (Value *)varArgs17);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_916)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_916)->name);
   abort();
 }
 }
@@ -20255,9 +19433,7 @@ varArgs6->tail = (List *)0;
 varArgs6 = (List *)listCons((Value *)&fn_118, varArgs6);
 rslt8 = fn7(arity5->closures, (Value *)varArgs6);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_809)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_809)->name);
   abort();
 }
 }
@@ -20281,9 +19457,7 @@ varArgs11 = (List *)listCons(rslt9, varArgs11);
 varArgs11 = (List *)listCons(rslt4, varArgs11);
 rslt13 = fn12(arity10->closures, (Value *)varArgs11);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_1469)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_1469)->name);
   abort();
 }
 }
@@ -20305,9 +19479,7 @@ varArgs15->tail = (List *)0;
 varArgs15 = (List *)listCons(rslt13, varArgs15);
 rslt17 = fn16(arity14->closures, (Value *)varArgs15);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_916)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_916)->name);
   abort();
 }
 }
@@ -20429,9 +19601,7 @@ varArgs4->tail = (List *)0;
 varArgs4 = (List *)listCons((Value *)&fn_118, varArgs4);
 rslt6 = fn5(arity3->closures, (Value *)varArgs4);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_809)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_809)->name);
   abort();
 }
 }
@@ -20455,9 +19625,7 @@ varArgs9 = (List *)listCons(rslt7, varArgs9);
 varArgs9 = (List *)listCons(rslt2, varArgs9);
 rslt11 = fn10(arity8->closures, (Value *)varArgs9);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_1470)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_1470)->name);
   abort();
 }
 }
@@ -20479,9 +19647,7 @@ varArgs13->tail = (List *)0;
 varArgs13 = (List *)listCons(rslt11, varArgs13);
 rslt15 = fn14(arity12->closures, (Value *)varArgs13);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_916)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_916)->name);
   abort();
 }
 }
@@ -20628,9 +19794,7 @@ varArgs4 = (List *)listCons(arg0, varArgs4);
 varArgs4 = (List *)listCons(rslt2, varArgs4);
 rslt6 = fn5(arity3->closures, (Value *)varArgs4);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_1475)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_1475)->name);
   abort();
 }
 }
@@ -20652,9 +19816,7 @@ varArgs8->tail = (List *)0;
 varArgs8 = (List *)listCons(rslt6, varArgs8);
 rslt10 = fn9(arity7->closures, (Value *)varArgs8);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_916)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_916)->name);
   abort();
 }
 }
@@ -20798,9 +19960,7 @@ varArgs19->tail = (List *)0;
 varArgs19 = (List *)listCons(rslt6, varArgs19);
 rslt21 = fn20(arity18->closures, (Value *)varArgs19);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_1463)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_1463)->name);
   abort();
 }
 }
@@ -20939,9 +20099,7 @@ varArgs4 = (List *)listCons(arg0, varArgs4);
 varArgs4 = (List *)listCons(rslt2, varArgs4);
 rslt6 = fn5(arity3->closures, (Value *)varArgs4);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_32)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_32)->name);
   abort();
 }
 }
@@ -21289,9 +20447,7 @@ varArgs4->tail = (List *)0;
 varArgs4 = (List *)listCons(rslt2, varArgs4);
 rslt6 = fn5(arity3->closures, (Value *)varArgs4);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_1476)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_1476)->name);
   abort();
 }
 }
@@ -21313,9 +20469,7 @@ varArgs8->tail = (List *)0;
 varArgs8 = (List *)listCons(rslt6, varArgs8);
 rslt10 = fn9(arity7->closures, (Value *)varArgs8);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_916)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_916)->name);
   abort();
 }
 }
@@ -21431,9 +20585,7 @@ varArgs3 = (List *)listCons(arg0, varArgs3);
 varArgs3 = (List *)listCons(val1, varArgs3);
 rslt5 = fn4(arity2->closures, (Value *)varArgs3);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_1477)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_1477)->name);
   abort();
 }
 }
@@ -21455,9 +20607,7 @@ varArgs7->tail = (List *)0;
 varArgs7 = (List *)listCons(rslt5, varArgs7);
 rslt9 = fn8(arity6->closures, (Value *)varArgs7);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_916)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_916)->name);
   abort();
 }
 }
@@ -21511,9 +20661,7 @@ varArgs12->tail = (List *)0;
 varArgs12 = (List *)listCons(rslt2, varArgs12);
 rslt14 = fn13(arity11->closures, (Value *)varArgs12);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_1463)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_1463)->name);
   abort();
 }
 }
@@ -21626,9 +20774,7 @@ varArgs11 = (List *)listCons(rslt9, varArgs11);
 varArgs11 = (List *)listCons(rslt8, varArgs11);
 rslt13 = fn12(arity10->closures, (Value *)varArgs11);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_1478)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_1478)->name);
   abort();
 }
 }
@@ -21650,9 +20796,7 @@ varArgs15->tail = (List *)0;
 varArgs15 = (List *)listCons(rslt13, varArgs15);
 rslt17 = fn16(arity14->closures, (Value *)varArgs15);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_916)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_916)->name);
   abort();
 }
 }
@@ -21841,9 +20985,7 @@ varArgs5->tail = (List *)0;
 varArgs5 = (List *)listCons(arg0, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)val3)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)val3)->name);
   abort();
 }
 }
@@ -21951,9 +21093,7 @@ varArgs9->tail = (List *)0;
 varArgs9 = (List *)listCons((Value *)&fn_118, varArgs9);
 rslt11 = fn10(arity8->closures, (Value *)varArgs9);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_809)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_809)->name);
   abort();
 }
 }
@@ -21977,9 +21117,7 @@ varArgs14 = (List *)listCons(rslt12, varArgs14);
 varArgs14 = (List *)listCons(rslt7, varArgs14);
 rslt16 = fn15(arity13->closures, (Value *)varArgs14);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_1470)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_1470)->name);
   abort();
 }
 }
@@ -22001,9 +21139,7 @@ varArgs18->tail = (List *)0;
 varArgs18 = (List *)listCons(rslt16, varArgs18);
 rslt20 = fn19(arity17->closures, (Value *)varArgs18);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_916)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_916)->name);
   abort();
 }
 }
@@ -22033,9 +21169,7 @@ varArgs24 = (List *)listCons(rslt22, varArgs24);
 varArgs24 = (List *)listCons(rslt5, varArgs24);
 rslt26 = fn25(arity23->closures, (Value *)varArgs24);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_1475)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_1475)->name);
   abort();
 }
 }
@@ -22057,9 +21191,7 @@ varArgs28->tail = (List *)0;
 varArgs28 = (List *)listCons(rslt26, varArgs28);
 rslt30 = fn29(arity27->closures, (Value *)varArgs28);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_916)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_916)->name);
   abort();
 }
 }
@@ -22233,9 +21365,7 @@ varArgs3->tail = (List *)0;
 varArgs3 = (List *)listCons(val1, varArgs3);
 rslt5 = fn4(arity2->closures, (Value *)varArgs3);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_519)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_519)->name);
   abort();
 }
 }
@@ -22412,9 +21542,7 @@ varArgs4 = (List *)listCons(arg0, varArgs4);
 varArgs4 = (List *)listCons(rslt2, varArgs4);
 rslt6 = fn5(arity3->closures, (Value *)varArgs4);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_1479)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_1479)->name);
   abort();
 }
 }
@@ -22436,9 +21564,7 @@ varArgs8->tail = (List *)0;
 varArgs8 = (List *)listCons(rslt6, varArgs8);
 rslt10 = fn9(arity7->closures, (Value *)varArgs8);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_916)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_916)->name);
   abort();
 }
 }
@@ -22544,9 +21670,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons(arg0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_1480)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_1480)->name);
   abort();
 }
 }
@@ -22568,9 +21692,7 @@ varArgs6->tail = (List *)0;
 varArgs6 = (List *)listCons(rslt4, varArgs6);
 rslt8 = fn7(arity5->closures, (Value *)varArgs6);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_916)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_916)->name);
   abort();
 }
 }
@@ -22698,9 +21820,7 @@ varArgs6 = (List *)listCons(rslt4, varArgs6);
 varArgs6 = (List *)listCons(rslt2, varArgs6);
 rslt8 = fn7(arity5->closures, (Value *)varArgs6);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_1482)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_1482)->name);
   abort();
 }
 }
@@ -22722,9 +21842,7 @@ varArgs10->tail = (List *)0;
 varArgs10 = (List *)listCons(rslt8, varArgs10);
 rslt12 = fn11(arity9->closures, (Value *)varArgs10);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_916)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_916)->name);
   abort();
 }
 }
@@ -22838,9 +21956,7 @@ varArgs5 = (List *)listCons(rslt2, varArgs5);
 varArgs5 = (List *)listCons(rslt1, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_1481)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_1481)->name);
   abort();
 }
 }
@@ -22862,9 +21978,7 @@ varArgs9->tail = (List *)0;
 varArgs9 = (List *)listCons(rslt7, varArgs9);
 rslt11 = fn10(arity8->closures, (Value *)varArgs9);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_916)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_916)->name);
   abort();
 }
 }
@@ -22958,9 +22072,7 @@ varArgs4->tail = (List *)0;
 varArgs4 = (List *)listCons((Value *)&fn_118, varArgs4);
 rslt6 = fn5(arity3->closures, (Value *)varArgs4);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_809)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_809)->name);
   abort();
 }
 }
@@ -22984,9 +22096,7 @@ varArgs9 = (List *)listCons(rslt7, varArgs9);
 varArgs9 = (List *)listCons(rslt2, varArgs9);
 rslt11 = fn10(arity8->closures, (Value *)varArgs9);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_1471)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_1471)->name);
   abort();
 }
 }
@@ -23008,9 +22118,7 @@ varArgs13->tail = (List *)0;
 varArgs13 = (List *)listCons(rslt11, varArgs13);
 rslt15 = fn14(arity12->closures, (Value *)varArgs13);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_916)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_916)->name);
   abort();
 }
 }
@@ -24161,9 +23269,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons((Value *)fn_1925, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_674)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_674)->name);
   abort();
 }
 }
@@ -24234,9 +23340,7 @@ varArgs3->tail = (List *)0;
 varArgs3 = (List *)listCons((Value *)fn_1930, varArgs3);
 rslt5 = fn4(arity2->closures, (Value *)varArgs3);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_674)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_674)->name);
   abort();
 }
 }
@@ -24427,16 +23531,12 @@ return (rslt0);
 Value *protoFnImpl_1951(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_1947);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for 'emit-c' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'emit-c' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to 'emit-c'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to 'emit-c'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -24451,16 +23551,12 @@ ProtoImpls *protoImpls_1953;
 Value *protoFnImpl_1956(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_1953);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for '.txt' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for '.txt' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to '.txt'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to '.txt'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -25192,9 +24288,7 @@ varArgs9->tail = (List *)0;
 varArgs9 = (List *)listCons((Value *)fn_2017, varArgs9);
 rslt11 = fn10(arity8->closures, (Value *)varArgs9);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_674)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_674)->name);
   abort();
 }
 }
@@ -25219,16 +24313,12 @@ ProtoImpls *protoImpls_2020;
 Value *protoFnImpl_2023(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_2020);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for '.sym' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for '.sym' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to '.sym'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to '.sym'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -25388,16 +24478,12 @@ ProtoImpls *protoImpls_2046;
 Value *protoFnImpl_2049(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_2046);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for '.kw' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for '.kw' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to '.kw'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to '.kw'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -25564,16 +24650,12 @@ ProtoImpls *protoImpls_2070;
 Value *protoFnImpl_2073(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_2070);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for '.num' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for '.num' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to '.num'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to '.num'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -25754,16 +24836,12 @@ ProtoImpls *protoImpls_2094;
 Value *protoFnImpl_2097(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_2094);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for '.const-str' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for '.const-str' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to '.const-str'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to '.const-str'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -27378,16 +26456,12 @@ ProtoImpls *protoImpls_2205;
 Value *protoFnImpl_2208(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_2205);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for '.body' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for '.body' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to '.body'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to '.body'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -29744,7 +28818,7 @@ struct {int64_t type;
    char buffer[12];} _str_168 = {1,11,", (Value *)"};
 struct {int64_t type;
    int64_t len;
-   char buffer[62];} _str_169 = {1,61,"} else {\nfprintf(stderr, \"\\\n*** no arity found for '%s'.\\\n\", "};
+   char buffer[62];} _str_169 = {1,61,"} else {\nfprintf(stderr, \"\\n*** no arity found for '%s'.\\n\", "};
 struct {int64_t type;
    int64_t len;
    char buffer[14];} _str_170 = {1,13,"((Function *)"};
@@ -31117,16 +30191,12 @@ ProtoImpls *protoImpls_2416;
 Value *protoFnImpl_2419(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_2416);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for '.callee' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for '.callee' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to '.callee'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to '.callee'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -31139,16 +30209,12 @@ ProtoImpls *protoImpls_2421;
 Value *protoFnImpl_2424(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_2421);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for '.params' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for '.params' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to '.params'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to '.params'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -31295,9 +30361,7 @@ varArgs8->tail = (List *)0;
 varArgs8 = (List *)listCons((Value *)fn_2438, varArgs8);
 rslt10 = fn9(arity7->closures, (Value *)varArgs8);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_674)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_674)->name);
   abort();
 }
 }
@@ -31488,16 +30552,12 @@ ProtoImpls *protoImpls_2455;
 Value *protoFnImpl_2458(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_2455);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for '.binding' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for '.binding' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to '.binding'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to '.binding'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -31510,16 +30570,12 @@ ProtoImpls *protoImpls_2460;
 Value *protoFnImpl_2463(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_2460);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for '.val' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for '.val' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to '.val'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to '.val'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -31746,16 +30802,12 @@ ProtoImpls *protoImpls_2490;
 Value *protoFnImpl_2493(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_2490);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for '.bindings' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for '.bindings' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to '.bindings'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to '.bindings'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -32078,16 +31130,12 @@ ProtoImpls *protoImpls_2526;
 Value *protoFnImpl_2529(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_2526);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for '.arities' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for '.arities' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to '.arities'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to '.arities'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -33993,16 +33041,12 @@ ProtoImpls *protoImpls_2641;
 Value *protoFnImpl_2644(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_2641);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for '.value' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for '.value' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to '.value'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to '.value'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -34319,9 +33363,7 @@ varArgs5 = (List *)listCons(val2, varArgs5);
 varArgs5 = (List *)listCons(rslt1, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)(Value *)&fn_2667)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)(Value *)&fn_2667)->name);
   abort();
 }
 }
@@ -34460,16 +33502,12 @@ ProtoImpls *protoImpls_2676;
 Value *protoFnImpl_2679(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_2676);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for '.clauses' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for '.clauses' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to '.clauses'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to '.clauses'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -34482,16 +33520,12 @@ ProtoImpls *protoImpls_2681;
 Value *protoFnImpl_2684(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_2681);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for '.default' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for '.default' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to '.default'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to '.default'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -34941,16 +33975,12 @@ ProtoImpls *protoImpls_2726;
 Value *protoFnImpl_2729(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_2726);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for '.type' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for '.type' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to '.type'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to '.type'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -34963,16 +33993,12 @@ ProtoImpls *protoImpls_2731;
 Value *protoFnImpl_2734(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_2731);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for '.impls' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for '.impls' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to '.impls'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to '.impls'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -36417,16 +35443,12 @@ ProtoImpls *protoImpls_2836;
 Value *protoFnImpl_2839(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_2836);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for '.fields' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for '.fields' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to '.fields'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to '.fields'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -36548,9 +35570,7 @@ varArgs15->tail = (List *)0;
 varArgs15 = (List *)listCons(rslt13, varArgs15);
 rslt17 = fn16(arity14->closures, (Value *)varArgs15);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_1484)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_1484)->name);
   abort();
 }
 }
@@ -36615,9 +35635,7 @@ varArgs5->tail = (List *)0;
 varArgs5 = (List *)listCons(rslt3, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_519)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_519)->name);
   abort();
 }
 }
@@ -36754,9 +35772,7 @@ varArgs1->head = (Value *)0;
 varArgs1->tail = (List *)0;
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_1483)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_1483)->name);
   abort();
 }
 }
@@ -37270,9 +36286,7 @@ varArgs8 = (List *)listCons(rslt0, varArgs8);
 varArgs8 = (List *)listCons(arg0, varArgs8);
 rslt10 = fn9(arity7->closures, (Value *)varArgs8);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_2841)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_2841)->name);
   abort();
 }
 }
@@ -37388,10 +36402,10 @@ struct {int64_t type;
    char buffer[33];} _str_228 = {1,32,"  if(implFn == (Function *)0) {\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[58];} _str_229 = {1,57,"   fprintf(stderr, \"\\\n*** Could not find proto impl for '"};
+   char buffer[58];} _str_229 = {1,57,"   fprintf(stderr, \"\\n*** Could not find proto impl for '"};
 struct {int64_t type;
    int64_t len;
-   char buffer[36];} _str_230 = {1,35,"' %lld\\\n\", arg0->type);\nabort();\n}\n"};
+   char buffer[36];} _str_230 = {1,35,"' %lld\\n\", arg0->type);\nabort();\n}\n"};
 struct {int64_t type;
    int64_t len;
    char buffer[50];} _str_231 = {1,49,"  FnArity *_arity = findFnArity((Value *)implFn, "};
@@ -37400,10 +36414,10 @@ struct {int64_t type;
    char buffer[52];} _str_232 = {1,51,"  if(_arity == (FnArity *)0 || _arity->variadic) {\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[63];} _str_233 = {1,62,"    fprintf(stderr, \"\\\n*** Invalid number of args in call to '"};
+   char buffer[63];} _str_233 = {1,62,"    fprintf(stderr, \"\\n*** Invalid number of args in call to '"};
 struct {int64_t type;
    int64_t len;
-   char buffer[8];} _str_234 = {1,7,"'\\\n\");\n"};
+   char buffer[8];} _str_234 = {1,7,"'\\n\");\n"};
 struct {int64_t type;
    int64_t len;
    char buffer[16];} _str_235 = {1,15,"    abort();\n}\n"};
@@ -38267,16 +37281,12 @@ ProtoImpls *protoImpls_2927;
 Value *protoFnImpl_2930(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_2927);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\
-*** Could not find proto impl for '.prototypes' %lld\
-", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for '.prototypes' %lld\n", arg0->type);
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
   if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\
-*** Invalid number of args in call to '.prototypes'\
-");
+    fprintf(stderr, "\n*** Invalid number of args in call to '.prototypes'\n");
     abort();
 }
   FnType1 *_fn = (FnType1 *)_arity->fn;
@@ -38719,7 +37729,7 @@ struct {int64_t type;
    char buffer[22];} _str_272 = {1,21,"if (boolVal->type != "};
 struct {int64_t type;
    int64_t len;
-   char buffer[32];} _str_273 = {1,31,"printf(\"Invalid boolean value\\\n"};
+   char buffer[32];} _str_273 = {1,31,"printf(\"Invalid boolean value\\n"};
 struct {int64_t type;
    int64_t len;
    char buffer[61];} _str_274 = {1,60,"\");\nabort();\n}\nelse\nreturn (((Number *)boolVal)->numVal);\n}\n"};
@@ -38881,7 +37891,7 @@ struct {int64_t type;
    char buffer[28];} _str_326 = {1,27,"if (l->type != ListType) {\n"};
 struct {int64_t type;
    int64_t len;
-   char buffer[37];} _str_327 = {1,36,"printf(\"'cons' requires a list\\\n\");\n"};
+   char buffer[37];} _str_327 = {1,36,"printf(\"'cons' requires a list\\n\");\n"};
 struct {int64_t type;
    int64_t len;
    char buffer[10];} _str_328 = {1,9,"abort();\n"};
@@ -40740,9 +39750,7 @@ varArgs5->tail = (List *)0;
 varArgs5 = (List *)listCons(rslt3, varArgs5);
 rslt7 = fn6(arity4->closures, (Value *)varArgs5);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_519)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_519)->name);
   abort();
 }
 }
@@ -40844,9 +39852,7 @@ varArgs4->tail = (List *)0;
 varArgs4 = (List *)listCons(rslt2, varArgs4);
 rslt6 = fn5(arity3->closures, (Value *)varArgs4);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_519)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_519)->name);
   abort();
 }
 }
@@ -41318,9 +40324,7 @@ varArgs3->tail = (List *)0;
 varArgs3 = (List *)listCons(rslt1, varArgs3);
 rslt5 = fn4(arity2->closures, (Value *)varArgs3);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_519)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_519)->name);
   abort();
 }
 }
@@ -41359,9 +40363,7 @@ varArgs4->tail = (List *)0;
 varArgs4 = (List *)listCons(rslt2, varArgs4);
 rslt6 = fn5(arity3->closures, (Value *)varArgs4);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_519)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_519)->name);
   abort();
 }
 }
@@ -41810,9 +40812,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons(rslt0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_519)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_519)->name);
   abort();
 }
 }
@@ -42150,9 +41150,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons(rslt0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_519)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_519)->name);
   abort();
 }
 }
@@ -42480,9 +41478,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons(rslt0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_519)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_519)->name);
   abort();
 }
 }
@@ -42807,9 +41803,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons(rslt0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_519)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_519)->name);
   abort();
 }
 }
@@ -43136,9 +42130,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons(rslt0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_519)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_519)->name);
   abort();
 }
 }
@@ -43673,9 +42665,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons(rslt0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_519)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_519)->name);
   abort();
 }
 }
@@ -44593,9 +43583,7 @@ varArgs30->tail = (List *)0;
 varArgs30 = (List *)listCons(rslt28, varArgs30);
 rslt32 = fn31(arity29->closures, (Value *)varArgs30);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)rslt6)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)rslt6)->name);
   abort();
 }
 }
@@ -44844,9 +43832,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons(val0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)arg1)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)arg1)->name);
   abort();
 }
 }
@@ -44868,9 +43854,7 @@ varArgs6->tail = (List *)0;
 varArgs6 = (List *)listCons(rslt4, varArgs6);
 rslt8 = fn7(arity5->closures, (Value *)varArgs6);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_3357)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_3357)->name);
   abort();
 }
 }
@@ -44906,9 +43890,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg1, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_3357)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_3357)->name);
   abort();
 }
 }
@@ -44976,9 +43958,7 @@ varArgs9->tail = (List *)0;
 varArgs9 = (List *)listCons(rslt7, varArgs9);
 rslt11 = fn10(arity8->closures, (Value *)varArgs9);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_3357)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_3357)->name);
   abort();
 }
 }
@@ -45022,9 +44002,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons(val0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)arg1)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)arg1)->name);
   abort();
 }
 }
@@ -45188,9 +44166,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg1, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_3357)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_3357)->name);
   abort();
 }
 }
@@ -45363,9 +44339,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg1, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_3411)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_3411)->name);
   abort();
 }
 }
@@ -45554,9 +44528,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg1, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_3411)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_3411)->name);
   abort();
 }
 }
@@ -45698,9 +44670,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons(val0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)arg1)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)arg1)->name);
   abort();
 }
 }
@@ -45722,9 +44692,7 @@ varArgs6->tail = (List *)0;
 varArgs6 = (List *)listCons(rslt4, varArgs6);
 rslt8 = fn7(arity5->closures, (Value *)varArgs6);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_3461)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_3461)->name);
   abort();
 }
 }
@@ -45760,9 +44728,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg1, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_3461)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_3461)->name);
   abort();
 }
 }
@@ -45830,9 +44796,7 @@ varArgs10->tail = (List *)0;
 varArgs10 = (List *)listCons(rslt8, varArgs10);
 rslt12 = fn11(arity9->closures, (Value *)varArgs10);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_3461)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_3461)->name);
   abort();
 }
 }
@@ -45877,9 +44841,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons(val0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)arg1)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)arg1)->name);
   abort();
 }
 }
@@ -46043,9 +45005,7 @@ varArgs1->tail = (List *)0;
 varArgs1 = (List *)listCons(arg1, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_3461)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_3461)->name);
   abort();
 }
 }
@@ -46142,9 +45102,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons(arg1, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)val0)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)val0)->name);
   abort();
 }
 }
@@ -46191,9 +45149,7 @@ varArgs3->tail = (List *)0;
 varArgs3 = (List *)listCons(arg0, varArgs3);
 rslt5 = fn4(arity2->closures, (Value *)varArgs3);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)val1)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)val1)->name);
   abort();
 }
 }
@@ -46215,9 +45171,7 @@ varArgs7->tail = (List *)0;
 varArgs7 = (List *)listCons(rslt5, varArgs7);
 rslt9 = fn8(arity6->closures, (Value *)varArgs7);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)val0)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)val0)->name);
   abort();
 }
 }
@@ -46259,9 +45213,7 @@ varArgs3->tail = (List *)0;
 varArgs3 = (List *)listCons((Value *)fn_3528, varArgs3);
 rslt5 = fn4(arity2->closures, (Value *)varArgs3);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_3511)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_3511)->name);
   abort();
 }
 }
@@ -46319,9 +45271,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons((Value *)fn_3534, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_3511)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_3511)->name);
   abort();
 }
 }
@@ -46370,9 +45320,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons(val0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)arg0)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)arg0)->name);
   abort();
 }
 }
@@ -46406,9 +45354,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons(arg0, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)val0)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)val0)->name);
   abort();
 }
 }
@@ -46470,9 +45416,7 @@ varArgs3->tail = (List *)0;
 varArgs3 = (List *)listCons((Value *)fn_3540, varArgs3);
 rslt5 = fn4(arity2->closures, (Value *)varArgs3);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_3511)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_3511)->name);
   abort();
 }
 }
@@ -46617,9 +45561,7 @@ varArgs2->tail = (List *)0;
 varArgs2 = (List *)listCons((Value *)fn_3555, varArgs2);
 rslt4 = fn3(arity1->closures, (Value *)varArgs2);
 } else {
-fprintf(stderr, "\
-*** no arity found for '%s'.\
-", ((Function *)var_3511)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_3511)->name);
   abort();
 }
 }
@@ -47632,7 +46574,7 @@ strInfo = listCons(stringValue("_str_168"), empty_list);
 strInfo = listCons(stringValue(", (Value *)"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_169"), empty_list);
-strInfo = listCons(stringValue("} else {\nfprintf(stderr, \"\\\n*** no arity found for '%s'.\\\n\", "), strInfo);
+strInfo = listCons(stringValue("} else {\nfprintf(stderr, \"\\n*** no arity found for '%s'.\\n\", "), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_170"), empty_list);
 strInfo = listCons(stringValue("((Function *)"), strInfo);
@@ -47812,10 +46754,10 @@ strInfo = listCons(stringValue("_str_228"), empty_list);
 strInfo = listCons(stringValue("  if(implFn == (Function *)0) {\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_229"), empty_list);
-strInfo = listCons(stringValue("   fprintf(stderr, \"\\\n*** Could not find proto impl for '"), strInfo);
+strInfo = listCons(stringValue("   fprintf(stderr, \"\\n*** Could not find proto impl for '"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_230"), empty_list);
-strInfo = listCons(stringValue("' %lld\\\n\", arg0->type);\nabort();\n}\n"), strInfo);
+strInfo = listCons(stringValue("' %lld\\n\", arg0->type);\nabort();\n}\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_231"), empty_list);
 strInfo = listCons(stringValue("  FnArity *_arity = findFnArity((Value *)implFn, "), strInfo);
@@ -47824,10 +46766,10 @@ strInfo = listCons(stringValue("_str_232"), empty_list);
 strInfo = listCons(stringValue("  if(_arity == (FnArity *)0 || _arity->variadic) {\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_233"), empty_list);
-strInfo = listCons(stringValue("    fprintf(stderr, \"\\\n*** Invalid number of args in call to '"), strInfo);
+strInfo = listCons(stringValue("    fprintf(stderr, \"\\n*** Invalid number of args in call to '"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_234"), empty_list);
-strInfo = listCons(stringValue("'\\\n\");\n"), strInfo);
+strInfo = listCons(stringValue("'\\n\");\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_235"), empty_list);
 strInfo = listCons(stringValue("    abort();\n}\n"), strInfo);
@@ -47944,7 +46886,7 @@ strInfo = listCons(stringValue("_str_272"), empty_list);
 strInfo = listCons(stringValue("if (boolVal->type != "), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_273"), empty_list);
-strInfo = listCons(stringValue("printf(\"Invalid boolean value\\\n"), strInfo);
+strInfo = listCons(stringValue("printf(\"Invalid boolean value\\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_274"), empty_list);
 strInfo = listCons(stringValue("\");\nabort();\n}\nelse\nreturn (((Number *)boolVal)->numVal);\n}\n"), strInfo);
@@ -48106,7 +47048,7 @@ strInfo = listCons(stringValue("_str_326"), empty_list);
 strInfo = listCons(stringValue("if (l->type != ListType) {\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_327"), empty_list);
-strInfo = listCons(stringValue("printf(\"'cons' requires a list\\\n\");\n"), strInfo);
+strInfo = listCons(stringValue("printf(\"'cons' requires a list\\n\");\n"), strInfo);
 strs = listCons((Value *)strInfo, strs);
 strInfo = listCons(stringValue("_str_328"), empty_list);
 strInfo = listCons(stringValue("abort();\n"), strInfo);
