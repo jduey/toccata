@@ -1546,6 +1546,7 @@ toccata-core
 (def emit-proto-fn)
 
 (defn escape-chars [c]
+  ;; does not allocate a Value
   (inline-text "if (arg0->type == StringType) {
                   String *s = (String *)arg0;
                   char *resultBuffer = (char *)my_malloc(s->len * 2 + 5);
@@ -1992,7 +1993,7 @@ toccata-core
 (def Int32 "int")
 (def Int64 "int64_t")
 (def ValueType Int64)  ;; type of boxed values
-(def Value "typedef struct {int64_t type;} Value;\n")
+(def Value "typedef struct {int64_t type; int32_t refs;} Value;\n")
 (def Value* "Value *")
 (def NumberVal "typedef struct {int64_t type; int32_t refs; int64_t numVal;} Number;\n")
 (def NumberVal* "Number *")
@@ -2135,6 +2136,7 @@ toccata-core
                      abort();\n")))
 
 ;; this function assumes the type of 'n' has already been checked
+;; does not allocate a Value
 (defn number-str [n]
   (inline-text
    "char *buffer = (char *)my_malloc(10);
@@ -2386,6 +2388,7 @@ toccata-core
     return(true);\n"))
 
 (defn slurp [fileName]
+  ;; does not allocate a Value
   (inline-text
    "char *arg0Str = (char *)my_malloc(((String *)arg0)->len + 5);
     if (arg0->type == StringType)
@@ -3462,7 +3465,9 @@ toccata-core
                     "  malloc_count++;"
                     "  // if (sz > 10000)\n"
                     "  //   fprintf(stderr, \"malloc: %lld\\n\", sz);\n"
-                    "  return(GC_malloc(sz));\n"
+                    "  Value *val = GC_malloc(sz);\n"
+                    "  if (sz > sizeof(Value))\n    val->refs = 0;\n"
+                    "  return(val);\n"
                     "}\n\n"
 
                     "int isTrue(Value *boolVal) {\n"
@@ -3553,7 +3558,9 @@ toccata-core
                     "List *oldList = (List *)l;\n"
                     "newList->type = ListType;\n"
                     "newList->len = oldList->len + 1;\n"
+                    "if (x->refs >= 0) x->refs++;\n"
                     "newList->head = (Value *)x;\n"
+                    "if (oldList->refs >= 0) oldList->refs++;\n"
                     "newList->tail = oldList;\n"
                     "return(newList);\n"
                     "};\n")))
@@ -3641,11 +3648,13 @@ toccata-core
      (< 0 (count strs))
      (traverse strs (fn [const-str]
                       (let [str-ptr (nth const-str 1 "noString_ptr")
-                            str-val (nth const-str 0 "noString_name")]
-                        (write (str "struct {int64_t type;\n int32_t refs;\n   int64_t len;\n   char buffer["
-                                    (inc (count str-val))
-                                    "];} " str-ptr " = {" type ", -1, "
-                                    (count str-val) ",\"" (escape-chars str-val) "\"};\n")))))
+                            str-val (nth const-str 0 "noString_name")
+                            str-len (count str-val)]
+                        (write-strs (list
+                                     "struct {int64_t type;\n int32_t refs;\n   int64_t len;\n   char buffer["
+                                     (inc str-len)
+                                     "];} " str-ptr " = {" type ", -1, "
+                                     str-len ",\"" (escape-chars str-val) "\"};\n")))))
 
      (state-maybe ""))))
 
