@@ -1,4 +1,7 @@
 
+;; every call to stringValue has to incRef the source
+;; symbolValue, keywordValue as well
+
 toccata-core
 
 (def true)
@@ -1635,7 +1638,7 @@ toccata-core
         _ (assoc-in-val (list :keywords kw) ext-kw)
         _ (update-in-val (list :new-externs)
                          (fn [externs]
-                           (cons (str "SymKey " ext-kw) externs)))]
+                           (cons (str "SubString " ext-kw) externs)))]
     ext-kw))
 
 (defn make-static-keyword [kw]
@@ -1805,7 +1808,7 @@ toccata-core
         _ (assoc-in-val (list :symbols sym) ext-sym)
         _ (update-in-val (list :new-externs)
                          (fn [externs]
-                           (cons (str "SymKey " ext-sym) externs)))]
+                           (cons (str "SubString " ext-sym) externs)))]
     ext-sym))
 
 (defn make-static-symbol [sym]
@@ -1997,7 +2000,6 @@ toccata-core
 (def Value* "Value *")
 (def NumberVal "typedef struct {int64_t type; int32_t refs; int64_t numVal;} Number;\n")
 (def NumberVal* "Number *")
-(def SymKey "typedef struct {int64_t type; int32_t refs; char *name;} SymKey;\n")
 (def StringVal "typedef struct {int64_t type; int32_t refs; int64_t len; char buffer[0];} String;\n")
 (def StringVal* "String *")
 (def SubStringVal "typedef struct {int64_t type; int32_t refs; int64_t len; Value *source; char *buffer;} SubString;\n")
@@ -2017,7 +2019,7 @@ toccata-core
 
 (defn symkey-name [v]
   (inline-text
-   "return(stringValue(((SymKey *)arg0)->name));"))
+   "return(stringValue(((SubString *)arg0)->buffer));"))
 
 (defn char-code [c]
   (inline-text "if (arg0->type == StringType) {
@@ -2030,24 +2032,48 @@ toccata-core
                   abort();\n "))
 
 (defn symbol [sym-str]
-  (inline-text
-   "SymKey *sym = (SymKey *)my_malloc(sizeof(SymKey));
-    sym->type = SymbolType;
-    if(arg0->type == StringType)
-      sym->name = ((String *)arg0)->buffer;
-    else if (arg0->type == SubStringType)
-      sym->name = ((SubString *)arg0)->buffer;
-    return((Value *)sym);"))
+  (inline-text "if (arg0->type == StringType) {
+                     String *s = (String *)arg0;
+                     SubString *subStr = (SubString *)my_malloc(sizeof(SubString));
+                     subStr->type = SymbolType;
+                     subStr->len = s->len;
+                     subStr->source = arg0;
+                     incRef(arg0);
+                     subStr->buffer = s->buffer;
+                     return((Value *)subStr);
+                   } else if (arg0->type == SubStringType) {
+                     SubString *s = (SubString *)arg0;
+                     SubString *subStr = (SubString *)my_malloc(sizeof(SubString));
+                     subStr->type = SymbolType;
+                     subStr->len = s->len;
+                     subStr->source = arg0;
+                     incRef(arg0);
+                     subStr->buffer = s->buffer;
+                     return((Value *)subStr);
+                   } else
+                     abort();\n"))
 
 (defn new-keyword [kw-str]
-  (inline-text
-   "SymKey *sym = (SymKey *)my_malloc(sizeof(SymKey));
-    sym->type = KeywordType;
-    if(arg0->type == StringType)
-      sym->name = ((String *)arg0)->buffer;
-    else if (arg0->type == SubStringType)
-      sym->name = ((SubString *)arg0)->buffer;
-    return((Value *)sym);"))
+  (inline-text "if (arg0->type == StringType) {
+                     String *s = (String *)arg0;
+                     SubString *subStr = (SubString *)my_malloc(sizeof(SubString));
+                     subStr->type = KeywordType;
+                     subStr->len = s->len;
+                     subStr->source = arg0;
+                     incRef(arg0);
+                     subStr->buffer = s->buffer;
+                     return((Value *)subStr);
+                   } else if (arg0->type == SubStringType) {
+                     SubString *s = (SubString *)arg0;
+                     SubString *subStr = (SubString *)my_malloc(sizeof(SubString));
+                     subStr->type = SymbolType;
+                     subStr->len = s->len;
+                     subStr->source = arg0;
+                     incRef(arg0);
+                     subStr->buffer = s->buffer;
+                     return((Value *)subStr);
+                   } else
+                     abort();\n"))
 
 (defn abort []
   (inline-text
@@ -2340,9 +2366,9 @@ toccata-core
    "if (arg0->type != arg1->type)
       return(false);
     else {
-      SymKey *s1 = (SymKey *)arg0;
-      SymKey *s2 = (SymKey *)arg1;
-      if (s1->type == s2->type && strcmp(s1->name,s2->name) == 0) {
+      SubString *s1 = (SubString *)arg0;
+      SubString *s2 = (SubString *)arg1;
+      if (s1->type == s2->type && strcmp(s1->buffer, s2->buffer) == 0) {
         return(true);
       } else
         return(false);
@@ -3441,12 +3467,13 @@ toccata-core
                     "Number trueVal;\n"
                     "Number falseVal;\n"
                     "Value *my_malloc(int64_t);\n"
+                    "void incRef(Value *);\n"
                     "int isTrue(Value *boolVal);\n"
                     "Value *findProtoImpl(int64_t type, ProtoImpls *impls);\n"
                     "FnArity *findFnArity(Value *fnVal, int argCount);\n"
-                    "Value *symbolValue(char *s);\n"
-                    "Value *keywordValue(char *s);\n"
                     "Value *stringValue(char *s);\n"
+                    "Value *keywordValue(char *s);\n"
+                    "Value *symbolValue(char *s);\n"
                     "Value *makeSubstr(int64_t len, Value *str, char *subsStart);\n"
                     "Value *numberValue(int64_t n);\n"
                     "List *listCons(Value *x, List *l);\n")))
@@ -3506,22 +3533,6 @@ toccata-core
                     "};\n\n"
                     "\n"
 
-                    "Value *symbolValue(char *s) {\n"
-                    "SymKey *sym = (SymKey *)my_malloc(sizeof(SymKey));\n"
-                    "sym->type = SymbolType;\n"
-                    "sym->name = s;\n"
-                    "return((Value *)sym);\n"
-                    "};\n"
-                    "\n"
-
-                    "Value *keywordValue(char *s) {\n"
-                    "SymKey *kw = (SymKey *)my_malloc(sizeof(SymKey));\n"
-                    "kw->type = KeywordType;\n"
-                    "kw->name = s;\n"
-                    "return((Value *)kw);\n"
-                    "};\n"
-                    "\n"
-
                     "Value *stringValue(char *s) {\n"
                     "int64_t len = strlen(s);\n"
                     "String *strVal = (String *)my_malloc(sizeof(String) + len + 4);\n"
@@ -3529,6 +3540,22 @@ toccata-core
                     "strVal->len = strlen(s);\n"
                     "strncpy(strVal->buffer, s, len);\n"
                     "return((Value *)strVal);\n"
+                    "};\n"
+                    "\n"
+
+                    "Value *symbolValue(char *s) {\n"
+                    "SubString *sym = (SubString *)my_malloc(sizeof(SubString));\n"
+                    "sym->type = SymbolType;\n"
+                    "sym->buffer = s;\n"
+                    "return((Value *)sym);\n"
+                    "};\n"
+                    "\n"
+
+                    "Value *keywordValue(char *s) {\n"
+                    "SubString *kw = (SubString *)my_malloc(sizeof(SubString));\n"
+                    "kw->type = KeywordType;\n"
+                    "kw->buffer = s;\n"
+                    "return((Value *)kw);\n"
                     "};\n"
                     "\n"
 
@@ -3548,6 +3575,31 @@ toccata-core
                     "return((Value *)numVal);\n"
                     "};\n"
                     "\n"
+
+                    "void incRef(Value *arg) {\n"
+                    "  if (arg->refs >= 0)\n"
+                    "    arg->refs++;\n"
+                    "  return;\n"
+                    "}\n\n"
+
+;; void decRef(Value *v) {
+;;   if (v->refs == -1)
+;;     return;
+;;   else if (v->refs > 0) {
+;;     v->refs--;
+;;     return;
+;;   } else if (v->type == 4) { // 'v' is a list
+;;     Value *head = ((List *)v)->head;
+;;     List *tail = ((List *)v)->tail;
+;;     free_count++;
+;;     decRef(head);
+;;     decRef((Value *)tail);
+;;     return;
+;;   } else {
+;;     free_count++;
+;;     return;
+;;   }
+;; };
 
                     "List *listCons(Value *x, List *l) {\n"
                     "if (l->type != ListType) {\n"
@@ -3612,7 +3664,6 @@ toccata-core
                  "#include <string.h>\n\n"
                  Value
                  NumberVal
-                 SymKey
                  StringVal
                  SubStringVal
                  ListVal
@@ -3664,11 +3715,11 @@ toccata-core
      (< 0 (count syms))
      (traverse syms
                (fn [sym]
-                 (write (str "SymKey "
+                 (write (str "SubString "
                              (nth sym 1 "no_symbol_val")
                              " = {"
                              sym-type
-                             ", -1, \""
+                             ", -1, " (count (str (nth sym 0 "no_symbol_name"))) ", 0, \""
                              (nth sym 0 "no_symbol_name")
                              "\"};\n"))))
 
