@@ -2216,6 +2216,16 @@ toccata-core
     } else
       return(numberValue(((Number *)arg0)->numVal * ((Number *)arg1)->numVal));\n"))
 
+(defn quot [x y]
+  (inline-text
+   "if (arg0->type != NumberType ||
+        arg1->type != NumberType) {
+      printf(\"\\ninvalid types for 'quot'\\n\");
+      abort();
+    } else
+      return(numberValue(((Number *)arg0)->numVal /
+                         ((Number *)arg1)->numVal));\n"))
+
 (defn rem [x y]
   (inline-text
    "if (arg0->type != NumberType ||
@@ -2224,6 +2234,26 @@ toccata-core
       abort();
     } else
       return(numberValue(((Number *)arg0)->numVal %
+                         ((Number *)arg1)->numVal));\n"))
+
+(defn bit-shift-left [x y]
+  (inline-text
+   "if (arg0->type != NumberType ||
+        arg1->type != NumberType) {
+      printf(\"\\ninvalid types for 'bit-shift-left'\\n\");
+      abort();
+    } else
+      return(numberValue(((Number *)arg0)->numVal  << 
+                         ((Number *)arg1)->numVal));\n"))
+
+(defn bit-shift-right [x y]
+  (inline-text
+   "if (arg0->type != NumberType ||
+        arg1->type != NumberType) {
+      printf(\"\\ninvalid types for 'bit-shift-right'\\n\");
+      abort();
+    } else
+      return(numberValue(((Number *)arg0)->numVal  >> 
                          ((Number *)arg1)->numVal));\n"))
 
 (def empty-list
