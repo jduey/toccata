@@ -663,7 +663,9 @@ toccata-core
 (defprotocol Monad
   (flat-map [mval func]
     (print-err "*** 'flat-map' not implemented")
-    (abort)))
+    (abort))
+  (flatten [mval]
+    (flat-map mval (fn [x] x))))
 
 (defprotocol Comonad
   (extract [wv])
@@ -1291,6 +1293,31 @@ toccata-core
    (< n 1) coll
    (drop (rest coll) (dec n))))
 
+(defn split
+  ([l n prefix]
+     (cond
+      (or (empty? l) (< n 1)) (list (reverse prefix) l)
+      (split (rest l) (dec n) (cons (first l) prefix))))
+  ([l n]
+     (split l n empty-list)))
+
+(defn replace-at-nth [l n v]
+  (cond
+   (empty? l) l
+   (< (dec (count l)) n) l
+   (let [split-l (split l n)]
+     (comp (first split-l)
+           (list v)
+           (rest (second split-l))))))
+
+(defn remove-nth [l n]
+  (cond
+   (empty? l) l
+   (< (dec (count l)) n) l
+   (let [split-l (split l n)]
+     (comp (first split-l)
+           (rest (second split-l))))))
+
 (defn partition [coll n]
   (cond
    (< (count coll) n) empty-list
@@ -1544,7 +1571,7 @@ toccata-core
    (map (range* (dec n)) (fn [_] v))))
 
 
-;; parser effect
+;; state-maybe monad with lazy comp*
 
 (deftype new-sm [invoke-fn]
   Fn
@@ -2626,6 +2653,24 @@ toccata-core
 
    (state-maybe empty-list)))
 
+(deftype add-ns-ast [ns-sym asts]
+  AST
+  (emit-c [_]
+    (for [defs (get-val :defined-syms {})
+          _ (set-val :defined-syms {})
+          mod-syms (get-val :module-syms {})
+          _ (set-val :module-syms {})
+          body-exprs (eval-exprs (free-app (pure list) asts))
+          new-mod-syms (get-val :module-syms)
+          :let [defs (HashMap (comp (map (seq new-mod-syms)
+                                         (fn [sym-def]
+                                           (list (symbol (str ns-sym "/" (first sym-def)))
+                                                 (second sym-def))))
+                                    (seq defs)))]
+          _ (set-val :module-syms mod-syms)
+          _ (set-val :defined-syms defs)]
+      (list "" empty-list))))
+
 (deftype variadic-arity-ast [args body]
   AST
   (emit-c [_]
@@ -2903,6 +2948,7 @@ toccata-core
         _ (cond
            (< 0 (count initialization)) (write (first initialization))
            (state-maybe ""))
+        _ (assoc-in-val (list :module-syms name) (list extern-def result-sym))
         _ (assoc-in-val (list :defined-syms name) (list extern-def result-sym))]
     c-name))
 
@@ -3510,6 +3556,31 @@ toccata-core
         proto-specs (analyze-extensions (drop expr 2))]
     (free (extend-ast (nth expr 1 :no-type) proto-specs))))
 
+(defn analyze-module []
+  (for [expr (is-expr (fn [x]
+                        (cond
+                         (not (seq? x)) false
+                         (not (= 2 (count x))) false
+                         (= 'module (first x)))))
+        text (get-val :text)
+        _ (set-val :text (slurp (second expr)))
+        parser (get-val :parser)
+        asts (recur (for [expr parser
+                          ast (analyze-expr expr)]
+                      ast))
+        _ (set-val :text text)]
+    asts))
+
+(defn analyze-add-ns []
+  (for [expr (is-expr (fn [x]
+                        (cond
+                         (not (seq? x)) false
+                         (not (= 3 (count x))) false
+                         (and (= 'add-ns (first x))
+                              (symbol? (second x))))))
+        asts (analyze-expr (nth expr 2))]
+    (free (add-ns-ast (second expr) asts))))
+
 ;; TODO: handle multi-arity reified fns
 (defn analyze-reify []
   (for [expr (is-expr (fn [x]
@@ -3563,6 +3634,8 @@ toccata-core
         (analyze-cond)
         (analyze-extend-type)
         (analyze-reify)
+        (analyze-module)
+        (analyze-add-ns)
         (analyze-inline-text)
         (analyze-fn-arity)
         (analyze-variadic)
@@ -4377,11 +4450,13 @@ toccata-core
       "")))
 
 (defn compile-source [parser]
-  (recur (for [expr parser
-               ast (analyze-expr expr)
-               _ (static-values)
-               _ (evaluate ast emit-c)]
-           "")))
+  (flat-map (set-val :parser parser)
+            (fn [_]
+              (recur (for [expr parser
+                           ast (analyze-expr expr)
+                           _ (static-values)
+                           _ (evaluate ast emit-c)]
+                       "")))))
 
 (defn compile-core [parser text]
   (apply-to list
@@ -4441,6 +4516,7 @@ toccata-core
                    :strings {}
                    :new-externs empty-list
                    :new-static-fns empty-list
+                   :module-syms {}
                    :defined-syms (reduce (seq (types)) {}
                                          (fn [m type]
                                            (assoc m
