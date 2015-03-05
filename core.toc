@@ -1891,66 +1891,93 @@ toccata-core
               (apply str chars))
             rule))
 
+(deftype parser-rule [name grammar]
+  Parser
+  (recursive-descent [_]
+    (let [parser (evaluate grammar recursive-descent)
+          parser-fn (fn [s] (parser s))]
+      (for [_ (assoc-in-val (list :parser-fns name) parser-fn)
+            result (new-sm parser-fn)]
+        result))))
+
+(defn rule [name grammar]
+  (free (parser-rule name grammar)))
+
 (defn symbol-start []
-  (comp (alpha) (one-of "._<>=+-*/")))
+  (rule "symbol-start"
+        (comp (alpha) (one-of "._<>=+-*/"))))
 
-(defn symbol-punct [] (one-of "._<>=*/+!-?"))
+(defn symbol-punct []
+  (rule "symbol-punct"
+        (one-of "._<>=*/+!-?")))
 
-(defn symbol-char [] (comp (alpha) (digit) (symbol-punct)))
+(defn symbol-char []
+  (rule "symbol-char"
+        (comp (alpha) (digit) (symbol-punct))))
 
 (defn rest-of-symbol []
-  (none-or-more (symbol-char)))
+  (rule "rest-of-symbol"
+        (none-or-more (symbol-char))))
 
 (defn read-symbol []
-  (apply-to (fn [start the-rest]
-              (symbol (apply str (cons start the-rest))))
-            (symbol-start)
-            (rest-of-symbol)))
+  (rule "symbol"
+        (apply-to (fn [start the-rest]
+                    (symbol (apply str (cons start the-rest))))
+                  (symbol-start)
+                  (rest-of-symbol))))
 
 (defn read-keyword []
-  (apply-to (fn [start the-rest]
-              (keyword (apply str (cons start the-rest))))
-            (ignore (term ":"))
-            (symbol-start)
-            (rest-of-symbol)))
+  (rule "keyword"
+        (apply-to (fn [start the-rest]
+                    (keyword (apply str (cons start the-rest))))
+                  (ignore (term ":"))
+                  (symbol-start)
+                  (rest-of-symbol))))
 
 (defn backslash []
   (term (char 92)))
 
 (defn read-string-newline []
-  (all (ignore (backslash))
-       (ignore (term "n"))
-       (always (char 10))))
+  (rule "newline"
+        (all (ignore (backslash))
+             (ignore (term "n"))
+             (always (char 10)))))
 
 (defn read-string-tab []
-  (all (ignore (backslash))
-       (ignore (term "t"))
-       (always (char 9))))
+  (rule "tab"
+        (all (ignore (backslash))
+             (ignore (term "t"))
+             (always (char 9)))))
 
 (defn read-string-backspace []
-  (all (ignore (backslash))
-       (ignore (term "b"))
-       (always (char 8))))
+  (rule "backspace"
+        (all (ignore (backslash))
+             (ignore (term "b"))
+             (always (char 8)))))
 
 (defn read-string-return []
-  (all (ignore (backslash))
-       (ignore (term "r"))
-       (always (char 13))))
+  (rule "line-return"
+        (all (ignore (backslash))
+             (ignore (term "r"))
+             (always (char 13)))))
 
 (defn read-string-formfeed []
-  (all (ignore (backslash))
-       (ignore (term "f"))
-       (always (char 12))))
+  (rule "form-feed"
+        (all (ignore (backslash))
+             (ignore (term "f"))
+             (always (char 12)))))
 
 (defn read-string-doublequote []
-  (all (ignore (backslash))
-       (ignore (term (char 34)))
-       (always (char 34))))
+  (rule "doublequote"
+        (all (ignore (backslash))
+             (ignore (term (char 34)))
+             (always (char 34)))))
 
 (defn read-string-backslash []
-  (all (ignore (backslash))
-       (ignore (backslash))
-       (always (char 92))))
+  (rule "backslach"
+        (all (ignore (backslash))
+             (ignore (backslash))
+             (always (char 92)))))
 
 (deftype parse-not-backslash []
   Parser
@@ -1968,18 +1995,19 @@ toccata-core
   (free (parse-not-backslash)))
 
 (defn read-const-string []
-  (all (ignore (term (char 34)))
-       (to-string
-        (none-or-more
-         (comp (not-backslash)
-               (read-string-backslash)
-               (read-string-doublequote)
-               (read-string-tab)
-               (read-string-backspace)
-               (read-string-return)
-               (read-string-formfeed)
-               (read-string-newline))))
-       (ignore (term (char 34)))))
+  (rule "const-string"
+        (all (ignore (term (char 34)))
+             (to-string
+              (none-or-more
+               (comp (not-backslash)
+                     (read-string-backslash)
+                     (read-string-doublequote)
+                     (read-string-tab)
+                     (read-string-backspace)
+                     (read-string-return)
+                     (read-string-formfeed)
+                     (read-string-newline))))
+             (ignore (term (char 34))))))
 
 (defn str-to-int [negate? int-str]
   (let [magnitude (reduce int-str 0
@@ -2002,9 +2030,10 @@ toccata-core
 
 ;; only reads integers
 (defn read-number []
-  (apply-to str-to-int
-            (optional (term "-"))
-            (one-or-more (digit))))
+  (rule "number"
+        (apply-to str-to-int
+                  (optional (term "-"))
+                  (one-or-more (digit)))))
 
 (deftype parse-sub-form []
   Parser
@@ -2017,23 +2046,26 @@ toccata-core
   (free (parse-sub-form)))
 
 (defn read-list []
-  (all (ignore (term "("))
-       (none-or-more (read-sub-form))
-       (ignore (term ")"))))
+  (rule "list"
+        (all (ignore (term "("))
+             (none-or-more (read-sub-form))
+             (ignore (term ")")))))
 
 (defn read-hash-map []
-  (apply-to cons
-            (ignore (term "{"))
-            (always 'hash-map)
-            (none-or-more (read-sub-form))
-            (ignore (term "}"))))
+  (rule "hash-map"
+        (apply-to cons
+                  (ignore (term "{"))
+                  (always 'hash-map)
+                  (none-or-more (read-sub-form))
+                  (ignore (term "}")))))
 
 (defn read-vector []
-  (apply-to cons
-            (ignore (term "["))
-            (always 'vector)
-            (none-or-more (read-sub-form))
-            (ignore (term "]"))))
+  (rule "vector"
+        (apply-to cons
+                  (ignore (term "["))
+                  (always 'vector)
+                  (none-or-more (read-sub-form))
+                  (ignore (term "]")))))
 
 (deftype parse-not-eol []
   Parser
@@ -2048,189 +2080,195 @@ toccata-core
   (free (parse-not-eol)))
 
 (defn read-comment []
-  (all (term ";")
-       (ignore (none-or-more (not-eol)))
-       (term (char 10))))
+  (rule "comment"
+        (all (term ";")
+             (ignore (none-or-more (not-eol)))
+             (term (char 10)))))
 
 (defn whitespace []
-  (comp (one-of " ,")
-        (term (char 9))
-        (term (char 13))
-        (term (char 10))
-        (read-comment)))
+  (rule "whitespace"
+        (comp (one-of " ,")
+              (term (char 9))
+              (term (char 13))
+              (term (char 10))
+              (read-comment))))
 
 (defn read-var-arg []
-  (apply-to list
-            (ignore (none-or-more (whitespace)))
-            (term "&")
-            (ignore (one-or-more (whitespace)))
-            (read-symbol)))
+  (rule "variadic"
+        (apply-to list
+                  (ignore (none-or-more (whitespace)))
+                  (term "&")
+                  (ignore (one-or-more (whitespace)))
+                  (read-symbol))))
 
 (defn read-arg []
-  (all (ignore (none-or-more (whitespace)))
-       (read-symbol)
-       (ignore (none-or-more (whitespace)))))
+  (rule "parameter"
+        (all (ignore (none-or-more (whitespace)))
+             (read-symbol)
+             (ignore (none-or-more (whitespace))))))
 
 (defn read-args []
-  (apply-to comp
-            (ignore (none-or-more (whitespace)))
-            (ignore (term "["))
-            (none-or-more (read-arg))
-            (comp (read-var-arg)
-                  (always empty-list))
-            (ignore (term "]"))))
+  (rule "parameters"
+        (apply-to comp
+                  (ignore (none-or-more (whitespace)))
+                  (ignore (term "["))
+                  (none-or-more (read-arg))
+                  (comp (read-var-arg)
+                        (always empty-list))
+                  (ignore (term "]")))))
 
 (defn read-main []
-  (apply-to list*
-            (ignore (term "("))
-            (ignore (none-or-more (whitespace)))
-            (ignore (term "main"))
-            (always 'main)
-            (ignore (one-or-more (whitespace)))
-            (read-args)
-            (one-or-more (read-sub-form))
-            (ignore (none-or-more (whitespace)))
-            (ignore (term ")"))))
+  (rule "main-function"
+        (apply-to list*
+                  (ignore (term "("))
+                  (ignore (none-or-more (whitespace)))
+                  (ignore (term "main"))
+                  (always 'main)
+                  (ignore (one-or-more (whitespace)))
+                  (read-args)
+                  (one-or-more (read-sub-form))
+                  (ignore (none-or-more (whitespace)))
+                  (ignore (term ")")))))
 
 (defn read-single-arity []
-  (apply-to (fn [& vs]
-              (list vs))
-            (always 'fn-arity)
-            (read-args)
-            (none-or-more (read-sub-form))))
+  (rule "single-arity"
+        (apply-to (fn [& vs]
+                    (list vs))
+                  (always 'fn-arity)
+                  (read-args)
+                  (none-or-more (read-sub-form)))))
 
 (defn read-multi-arity []
-  (apply-to list
-            (ignore (none-or-more (whitespace)))
-            (ignore (term "("))
-            (ignore (none-or-more (whitespace)))
-            (always 'fn-arity)
-            (read-args)
-            (none-or-more (read-sub-form))
-            (ignore (none-or-more (whitespace)))
-            (ignore (term ")"))))
+  (rule "multi-arity"
+        (apply-to list
+                  (ignore (none-or-more (whitespace)))
+                  (ignore (term "("))
+                  (ignore (none-or-more (whitespace)))
+                  (always 'fn-arity)
+                  (read-args)
+                  (none-or-more (read-sub-form))
+                  (ignore (none-or-more (whitespace)))
+                  (ignore (term ")")))))
 
 (defn read-arities []
-  (comp (read-single-arity)
-        (one-or-more (read-multi-arity))))
+  (rule "function-arities"
+        (comp (read-single-arity)
+              (one-or-more (read-multi-arity)))))
 
 (defn read-defn []
-  (apply-to (fn [name arities]
-              (list 'def name (list 'fn name arities)))
-            (ignore (term "("))
-            (ignore (none-or-more (whitespace)))
-            (ignore (term "defn"))
-            (ignore (one-or-more (whitespace)))
-            (read-symbol)
-            (ignore (one-or-more (whitespace)))
-            (read-arities)
-            (ignore (none-or-more (whitespace)))
-            (ignore (term ")"))))
+  (rule "defn"
+        (apply-to (fn [name arities]
+                    (list 'def name (list 'fn name arities)))
+                  (ignore (term "("))
+                  (ignore (none-or-more (whitespace)))
+                  (ignore (term "defn"))
+                  (ignore (one-or-more (whitespace)))
+                  (read-symbol)
+                  (ignore (one-or-more (whitespace)))
+                  (read-arities)
+                  (ignore (none-or-more (whitespace)))
+                  (ignore (term ")")))))
 
 (defn read-fn []
-  (apply-to list
-            (ignore (term "("))
-            (ignore (none-or-more (whitespace)))
-            (ignore (term "fn"))
-            (always 'fn)
-            (ignore (one-or-more (whitespace)))
-            (comp (read-symbol)
-                  (always 'anon))
-            (ignore (none-or-more (whitespace)))
-            (read-arities)
-            (ignore (none-or-more (whitespace)))
-            (ignore (term ")"))))
+  (rule "anonymous-fn"
+        (apply-to list
+                  (ignore (term "("))
+                  (ignore (none-or-more (whitespace)))
+                  (ignore (term "fn"))
+                  (always 'fn)
+                  (ignore (one-or-more (whitespace)))
+                  (comp (read-symbol)
+                        (always 'anon))
+                  (ignore (none-or-more (whitespace)))
+                  (read-arities)
+                  (ignore (none-or-more (whitespace)))
+                  (ignore (term ")")))))
 
 (defn read-let-binding []
-  (apply-to list
-            (ignore (none-or-more (whitespace)))
-            (read-symbol)
-            (ignore (none-or-more (whitespace)))
-            (read-sub-form)))
+  (rule "let-binding"
+        (apply-to list
+                  (ignore (none-or-more (whitespace)))
+                  (read-symbol)
+                  (ignore (none-or-more (whitespace)))
+                  (read-sub-form))))
 
 (defn read-let []
-  (apply-to list*
-            (ignore (term "("))
-            (ignore (none-or-more (whitespace)))
-            (ignore (term "let"))
-            (always 'let)
-            (ignore (one-or-more (whitespace)))
-            (ignore (term "["))
-            (none-or-more (read-let-binding))
-            (ignore (term "]"))
-            (one-or-more (read-sub-form))
-            (ignore (none-or-more (whitespace)))
-            (ignore (term ")"))))
+  (rule "let"
+        (apply-to list*
+                  (ignore (term "("))
+                  (ignore (none-or-more (whitespace)))
+                  (ignore (term "let"))
+                  (always 'let)
+                  (ignore (one-or-more (whitespace)))
+                  (ignore (term "["))
+                  (none-or-more (read-let-binding))
+                  (ignore (term "]"))
+                  (one-or-more (read-sub-form))
+                  (ignore (none-or-more (whitespace)))
+                  (ignore (term ")")))))
 
 (defn read-for-let []
-  (apply-to list
-            (ignore (none-or-more (whitespace)))
-            (ignore (term ":let"))
-            (always :let)
-            (ignore (one-or-more (whitespace)))
-            (ignore (term "["))
-            (none-or-more (read-let-binding))
-            (ignore (term "]"))))
+  (rule "for-let"
+        (apply-to list
+                  (ignore (none-or-more (whitespace)))
+                  (ignore (term ":let"))
+                  (always :let)
+                  (ignore (one-or-more (whitespace)))
+                  (ignore (term "["))
+                  (none-or-more (read-let-binding))
+                  (ignore (term "]")))))
 
 (defn read-for-when []
-  (apply-to list
-            (ignore (none-or-more (whitespace)))
-            (ignore (term ":when"))
-            (always :when)
-            (ignore (one-or-more (whitespace)))
-            (read-sub-form)))
+  (rule "for-when"
+        (apply-to list
+                  (ignore (none-or-more (whitespace)))
+                  (ignore (term ":when"))
+                  (always :when)
+                  (ignore (one-or-more (whitespace)))
+                  (read-sub-form))))
 
 (defn read-for-binding []
-  (comp (read-for-let)
-        (read-for-when)
-        (read-let-binding)))
+  (rule "for-binding"
+        (comp (read-for-let)
+              (read-for-when)
+              (read-let-binding))))
 
 (defn read-for []
-  (apply-to (fn [bound val bindings body]
-              (let [bindings (cons (list bound 'some-unique-var) bindings)]
-                (list 'let (list (list 'some-unique-var val))
-                      (reduce (reverse bindings) (list 'wrap 'some-unique-var body)
-                              (fn [expr sym-val]
-                                (let [sym (first sym-val)
-                                      val (first (rest sym-val))]
-                                  (cond
-                                   (= sym :let) (list 'let val expr)
-                                   (= sym :when) (list 'cond val expr (list 'zero 'some-unique-var))
-                                   (list 'flat-map val
-                                         (list 'fn 'anon
-                                               (list (list 'fn-arity (list sym) (list expr))))))))))))
-            (ignore (term "("))
-            (ignore (none-or-more (whitespace)))
-            (ignore (term "for"))
-            (ignore (one-or-more (whitespace)))
-            (ignore (term "["))
-            (ignore (none-or-more (whitespace)))
-            (read-symbol)
-            (ignore (one-or-more (whitespace)))
-            (read-sub-form)
-            (none-or-more (read-for-binding))
-            (ignore (term "]"))
-            (read-sub-form)
-            (ignore (none-or-more (whitespace)))
-            (ignore (term ")"))))
+  (rule "for-expr"
+        (apply-to (fn [bound val bindings body]
+                    (let [bindings (cons (list bound 'some-unique-var) bindings)]
+                      (list 'let (list (list 'some-unique-var val))
+                            (reduce (reverse bindings) (list 'wrap 'some-unique-var body)
+                                    (fn [expr sym-val]
+                                      (let [sym (first sym-val)
+                                            val (first (rest sym-val))]
+                                        (cond
+                                         (= sym :let) (list 'let val expr)
+                                         (= sym :when) (list 'cond val expr (list 'zero 'some-unique-var))
+                                         (list 'flat-map val
+                                               (list 'fn 'anon
+                                                     (list (list 'fn-arity (list sym) (list expr))))))))))))
+                  (ignore (term "("))
+                  (ignore (none-or-more (whitespace)))
+                  (ignore (term "for"))
+                  (ignore (one-or-more (whitespace)))
+                  (ignore (term "["))
+                  (ignore (none-or-more (whitespace)))
+                  (read-symbol)
+                  (ignore (one-or-more (whitespace)))
+                  (read-sub-form)
+                  (none-or-more (read-for-binding))
+                  (ignore (term "]"))
+                  (read-sub-form)
+                  (ignore (none-or-more (whitespace)))
+                  (ignore (term ")")))))
 
 (defn read-quoted []
-  (apply-to list
-            (ignore (term "'"))
-            (always 'quote)
-            (read-sub-form)))
-
-(deftype parser-rule [name grammar]
-  Parser
-  (recursive-descent [_]
-    (let [parser (evaluate grammar recursive-descent)
-          parser-fn (fn [s] (parser s))]
-      (for [_ (assoc-in-val (list :parser-fns name) parser-fn)
-            result (new-sm parser-fn)]
-        result))))
-
-(defn rule [name grammar]
-  (free (parser-rule name grammar)))
+  (rule "quoted"
+        (apply-to list
+                  (ignore (term "'"))
+                  (always 'quote)
+                  (read-sub-form))))
 
 (defn read-form []
   (rule "form"
@@ -2245,7 +2283,6 @@ toccata-core
                    (read-defn)
                    (read-fn)
                    (read-for)
-                   ;; (read-character)
                    (read-hash-map)
                    (read-vector)
                    (read-list))
