@@ -1658,35 +1658,6 @@ toccata-core
   (comp* [mv mvs]
     (free-plus (cons mv mvs))))
 
-(deftype pure [arg]
-  Stringable
-  (string-list [_]
-    (comp (list "<Pure: ")
-          (string-list arg)
-          (list ">")))
-
-  FreeEval
-  (evaluate [pure-val eval-endo]
-    (eval-endo arg))
-
-  Eq
-  (=* [x y]
-    (and (type= x y)
-         (= arg (extract y))))
-
-  Applicative
-  (wrap [_ v] (pure v))
-  (apply* [fv args]
-    (free-app fv args))
-
-  Comonad
-  (extract [_] arg)
-
-  Monoid
-  (zero [ev] free-zero)
-  (comp* [mv mvs]
-    (free-plus (cons mv mvs))))
-
 (deftype free-app [fv args]
   Stringable
   (string-list [_]
@@ -1861,7 +1832,7 @@ toccata-core
   (free (parser-always v)))
 
 (defn all [& rules]
-  (apply* (pure comp) rules))
+  (apply* (free comp) rules))
 
 (defn optional [rule]
   (comp rule (always "")))
@@ -2660,7 +2631,7 @@ toccata-core
           _ (set-val :defined-syms {})
           mod-syms (get-val :module-syms {})
           _ (set-val :module-syms {})
-          body-exprs (eval-exprs (free-app (pure list) asts))
+          body-exprs (eval-exprs (free-app (free list) asts))
           new-mod-syms (get-val :module-syms)
           :let [defs (HashMap (comp (map (seq new-mod-syms)
                                          (fn [sym-def]
@@ -3396,8 +3367,8 @@ toccata-core
         bindings (traverse (nth expr 1 empty-list)
                            analyze-let-binding)
         body (traverse (drop expr 2) analyze-expr)]
-    (free (let-ast (apply* (pure list) bindings)
-                   (apply* (pure list) body)))))
+    (free (let-ast (apply* (free list) bindings)
+                   (apply* (free list) body)))))
 
 (defn variadic? [expr]
   (let [args (nth expr 1 empty-list)]
@@ -3412,7 +3383,7 @@ toccata-core
         body (traverse (nth expr 2 empty-list) analyze-expr)]
     (free (variadic-arity-ast (remove (nth expr 1 empty-list) (fn [arg]
                                                                 (= "&" arg)))
-                              (apply* (pure list) body)))))
+                              (apply* (free list) body)))))
 
 (defn analyze-fn-arity []
   (for [expr (is-expr (fn [x]
@@ -3423,7 +3394,7 @@ toccata-core
         file-name (get-val :file-name "")
         body (traverse (nth expr 2 empty-list) analyze-expr)]
     (free (fn-arity-ast (nth expr 1 empty-list)
-                        (apply* (pure list) body)))))
+                        (apply* (free list) body)))))
 
 ;; TODO: let anonymous function closures reference themselves by name
 (defn analyze-fn []
@@ -3533,7 +3504,7 @@ toccata-core
     (list (nth expr 0 'no-name)
           (free (fn-ast (str (nth expr 0 'no-name) "_impl")
                         (list (free (fn-arity-ast (rest (nth expr 1 empty-list))
-                                                  (apply* (pure list) body)))))))))
+                                                  (apply* (free list) body)))))))))
 
 (defn analyze-proto-impl []
   (for [name (is-form? symbol?)
@@ -3619,7 +3590,7 @@ toccata-core
                          (= 'main (first x)))))
         body (traverse (drop expr 2) analyze-expr)]
     (free (main-ast (nth expr 1 empty-list)
-                    (apply* (pure list) body)))))
+                    (apply* (free list) body)))))
 
 (defn expr-to-ast []
   (comp (analyze-symbol)
