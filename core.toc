@@ -1516,8 +1516,9 @@ toccata-core
        (= not-found v) (let [_ (print-err "Could not look up " kw)]
                          (abort))
        v)))
-  (invoke [kw hm not-found]
-    (get hm kw not-found)))
+  ;; (invoke [kw hm not-found]
+  ;;   (get hm kw not-found))
+  )
 
 (extend-type Symbol
   Eq
@@ -4532,37 +4533,6 @@ toccata-core
                                              (list (str "Number _num_" (second type))
                                                    (str "(Value *)&_num_" (second type))))))
                    :num-count (inc (count (seq (types))))})))
-
-(deftype reader-value [invoke-fn]
-  Stringable
-  (string-list [_]
-    (list "<reader>"))
-
-  Fn
-  (invoke [_ env]
-    (invoke-fn env))
-
-  Functor
-  (map [_ f]
-    (reader-value (fn [env]
-                   (f (invoke-fn env)))))
-
-  Applicative
-  (wrap [_ v]
-    (reader-value (fn [_] v)))
-  (apply* [fv args]
-    (reader-value (fn [env]
-                   (apply (invoke-fn env) (map args (fn [rv] (rv env))))))))
-
-(def reader
-  (reify
-    Fn
-    (invoke [_ v]
-      (reader-value (fn [_] v)))
-
-    Type
-    (instance? [_ mv]
-      (instance? reader-value mv))))
 
 (main [argList]
       (compile-module (rest argList)))

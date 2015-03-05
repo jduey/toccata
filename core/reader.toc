@@ -1,0 +1,89 @@
+
+(deftype reader-value [invoke-fn]
+  Stringable
+  (string-list [_]
+    (list "<reader>"))
+
+  Fn
+  (invoke [_ env]
+    (invoke-fn env))
+
+  Functor
+  (map [_ f]
+    (reader-value (fn [env]
+                   (f (invoke-fn env)))))
+
+  Applicative
+  (wrap [_ v]
+    (reader-value (fn [_] v)))
+  (apply* [fv args]
+    (reader-value (fn [env]
+                   (apply (invoke-fn env) (map args (fn [rv] (rv env))))))))
+
+(def reader
+  (reify
+    Fn
+    (invoke [_ v]
+      (reader-value (fn [_] v)))
+
+    Type
+    (instance? [_ mv]
+      (instance? reader-value mv))))
+
+(defn double [x]
+  (* 2 x))
+
+(main [_]
+      ;; check the functor and applicative laws for reader
+      (println :reader)
+      (let [env :environment]
+        (println :functor-1 (= ((map (reader 5) identity) env)
+                               ((reader 5) env)))
+        (println :functor-2 (= ((map (map (reader 2) inc) double) env)
+                               ((map (reader 2) (comp inc double)) env)))
+        (println :apply-1 (= ((map (reader 5) inc) env)
+                             ((apply-to inc (reader 5)) env)))
+        (println :apply-2 (= ((reader 5) env)
+                             ((apply-to identity (reader 5)) env)))
+        (let [v1 (reader "first ")
+              v2 (reader "second ")
+              v3 (reader "third")]
+          (println :apply-3 (= ((apply-to comp (apply-to comp v1 v2) v3) env)
+                               ((apply-to comp v1 (apply-to comp v2 v3)) env)
+                               ((apply-to comp v1 v2 v3) env)))))
+      (println)
+
+      (let [rv1 (reader 1)
+            rv5 (reader 5)
+            env {:x 5 :y 1 :z 9}]
+        (println :rv1 rv1)
+        (println)
+        (println :rv5 rv5)
+        (println)
+        (println :rv1-invoked (rv1 env))
+        (println)
+        (println :map (map rv1 (fn [x]
+                                 (println :incrementing x)
+                                 (inc x))))
+        (println)
+        (println :mapped ((map rv1 (fn [x]
+                                     (println :incrementing x)
+                                     (inc x)))
+                          env))
+        (println)
+        (println :apply (apply-to + rv1 rv5))
+        (println)
+        (println :applied ((apply-to + rv1 rv5) env))
+
+        ;; using other functions as readers
+        (println :apply-reader ((apply (reader +) :x :y :z) env))
+
+        ;; nesting calls to apply
+        (println :nested ((apply-to comp
+                                    (reader "<")
+                                    (apply (reader str) :x
+                                           (reader ", ") :y
+                                           (reader ", ") :z)
+                                    (reader ">"))
+                          env))
+        ))
