@@ -1612,9 +1612,9 @@ toccata-core
                  x))))))
 
 (defprotocol FreeEval
-  (evaluate [free-val eval-endo]))
+  (evaluate [free-val eval-free]))
 
-(def free-val)
+(def free)
 (def free-app)
 
 (def free-zero
@@ -1626,7 +1626,7 @@ toccata-core
     (=* [x y] (type= x y))
 
     Applicative
-    (wrap [_ v] (free-val v))
+    (wrap [_ v] (free v))
     (apply* [fv args]
       (free-app fv args))
 
@@ -1642,12 +1642,12 @@ toccata-core
           (list ">")))
 
   FreeEval
-  (evaluate [free-val eval-endo]
+  (evaluate [free-val eval-free]
     (crush alts (fn [alt]
-                  (evaluate alt eval-endo))))
+                  (evaluate alt eval-free))))
 
   Applicative
-  (wrap [_ v] (free-val v))
+  (wrap [_ v] (free v))
   (apply* [fv args]
     (free-app fv args))
 
@@ -1669,10 +1669,10 @@ toccata-core
           (list ">")))
 
   FreeEval
-  (evaluate [free-val eval-endo]
+  (evaluate [free-val eval-free]
     (let [args (map args (fn [arg]
-                           (evaluate arg eval-endo)))
-          f (evaluate fv eval-endo)]
+                           (evaluate arg eval-free)))
+          f (evaluate fv eval-free)]
       (apply* f args)))
 
   Eq
@@ -1682,7 +1682,7 @@ toccata-core
             (extract y))))
 
   Applicative
-  (wrap [_ v] (free-val v))
+  (wrap [_ v] (free v))
   (apply* [fv args]
     (free-app fv args))
 
@@ -1704,8 +1704,8 @@ toccata-core
           (list ">")))
 
   FreeEval
-  (evaluate [free-val eval-endo]
-    (eval-endo v))
+  (evaluate [free-val eval-free]
+    (eval-free v))
 
   Eq
   (=* [x y]
@@ -1733,8 +1733,6 @@ toccata-core
     free-zero)
   (comp* [mv mvs]
     (free-plus (cons mv mvs))))
-
-(defn free-val [v] (free v))
 
 (defn state-maybe [v]
   (new-sm (fn [s]
