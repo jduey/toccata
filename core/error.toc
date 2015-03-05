@@ -1,0 +1,128 @@
+
+(deftype error-value [v]
+  Stringable
+  (string-list [mv]
+    (comp (list "<error ")
+          (string-list v)
+          (list ">")))
+
+  Eq
+  (=* [mv x]
+    (cond
+     (type= mv x) (= v (.v x))
+     false))
+
+  Functor
+  (map [mv _] mv)
+
+  Applicative
+  (wrap [_ x] (error-value x))
+  (apply* [fv args]
+    (let [errors (filter args (fn [arg] (instance? error-value arg)))]
+      (cond
+       (empty? errors) fv
+       (first errors))))
+
+  Monad
+  (flat-map [ev _]
+    ev))
+
+(def error
+  (reify
+    Type
+    (instance? [_ mv]
+      (instance? error-value mv))
+
+    Fn
+    (invoke [_ v]
+      (error-value v))))
+
+(deftype valid-value [v]
+  Stringable
+  (string-list [mv]
+    (comp (list "<valid ")
+          (string-list v)
+          (list ">")))
+
+  Eq
+  (=* [mv x]
+    (cond
+     (type= mv x) (= v (.v x))
+     false))
+
+  Functor
+  (map [mv f]
+    (valid-value (f v)))
+
+  Applicative
+  (wrap [_ x] (valid-value x))
+  (apply* [fv args]
+    (let [errors (filter args (fn [arg] (instance? error-value arg)))]
+      (cond
+       (empty? errors) (valid-value (apply v (map args .v)))
+       (first errors))))
+
+  Monad
+  (flat-map [_ f]
+    (f v)))
+
+(def valid
+  (reify
+    Type
+    (instance? [_ mv]
+      (instance? valid-value mv))
+
+    Fn
+    (invoke [_ v]
+      (valid-value v))))
+
+(defn double [x]
+  (* 2 x))
+
+(defn check-int [x]
+  (cond
+   (= 0 (rem x 2)) (valid x)
+   (error (str "Found odd int: " x))))
+
+(main [_]
+      ;; check the functor and applicative laws for valid-value
+      (println :valid)
+      (println :functor-1 (= (map (valid 5) identity) (valid 5)))
+      (println :functor-2 (= (map (map (valid 2) inc) double)
+                             (map (valid 2) (comp inc double))))
+      (println :apply-1 (= (map (valid 5) inc)
+                           (apply-to inc (valid 5))))
+      (println :apply-2 (= (valid 5) (apply-to identity (valid 5))))
+      (let [v1 (valid "first ")
+            v2 (valid "second ")
+            v3 (valid "third")]
+        (println :apply-3 (= (apply-to comp (apply-to comp v1 v2) v3)
+                             (apply-to comp v1 (apply-to comp v2 v3))
+                             (apply-to comp v1 v2 v3))))
+
+      ;; check the functor and applicative laws for error-value
+      (println)
+      (println :error)
+      (println :functor-1 (= (map (error 5) identity) (error 5)))
+      (println :functor-2 (= (map (map (error 2) inc) double)
+                             (map (error 2) (comp inc double))))
+      (println :apply-1 (= (map (error 5) inc)
+                           (apply-to inc (error 5))))
+      (println :apply-2 (= (error 5) (apply-to identity (error 5))))
+      (let [v1 (error "first ")
+            v2 (error "second ")
+            v3 (error "third")]
+        (println :apply-3 (= (apply-to comp (apply-to comp v1 v2) v3)
+                             (apply-to comp v1 (apply-to comp v2 v3))
+                             (apply-to comp v1 v2 v3))))
+
+      ;; make sure an error-value will short circuit apply-to
+      (println)
+      (println :valid-error (= (error :some-error)
+                               (apply-to + (valid 8) (error :some-error) (valid 13))))
+
+      ;; error-value in action
+      (let [good-ints (map (list 8 10 2 4 14) check-int)
+            error-ints (map (list 8 3 2 5 14) check-int)]
+        (println :sum-good-ints (apply* (valid +) good-ints))
+        (println :sum-error-ints (apply* (valid +) error-ints))))
