@@ -1,0 +1,121 @@
+
+(def maybe-val)
+
+(def nothing
+  (reify
+    Stringable
+    (string-list [_] (list "<nothing>"))
+
+    Eq
+    (=* [nv x] (type= nv x))
+
+    Monoid
+    (zero [nv] nv)
+    (comp* [nv mvs]
+      (cond
+       (empty? mvs) nv
+       (comp* (first mvs) (rest mvs))))
+
+    Functor
+    (map [nv f] nv)
+
+    Applicative
+    (wrap [_ x] (maybe-val x))
+    (apply* [nv _] nv)
+
+    Monad
+    (flatten [nv] nv)
+    (flat-map [nv _] nv)))
+
+(deftype maybe-val [v]
+  Stringable
+  (string-list [mv]
+    (comp (list "<maybe ")
+          (string-list (.v mv))
+          (list ">")))
+
+  Eq
+  (=* [x y]
+    (cond
+     (not (type= x y)) false
+     (= v (.v y))))
+
+  Monoid
+  (zero [_] nothing)
+  (comp* [_ _] v)
+
+  Functor
+  (map [_ f]
+    (maybe-val (f v)))
+
+  Applicative
+  (wrap [_ v] (maybe-val v))
+  (apply* [fv args]
+    (cond
+     (some args (partial = nothing)) nothing
+     (maybe-val (apply (.v fv) (map args .v)))))
+
+  Monad
+  (flatten [_] v)
+  (flat-map [_ f]
+    (f v)))
+
+(def maybe
+  (reify
+    Function
+    (invoke [_ v] (maybe-val v))
+
+    Type
+    (instance? [_ mv] (instance? maybe-val mv))
+
+    Monoid
+    (zero [_] nothing)
+    (comp* [_ _] :nothing-here)
+    ))
+
+
+(main [_]
+      (let [double (fn [x]
+                     (* 2 x))
+            check-int (fn [x]
+                        (cond
+                         (= 0 (rem x 2)) (maybe x)
+                         nothing))]
+        ;; check the functor and applicative laws for maybe
+        (println :maybe)
+        (println :functor-1 (= (map (maybe 5) identity) (maybe 5)))
+        (println :functor-2 (= (map (map (maybe 2) inc) double)
+                               (map (maybe 2) (comp inc double))))
+        (println :apply-1 (= (map (maybe 5) inc)
+                             (apply-to inc (maybe 5))))
+        (println :apply-2 (= (maybe 5) (apply-to identity (maybe 5))))
+        (let [v1 (maybe "first ")
+              v2 (maybe "second ")
+              v3 (maybe "third")]
+          (println :apply-3 (= (apply-to comp (apply-to comp v1 v2) v3)
+                               (apply-to comp v1 (apply-to comp v2 v3))
+                               (apply-to comp v1 v2 v3))))
+
+        ;; check the functor and applicative laws for nothing
+        (println)
+        (println :nothing)
+        (println :functor-1 (= (map nothing identity) nothing))
+        (println :functor-2 (= (map (map nothing inc) double)
+                               (map nothing (comp inc double))))
+        (println :apply-1 (= (map nothing inc)
+                             (apply-to inc nothing)))
+        (println :apply-2 (= nothing (apply-to identity nothing)))
+        (println :apply-3 (= (apply-to comp (apply-to comp nothing nothing) nothing)
+                             (apply-to comp nothing (apply-to comp nothing nothing))
+                             (apply-to comp nothing nothing nothing)))
+
+        ;; make sure an nothing will short circuit apply-to
+        (println)
+        (println :short-circuit (= nothing
+                                   (apply-to + (maybe 8) nothing (maybe 13))))
+
+        ;; nothing in action
+        (let [good-ints (map (list 8 10 2 4 14) check-int)
+              nothing-ints (map (list 8 3 2 5 14) check-int)]
+          (println :sum-good-ints (apply* (maybe +) good-ints))
+          (println :sum-nothing-ints (apply* (maybe +) nothing-ints)))))
