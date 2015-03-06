@@ -1,68 +1,31 @@
 
-(deftype TreeGraph [leaf]
-  Function
-  (invoke [_ node-count]
-    (let [node-name (str "node_" node-count)]
-      (println (str node-name " [label=\"" leaf "\"];"))
-      (list node-name (inc node-count))))
-
-  Applicative
-  (apply* [_ sub-trees]
-    (fn [node-count]
-      (let [reduce-state (list empty-list node-count)
-            reduce-state (reduce sub-trees
-                                 reduce-state
-                                 (fn [reduce-state sub-tree]
-                                   (let [node-list (first reduce-state)
-                                         node-count (second reduce-state)
-                                         sub-graph (sub-tree node-count)]
-                                     (list (conj node-list (first sub-graph))
-                                           (second sub-graph)))))
-            node-list (first reduce-state)
-            node-count (second reduce-state)
-            node-name (str "node_" node-count)]
-        (println node-name "[label=\"\"];")
-        (map (reverse node-list)
-             (fn [sub-node]
-               (println (str node-name " -- " sub-node ";"))))
-        (list node-name (inc node-count))))))
-
-(def tree-node)
-
-(deftype StateGraph [invoke-fn]
-  Fn
-  (invoke [ev s]
-    (invoke-fn s))
-
-  Applicative
-  (wrap [_ v]
-    (StateGraph (fn [s]
-                 (list v s))))
-  (apply* [_ sub-trees]
-    (StateGraph
-     (fn [node-count]
-       (apply* (StateGraph (fn [node-count]
-                             (println :node-count node-count)
-                             (list (fn [& sts]
-                                     (println :sts sts))
-                                   (inc node-count))))
-               (map sub-trees tree-node))))))
+(add-ns st (module "core/state.toc"))
 
 (defn tree-node [v]
-  (print-err :v v)
-  (StateGraph (fn [node-count]
-                (let [node-name (str "node_" node-count)]
-                  (println (str node-name " [label=\"" v "\"];"))
-                  (list node-name (inc node-count))))))
+  (cond
+   (= v :list) (apply-to (fn [node-count]
+                           (fn [& sub-nodes]
+                             (let [node-name (str "node_" node-count)]
+                               (println node-name "[label=\"\"];")
+                               (map sub-nodes
+                                    (fn [sub-node]
+                                      (println (str node-name " -- " sub-node ";"))))
+                               node-name)))
+                 (st/update-state inc))
+   (apply-to (fn [node-count]
+               (let [node-name (str "node_" node-count)]
+                 (println (str node-name " [label=\"" v "\"];"))
+                 node-name))
+             (st/update-state inc))))
 
 (main [_]
-      (let [tree (apply-to list
+      (let [tree (apply-to :list
                            (free 9)
                            (free 3)
-                           (apply-to list
+                           (apply-to :list
                                      (free 5)
                                      (free 1)
-                                     (apply-to list
+                                     (apply-to :list
                                                (free 7)
                                                (free 6)
                                                (free 4)))
