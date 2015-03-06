@@ -1576,6 +1576,18 @@ toccata-core
 
 ;; state-maybe monad with lazy comp*
 
+(defn reduce-args [args s]
+  (cond
+   (empty? args) (list empty-list s)
+   (let [result-s ((first args) s)]
+     (cond
+      (empty? result-s) empty-list
+      (let [results-s (reduce-args (rest args) (second result-s))]
+        (cond
+         (empty? results-s) empty-list
+         (list (cons (first result-s) (first results-s))
+               (second results-s))))))))
+
 (deftype new-sm [invoke-fn]
   Fn
   (invoke [ev s]
@@ -1585,11 +1597,15 @@ toccata-core
   (wrap [_ v]
     (new-sm (fn [s]
               (list v s))))
-  ;; TODO: make this more effecient
-  ;; (apply* [fv args]
-  ;;   (new-sm (fn [s]
-  ;;             (let [head (new-list)]
-  ;;               (sm-apply (cons fv args) head head s)))))
+  (apply* [fv args]
+    (new-sm (fn [s]
+              (let [reduce-state (reduce-args args s)]
+                (cond
+                 (empty? reduce-state) empty-list
+                 (let [results (first reduce-state)
+                       s (second reduce-state)
+                       f-s (fv s)]
+                   (list (apply (first f-s) results) (second f-s))))))))
 
   Monad
   (flat-map [ev f]
