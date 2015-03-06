@@ -2643,20 +2643,33 @@ toccata-core
 (deftype add-ns-ast [ns-sym asts]
   AST
   (emit-c [_]
-    (for [defs (get-val :defined-syms {})
-          _ (set-val :defined-syms {})
-          mod-syms (get-val :module-syms {})
-          _ (set-val :module-syms {})
-          body-exprs (eval-exprs (free-app (free list) asts))
-          new-mod-syms (get-val :module-syms)
-          :let [defs (HashMap (comp (map (seq new-mod-syms)
-                                         (fn [sym-def]
-                                           (list (symbol (str ns-sym "/" (first sym-def)))
-                                                 (second sym-def))))
-                                    (seq defs)))]
-          _ (set-val :module-syms mod-syms)
-          _ (set-val :defined-syms defs)]
-      (list "" empty-list))))
+    (let [module-name (.const-str (.v (first asts)))]
+      (comp
+       (for [new-mod-syms (get-in-val (list :modules module-name))
+             defs (get-val :defined-syms {})
+             :let [defs (HashMap (comp (map (seq new-mod-syms)
+                                            (fn [sym-def]
+                                              (list (symbol (str ns-sym "/" (first sym-def)))
+                                                    (second sym-def))))
+                                       (seq defs)))]
+             _ (set-val :defined-syms defs)]
+         (list "" empty-list))
+       (for [defs (get-val :defined-syms {})
+             _ (set-val :defined-syms {})
+             mod-syms (get-val :module-syms {})
+             _ (set-val :module-syms {})
+             :let [_ (print-err :evalling-module module-name)]
+             body-exprs (eval-exprs (free-app (free list) asts))
+             new-mod-syms (get-val :module-syms)
+             :let [defs (HashMap (comp (map (seq new-mod-syms)
+                                            (fn [sym-def]
+                                              (list (symbol (str ns-sym "/" (first sym-def)))
+                                                    (second sym-def))))
+                                       (seq defs)))]
+             _ (assoc-in-val (list :modules module-name) new-mod-syms)
+             _ (set-val :module-syms mod-syms)
+             _ (set-val :defined-syms defs)]
+         (list "" empty-list))))))
 
 (defn unpack-closures [arg-syms]
   (cond
@@ -3549,7 +3562,8 @@ toccata-core
                           ast (analyze-expr expr)]
                       ast))
         _ (set-val :text text)]
-    asts))
+    (cons (free (const-string-ast (second expr)))
+          asts)))
 
 (defn analyze-add-ns []
   (for [expr (is-expr (fn [x]
