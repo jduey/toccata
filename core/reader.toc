@@ -56,10 +56,6 @@
       (let [rv1 (reader 1)
             rv5 (reader 5)
             env {:x 5 :y 1 :z 9}]
-        (println :rv1 rv1)
-        (println)
-        (println :rv5 rv5)
-        (println)
         (println :rv1-invoked (rv1 env))
         (println)
         (println :map (map rv1 (fn [x]

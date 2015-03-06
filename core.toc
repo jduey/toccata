@@ -695,7 +695,7 @@ toccata-core
 
 (defprotocol Functor
   (map [v f]
-    (f v)))
+    (flat-map v (fn [x] (wrap v (f x))))))
 
 (defprotocol Named
   (name [value]
@@ -943,6 +943,8 @@ toccata-core
     (cond
      (empty? args) (f)
      (let [new-args (list** (first args) (rest args))]
+       ;; Remember, the last element of 'args' must be a list
+       ;; everything up to that must be prepended to it
        (fn-apply f new-args)))))
 
 (extend-type Number

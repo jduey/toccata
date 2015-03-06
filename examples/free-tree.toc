@@ -27,6 +27,34 @@
                (println (str node-name " -- " sub-node ";"))))
         (list node-name (inc node-count))))))
 
+(def tree-node)
+
+(deftype StateGraph [invoke-fn]
+  Fn
+  (invoke [ev s]
+    (invoke-fn s))
+
+  Applicative
+  (wrap [_ v]
+    (StateGraph (fn [s]
+                 (list v s))))
+  (apply* [_ sub-trees]
+    (StateGraph
+     (fn [node-count]
+       (apply* (StateGraph (fn [node-count]
+                             (println :node-count node-count)
+                             (list (fn [& sts]
+                                     (println :sts sts))
+                                   (inc node-count))))
+               (map sub-trees tree-node))))))
+
+(defn tree-node [v]
+  (print-err :v v)
+  (StateGraph (fn [node-count]
+                (let [node-name (str "node_" node-count)]
+                  (println (str node-name " [label=\"" v "\"];"))
+                  (list node-name (inc node-count))))))
+
 (main [_]
       (let [tree (apply-to list
                            (free 9)
@@ -40,7 +68,6 @@
                                                (free 4)))
                            (free 2)
                            (free 0))]
-        (println "// " (first (evaluate tree list)))
         (println "graph graphname {")
-        ((evaluate tree TreeGraph) 0)
+        ((evaluate tree tree-node) 0)
         (println "}")))

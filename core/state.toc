@@ -1,0 +1,104 @@
+(defn reduce-args [args s]
+  (cond
+   (empty? args) (list empty-list s)
+   (let [result-s ((first args) s)
+         results-s (reduce-args (rest args) (second result-s))]
+     (list (cons (first result-s) (first results-s))
+           (second results-s)))))
+
+(deftype state-val [invoke-fn]
+  Stringable
+  (string-list [mv]
+    (list "<state >"))
+
+  Fn
+  (invoke [ev s]
+    (invoke-fn s))
+
+  Functor
+  (map [_ f]
+    (state-val (fn [s]
+                 (let [v-ss (invoke-fn s)]
+                   (list (f (first v-ss)) (second v-ss))))))
+
+  Applicative
+  (wrap [_ v]
+    (state-val (fn [s]
+                 (list v s))))
+  (apply* [fv args]
+    (state-val (fn [s]
+                 (let [reduce-state (reduce-args args s)
+                       results (first reduce-state)
+                       s (second reduce-state)
+                       f-s (fv s)]
+                   (list (apply (first f-s) results) (second f-s))))))
+
+  Monad
+  (flat-map [ev f]
+    (state-val (fn [s]
+                 (let [v-ss (ev s)
+                       v (nth v-ss 0)
+                       ss (nth v-ss 1)]
+                   ((f v) ss))))))
+
+(def state
+  (reify
+    Function
+    (invoke [_ v]
+      (state-val (fn [s]
+                   (list v s))))
+
+    Type
+    (instance? [_ sv] (instance? state-val sv))
+
+    Monoid
+    (comp* [_ _] :nothing-yet)))
+
+(defn get-state []
+  (state-val (fn [s]
+               (list s s))))
+
+(defn update-state [f]
+  (state-val (fn [s]
+               (list s (f s)))))
+
+(defn double [x]
+  (* 2 x))
+
+(main [_]
+      ;; check the functor and applicative laws for state
+      (println :state)
+      (let [env :environment]
+        (println :functor-1 (= ((map (state 5) identity) env)
+                               ((state 5) env)))
+        (println :functor-2 (= ((map (map (state 2) inc) double) env)
+                               ((map (state 2) (comp inc double)) env)))
+        (println :apply-1 (= ((map (state 5) inc) env)
+                             ((apply-to inc (state 5)) env)))
+        (println :apply-2 (= ((state 5) env)
+                             ((apply-to identity (state 5)) env)))
+        (let [v1 (state "first ")
+              v2 (state "second ")
+              v3 (state "third")]
+          (println :apply-3 (= ((apply-to comp (apply-to comp v1 v2) v3) env)
+                               ((apply-to comp v1 (apply-to comp v2 v3)) env)
+                               ((apply-to comp v1 v2 v3) env)))))
+      (println)
+
+      (let [rv1 (state 1)
+            rv5 (state 5)
+            env {:x 5 :y 1 :z 9}]
+        (println :rv1-invoked (rv1 env))
+        (println)
+        (println :map (map rv1 (fn [x]
+                                 (println :incrementing x)
+                                 (inc x))))
+        (println)
+        (println :mapped ((map rv1 (fn [x]
+                                     (println :incrementing x)
+                                     (inc x)))
+                          env))
+        (println)
+        (println :apply (apply-to + rv1 rv5))
+        (println)
+        (println :applied ((apply-to + rv1 rv5) env))))
