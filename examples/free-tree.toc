@@ -1,0 +1,46 @@
+
+(deftype TreeGraph [leaf]
+  Function
+  (invoke [_ node-count]
+    (let [node-name (str "node_" node-count)]
+      (println (str node-name " [label=\"" leaf "\"];"))
+      (list node-name (inc node-count))))
+
+  Applicative
+  (apply* [_ sub-trees]
+    (fn [node-count]
+      (let [reduce-state (list empty-list node-count)
+            reduce-state (reduce sub-trees
+                                 reduce-state
+                                 (fn [reduce-state sub-tree]
+                                   (let [node-list (first reduce-state)
+                                         node-count (second reduce-state)
+                                         sub-graph (sub-tree node-count)]
+                                     (list (conj node-list (first sub-graph))
+                                           (second sub-graph)))))
+            node-list (first reduce-state)
+            node-count (second reduce-state)
+            node-name (str "node_" node-count)]
+        (println node-name "[label=\"\"];")
+        (map (reverse node-list)
+             (fn [sub-node]
+               (println (str node-name " -- " sub-node ";"))))
+        (list node-name (inc node-count))))))
+
+(main [_]
+      (let [tree (apply-to list
+                           (free 9)
+                           (free 3)
+                           (apply-to list
+                                     (free 5)
+                                     (free 1)
+                                     (apply-to list
+                                               (free 7)
+                                               (free 6)
+                                               (free 4)))
+                           (free 2)
+                           (free 0))]
+        (println "// " (first (evaluate tree list)))
+        (println "graph graphname {")
+        ((evaluate tree TreeGraph) 0)
+        (println "}")))
