@@ -2655,20 +2655,23 @@ toccata-core
              _ (set-val :defined-syms defs)]
          (list "" empty-list))
        (for [defs (get-val :defined-syms {})
-             _ (set-val :defined-syms {})
+             _ (cond
+                (= :no-prefix ns-sym) (state-maybe "")
+                (set-val :defined-syms {}))
              mod-syms (get-val :module-syms {})
              _ (set-val :module-syms {})
-             :let [_ (print-err :evalling-module module-name)]
-             body-exprs (eval-exprs (free-app (free list) asts))
+             _ (evaluate (free-app (free list) asts) emit-c)
              new-mod-syms (get-val :module-syms)
-             :let [defs (HashMap (comp (map (seq new-mod-syms)
-                                            (fn [sym-def]
-                                              (list (symbol (str ns-sym "/" (first sym-def)))
-                                                    (second sym-def))))
-                                       (seq defs)))]
-             _ (assoc-in-val (list :modules module-name) new-mod-syms)
-             _ (set-val :module-syms mod-syms)
-             _ (set-val :defined-syms defs)]
+             _ (cond
+                (= :no-prefix ns-sym) (state-maybe "")
+                (let [defs (HashMap (comp (map (seq new-mod-syms)
+                                               (fn [sym-def]
+                                                 (list (symbol (str ns-sym "/" (first sym-def)))
+                                                       (second sym-def))))
+                                          (seq defs)))]
+                  (apply-to (assoc-in-val (list :modules module-name) new-mod-syms)
+                            (set-val :module-syms mod-syms)
+                            (set-val :defined-syms defs))))]
          (list "" empty-list))))))
 
 (defn unpack-closures [arg-syms]
@@ -3557,10 +3560,13 @@ toccata-core
                          (= 'module (first x)))))
         text (get-val :text)
         _ (set-val :text (slurp (second expr)))
+        file-name (get-val :file-name)
+        _ (set-val :file-name (second expr))
         parser (get-val :parser)
         asts (recur (for [expr parser
                           ast (analyze-expr expr)]
                       ast))
+        _ (set-val :file-name file-name)
         _ (set-val :text text)]
     (cons (free (const-string-ast (second expr)))
           asts)))
