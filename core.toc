@@ -41,7 +41,7 @@ toccata-core
 (defn symbol [sym-str]
   (inline-text "if (arg0->type == StringType) {
                      String *s = (String *)arg0;
-                     SubString *subStr = (SubString *)my_malloc(sizeof(SubString));
+                     SubString *subStr = malloc_substring();
                      subStr->type = SymbolType;
                      subStr->len = s->len;
                      subStr->source = arg0;
@@ -50,7 +50,7 @@ toccata-core
                      return((Value *)subStr);
                    } else if (arg0->type == SubStringType) {
                      SubString *s = (SubString *)arg0;
-                     SubString *subStr = (SubString *)my_malloc(sizeof(SubString));
+                     SubString *subStr = malloc_substring();
                      subStr->type = SymbolType;
                      subStr->len = s->len;
                      subStr->source = arg0;
@@ -63,7 +63,7 @@ toccata-core
 (defn new-keyword [kw-str]
   (inline-text "if (arg0->type == StringType) {
                      String *s = (String *)arg0;
-                     SubString *subStr = (SubString *)my_malloc(sizeof(SubString));
+                     SubString *subStr = malloc_substring();
                      subStr->type = KeywordType;
                      subStr->len = s->len;
                      subStr->source = arg0;
@@ -72,7 +72,7 @@ toccata-core
                      return((Value *)subStr);
                    } else if (arg0->type == SubStringType) {
                      SubString *s = (SubString *)arg0;
-                     SubString *subStr = (SubString *)my_malloc(sizeof(SubString));
+                     SubString *subStr = malloc_substring();
                      subStr->type = SymbolType;
                      subStr->len = s->len;
                      subStr->source = arg0;
@@ -102,7 +102,7 @@ toccata-core
      (inline-text "int64_t idx = ((Number *)arg1)->numVal;
                    if (arg0->type == StringType) {
                      String *s = (String *)arg0;
-                     SubString *subStr = (SubString *)my_malloc(sizeof(SubString));
+                     SubString *subStr = malloc_substring();
                      subStr->type = SubStringType;
                      if (idx < s->len) {
                        subStr->len = s->len - idx;
@@ -118,7 +118,7 @@ toccata-core
                      return((Value *)subStr);
                    } else if (arg0->type == SubStringType) {
                      SubString *s = (SubString *)arg0;
-                     SubString *subStr = (SubString *)my_malloc(sizeof(SubString));
+                     SubString *subStr = malloc_substring();
                      subStr->type = SubStringType;
                      if (idx < s->len) {
                        subStr->len = s->len - idx;
@@ -139,7 +139,7 @@ toccata-core
                    int64_t len = ((Number *)arg2)->numVal;
                    if (arg0->type == StringType) {
                      String *s = (String *)arg0;
-                     SubString *subStr = (SubString *)my_malloc(sizeof(SubString));
+                     SubString *subStr = malloc_substring();
                      subStr->type = SubStringType;
                      if (idx + len <= s->len) {
                        subStr->len = len;
@@ -155,7 +155,7 @@ toccata-core
                      return((Value *)subStr);
                    } else if (arg0->type == SubStringType) {
                      SubString *s = (SubString *)arg0;
-                     SubString *subStr = (SubString *)my_malloc(sizeof(SubString));
+                     SubString *subStr = malloc_substring();
                      subStr->type = SubStringType;
                      if (idx + len <= s->len) {
                        subStr->len = len;
@@ -3700,6 +3700,7 @@ toccata-core
                     "Number trueVal;\n"
                     "Number falseVal;\n"
                     "Value *my_malloc(int64_t);\n"
+                    "SubString *malloc_substring();\n"
                     "void incRef(Value *);\n"
                     "void decRef(Value *);\n"
                     "void my_free(Value *);\n"
@@ -3729,6 +3730,7 @@ toccata-core
                     "    abort();\n"
                     "  } else if (v->refs < -1) {\n"
                     "    fprintf(stderr, \"incRefing: %p\\n\", v);\n"
+                    "    abort();\n"
                     "  } else if (v->refs >= 0)\n"
                     "    v->refs++;\n"
                     "  return;\n"
@@ -3760,6 +3762,19 @@ toccata-core
                     "#endif\n"
                     "  if (sz > sizeof(Value))\n    val->refs = 1;\n"
                     "  return(val);\n"
+                    "}\n\n"
+
+                    "typedef struct DirectLL {int64_t type; struct DirectLL *next;} DirectLL;\n"
+                    "DirectLL *freeSubStrings = (DirectLL *)0;\n"
+                    "SubString *malloc_substring() {\n"
+                    "  if (freeSubStrings == (DirectLL *)0)\n"
+                    "    return((SubString *)my_malloc(sizeof(SubString)));\n"
+                    "  else {\n"
+                    "    DirectLL *subStr = freeSubStrings;\n"
+                    "    freeSubStrings = subStr->next;\n"
+                    "    ((SubString *)subStr)->refs = 1;\n"
+                    "    return((SubString *)subStr);\n"
+                    "  }\n"
                     "}\n\n"
 
                     "void my_free(Value *v) {\n"
@@ -3812,14 +3827,16 @@ toccata-core
                     "             v->type == " (get (types) 'Symbol 10000) ") {\n"
                     "    Value *src = ((SubString *)v)->source;\n"
                     "    v->refs = -10;\n"
-                    "    free_count++;\n"
+                    "    // free_count++;\n"
                     "    if (src != (Value *)0) {\n"
                     "      decRef(src);\n"
                     "      my_free(src);\n"
                     "    }\n"
-                    "#ifdef REF_COUNT\n"
-                    "    free(v);\n"
-                    "#endif\n"
+                    "    ((DirectLL *)v)->next = freeSubStrings;\n"
+                    "    freeSubStrings = (DirectLL *)v;\n"
+                    ;; "#ifdef REF_COUNT\n"
+                    ;; "    free(v);\n"
+                    ;; "#endif\n"
                     "  } else if (v->type == " (get (types) 'FnArity 10000) ") {\n"
                     "    FnArity *arity = (FnArity *)v;\n"
                     "    decRef((Value *)arity->closures);\n"
@@ -3891,7 +3908,7 @@ toccata-core
                     "\n"
 
                     "Value *symbolValue(char *s) {\n"
-                    "SubString *sym = (SubString *)my_malloc(sizeof(SubString));\n"
+                    "SubString *sym = malloc_substring();\n"
                     "sym->type = SymbolType;\n"
                     "sym->buffer = s;\n"
                     "sym->source = (Value *)0;\n"
@@ -3900,7 +3917,7 @@ toccata-core
                     "\n"
 
                     "Value *keywordValue(char *s) {\n"
-                    "SubString *kw = (SubString *)my_malloc(sizeof(SubString));\n"
+                    "SubString *kw = malloc_substring();\n"
                     "kw->type = KeywordType;\n"
                     "kw->buffer = s;\n"
                     "kw->source = (Value *)0;\n"
@@ -3909,7 +3926,7 @@ toccata-core
                     "\n"
 
                     "Value *makeSubstr(int64_t len, Value *str, char *subsStart) {\n"
-                    "SubString *subStr = (SubString *)my_malloc(sizeof(SubString));\n"
+                    "SubString *subStr = malloc_substring();\n"
                     "subStr->type = SubStringType;\n"
                     "subStr->len = len;\n"
                     "subStr->source = str;\n"
