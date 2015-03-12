@@ -2887,8 +2887,7 @@ toccata-core
 
          (list (str "(Value *)" fn-sym)
                (comp arity-init
-                     (list (str "Function *" fn-sym " = (Function *)my_malloc(sizeof(Function)"
-                                " + sizeof(FnArity *) * " arity-count ");\n")
+                     (list (str "Function *" fn-sym " = malloc_function(" arity-count ");\n")
                            (str fn-sym "->type = " (get (types) 'Function :no-fn-type) ";\n")
                            (str fn-sym "->name = \"" name "\";\n")
                            (str fn-sym "->arityCount = " arity-count ";\n"))
@@ -3703,6 +3702,7 @@ toccata-core
                     "SubString *malloc_substring();\n"
                     "FnArity *malloc_fnArity();\n"
                     "List *malloc_list();\n"
+                    "Function *malloc_function(int arityCount);\n"
                     "void incRef(Value *);\n"
                     "void decRef(Value *);\n"
                     "void my_free(Value *);\n"
@@ -3780,6 +3780,20 @@ toccata-core
                     "  }\n"
                     "}\n\n"
 
+                    "int recycledFunction = 0;\n"
+                    "DirectLL *freeFunctions = (DirectLL *)0;\n"
+                    "Function *malloc_function(int arityCount) {\n"
+                    "  if (arityCount != 1 || freeFunctions == (DirectLL *)0)\n"
+                    "    return((Function *)my_malloc(sizeof(Function) + sizeof(FnArity *) * arityCount));\n"
+                    "  else {\n"
+                    "    recycledFunction++;\n"
+                    "    DirectLL *newFunction = freeFunctions;\n"
+                    "    freeFunctions = newFunction->next;\n"
+                    "    ((Function *)newFunction)->refs = 1;\n"
+                    "    return((Function *)newFunction);\n"
+                    "  }\n"
+                    "}\n\n"
+
                     "DirectLL *freeLists = (DirectLL *)0;\n"
                     "List *malloc_list() {\n"
                     "  if (freeLists == (DirectLL *)0)\n"
@@ -3829,10 +3843,15 @@ toccata-core
                     "      my_free((Value *)f->arities[i]);\n"
                     "    }\n"
                     "    v->refs = -10;\n"
-                    "    free_count++;\n"
+                    "    if (f->arityCount == 1) {\n"
+                    "      ((DirectLL *)v)->next = freeLists;\n"
+                    "      freeLists = (DirectLL *)v;\n"
+                    "    } else {\n"
+                    "      free_count++;\n"
                     "#ifdef REF_COUNT\n"
-                    "    free(v);\n"
+                    "      free(v);\n"
                     "#endif\n"
+                    "    }"
                     "  } else if (v->type == " (get (types) 'List 10000) ") {\n"
                     "    Value *head = ((List *)v)->head;\n"
                     "    List *tail = ((List *)v)->tail;\n"
