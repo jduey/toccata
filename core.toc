@@ -2439,7 +2439,7 @@ toccata-core
                                        (first c-sym)
                                        ", (List *)" arity-sym "->closures);\n"))))]
     (list arity-sym
-          (list* (str "FnArity *" arity-sym " = (FnArity *)my_malloc(sizeof(FnArity));\n")
+          (list* (str "FnArity *" arity-sym " = malloc_fnArity();\n")
                  (str arity-sym "->type = " (get (types) 'FnArity :no-fn-type) ";\n")
                  (str arity-sym "->count = " (count arg-syms) ";\n")
                  (str arity-sym "->closures = empty_list;\n")
@@ -3701,6 +3701,7 @@ toccata-core
                     "Number falseVal;\n"
                     "Value *my_malloc(int64_t);\n"
                     "SubString *malloc_substring();\n"
+                    "FnArity *malloc_fnArity();\n"
                     "List *malloc_list();\n"
                     "void incRef(Value *);\n"
                     "void decRef(Value *);\n"
@@ -3791,6 +3792,18 @@ toccata-core
                     "  }\n"
                     "}\n\n"
 
+                    "DirectLL *freeFnAritys = (DirectLL *)0;\n"
+                    "FnArity *malloc_fnArity() {\n"
+                    "  if (freeFnAritys == (DirectLL *)0)\n"
+                    "    return((FnArity *)my_malloc(sizeof(FnArity)));\n"
+                    "  else {\n"
+                    "    DirectLL *newFnArity = freeFnAritys;\n"
+                    "    freeFnAritys = newFnArity->next;\n"
+                    "    ((FnArity *)newFnArity)->refs = 1;\n"
+                    "    return((FnArity *)newFnArity);\n"
+                    "  }\n"
+                    "}\n\n"
+
                     "void my_free(Value *v) {\n"
                     "  if (v == (Value *)0) {\n"
                     "    fprintf(stderr, \"why are you freeing 'null'\\n\");\n "
@@ -3858,10 +3871,12 @@ toccata-core
                     "    decRef((Value *)arity->closures);\n"
                     "    my_free((Value *)arity->closures);\n"
                     "    v->refs = -10;\n"
-                    "    free_count++;\n"
-                    "#ifdef REF_COUNT\n"
-                    "    free(v);\n"
-                    "#endif\n"
+                    "    // free_count++;\n"
+                    "    ((DirectLL *)v)->next = freeFnAritys;\n"
+                    "    freeFnAritys = (DirectLL *)v;\n"
+                    ;; "#ifdef REF_COUNT\n"
+                    ;; "    free(v);\n"
+                    ;; "#endif\n"
                     "  } else {\n"
                     "    ReifiedVal *rv = (ReifiedVal *)v;\n"
                     "    for (int i = 0; i < rv->implCount; i++) {\n"
