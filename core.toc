@@ -893,7 +893,7 @@ toccata-core
           if (isTrue(y)) {
             if (head == empty_list) {
               // if we haven't started the new list yet
-              head = (List *)my_malloc(sizeof(List));
+              head = malloc_list();
               head->type = ListType;
               head->len = 1;
               head->head = x;
@@ -902,7 +902,7 @@ toccata-core
               tail = head;
             } else {
               // otherwise, append to tail of list
-              List *new_tail = (List *)my_malloc(sizeof(List));
+              List *new_tail = malloc_list();
               new_tail->type = ListType;
               new_tail->len = 1;
               new_tail->head = x;
@@ -1016,7 +1016,7 @@ toccata-core
         x = l->head;
         if (head == empty_list) {
           // if we haven't started the new list yet
-          head = (List *)my_malloc(sizeof(List));
+          head = malloc_list();
           head->type = ListType;
           head->len = 1;
           head->head = x;
@@ -1025,7 +1025,7 @@ toccata-core
           tail = head;
         } else {
           // otherwise, append to tail of list
-          List *new_tail = (List *)my_malloc(sizeof(List));
+          List *new_tail = malloc_list();
           new_tail->type = ListType;
           new_tail->len = 1;
           new_tail->head = x;
@@ -1124,7 +1124,7 @@ toccata-core
 
           if (head == empty_list) {
             // if we haven't started the new list yet
-            head = (List *)my_malloc(sizeof(List));
+            head = malloc_list();
             head->type = ListType;
             head->len = 1;
             head->head = y;
@@ -1132,7 +1132,7 @@ toccata-core
             tail = head;
           } else {
             // otherwise, append to tail of list
-            List *new_tail = (List *)my_malloc(sizeof(List));
+            List *new_tail = malloc_list();
             new_tail->type = ListType;
             new_tail->len = 1;
             new_tail->head = y;
@@ -3701,6 +3701,7 @@ toccata-core
                     "Number falseVal;\n"
                     "Value *my_malloc(int64_t);\n"
                     "SubString *malloc_substring();\n"
+                    "List *malloc_list();\n"
                     "void incRef(Value *);\n"
                     "void decRef(Value *);\n"
                     "void my_free(Value *);\n"
@@ -3764,7 +3765,8 @@ toccata-core
                     "  return(val);\n"
                     "}\n\n"
 
-                    "typedef struct DirectLL {int64_t type; struct DirectLL *next;} DirectLL;\n"
+                    "typedef struct DirectLL {int64_t type; struct DirectLL *next;} DirectLL;\n\n"
+
                     "DirectLL *freeSubStrings = (DirectLL *)0;\n"
                     "SubString *malloc_substring() {\n"
                     "  if (freeSubStrings == (DirectLL *)0)\n"
@@ -3774,6 +3776,18 @@ toccata-core
                     "    freeSubStrings = subStr->next;\n"
                     "    ((SubString *)subStr)->refs = 1;\n"
                     "    return((SubString *)subStr);\n"
+                    "  }\n"
+                    "}\n\n"
+
+                    "DirectLL *freeLists = (DirectLL *)0;\n"
+                    "List *malloc_list() {\n"
+                    "  if (freeLists == (DirectLL *)0)\n"
+                    "    return((List *)my_malloc(sizeof(List)));\n"
+                    "  else {\n"
+                    "    DirectLL *newList = freeLists;\n"
+                    "    freeLists = newList->next;\n"
+                    "    ((List *)newList)->refs = 1;\n"
+                    "    return((List *)newList);\n"
                     "  }\n"
                     "}\n\n"
 
@@ -3810,7 +3824,7 @@ toccata-core
                     "    Value *head = ((List *)v)->head;\n"
                     "    List *tail = ((List *)v)->tail;\n"
                     "    v->refs = -10;\n"
-                    "    free_count++;\n"
+                    "    // free_count++;\n"
                     "    if (head != (Value *)0) {\n"
                     "      decRef(head);\n"
                     "      my_free(head);\n"
@@ -3819,9 +3833,11 @@ toccata-core
                     "      decRef((Value *)tail);\n"
                     "      my_free((Value *)tail);\n"
                     "    }\n"
-                    "#ifdef REF_COUNT\n"
-                    "    free(v);\n"
-                    "#endif\n"
+                    "    ((DirectLL *)v)->next = freeLists;\n"
+                    "    freeLists = (DirectLL *)v;\n"
+                    ;; "#ifdef REF_COUNT\n"
+                    ;; "    free(v);\n"
+                    ;; "#endif\n"
                     "  } else if (v->type == " (get (types) 'Keyword 10000) " ||\n"
                     "             v->type == " (get (types) 'SubStr 10000) " ||\n"
                     "             v->type == " (get (types) 'Symbol 10000) ") {\n"
@@ -3948,7 +3964,7 @@ toccata-core
                     "    fprintf(stderr, \"'cons' requires a list\\n\");\n"
                     "    abort();\n"
                     "  }\n"
-                    "  List *newList = (List *)my_malloc(sizeof(List));\n"
+                    "  List *newList = malloc_list();\n"
                     "  newList->type = ListType;\n"
                     "  newList->len = l->len + 1;\n"
                     "  newList->head = (Value *)x;\n"
@@ -4133,14 +4149,14 @@ toccata-core
         _ (write-strs (list "#ifndef REF_COUNT\n"
                             "    GC_init();\n"
                             "#endif\n"
-                            "     List *argList = (List *)my_malloc(sizeof(List));\n"
+                            "     List *argList = malloc_list();\n"
                             "      argList->type = ListType;\n"
                             "      argList->len = 0;\n"
                             "      argList->head = (Value *)0;\n"
                             "      argList->tail = (List *)0;\n"
                             "      List *tail = argList;\n"
                             "      for(int i = 0; i < argc; i++) {\n"
-                            "         List *newTail = (List *)my_malloc(sizeof(List));\n"
+                            "         List *newTail = malloc_list();\n"
                             "         newTail->type = ListType;\n"
                             "         newTail->len = 0;\n"
                             "         newTail->tail = (List *)0;\n"
