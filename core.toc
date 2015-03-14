@@ -24,6 +24,26 @@ toccata-core
 (def true (inline-text "(Value *)&trueVal;"))
 (def false (inline-text "(Value *)&falseVal;"))
 
+(defn output-to-file [file-path]
+  (inline-text
+   "String *arg0Str = (String *)my_malloc(sizeof(String) + ((String *)arg0)->len + 5);
+    if (arg0->type == StringType)
+      snprintf(arg0Str->buffer, ((String *)arg0)->len + 1, \"%s\", ((String *)arg0)->buffer);
+    else if (arg0->type == SubStringType)
+      snprintf(arg0Str->buffer, ((String *)arg0)->len + 1, \"%s\", ((SubString *)arg0)->buffer);
+    else {
+      fprintf(stderr, \"\\ninvalid type for 'output-to-file'\\n\");
+      abort();
+    }
+
+    outStream = fopen(arg0Str->buffer, \"w\");
+    return((Value *)&trueVal);\n"))
+
+(defn standard-output []
+  (inline-text
+   "outStream = stdout;
+    return((Value *)&trueVal);\n"))
+
 (defn symkey-name [v]
   (inline-text
    "return(stringValue(((SubString *)arg0)->buffer));\n"))
@@ -194,7 +214,7 @@ toccata-core
 (defn number-less-than [x y]
   (inline-text
    "if (arg0->type != arg1->type) {
-      printf(\"\\ninvalid types for 'number-less-than'\\n\");
+      fprintf(outStream, \"\\ninvalid types for 'number-less-than'\\n\");
       abort();
    } else if (((Number *)arg0)->numVal < ((Number *)arg1)->numVal)
       return(true);
@@ -205,7 +225,7 @@ toccata-core
 (defn add-numbers [x y]
   (inline-text
    "if (arg0->type != arg1->type) {
-      printf(\"\\ninvalid types for 'add-numbers'\\n\");
+      fprintf(outStream, \"\\ninvalid types for 'add-numbers'\\n\");
       abort();
     } else
       return(numberValue(((Number *)arg0)->numVal + ((Number *)arg1)->numVal));\n"))
@@ -214,7 +234,7 @@ toccata-core
 (defn subtract-numbers [x y]
   (inline-text
    "if (arg0->type != arg1->type) {
-      printf(\"\\ninvalid types for 'subtract-numbers'\\n\");
+      fprintf(outStream, \"\\ninvalid types for 'subtract-numbers'\\n\");
       abort();
     } else
       return(numberValue(((Number *)arg0)->numVal - ((Number *)arg1)->numVal));\n"))
@@ -232,7 +252,7 @@ toccata-core
   (inline-text
    "if (arg0->type != NumberType ||
         arg1->type != NumberType) {
-      printf(\"\\ninvalid types for 'rem'\\n\");
+      fprintf(outStream, \"\\ninvalid types for 'rem'\\n\");
       abort();
     } else
       return(numberValue(((Number *)arg0)->numVal %
@@ -294,7 +314,7 @@ toccata-core
 (defn char [n]
   (inline-text
    "if (arg0->type != NumberType) {
-      printf(\"\\ninvalid type for 'char'\\n\");
+      fprintf(outStream, \"\\ninvalid type for 'char'\\n\");
       abort();
     }
     String *strVal = (String *)my_malloc(sizeof(String) + 2);
@@ -307,7 +327,7 @@ toccata-core
 (defn str-count [str]
   (inline-text
    "if (arg0->type != StringType && arg0->type != SubStringType ) {
-      printf(\"\\ninvalid type for 'str-count'\\n\");
+      fprintf(outStream, \"\\ninvalid type for 'str-count'\\n\");
       abort();
     }
    return(numberValue(((String *)arg0)->len));\n"))
@@ -371,7 +391,7 @@ toccata-core
 (defn str-append [dest src]
   (inline-text
    " if (arg0->type != StringType) {
-      printf(\"\\ninvalid type for 'str-append'\\n\");
+      fprintf(outStream, \"\\ninvalid type for 'str-append'\\n\");
       abort();
     }
 
@@ -408,7 +428,7 @@ toccata-core
     else if (arg0->type == SubStringType)
       snprintf(arg0Str->buffer, ((String *)arg0)->len + 1, \"%s\", ((SubString *)arg0)->buffer);
     else {
-      printf(\"\\ninvalid type for 'slurp'\\n\");
+      fprintf(stderr, \"\\ninvalid type for 'slurp'\\n\");
       abort();
     }
 
@@ -559,7 +579,7 @@ toccata-core
                                                     appArg4, appArg5, appArg6, appArg7,
                                                     appArg8));
                      } else {
-                       printf(\"error in 'fn-apply'\\n\");
+                       fprintf(outStream, \"error in 'fn-apply'\\n\");
                        abort();
                      }
                    "))
@@ -640,11 +660,11 @@ toccata-core
 (defn pr* [str]
   (inline-text
    "if (arg0->type == StringType)
-      printf(\"%-.*s\", (int)((String *)arg0)->len, ((String *)arg0)->buffer);
+      fprintf(outStream, \"%-.*s\", (int)((String *)arg0)->len, ((String *)arg0)->buffer);
     else if (arg0->type == SubStringType)
-      printf(\"%-.*s\", (int)((SubString *)arg0)->len, ((SubString *)arg0)->buffer);
+      fprintf(outStream, \"%-.*s\", (int)((SubString *)arg0)->len, ((SubString *)arg0)->buffer);
     else {
-      printf(\"\\ninvalid type for 'pr*'\\n\");
+      fprintf(outStream, \"\\ninvalid type for 'pr*'\\n\");
       abort();
     }
     return(true);\n"))
@@ -874,7 +894,7 @@ toccata-core
               y = fn4(arity2->closures, x);
             } else if(arity2 != (FnArity *)0 && arity2->variadic) {
               FnType1 *fn4 = (FnType1 *)arity2->fn;
-              List *varArgs3 = (List *)var_85;
+              List *varArgs3 = empty_list;
               incRef(x);
               varArgs3 = (List *)listCons(x, varArgs3);
               y = fn4(arity2->closures, (Value *)varArgs3);
@@ -2645,6 +2665,7 @@ toccata-core
   (emit-c [_]
     (let [module-name (.const-str (.v (first asts)))]
       (comp
+       ;; module with that name has already been loaded
        (for [new-mod-syms (get-in-val (list :modules module-name))
              defs (get-val :defined-syms {})
              :let [defs (HashMap (comp (map (seq new-mod-syms)
@@ -2654,16 +2675,21 @@ toccata-core
                                        (seq defs)))]
              _ (set-val :defined-syms defs)]
          (list "" empty-list))
+       ;; otherwise
        (for [defs (get-val :defined-syms {})
              _ (cond
-                (= :no-prefix ns-sym) (state-maybe "")
+                (= :no-prefix ns-sym) (let [out-file (str (subs module-name 0 (- (count module-name) 3))
+                                                          ".c")
+                                            _ (output-to-file out-file)]
+                                        (state-maybe ""))
                 (set-val :defined-syms {}))
              mod-syms (get-val :module-syms {})
              _ (set-val :module-syms {})
              _ (evaluate (free-app (free list) asts) emit-c)
              new-mod-syms (get-val :module-syms)
              _ (cond
-                (= :no-prefix ns-sym) (state-maybe "")
+                (= :no-prefix ns-sym) (let [_ (standard-output)]
+                                        (state-maybe ""))
                 (let [defs (HashMap (comp (map (seq new-mod-syms)
                                                (fn [sym-def]
                                                  (list (symbol (str ns-sym "/" (first sym-def)))
@@ -3691,6 +3717,7 @@ toccata-core
 
 (defn core-base-fns []
   (write-strs (list "\n"
+                    "FILE *outStream;\n"
                     "long long malloc_count;\n"
                     "long long free_count;\n"
                     "int recycledFunction;\n"
@@ -3721,6 +3748,7 @@ toccata-core
 
 (defn base-fns []
   (write-strs (list "\n"
+                    "FILE *outStream;\n"
                     "Number trueVal = {NumberType, -1, 1};\n"
                     "Value* true = (Value *)&trueVal;\n"
                     "Number falseVal = {NumberType, -1, 0};\n"
@@ -3961,7 +3989,7 @@ toccata-core
 
                     "int isTrue(Value *boolVal) {\n"
                     "if (boolVal->type != " (get (types) 'Number 10000) ") {\n"
-                    "printf(\"Invalid boolean value\\n"
+                    "fprintf(outStream, \"Invalid boolean value\\n"
                     "\");\nabort();\n}\nelse\nreturn(((Number *)boolVal)->numVal);\n}\n"
                     "\n"
 
@@ -4231,6 +4259,7 @@ toccata-core
         _ (write-strs (list "#ifndef REF_COUNT\n"
                             "    GC_init();\n"
                             "#endif\n"
+                            "     outStream = stdout;\n"
                             "     List *argList = malloc_list();\n"
                             "      argList->type = ListType;\n"
                             "      argList->len = 0;\n"
