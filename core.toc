@@ -2660,12 +2660,98 @@ toccata-core
 
    (state-maybe empty-list)))
 
+(defn base-types []
+  (let [types (types)]
+    (write-strs (list
+                 "#include <sys/types.h>\n"
+                 "#include <stdio.h>\n"
+                 "#include <string.h>\n\n"
+                 Value
+                 NumberVal
+                 StringVal
+                 SubStringVal
+                 ListVal
+                 FnArityVal
+                 FunctionVal
+                 ProtoImpl
+                 ProtoImpls
+                 ReifiedVal
+                 "List *listCons(Value *x, List *l);\n"
+                 "Value *stringValue(char *s);\n"
+                 "const int64_t NumberType;\n"
+                 "const int64_t KeywordType;\n"
+                 "const int64_t SymbolType;\n"
+                 "const int64_t StringType;\n"
+                 "const int64_t SubStringType;\n"
+                 "const int64_t ListType;\n"
+                 "const int64_t FunctionType;\n"
+                 "List *empty_list;\n"
+                 "Value *number_literals();\n"
+                 "Value *counts();\n"
+                 "Value *types();\n"
+                 "Value *symbol_literals();\n"
+                 "Value *keyword_literals();\n"
+                 "Value *string_literals();\n"
+                 "Value *defined_syms();\n"
+                 "Value *static_fns();\n"
+                 "Value *protocols();\n"
+                 "\n"))))
+
+(defn extern-fn [name variadic return-type & arg-types]
+  (let [arg-types (comp arg-types
+                        (cond
+                         variadic (list "...")
+                         empty-list))]
+    (apply-to list
+              (write-strs (list "extern " return-type " " name "("))
+              (write-strs (interpose arg-types ", "))
+              (write ");\n"))))
+
+(defn extern-functions []
+  (apply-to list
+            (write "\n")
+            (extern-fn 'abort 0 VoidT)
+            (extern-fn 'printf 1 Int32 "const char *")
+            (write "#ifdef REF_COUNT\n")
+            (extern-fn 'free 0 VoidT "void *")
+            (extern-fn 'malloc 0 "void *" "unsigned long")
+            (write "#else\n")
+            (extern-fn 'GC_init 0 VoidT)
+            (extern-fn 'GC_malloc 0 Value* Int64)
+            (write "#endif\n")))
+
+(def static-values)
+
+(defn fixed-fn-types []
+  (traverse (range 10)
+            (fn [arg-count]
+              (cond
+               (= arg-count 0)
+               (write-strs (list "typedef Value *(FnType0)(List *);\n"))
+
+               (apply-to list
+                         (write-strs (list "typedef Value *(FnType" arg-count ")("))
+                         (write-strs (interpose (cons "List *"
+                                                      (repeat arg-count "Value *"))
+                                                ", "))
+                         (write ");\n"))))))
+
+(def base-fns)
+(def emit-proto-fn)
+(def serialize-symbol-literals)
+(def serialize-number-literals)
+(def serialize-string-literals)
+(def serialize-keyword-literals)
+(def serialize-protocols)
+(def serialize-static-fns)
+(def serialize-defined-syms)
+(def serialize-types)
+(def serialize-counts)
 (deftype add-ns-ast [ns-sym asts]
   AST
   (emit-c [_]
     (let [module-name (.const-str (.v (first asts)))]
       (comp
-       ;; module with that name has already been loaded
        (for [new-mod-syms (get-in-val (list :modules module-name))
              defs (get-val :defined-syms {})
              :let [defs (HashMap (comp (map (seq new-mod-syms)
@@ -2675,30 +2761,70 @@ toccata-core
                                        (seq defs)))]
              _ (set-val :defined-syms defs)]
          (list "" empty-list))
-       ;; otherwise
-       (for [defs (get-val :defined-syms {})
-             _ (cond
-                (= :no-prefix ns-sym) (let [out-file (str (subs module-name 0 (- (count module-name) 3))
-                                                          ".c")
-                                            _ (output-to-file out-file)]
-                                        (state-maybe ""))
-                (set-val :defined-syms {}))
-             mod-syms (get-val :module-syms {})
-             _ (set-val :module-syms {})
-             _ (evaluate (free-app (free list) asts) emit-c)
-             new-mod-syms (get-val :module-syms)
-             _ (cond
-                (= :no-prefix ns-sym) (let [_ (standard-output)]
-                                        (state-maybe ""))
-                (let [defs (HashMap (comp (map (seq new-mod-syms)
-                                               (fn [sym-def]
-                                                 (list (symbol (str ns-sym "/" (first sym-def)))
-                                                       (second sym-def))))
-                                          (seq defs)))]
-                  (apply-to (assoc-in-val (list :modules module-name) new-mod-syms)
-                            (set-val :module-syms mod-syms)
-                            (set-val :defined-syms defs))))]
-         (list "" empty-list))))))
+       (cond
+        ;; compiling the compiler and adding core.toc?
+        (= :no-prefix ns-sym)
+        (for [bootstrapping (get-val :bootstrapping)
+              :when bootstrapping
+              defs (get-val :defined-syms {})
+              :let [out-file (str (subs module-name 0 (- (count module-name) 3)) "c")
+                    _ (output-to-file out-file)]
+              _ (apply-to list
+                          (set-val :module-syms {})
+                          (assoc-in-val (list :new-numbers)
+                                        (reduce (seq (types)) {}
+                                                (fn [m type]
+                                                  (assoc m
+                                                    (nth type 1 0)
+                                                    (str "_num_" (nth type 1 0))))))
+                          (base-types)
+                          (extern-functions)
+                          (static-values)
+                          (fixed-fn-types)
+                          (let [types (types)]
+                            (write-strs
+                             (list
+                              "const int64_t NumberType = " (get types 'Number 0) ";\n"
+                              "const int64_t KeywordType = " (get types 'Keyword 0) ";\n"
+                              "const int64_t SymbolType = " (get types 'Symbol 0) ";\n"
+                              "const int64_t StringType = " (get types 'String 0) ";\n"
+                              "const int64_t SubStringType = " (get types 'SubStr 0) ";\n"
+                              "const int64_t ListType = " (get types 'List 0) ";\n"
+                              "const int64_t FunctionType = " (get types 'Function 0) ";\n"
+                              "List *empty_list = &(List){4,-1,0,0,0};\n")))
+                          (base-fns)
+                          (emit-proto-fn (list 'invoke (map (range 8)
+                                                            (fn [num-args]
+                                                              (list (inc num-args) {})))))
+                          (traverse asts (fn [ast] (evaluate ast emit-c)))
+                          (serialize-symbol-literals)
+                          (serialize-number-literals)
+                          (serialize-string-literals)
+                          (serialize-keyword-literals)
+                          (serialize-protocols)
+                          (serialize-static-fns)
+                          (serialize-defined-syms)
+                          (serialize-types)
+                          (serialize-counts))]
+          (let [_ (standard-output)]
+            (list "" empty-list)))
+
+        ;; normal adding of a module namespace
+        (for [defs (get-val :defined-syms {})
+              _ (set-val :defined-syms {})
+              mod-syms (get-val :module-syms {})
+              _ (set-val :module-syms {})
+              _ (evaluate (free-app (free list) asts) emit-c)
+              new-mod-syms (get-val :module-syms)
+              :let [defs (HashMap (comp (map (seq new-mod-syms)
+                                             (fn [sym-def]
+                                               (list (symbol (str ns-sym "/" (first sym-def)))
+                                                     (second sym-def))))
+                                        (seq defs)))]
+              _ (apply-to (assoc-in-val (list :modules module-name) new-mod-syms)
+                          (set-val :module-syms mod-syms)
+                          (set-val :defined-syms defs))]
+          (list "" empty-list)))))))
 
 (defn unpack-closures [arg-syms]
   (cond
@@ -3242,8 +3368,6 @@ toccata-core
                                                 (rest types))
    (cons (first types) (replace-type (rest types) type-val-num name))))
 
-(def static-values)
-
 (deftype type-ast-val [name fields impls]
   AST
   (emit-c [_]
@@ -3596,14 +3720,23 @@ toccata-core
           asts)))
 
 (defn analyze-add-ns []
-  (for [expr (is-expr (fn [x]
-                        (cond
-                         (not (seq? x)) false
-                         (not (= 3 (count x))) false
-                         (and (= 'add-ns (first x))
-                              (symbol? (second x))))))
-        asts (analyze-expr (nth expr 2))]
-    (free (add-ns-ast (second expr) asts))))
+  (comp (for [expr (is-expr (fn [x]
+                              (cond
+                               (not (seq? x)) false
+                               (not (= 3 (count x))) false
+                               (and (= 'add-ns (first x))
+                                    (symbol? (second x))))))
+              asts (analyze-expr (nth expr 2))]
+          (free (add-ns-ast (second expr) asts)))
+        (for [bootstrapping (get-val :bootstrapping false)
+              :when bootstrapping
+              expr (is-expr (fn [x]
+                              (cond
+                               (not (seq? x)) false
+                               (not (= 2 (count x))) false
+                               (= 'add-ns (first x)))))
+              asts (analyze-expr (second expr))]
+          (free (add-ns-ast :no-prefix asts)))))
 
 ;; TODO: handle multi-arity reified fns
 (defn analyze-reify []
@@ -3677,43 +3810,6 @@ toccata-core
         ast (expr-to-ast)
         _ (set-expr curr-expr)]
     ast))
-
-(defn fixed-fn-types []
-  (traverse (range 10)
-            (fn [arg-count]
-              (cond
-               (= arg-count 0)
-               (write-strs (list "typedef Value *(FnType0)(List *);\n"))
-
-               (apply-to list
-                         (write-strs (list "typedef Value *(FnType" arg-count ")("))
-                         (write-strs (interpose (cons "List *"
-                                                      (repeat arg-count "Value *"))
-                                                ", "))
-                         (write ");\n"))))))
-
-(defn extern-fn [name variadic return-type & arg-types]
-  (let [arg-types (comp arg-types
-                        (cond
-                         variadic (list "...")
-                         empty-list))]
-    (apply-to list
-              (write-strs (list "extern " return-type " " name "("))
-              (write-strs (interpose arg-types ", "))
-              (write ");\n"))))
-
-(defn extern-functions []
-  (apply-to list
-            (write "\n")
-            (extern-fn 'abort 0 VoidT)
-            (extern-fn 'printf 1 Int32 "const char *")
-            (write "#ifdef REF_COUNT\n")
-            (extern-fn 'free 0 VoidT "void *")
-            (extern-fn 'malloc 0 "void *" "unsigned long")
-            (write "#else\n")
-            (extern-fn 'GC_init 0 VoidT)
-            (extern-fn 'GC_malloc 0 Value* Int64)
-            (write "#endif\n")))
 
 (defn core-base-fns []
   (write-strs (list "\n"
@@ -4120,43 +4216,6 @@ toccata-core
                                     _ (emit-impl default impls)]
                                 (list impls-sym local-sym))))))]
     result))
-
-(defn base-types []
-  (let [types (types)]
-    (write-strs (list
-                 "#include <sys/types.h>\n"
-                 "#include <stdio.h>\n"
-                 "#include <string.h>\n\n"
-                 Value
-                 NumberVal
-                 StringVal
-                 SubStringVal
-                 ListVal
-                 FnArityVal
-                 FunctionVal
-                 ProtoImpl
-                 ProtoImpls
-                 ReifiedVal
-                 "List *listCons(Value *x, List *l);\n"
-                 "Value *stringValue(char *s);\n"
-                 "const int64_t NumberType;\n"
-                 "const int64_t KeywordType;\n"
-                 "const int64_t SymbolType;\n"
-                 "const int64_t StringType;\n"
-                 "const int64_t SubStringType;\n"
-                 "const int64_t ListType;\n"
-                 "const int64_t FunctionType;\n"
-                 "List *empty_list;\n"
-                 "Value *number_literals();\n"
-                 "Value *counts();\n"
-                 "Value *types();\n"
-                 "Value *symbol_literals();\n"
-                 "Value *keyword_literals();\n"
-                 "Value *string_literals();\n"
-                 "Value *defined_syms();\n"
-                 "Value *static_fns();\n"
-                 "Value *protocols();\n"
-                 "\n"))))
 
 (defn const-strings [strs type]
   (let [strs (seq strs)]
@@ -4568,31 +4627,6 @@ toccata-core
         _ (write "}\n\n")]
     ""))
 
-(defn bootstrap-toccata [parser]
-  (let [types (types)]
-    (for [expr parser
-          :when (= expr 'toccata-core)
-          _ (apply-to list
-                      (base-types)
-                      (extern-functions)
-                      (static-values)
-                      (fixed-fn-types)
-                      (write-strs
-                       (list
-                        "const int64_t NumberType = " (get types 'Number 0) ";\n"
-                        "const int64_t KeywordType = " (get types 'Keyword 0) ";\n"
-                        "const int64_t SymbolType = " (get types 'Symbol 0) ";\n"
-                        "const int64_t StringType = " (get types 'String 0) ";\n"
-                        "const int64_t SubStringType = " (get types 'SubStr 0) ";\n"
-                        "const int64_t ListType = " (get types 'List 0) ";\n"
-                        "const int64_t FunctionType = " (get types 'Function 0) ";\n"
-                        "List *empty_list = &(List){4,-1,0,0,0};\n"))
-                      (base-fns)
-                      (emit-proto-fn (list 'invoke (map (range 8)
-                                                        (fn [num-args]
-                                                          (list (inc num-args) {}))))))]
-      "")))
-
 (defn compile-source [parser]
   (flat-map (set-val :parser parser)
             (fn [_]
@@ -4611,9 +4645,30 @@ toccata-core
                                     (assoc m
                                       (nth type 1 0)
                                       (str "_num_" (nth type 1 0))))))
-            (bootstrap-toccata parser)
+            (for [expr parser
+                  :when (= expr 'toccata-core)
+                  _ (apply-to list
+                              (base-types)
+                              (extern-functions)
+                              (static-values)
+                              (fixed-fn-types)
+                              (let [types (types)]
+                                (write-strs
+                                 (list
+                                  "const int64_t NumberType = " (get types 'Number 0) ";\n"
+                                  "const int64_t KeywordType = " (get types 'Keyword 0) ";\n"
+                                  "const int64_t SymbolType = " (get types 'Symbol 0) ";\n"
+                                  "const int64_t StringType = " (get types 'String 0) ";\n"
+                                  "const int64_t SubStringType = " (get types 'SubStr 0) ";\n"
+                                  "const int64_t ListType = " (get types 'List 0) ";\n"
+                                  "const int64_t FunctionType = " (get types 'Function 0) ";\n"
+                                  "List *empty_list = &(List){4,-1,0,0,0};\n")))
+                              (base-fns)
+                              (emit-proto-fn (list 'invoke (map (range 8)
+                                                                (fn [num-args]
+                                                                  (list (inc num-args) {}))))))]
+              "")
             (set-val :bootstrapping true)
-            (set-val :debug-on true)
             (compile-source parser)
             (emit-main)
             (serialize-symbol-literals)
@@ -4626,10 +4681,69 @@ toccata-core
             (serialize-types)
             (serialize-counts)))
 
+(defn compile-compiler [parser text]
+  (apply-to list
+            (set-val :text text)
+            (assoc-in-val (list :new-numbers)
+                          (reduce (seq (types)) {}
+                                  (fn [m type]
+                                    (assoc m
+                                      (nth type 1 0)
+                                      (str "_num_" (nth type 1 0))))))
+            (for [expr parser
+                  :when (= expr 'toccata-compiler)
+                  :let [_ (print-err :toccata-compiler)]
+                  _ (apply-to list
+                              (write-strs (list
+                                           "#include <sys/types.h>\n"
+                                           "#include <stdio.h>\n"
+                                           "#include <string.h>\n\n"
+                                           Value
+                                           NumberVal
+                                           StringVal
+                                           SubStringVal
+                                           ListVal
+                                           FnArityVal
+                                           FunctionVal
+                                           ProtoImpl
+                                           ProtoImpls
+                                           ReifiedVal
+                                           "\n"))
+                              (extern-functions)
+                              (static-values)
+                              (fixed-fn-types)
+                              (let [types (types)]
+                                (write-strs
+                                 (list
+                                  "const int64_t NumberType = " (get types 'Number 0) ";\n"
+                                  "const int64_t KeywordType = " (get types 'Keyword 0) ";\n"
+                                  "const int64_t SymbolType = " (get types 'Symbol 0) ";\n"
+                                  "const int64_t StringType = " (get types 'String 0) ";\n"
+                                  "const int64_t SubStringType = " (get types 'SubStr 0) ";\n"
+                                  "const int64_t ListType = " (get types 'List 0) ";\n"
+                                  "const int64_t FunctionType = " (get types 'Function 0) ";\n"
+                                  "List *empty_list = &(List){4,-1,0,0,0};\n")))
+                              (base-fns)
+                              (emit-proto-fn (list 'invoke (map (range 8)
+                                                                (fn [num-args]
+                                                                  (list (inc num-args) {}))))))]
+              "")
+            (set-val :bootstrapping true)
+            ;; (write "extern Value *counts();\n")
+            ;; (write "extern Value *defined_syms();\n")
+            ;; (write "extern Value *protocols();\n")
+            ;; (write "extern Value *static_fns();\n")
+            ;; (write "extern Value *types();\n")
+            ;; (write "extern Value *keyword_literals();\n")
+            ;; (write "extern Value *number_literals();\n")
+            ;; (write "extern Value *string_literals();\n")
+            ;; (write "extern Value *symbol_literals();\n")
+            (compile-source parser)
+            (emit-main)))
+
 (defn compile-main [parser text]
   (apply-to list
             (set-val :text text)
-            (set-val :debug-on true)
             (base-types)
             (extern-functions)
             (core-base-fns)
@@ -4650,6 +4764,7 @@ toccata-core
   (let [parser (make-parser)
         text (slurp (first src-files))
         compiling-fn (comp (compile-core parser text)
+                           (compile-compiler parser text)
                            (compile-main parser text))]
     (compiling-fn {:file-name (first src-files)
                    :line-num 0
