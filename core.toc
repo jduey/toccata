@@ -2861,7 +2861,6 @@ toccata-core
                                                     (str "_num_" (nth type 1 0))))))
                           (base-types)
                           (extern-functions)
-                          (static-values)
                           (fixed-fn-types)
                           (let [types (types)]
                             (write-strs
@@ -3010,7 +3009,8 @@ toccata-core
 (deftype main-ast [args body]
   AST
   (emit-c [_]
-    (for [main-sym (gensym "main_")
+    (for [_ (static-values)
+          main-sym (gensym "main_")
           _ (set-val :main-sym main-sym)
           arg-syms (gen-arg-syms args)
           _ (set-val :local-sym-count 0)
@@ -3086,7 +3086,8 @@ toccata-core
   AST
   (emit-c [_]
     (let [arity-count (count arities)]
-      (for [curr-fn-sym (get-val :curr-fn-sym "")
+      (for [_ (static-values)
+            curr-fn-sym (get-val :curr-fn-sym "")
             fn-sym (gensym "fn_")
             _ (set-val :curr-fn-sym fn-sym)
             _ (write-strs (list "\n// --------- " name " --------------\n"
@@ -3199,10 +3200,12 @@ toccata-core
 (deftype definition-ast [name value]
   AST
   (emit-c [_]
-    (cond
-     (= :no-value value) (forward-decl name value)
-     (comp (define-fwd-decl name value)
-           (define-value name value)))))
+    (flat-map (static-values)
+              (fn [_]
+                (cond
+                 (= :no-value value) (forward-decl name value)
+                 (comp (define-fwd-decl name value)
+                       (define-value name value)))))))
 
 (defn eval-cond-clause [clauses default cond-result]
   (cond
@@ -3441,7 +3444,9 @@ toccata-core
 (deftype protocol-ast [name prototypes]
   AST
   (emit-c [ast]
-    (traverse (seq prototypes) emit-proto-fn)))
+    (flat-map (static-values)
+              (fn [_]
+                (traverse (seq prototypes) emit-proto-fn)))))
 
 (defn replace-type [types type-val-num name]
   (cond
@@ -4631,7 +4636,6 @@ toccata-core
             (fn [_]
               (recur (for [expr parser
                            ast (analyze-expr expr)
-                           _ (static-values)
                            _ (evaluate ast emit-c)]
                        "")))))
 
