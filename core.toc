@@ -2720,7 +2720,89 @@ toccata-core
             (extern-fn 'GC_malloc 0 Value* Int64)
             (write "#endif\n")))
 
-(def static-values)
+(defn const-strings [strs type]
+  (let [strs (seq strs)]
+    (cond
+     (< 0 (count strs))
+     (traverse strs (fn [const-str]
+                      (let [str-ptr (nth const-str 1 "noString_ptr")
+                            str-val (nth const-str 0 "noString_name")
+                            str-len (count str-val)]
+                        (write-strs (list
+                                     "struct {int64_t type;\n int32_t refs;\n   int64_t len;\n   char buffer["
+                                     (inc str-len)
+                                     "];} " str-ptr " = {" type ", -1, "
+                                     str-len ",\"" (escape-chars str-val) "\"};\n")))))
+
+     (state-maybe ""))))
+
+(defn static-syms [syms sym-type]
+  (let [syms (seq syms)]
+    (cond
+     (< 0 (count syms))
+     (traverse syms
+               (fn [sym]
+                 (write-strs (list "SubString "
+                             (nth sym 1 "no_symbol_val")
+                             " = {"
+                             sym-type
+                             ", -1, " (count (str (nth sym 0 "no_symbol_name"))) ", 0, \""
+                             (nth sym 0 "no_symbol_name")
+                             "\"};\n"))))
+
+     (state-maybe ""))))
+
+(defn static-numbers [nums num-type]
+  (let [nums (seq nums)]
+    (cond
+     (< 0 (count nums))
+     (traverse nums
+               (fn [num]
+                 (write-strs (list "Number "
+                             (nth num 1 "noNumber_sym")
+                             " = {"
+                             num-type
+                             ", -1, "
+                             (nth num 0 "noNumber_val")
+                             "};\n"))))
+
+     (state-maybe ""))))
+
+(defn static-values []
+  (let [types (types)]
+    (for [strs (get-in-val (list :new-strings) empty-list)
+          _ (apply-to list
+                      (const-strings strs (get types 'String "no_String_type"))
+                      (update-in-val (list :strings)
+                                     (fn [old-strs]
+                                       (comp old-strs strs)))
+                      (assoc-in-val (list :new-strings) {}))
+
+          nums (get-in-val (list :new-numbers) empty-list)
+          _ (apply-to list
+                      (static-numbers nums (get types 'Number "no_Number_type"))
+                      (update-in-val (list :numbers)
+                                     (fn [old-nums]
+                                       (comp old-nums nums)))
+                      (assoc-in-val (list :new-numbers) {}))
+
+          syms (get-in-val (list :new-symbols) empty-list)
+          _ (apply-to list
+                      (static-syms syms (get types 'Symbol "no_Symbol_type"))
+                      (update-in-val (list :symbols)
+                                     (fn [old-sys]
+                                       (comp old-sys syms)))
+                      (assoc-in-val (list :new-symbols) {}))
+
+          kws (get-in-val (list :new-keywords) empty-list)
+          _ (apply-to list
+                      (static-syms kws (get types 'Keyword "no_Keyword_type"))
+                      (update-in-val (list :keywords)
+                                     (fn [old-kws]
+                                       (comp old-kws kws)))
+                      (assoc-in-val (list :new-keywords) {}))]
+      "")))
+
 
 (defn fixed-fn-types []
   (traverse (range 10)
@@ -4216,89 +4298,6 @@ toccata-core
                                     _ (emit-impl default impls)]
                                 (list impls-sym local-sym))))))]
     result))
-
-(defn const-strings [strs type]
-  (let [strs (seq strs)]
-    (cond
-     (< 0 (count strs))
-     (traverse strs (fn [const-str]
-                      (let [str-ptr (nth const-str 1 "noString_ptr")
-                            str-val (nth const-str 0 "noString_name")
-                            str-len (count str-val)]
-                        (write-strs (list
-                                     "struct {int64_t type;\n int32_t refs;\n   int64_t len;\n   char buffer["
-                                     (inc str-len)
-                                     "];} " str-ptr " = {" type ", -1, "
-                                     str-len ",\"" (escape-chars str-val) "\"};\n")))))
-
-     (state-maybe ""))))
-
-(defn static-syms [syms sym-type]
-  (let [syms (seq syms)]
-    (cond
-     (< 0 (count syms))
-     (traverse syms
-               (fn [sym]
-                 (write-strs (list "SubString "
-                             (nth sym 1 "no_symbol_val")
-                             " = {"
-                             sym-type
-                             ", -1, " (count (str (nth sym 0 "no_symbol_name"))) ", 0, \""
-                             (nth sym 0 "no_symbol_name")
-                             "\"};\n"))))
-
-     (state-maybe ""))))
-
-(defn static-numbers [nums num-type]
-  (let [nums (seq nums)]
-    (cond
-     (< 0 (count nums))
-     (traverse nums
-               (fn [num]
-                 (write-strs (list "Number "
-                             (nth num 1 "noNumber_sym")
-                             " = {"
-                             num-type
-                             ", -1, "
-                             (nth num 0 "noNumber_val")
-                             "};\n"))))
-
-     (state-maybe ""))))
-
-(defn static-values []
-  (let [types (types)]
-    (for [strs (get-in-val (list :new-strings) empty-list)
-          _ (apply-to list
-                      (const-strings strs (get types 'String "no_String_type"))
-                      (update-in-val (list :strings)
-                                     (fn [old-strs]
-                                       (comp old-strs strs)))
-                      (assoc-in-val (list :new-strings) {}))
-
-          nums (get-in-val (list :new-numbers) empty-list)
-          _ (apply-to list
-                      (static-numbers nums (get types 'Number "no_Number_type"))
-                      (update-in-val (list :numbers)
-                                     (fn [old-nums]
-                                       (comp old-nums nums)))
-                      (assoc-in-val (list :new-numbers) {}))
-
-          syms (get-in-val (list :new-symbols) empty-list)
-          _ (apply-to list
-                      (static-syms syms (get types 'Symbol "no_Symbol_type"))
-                      (update-in-val (list :symbols)
-                                     (fn [old-sys]
-                                       (comp old-sys syms)))
-                      (assoc-in-val (list :new-symbols) {}))
-
-          kws (get-in-val (list :new-keywords) empty-list)
-          _ (apply-to list
-                      (static-syms kws (get types 'Keyword "no_Keyword_type"))
-                      (update-in-val (list :keywords)
-                                     (fn [old-kws]
-                                       (comp old-kws kws)))
-                      (assoc-in-val (list :new-keywords) {}))]
-      "")))
 
 (defn emit-main []
   (for [_ (set-val :local-sym-count 0)
