@@ -35574,7 +35574,6 @@ struct {int64_t type;
  int32_t refs;
    int64_t len;
    char buffer[4];} _str_243 = {1, -1, 3,";\n\n"};
-SubString _kw_50 = {5, -1, 9, 0, ":no-value"};
 
 // --------- forward-decl --------------
 Function fn_2388;
@@ -35739,55 +35738,37 @@ my_free(rslt10);
 return(rslt10);
 };
 
-Value *arityImpl_2389(List *closures, Value *arg0, Value *arg1) {
-Value *cond0;
-Value *rslt1 = arityImpl_378(empty_list, (Value *)&_kw_50, arg1);
-decRef(rslt1);
-my_free(rslt1);
-
-if (isTrue(rslt1)) {
-decRef(rslt1);
-my_free(rslt1);
-Value *rslt2 = arityImpl_1522(empty_list, (Value *)&_str_240);
-FnArity *arity_3 = malloc_fnArity();
-arity_3->type = 8;
-arity_3->count = 1;
-arity_3->closures = empty_list;
-arity_3->variadic = 0;
-arity_3->fn = arityImpl_2391;
-incRef((Value *)rslt2);
-arity_3->closures = listCons((Value *)rslt2, (List *)arity_3->closures);
+Value *arityImpl_2389(List *closures, Value *arg0) {
+Value *rslt0 = arityImpl_1522(empty_list, (Value *)&_str_240);
+FnArity *arity_1 = malloc_fnArity();
+arity_1->type = 8;
+arity_1->count = 1;
+arity_1->closures = empty_list;
+arity_1->variadic = 0;
+arity_1->fn = arityImpl_2391;
+incRef((Value *)rslt0);
+arity_1->closures = listCons((Value *)rslt0, (List *)arity_1->closures);
 incRef((Value *)arg0);
-arity_3->closures = listCons((Value *)arg0, (List *)arity_3->closures);
+arity_1->closures = listCons((Value *)arg0, (List *)arity_1->closures);
 Function *fn_2390 = malloc_function(1);
 fn_2390->type = 3;
 fn_2390->name = "anon";
 fn_2390->arityCount = 1;
-fn_2390->arities[0] = arity_3;
-Value *rslt4 = protoFnImpl_163(empty_list, rslt2, (Value *)fn_2390);
-incRef(rslt4);
-cond0 = rslt4;
-decRef(rslt2);
-my_free(rslt2);
+fn_2390->arities[0] = arity_1;
+Value *rslt2 = protoFnImpl_163(empty_list, rslt0, (Value *)fn_2390);
+incRef(rslt2);
+decRef(rslt0);
+my_free(rslt0);
 decRef((Value *)fn_2390);
 my_free((Value *)fn_2390);
-decRef(rslt4);
-my_free(rslt4);
-} else {
-decRef(rslt1);
-my_free(rslt1);
-incRef(var_91);
-cond0 = var_91;
-}
-incRef(cond0);
-decRef(cond0);
-my_free(cond0);
-return(cond0);
+decRef(rslt2);
+my_free(rslt2);
+return(rslt2);
 };
 
 
 // --------- forward-decl main body --------------
-Function fn_2388 = {3, -1, "forward-decl", 1, {&(FnArity){8, -1, 2, (List *)0, 0, arityImpl_2389}}};
+Function fn_2388 = {3, -1, "forward-decl", 1, {&(FnArity){8, -1, 1, (List *)0, 0, arityImpl_2389}}};
 
 
 // --------- fv --------------
@@ -36753,6 +36734,7 @@ Function protoFn_2437 = {3, -1, ".value", 1, {&protoFnArity_2440}};
 Value *var_2441;
 
 Number _num_45 = {2, -1, 74};
+SubString _kw_50 = {5, -1, 9, 0, ":no-value"};
 
 // --------- instance?_impl --------------
 Function fn_2442;
@@ -36805,7 +36787,7 @@ my_free(rslt7);
 if (isTrue(rslt7)) {
 decRef(rslt7);
 my_free(rslt7);
-Value *rslt8 = arityImpl_2389(empty_list, val1, val2);
+Value *rslt8 = arityImpl_2389(empty_list, val1);
 incRef(rslt8);
 cond0 = rslt8;
 decRef(rslt8);
@@ -42990,7 +42972,7 @@ Value *rslt2 = arityImpl_212(empty_list, (Value *)varArgs1);
 decRef((Value *)varArgs1);
 my_free((Value *)varArgs1);
 Value *rslt3 = arityImpl_1041(empty_list, rslt2);
-Value *rslt4 = arityImpl_2389(empty_list, val0, (Value *)&_kw_50);
+Value *rslt4 = arityImpl_2389(empty_list, val0);
 List *varArgs5 = empty_list;
 incRef((Value *)rslt4);
 varArgs5 = (List *)listCons((Value *)rslt4, varArgs5);
@@ -67756,7 +67738,7 @@ fnInfo = listCons(stringValue("(Value *)&fn_2375"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(stringValue("arityImpl_2389"), empty_list);
-arityInfo = listCons(numberValue(2), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_2388"), fnInfo);

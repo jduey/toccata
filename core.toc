@@ -3137,16 +3137,12 @@ toccata-core
   (emit-c [_]
     (emit-static-sym sym)))
 
-(defn forward-decl [name value]
-  (cond
-   (= :no-value value)
-   (for [c-name (gensym "var_")
-         _ (write-strs (list (str "// forward declaration for '" name "'\n")
-                             (str Value* c-name ";\n\n")))
-         _ (assoc-in-val (list :defined-syms name) (list (str "Value *" c-name) c-name))]
-     "")
-
-   empty-list))
+(defn forward-decl [name]
+  (for [c-name (gensym "var_")
+        _ (write-strs (list (str "// forward declaration for '" name "'\n")
+                            (str Value* c-name ";\n\n")))
+        _ (assoc-in-val (list :defined-syms name) (list (str "Value *" c-name) c-name))]
+    ""))
 
 (defn fv [x]
   true)
@@ -3203,7 +3199,7 @@ toccata-core
     (flat-map (static-values)
               (fn [_]
                 (cond
-                 (= :no-value value) (forward-decl name value)
+                 (= :no-value value) (forward-decl name)
                  (comp (define-fwd-decl name value)
                        (define-value name value)))))))
 
@@ -3470,7 +3466,7 @@ toccata-core
                            (comp (get-in-val (list :protocols getter-name))
                                  (emit-proto-fn (list getter-name (list (list 1 {})))))))))
           _ (comp (get-in-val (list :defined-syms name))
-                  (forward-decl name :no-value))
+                  (forward-decl name))
           type-ast (analyze-expr (list 'reify
                                        'Type
                                        (list 'instance? (list 'vector '_ 'v)
