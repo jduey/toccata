@@ -1,0 +1,101 @@
+
+;; state-maybe monad with lazy comp*
+
+(defn reduce-args [args s]
+  (cond
+   (empty? args) (list empty-list s)
+   (let [result-s ((first args) s)]
+     (cond
+      (empty? result-s) empty-list
+      (let [results-s (reduce-args (rest args) (second result-s))]
+        (cond
+         (empty? results-s) empty-list
+         (list (cons (first result-s) (first results-s))
+               (second results-s))))))))
+
+;; TODO: deftypes don't get added to the importing ns correctly
+(deftype sm-value [invoke-fn]
+  Fn
+  (invoke [ev s]
+    (invoke-fn s))
+
+  Applicative
+  (wrap [_ v]
+    (sm-value (fn [s]
+                (list v s))))
+  (apply* [fv args]
+    (sm-value (fn [s]
+                (let [reduce-state (reduce-args args s)]
+                  (cond
+                   (empty? reduce-state) empty-list
+                   (let [results (first reduce-state)
+                         s (second reduce-state)
+                         f-s (fv s)]
+                     (list (apply (first f-s) results) (second f-s))))))))
+
+  Monad
+  (flat-map [ev f]
+    (sm-value (fn [s]
+                (let [v-ss (ev s)]
+                  (cond
+                   (empty? v-ss) v-ss
+                   (let [v (nth v-ss 0)
+                         ss (nth v-ss 1)]
+                     ((f v) ss)))))))
+
+  Monoid
+  (zero [_]
+    (sm-value (fn [s]
+                empty-list)))
+  (comp* [mv mvs]
+    (sm-value (fn [s]
+                (let [x (mv s)]
+                  (cond
+                   (empty? mvs) x
+                   (empty? x) ((comp* (first mvs) (rest mvs)) s)
+                   x))))))
+
+(defn new-sm [invoke-fn]
+  (sm-value invoke-fn))
+
+(defn state-maybe [v]
+  (sm-value (fn [s]
+              (list v s))))
+
+(defn update-state [f]
+  (sm-value (fn [s]
+              (list s (f s)))))
+
+(defn get-val
+  ([k]
+     (sm-value (fn [s]
+                 (let [v (get s k not-found)]
+                   (cond
+                    (= not-found v) empty-list
+                    (list v s))))))
+  ([k nf]
+     (sm-value (fn [s]
+                 (list (get s k nf) s)))))
+
+(defn set-val [k v]
+  (sm-value (fn [s]
+              (list (get s k :not-found) (assoc s k v)))))
+
+(defn get-in-val
+  ([path]
+     (sm-value (fn [s]
+                 (let [v (get-in s path not-found)]
+                   (cond
+                    (= not-found v) empty-list
+                    (list v s))))))
+  ([path nf]
+     (sm-value (fn [s]
+                 (list (get-in s path nf) s)))))
+
+(defn assoc-in-val [path v]
+  (sm-value (fn [s]
+              (list v (assoc-in s path v)))))
+
+(defn update-in-val [path f]
+  (sm-value (fn [s]
+              (list (get-in s path :not-found) (update-in s path f)))))
