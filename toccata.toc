@@ -2158,23 +2158,14 @@ toccata-compiler
           asts)))
 
 (defn analyze-add-ns []
-  (comp (for [expr (is-expr (fn [x]
-                              (cond
-                               (not (seq? x)) false
-                               (not (= 3 (count x))) false
-                               (and (= 'add-ns (first x))
-                                    (symbol? (second x))))))
-              asts (analyze-expr (nth expr 2))]
-          (free (add-ns-ast (second expr) asts)))
-        (for [bootstrapping (sm/get-val :bootstrapping false)
-              :when bootstrapping
-              expr (is-expr (fn [x]
-                              (cond
-                               (not (seq? x)) false
-                               (not (= 2 (count x))) false
-                               (= 'add-ns (first x)))))
-              asts (analyze-expr (second expr))]
-          (free (add-ns-ast :no-prefix asts)))))
+  (for [expr (is-expr (fn [x]
+                        (cond
+                         (not (seq? x)) false
+                         (not (= 3 (count x))) false
+                         (and (= 'add-ns (first x))
+                              (symbol? (second x))))))
+        asts (analyze-expr (nth expr 2))]
+    (free (add-ns-ast (second expr) asts))))
 
 ;; TODO: handle multi-arity reified fns
 (defn analyze-reify []
