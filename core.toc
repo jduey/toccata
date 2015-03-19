@@ -1,7 +1,4 @@
 
-
-toccata-core
-
 (def print-err)
 
 (def VoidT "void")
@@ -1593,7 +1590,3 @@ toccata-core
   (cond
    (< n 1) empty-list
    (map (range* (dec n)) (fn [_] v))))
-
-
-(main [_]
-      :bogus)

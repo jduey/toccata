@@ -3063,31 +3063,26 @@ toccata-compiler
                                     (assoc m
                                       (nth type 1 0)
                                       (str "_num_" (nth type 1 0))))))
-            (for [expr parser
-                  :when (= expr 'toccata-core)
-                  _ (apply-to list
-                              (base-types)
-                              (extern-functions)
-                              (fixed-fn-types)
-                              (let [types (types)]
-                                (write-strs
-                                 (list
-                                  "const int64_t NumberType = " (get types 'Number 0) ";\n"
-                                  "const int64_t KeywordType = " (get types 'Keyword 0) ";\n"
-                                  "const int64_t SymbolType = " (get types 'Symbol 0) ";\n"
-                                  "const int64_t StringType = " (get types 'String 0) ";\n"
-                                  "const int64_t SubStringType = " (get types 'SubStr 0) ";\n"
-                                  "const int64_t ListType = " (get types 'List 0) ";\n"
-                                  "const int64_t FunctionType = " (get types 'Function 0) ";\n"
-                                  "List *empty_list = &(List){4,-1,0,0,0};\n")))
-                              (base-fns)
-                              (emit-proto-fn (list 'invoke (map (range 8)
-                                                                (fn [num-args]
-                                                                  (list (inc num-args) {}))))))]
-              "")
-            (set-val :bootstrapping true)
+            (apply-to list
+                      (base-types)
+                      (extern-functions)
+                      (fixed-fn-types)
+                      (let [types (types)]
+                        (write-strs
+                         (list
+                          "const int64_t NumberType = " (get types 'Number 0) ";\n"
+                          "const int64_t KeywordType = " (get types 'Keyword 0) ";\n"
+                          "const int64_t SymbolType = " (get types 'Symbol 0) ";\n"
+                          "const int64_t StringType = " (get types 'String 0) ";\n"
+                          "const int64_t SubStringType = " (get types 'SubStr 0) ";\n"
+                          "const int64_t ListType = " (get types 'List 0) ";\n"
+                          "const int64_t FunctionType = " (get types 'Function 0) ";\n"
+                          "List *empty_list = &(List){4,-1,0,0,0};\n")))
+                      (base-fns)
+                      (emit-proto-fn (list 'invoke (map (range 8)
+                                                        (fn [num-args]
+                                                          (list (inc num-args) {}))))))
             (compile-source parser)
-            (emit-main)
             (serialize-symbol-literals)
             (serialize-number-literals)
             (serialize-string-literals)
@@ -3103,7 +3098,6 @@ toccata-compiler
             (set-val :text text)
             (for [expr parser
                   :when (= expr 'toccata-compiler)
-                  :let [_ (print-err :toccata-compiler)]
                   _ (compile-source parser)]
               "")
             (set-val :bootstrapping false)
@@ -3131,8 +3125,7 @@ toccata-compiler
 (defn compile-module [src-files]
   (let [parser (make-parser)
         text (slurp (first src-files))
-        compiling-fn (comp (compile-core parser text)
-                           (compile-compiler parser text)
+        compiling-fn (comp (compile-compiler parser text)
                            (compile-main parser text))]
     (compiling-fn {:file-name (first src-files)
                    :line-num 0

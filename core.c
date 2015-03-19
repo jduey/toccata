@@ -8945,114 +8945,6 @@ return(cond0);
 // --------- repeat main body --------------
 Function fn_768 = {3, -1, "repeat", 1, {&(FnArity){8, -1, 2, (List *)0, 0, arityImpl_769}}};
 
-SubString _kw_8 = {5, -1, 6, 0, ":bogus"};
-
-int main_773 (Value *arg0) {
-
-return(0);
-}
-
-ProtoImpls localImpls_774 = {4, (Value *)0, {{9, (Value *)&protoFn_452}, {11, (Value *)&protoFn_702}, {5, (Value *)&fn_735}, {7, (Value *)&fn_745}}};
-ProtoImpls localImpls_775 = {0, (Value *)0, {}};
-ProtoImpls localImpls_776 = {0, (Value *)&defaultFn_148, {}};
-ProtoImpls localImpls_777 = {2, (Value *)0, {{9, (Value *)&protoFn_438}, {11, (Value *)&protoFn_636}}};
-ProtoImpls localImpls_778 = {1, (Value *)&defaultFn_161, {{4, (Value *)&fn_511}}};
-ProtoImpls localImpls_779 = {0, (Value *)&defaultFn_167, {}};
-ProtoImpls localImpls_780 = {0, (Value *)0, {}};
-ProtoImpls localImpls_781 = {0, (Value *)0, {}};
-ProtoImpls localImpls_782 = {0, (Value *)0, {}};
-ProtoImpls localImpls_783 = {1, (Value *)&defaultFn_191, {{4, (Value *)&fn_509}}};
-ProtoImpls localImpls_784 = {2, (Value *)&defaultFn_197, {{3, (Value *)&fn_418}, {10, (Value *)&protoFn_446}}};
-ProtoImpls localImpls_785 = {1, (Value *)&defaultFn_216, {{4, (Value *)&fn_507}}};
-ProtoImpls localImpls_786 = {2, (Value *)&defaultFn_224, {{5, (Value *)&fn_731}, {7, (Value *)&fn_739}}};
-ProtoImpls localImpls_787 = {8, (Value *)&defaultFn_230, {{3, (Value *)&fn_408}, {2, (Value *)&fn_424}, {4, (Value *)&fn_485}, {1, (Value *)&fn_547}, {6, (Value *)&fn_555}, {12, (Value *)&protoFn_660}, {5, (Value *)&fn_733}, {7, (Value *)&fn_741}}};
-ProtoImpls localImpls_788 = {0, (Value *)&defaultFn_236, {}};
-ProtoImpls localImpls_789 = {8, (Value *)&defaultFn_261, {{2, (Value *)&fn_420}, {4, (Value *)&fn_483}, {1, (Value *)&fn_531}, {6, (Value *)&fn_557}, {12, (Value *)&protoFn_654}, {13, (Value *)&protoFn_726}, {5, (Value *)&fn_729}, {7, (Value *)&fn_737}}};
-ProtoImpls localImpls_790 = {1, (Value *)&defaultFn_267, {{2, (Value *)&fn_422}}};
-ProtoImpls localImpls_791 = {4, (Value *)0, {{4, (Value *)&fn_487}, {1, (Value *)&fn_533}, {6, (Value *)&fn_559}, {12, (Value *)&protoFn_664}}};
-ProtoImpls localImpls_792 = {3, (Value *)0, {{4, (Value *)&fn_489}, {1, (Value *)&fn_535}, {6, (Value *)&fn_561}}};
-ProtoImpls localImpls_793 = {0, (Value *)0, {}};
-ProtoImpls localImpls_794 = {4, (Value *)&defaultFn_288, {{4, (Value *)&fn_493}, {1, (Value *)&fn_537}, {6, (Value *)&fn_563}, {12, (Value *)&protoFn_668}}};
-ProtoImpls localImpls_795 = {3, (Value *)0, {{4, (Value *)&fn_491}, {1, (Value *)&fn_539}, {6, (Value *)&fn_565}}};
-ProtoImpls localImpls_796 = {1, (Value *)&defaultFn_302, {{4, (Value *)&fn_495}}};
-ProtoImpls localImpls_797 = {4, (Value *)0, {{4, (Value *)&fn_497}, {1, (Value *)&fn_541}, {6, (Value *)&fn_567}, {12, (Value *)&protoFn_642}}};
-ProtoImpls localImpls_798 = {4, (Value *)0, {{4, (Value *)&fn_499}, {1, (Value *)&fn_543}, {6, (Value *)&fn_569}, {12, (Value *)&protoFn_646}}};
-ProtoImpls localImpls_799 = {4, (Value *)0, {{4, (Value *)&fn_501}, {1, (Value *)&fn_545}, {6, (Value *)&fn_571}, {12, (Value *)&protoFn_650}}};
-ProtoImpls localImpls_800 = {1, (Value *)0, {{4, (Value *)&fn_481}}};
-ProtoImpls localImpls_801 = {1, (Value *)0, {{4, (Value *)&fn_477}}};
-ProtoImpls localImpls_802 = {3, (Value *)0, {{3, (Value *)&fn_410}, {4, (Value *)&fn_503}, {12, (Value *)&protoFn_672}}};
-ProtoImpls localImpls_803 = {5, (Value *)0, {{3, (Value *)&fn_412}, {4, (Value *)&fn_505}, {1, (Value *)&fn_549}, {6, (Value *)&fn_573}, {12, (Value *)&protoFn_680}}};
-ProtoImpls localImpls_804 = {1, (Value *)0, {{12, (Value *)&protoFn_684}}};
-ProtoImpls localImpls_805 = {1, (Value *)&defaultFn_354, {{12, (Value *)&protoFn_688}}};
-ProtoImpls localImpls_806 = {1, (Value *)0, {{12, (Value *)&protoFn_692}}};
-ProtoImpls localImpls_807 = {1, (Value *)0, {{12, (Value *)&protoFn_696}}};
-ProtoImpls localImpls_808 = {1, (Value *)0, {{10, (Value *)&protoFn_450}}};
-ProtoImpls localImpls_809 = {1, (Value *)0, {{12, (Value *)&protoFn_700}}};
-
-int toccataMain(int argc, char *argv[]) {
-  protoImpls_0 = &localImpls_774;
-  protoImpls_141 = &localImpls_775;
-  protoImpls_146 = &localImpls_776;
-  protoImpls_154 = &localImpls_777;
-  protoImpls_159 = &localImpls_778;
-  protoImpls_165 = &localImpls_779;
-  protoImpls_173 = &localImpls_780;
-  protoImpls_178 = &localImpls_781;
-  protoImpls_183 = &localImpls_782;
-  protoImpls_189 = &localImpls_783;
-  protoImpls_195 = &localImpls_784;
-  protoImpls_214 = &localImpls_785;
-  protoImpls_222 = &localImpls_786;
-  protoImpls_228 = &localImpls_787;
-  protoImpls_234 = &localImpls_788;
-  protoImpls_259 = &localImpls_789;
-  protoImpls_265 = &localImpls_790;
-  protoImpls_271 = &localImpls_791;
-  protoImpls_276 = &localImpls_792;
-  protoImpls_281 = &localImpls_793;
-  protoImpls_286 = &localImpls_794;
-  protoImpls_292 = &localImpls_795;
-  protoImpls_300 = &localImpls_796;
-  protoImpls_306 = &localImpls_797;
-  protoImpls_311 = &localImpls_798;
-  protoImpls_316 = &localImpls_799;
-  protoImpls_324 = &localImpls_800;
-  protoImpls_329 = &localImpls_801;
-  protoImpls_334 = &localImpls_802;
-  protoImpls_339 = &localImpls_803;
-  protoImpls_347 = &localImpls_804;
-  protoImpls_352 = &localImpls_805;
-  protoImpls_358 = &localImpls_806;
-  protoImpls_363 = &localImpls_807;
-  protoImpls_429 = &localImpls_808;
-  protoImpls_627 = &localImpls_809;
-#ifndef REF_COUNT
-    GC_init();
-#endif
-     outStream = stdout;
-     List *argList = malloc_list();
-      argList->type = ListType;
-      argList->len = 0;
-      argList->head = (Value *)0;
-      argList->tail = (List *)0;
-      List *tail = argList;
-      for(int i = 0; i < argc; i++) {
-         List *newTail = malloc_list();
-         newTail->type = ListType;
-         newTail->len = 0;
-         newTail->tail = (List *)0;
-         newTail->head = (Value *)0;
-         tail->head = stringValue(argv[i]);
-         tail->tail = newTail;
-         tail = newTail;
-         argList->len++;
-}
-  int the_final_answer = main_773((Value *)argList);
-  decRef((Value *)argList);
-  my_free((Value *)argList);
-  fprintf(stderr, "malloc count: %lld  free count: %lld  diff: %lld\n", malloc_count, free_count, malloc_count - free_count);
-  return(the_final_answer);
-};
 Value *symbol_literals() {
 List *syms = empty_list;
 List *symInfo;
@@ -9256,9 +9148,6 @@ kwInfo = listCons(keywordValue(":update-in-nil"), kwInfo);
 kws = listCons((Value *)kwInfo, kws);
 kwInfo = listCons(stringValue("_kw_7"), empty_list);
 kwInfo = listCons(keywordValue(":assoc-in-nil"), kwInfo);
-kws = listCons((Value *)kwInfo, kws);
-kwInfo = listCons(stringValue("_kw_8"), empty_list);
-kwInfo = listCons(keywordValue(":bogus"), kwInfo);
 kws = listCons((Value *)kwInfo, kws);
 return((Value *)kws);
 }
@@ -12343,7 +12232,7 @@ return((Value *)types);
 
 Value *counts() {
 List *cnts = empty_list;
-cnts = listCons(numberValue(810), cnts);
+cnts = listCons(numberValue(773), cnts);
 return((Value *)cnts);
 }
 
