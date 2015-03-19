@@ -2625,7 +2625,7 @@ toccata-core
   AST
   (emit-c [_]
     (for [static-kw (get-in-val (list :keywords kw))]
-      (list (str "(Value *)&" static-kw) empty-list))))
+      (list (str "(Value *)&" static-kw) empty-list (str "SubString " static-kw)))))
 
 (deftype const-number-ast [num]
   Stringable
@@ -2641,7 +2641,7 @@ toccata-core
   AST
   (emit-c [ast]
     (for [static-str (get-in-val (list :strings const-str) :no-static-str)]
-      (list (str "(Value *)&" static-str) empty-list))))
+      (list (str "(Value *)&" static-str) empty-list (str "String " static-str)))))
 
 (defn eval-exprs [ast]
   (for [exprs (evaluate ast emit-c)]
@@ -2821,17 +2821,6 @@ toccata-core
                                                 ", "))
                          (write ");\n"))))))
 
-(def base-fns)
-(def emit-proto-fn)
-(def serialize-symbol-literals)
-(def serialize-number-literals)
-(def serialize-string-literals)
-(def serialize-keyword-literals)
-(def serialize-protocols)
-(def serialize-static-fns)
-(def serialize-defined-syms)
-(def serialize-types)
-(def serialize-counts)
 (deftype add-ns-ast [ns-sym asts]
   AST
   (emit-c [_]
@@ -3307,7 +3296,7 @@ toccata-core
                             type-num ", -1, " (count impl-fns) ", {"
                             (apply str (interpose (map impl-fns first) ", "))
                             "}};\n"))]
-    (list (str "(Value *)&" reified-sym) empty-list reified-sym)))
+    (list (str "(Value *)&" reified-sym) empty-list (str "ReifiedVal " reified-sym))))
 
 (deftype reify-ast [impls]
   AST
@@ -3456,6 +3445,38 @@ toccata-core
 
 
 (def compile-core)
+
+(defn core-base-fns []
+  (write-strs (list "\n"
+                    "FILE *outStream;\n"
+                    "long long malloc_count;\n"
+                    "long long free_count;\n"
+                    "int recycledFunction;\n"
+                    "int recycledReified;\n"
+                    "Value* true;\n"
+                    "Value* false;\n"
+                    "Number trueVal;\n"
+                    "Number falseVal;\n"
+                    "Value *my_malloc(int64_t);\n"
+                    "SubString *malloc_substring();\n"
+                    "FnArity *malloc_fnArity();\n"
+                    "List *malloc_list();\n"
+                    "Number *malloc_number();\n"
+                    "Function *malloc_function(int arityCount);\n"
+                    "ReifiedVal *malloc_reified(int implCount);\n"
+                    "void incRef(Value *);\n"
+                    "void decRef(Value *);\n"
+                    "void my_free(Value *);\n"
+                    "int isTrue(Value *boolVal);\n"
+                    "Value *findProtoImpl(int64_t type, ProtoImpls *impls);\n"
+                    "FnArity *findFnArity(Value *fnVal, int argCount);\n"
+                    "Value *stringValue(char *s);\n"
+                    "Value *keywordValue(char *s);\n"
+                    "Value *symbolValue(char *s);\n"
+                    "Value *makeSubstr(int64_t len, Value *str, char *subsStart);\n"
+                    "Value *numberValue(int64_t n);\n"
+                    "List *listCons(Value *x, List *l);\n")))
+
 (defn analyze-toccata-core []
   (for [expr (is-expr (fn [x]
                         (cond
@@ -3474,6 +3495,46 @@ toccata-core
                           core (slurp (second expr))]
                     _ (compile-core parser core)
                     :let [_ (standard-output)]
+
+                    syms (get-val :symbols {})
+                    _ (set-val :core-symbols syms)
+                    _ (set-val :symbols {})
+
+                    kws (get-val :keywords {})
+                    _ (set-val :core-keywords kws)
+                    _ (set-val :keywords {})
+
+                    strs (get-val :strings {})
+                    _ (set-val :core-strings strs)
+                    _ (set-val :strings {})
+
+                    nums (get-val :numbers {})
+                    _ (set-val :core-numbers nums)
+                    _ (set-val :numbers {})
+                    def-syms (get-val :defined-syms {})
+                    _ (set-val :core-defined-syms def-syms)
+                    _ (set-val :defined-syms {})
+                    s-funs (get-val :static-fns {})
+                    _ (set-val :core-static-fns s-funs)
+                    _ (set-val :static-fns {})
+
+                    _ (base-types)
+
+                    protos (get-val :protocols)
+                    _ (traverse (seq protos)
+                                (fn [proto]
+                                  (let [impls (get (second proto) :impls {})]
+                                    (cond
+                                     (empty? impls) (state-maybe "")
+                                     (traverse (seq impls)
+                                               (fn [impl]
+                                                 (write-strs (list "extern Function "
+                                                                   (subs (second impl) 10) ";\n"))))))))
+
+                    _ (extern-functions)
+                    _ (core-base-fns)
+                    _ (fixed-fn-types)
+
                     _ (set-val :file-name file-name)
                     _ (set-val :text text)]
                 (list "" empty-list)))))))
@@ -3873,37 +3934,6 @@ toccata-core
         ast (expr-to-ast)
         _ (set-expr curr-expr)]
     ast))
-
-(defn core-base-fns []
-  (write-strs (list "\n"
-                    "FILE *outStream;\n"
-                    "long long malloc_count;\n"
-                    "long long free_count;\n"
-                    "int recycledFunction;\n"
-                    "int recycledReified;\n"
-                    "Value* true;\n"
-                    "Value* false;\n"
-                    "Number trueVal;\n"
-                    "Number falseVal;\n"
-                    "Value *my_malloc(int64_t);\n"
-                    "SubString *malloc_substring();\n"
-                    "FnArity *malloc_fnArity();\n"
-                    "List *malloc_list();\n"
-                    "Number *malloc_number();\n"
-                    "Function *malloc_function(int arityCount);\n"
-                    "ReifiedVal *malloc_reified(int implCount);\n"
-                    "void incRef(Value *);\n"
-                    "void decRef(Value *);\n"
-                    "void my_free(Value *);\n"
-                    "int isTrue(Value *boolVal);\n"
-                    "Value *findProtoImpl(int64_t type, ProtoImpls *impls);\n"
-                    "FnArity *findFnArity(Value *fnVal, int argCount);\n"
-                    "Value *stringValue(char *s);\n"
-                    "Value *keywordValue(char *s);\n"
-                    "Value *symbolValue(char *s);\n"
-                    "Value *makeSubstr(int64_t len, Value *str, char *subsStart);\n"
-                    "Value *numberValue(int64_t n);\n"
-                    "List *listCons(Value *x, List *l);\n")))
 
 (defn base-fns []
   (write-strs (list "\n"
@@ -4629,7 +4659,6 @@ toccata-core
                   _ (apply-to list
                               (base-types)
                               (extern-functions)
-                              (static-values)
                               (fixed-fn-types)
                               (let [types (types)]
                                 (write-strs
@@ -4663,62 +4692,12 @@ toccata-core
 (defn compile-compiler [parser text]
   (apply-to list
             (set-val :text text)
-            (set-val :debug-on true)
-            (assoc-in-val (list :new-numbers)
-                          (reduce (seq (types)) {}
-                                  (fn [m type]
-                                    (assoc m
-                                      (nth type 1 0)
-                                      (str "_num_" (nth type 1 0))))))
             (for [expr parser
                   :when (= expr 'toccata-compiler)
                   :let [_ (print-err :toccata-compiler)]
-                  _ (apply-to list
-                              (write-strs (list
-                                           "#include <sys/types.h>\n"
-                                           "#include <stdio.h>\n"
-                                           "#include <string.h>\n\n"
-                                           Value
-                                           NumberVal
-                                           StringVal
-                                           SubStringVal
-                                           ListVal
-                                           FnArityVal
-                                           FunctionVal
-                                           ProtoImpl
-                                           ProtoImpls
-                                           ReifiedVal
-                                           "\n"))
-                              (extern-functions)
-                              (static-values)
-                              (fixed-fn-types)
-                              (let [types (types)]
-                                (write-strs
-                                 (list
-                                  "const int64_t NumberType = " (get types 'Number 0) ";\n"
-                                  "const int64_t KeywordType = " (get types 'Keyword 0) ";\n"
-                                  "const int64_t SymbolType = " (get types 'Symbol 0) ";\n"
-                                  "const int64_t StringType = " (get types 'String 0) ";\n"
-                                  "const int64_t SubStringType = " (get types 'SubStr 0) ";\n"
-                                  "const int64_t ListType = " (get types 'List 0) ";\n"
-                                  "const int64_t FunctionType = " (get types 'Function 0) ";\n"
-                                  "List *empty_list = &(List){4,-1,0,0,0};\n")))
-                              (base-fns)
-                              (emit-proto-fn (list 'invoke (map (range 8)
-                                                                (fn [num-args]
-                                                                  (list (inc num-args) {}))))))]
+                  _ (compile-source parser)]
               "")
-            (set-val :bootstrapping true)
-            ;; (write "extern Value *counts();\n")
-            ;; (write "extern Value *defined_syms();\n")
-            ;; (write "extern Value *protocols();\n")
-            ;; (write "extern Value *static_fns();\n")
-            ;; (write "extern Value *types();\n")
-            ;; (write "extern Value *keyword_literals();\n")
-            ;; (write "extern Value *number_literals();\n")
-            ;; (write "extern Value *string_literals();\n")
-            ;; (write "extern Value *symbol_literals();\n")
-            (compile-source parser)
+            (set-val :bootstrapping false)
             (emit-main)))
 
 (defn compile-main [parser text]
