@@ -1,5 +1,6 @@
 #!/bin/bash
 
+./toccata toccata.toc > toccata.c &&
 clang -g -c -o core.a core.c &&
 clang ~/boehm/lib/libgc.a core.a -g -o toccata toccata.c &&
 
