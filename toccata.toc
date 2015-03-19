@@ -1405,6 +1405,7 @@ toccata-compiler
   (for [c-name (gensym "var_")
         _ (write-strs (list (str "// forward declaration for '" name "'\n")
                             (str Value* c-name ";\n\n")))
+        _ (sm/assoc-in-val (list :module-syms name) (list (str "Value *" c-name) c-name))
         _ (sm/assoc-in-val (list :defined-syms name) (list (str "Value *" c-name) c-name))]
     ""))
 
@@ -1636,8 +1637,7 @@ toccata-compiler
     (cond
      (= :no-default default-impl) (sm/state-maybe empty-list)
 
-     (for [_ (sm/set-val :debug-on true)
-           default-fn (evaluate default-impl emit-c)
+     (for [default-fn (evaluate default-impl emit-c)
            _ (write-strs (nth default-fn 1 empty-list))]
        (list (nth default-fn 0 ""))))))
 
