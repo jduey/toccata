@@ -1,0 +1,124 @@
+
+
+(defprotocol FreeEval
+  (evaluate [free-val eval-free]))
+
+(def free)
+(def free-app)
+
+(def free-zero
+  (reify
+    Stringable
+    (string-list [_] (list "<FreeZero>"))
+
+    Eq
+    (=* [x y] (type= x y))
+
+    Applicative
+    (wrap [_ v] (free v))
+    (apply* [fv args]
+      (free-app fv args))
+
+    Monoid
+    (zero [ev] ev)
+    (comp* [_ mvs] mvs)))
+
+(deftype free-plus [alts]
+  Stringable
+  (string-list [_]
+    (comp (list "<FreePlus: ")
+          (string-list alts)
+          (list ">")))
+
+  FreeEval
+  (evaluate [free-val eval-free]
+    (crush alts (fn [alt]
+                  (evaluate alt eval-free))))
+
+  Applicative
+  (wrap [_ v] (free v))
+  (apply* [fv args]
+    (free-app fv args))
+
+  Comonad
+  (extract [_] alts)
+
+  Monoid
+  (zero [ev] free-zero)
+  (comp* [mv mvs]
+    (free-plus (cons mv mvs))))
+
+(deftype free-app [fv args]
+  Stringable
+  (string-list [_]
+    (comp (list "<FreeApp: ")
+          (string-list fv)
+          (list " ")
+          (string-list args)
+          (list ">")))
+
+  FreeEval
+  (evaluate [free-val eval-free]
+    (let [args (map args (fn [arg]
+                           (evaluate arg eval-free)))
+          f (evaluate fv eval-free)]
+      (apply* f args)))
+
+  Eq
+  (=* [x y]
+    (and (type= x y)
+         (= (list fv args)
+            (extract y))))
+
+  Applicative
+  (wrap [_ v] (free v))
+  (apply* [fv args]
+    (free-app fv args))
+
+  Comonad
+  (extract [_]
+    (list fv args))
+
+  Monoid
+  (zero [ev]
+    free-zero)
+  (comp* [mv mvs]
+    (free-plus (cons mv mvs))))
+
+(deftype free [v]
+  Stringable
+  (string-list [_]
+    (comp (list "<Free: ")
+          (string-list v)
+          (list ">")))
+
+  FreeEval
+  (evaluate [free-val eval-free]
+    (eval-free v))
+
+  Eq
+  (=* [x y]
+    (and (type= x y)
+         (= v (extract y))))
+
+  Applicative
+  (wrap [_ v]
+    (free v))
+  (apply* [fv args]
+    (free-app fv args))
+
+  Comonad
+  (extract [_] v)
+
+  ;; Monad
+  ;; (flat-map [ev f]
+  ;;   (println :v v)
+  ;;   (invoke effect (map v (fn [inner-v]
+  ;;                           (println :inner-v inner-v)
+  ;;                           (flat-map inner-v f)))))
+
+  Monoid
+  (zero [_]
+    free-zero)
+  (comp* [mv mvs]
+    (free-plus (cons mv mvs))))

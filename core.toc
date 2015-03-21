@@ -75,7 +75,9 @@
                      incRef(arg0);
                      subStr->buffer = s->buffer;
                      return((Value *)subStr);
-                   } else
+                   } else if (arg0->type == SymbolType) {
+                     return(arg0);
+                   }
                      abort();\n"))
 
 (defn new-keyword [kw-str]
@@ -1163,8 +1165,10 @@
         return((Value *)head);
       }\n"))
 
-  Monad
+  Applicative
   (wrap [x v] (list v))
+
+  Monad
   (flat-map [mv mf]
     (let [l (map mv mf)]
       (cond
@@ -1529,7 +1533,7 @@
   Stringable
   (string-list [v] (list (name v)))
 
-  Fn
+  Function
   (invoke [kw hm]
     (let [v (get hm kw not-found)]
       (cond
@@ -1552,7 +1556,7 @@
   Stringable
   (string-list [v] (list (name v)))
 
-  Fn
+  Function
   (invoke [sym-lit hm]
     (let [v (get hm sym-lit not-found)]
       (cond
