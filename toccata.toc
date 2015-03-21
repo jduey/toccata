@@ -656,7 +656,7 @@ toccata-compiler
         :let [closure-sym (reduce closed-over :not-found
                                   (fn [found? c]
                                     (cond
-                                     (= sym (nth c 1)) (nth c 0)
+                                     (= sym (second c)) (first c)
                                      found?)))]
         closure-sym (cond
                      (= closure-sym :not-found) (for [closure-sym (genlocal "val")
@@ -677,7 +677,7 @@ toccata-compiler
         _ (sm/assoc-in-val (list :defined-syms sym) ext-ref)
         _ (sm/update-in-val (list :new-externs)
                          (fn [externs]
-                           (cons (nth ext-ref 0) externs)))]
+                           (cons (first ext-ref) externs)))]
     ext-ref))
 
 ;; A symbol can be a local, from the context, from the dictionary or
@@ -1409,9 +1409,6 @@ toccata-compiler
         _ (sm/assoc-in-val (list :defined-syms name) (list (str "Value *" c-name) c-name))]
     ""))
 
-(defn fv [x]
-  true)
-
 (defn define-fwd-decl [name value]
   (for [c-name (sm/get-in-val (list :defined-syms name))
         evalled-expr (evaluate value emit-c)
@@ -1547,8 +1544,8 @@ toccata-compiler
                         (for [ext-fn (evaluate impl-fn emit-c)
                               _ (write-strs (nth ext-fn 1 empty-list))
                               _ (sm/assoc-in-val (list :protocols (first impl)
-                                                    :impls type-num)
-                                              (first ext-fn))]
+                                                       :impls type-num)
+                                                 (first ext-fn))]
                           ""))))]
     (list "" empty-list)))
 
@@ -1960,7 +1957,7 @@ toccata-compiler
 (defn analyze-let-binding [binding-pair]
   (cond
    (not (= 2 (count binding-pair))) empty-list
-   (let [binding (nth binding-pair 0)
+   (let [binding (first binding-pair)
          expr (nth binding-pair 1)]
      (for [curr-expr (sm/get-val :expr)
            _ (set-expr binding)
@@ -2020,7 +2017,7 @@ toccata-compiler
 (defn analyze-proto-arity [args]
   (cond
    (< (count args) 2) empty-list
-   (let [fn-name (nth args 0)
+   (let [fn-name (first args)
          params (rest (nth args 1))
          body (drop args 2)
          default-fn-expr (list 'fn-arity params body)]
@@ -2667,7 +2664,7 @@ toccata-compiler
   (let [protos (protocols)
         protos (map protos
                     (fn [proto-info]
-                      (let [proto-name (nth proto-info 0)
+                      (let [proto-name (first proto-info)
                             impls-sym (nth proto-info 1)
                             extern-def (nth proto-info 2)
                             impls (HashMap (nth proto-info 3))]
@@ -2731,7 +2728,7 @@ toccata-compiler
   (let [s-funs (static-fns)
         s-funs (map s-funs
                     (fn [fn-info]
-                      (let [fn-name (nth fn-info 0)
+                      (let [fn-name (first fn-info)
                             arities (nth fn-info 1)]
                         (list fn-name (HashMap arities)))))]
     (sm/set-val :core-static-fns (HashMap s-funs))))
@@ -2744,13 +2741,13 @@ toccata-compiler
         _ (write "List *arityInfo;\n")
         _ (write-strs (flat-map (seq s-fns)
                                 (fn [static-fn]
-                                  (let [name (nth static-fn 0)
+                                  (let [name (first static-fn)
                                         arities (nth static-fn 1)]
                                     (comp
                                      (list "fnInfo = empty_list;\n")
                                      (flat-map (seq arities)
                                                (fn [arity]
-                                                 (let [arg-count (nth arity 0)
+                                                 (let [arg-count (first arity)
                                                        arity-sym (nth arity 1)]
                                                    (comp
                                                     (list "arityInfo = listCons(stringValue(\"" arity-sym
@@ -2784,9 +2781,9 @@ toccata-compiler
         _ (write "List *symInfo;\n")
         _ (write-strs (flat-map (seq def-syms)
                                 (fn [def]
-                                  (let [sym (nth def 0)
+                                  (let [sym (first def)
                                         ext-ref (nth def 1)
-                                        ext (nth ext-ref 0)
+                                        ext (first ext-ref)
                                         ref (nth ext-ref 1)]
                                     (list
                                      "symInfo = listCons(stringValue(\"" ref "\"), empty_list);\n"
@@ -2814,7 +2811,7 @@ toccata-compiler
         _ (write "List *numInfo;\n")
         _ (write-strs (flat-map (seq nums)
                                 (fn [num-lit]
-                                  (let [num (nth num-lit 0)
+                                  (let [num (first num-lit)
                                         ref (nth num-lit 1)]
                                     (list "numInfo = listCons(stringValue(\"" ref "\"), empty_list);\n"
                                           "numInfo = listCons(numberValue(" num "), numInfo);\n"
@@ -2839,7 +2836,7 @@ toccata-compiler
         _ (write "List *strInfo;\n")
         _ (write-strs (flat-map (seq strs)
                                 (fn [str-lit]
-                                  (let [str-val (nth str-lit 0)
+                                  (let [str-val (first str-lit)
                                         ref (nth str-lit 1)]
                                     (list "strInfo = listCons(stringValue(\"" ref "\"), empty_list);\n"
                                           "strInfo = listCons(stringValue(\"" (escape-chars str-val)
@@ -2865,7 +2862,7 @@ toccata-compiler
         _ (write "List *kwInfo;\n")
         _ (write-strs (flat-map (seq kws)
                                 (fn [kw-lit]
-                                  (let [kw (nth kw-lit 0)
+                                  (let [kw (first kw-lit)
                                         ref (nth kw-lit 1)]
                                     (list
                                      "kwInfo = listCons(stringValue(\"" ref "\"), empty_list);\n"
@@ -2891,7 +2888,7 @@ toccata-compiler
         _ (write "List *symInfo;\n")
         _ (write-strs (flat-map (seq syms)
                                 (fn [sym-lit]
-                                  (let [sym (nth sym-lit 0)
+                                  (let [sym (first sym-lit)
                                         ref (nth sym-lit 1)]
                                     (list
                                      "symInfo = listCons(stringValue(\"" ref "\"), empty_list);\n"
@@ -2932,7 +2929,7 @@ toccata-compiler
         _ (write "List *typeInfo;\n")
         _ (write-strs (flat-map (seq types)
                                 (fn [type]
-                                  (let [type-sym (nth type 0)
+                                  (let [type-sym (first type)
                                         type-num (nth type 1)]
                                     (list
                                      "typeInfo = listCons(numberValue(" type-num "), empty_list);\n"
