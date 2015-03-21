@@ -1556,9 +1556,8 @@ toccata-compiler
           _ (traverse (seq impls) (partial emit-extension type-num))]
       "")))
 
-(defn emit-reified-fn [name-asts type-num index]
-  (let [name-ast (nth name-asts index :no-name-ast)
-        name (first name-ast)
+(defn emit-reified-fn [protocol-name type-num name-ast]
+  (let [name (first name-ast)
         ast (second name-ast)
         num-args (count (.args (.v (first (.arities (.v ast))))))]
     (for [evalled (evaluate ast emit-c)
@@ -1573,9 +1572,11 @@ toccata-compiler
                                                       (map args (fn [arg] (str Value* arg))))
                                                 ", "))
                 args (apply str (interpose (cons "closures" args) ", "))]
+          reify-fn-index (sm/get-val :reify-fn-index 0)
+          _ (sm/set-val :reify-fn-index (inc reify-fn-index))
           _ (write-strs (list Value* impl-sym "(" arg-decls ") {\n"
                               "FnArity *arityPtr = ((Function *)((ReifiedVal *)arg0)->impls["
-                              index "])->arities[0];\n"
+                              reify-fn-index "])->arities[0];\n"
                               "Value *rval = ((FnType" num-args " *)arityPtr->fn)(arityPtr->" args ");\n"
                               "return(rval);\n"
                               "};\n\n"
@@ -1616,18 +1617,22 @@ toccata-compiler
     (cond
      (empty? impls) (let [_ (print-err :no-impls)]
                       (list "" empty-list))
-     (let [name-asts (crush (seq impls) second)]
-       (for [types (sm/get-val :types {})
-             :let [type-num (inc (count (seq types)))]
-             _ (sm/assoc-in-val (list :types type-num) type-num)
-             impl-fns (traverse (range (count name-asts))
-                                (partial emit-reified-fn name-asts type-num))
-             reified-result (cond
-                             (= 0 (count (crush impl-fns second)))
-                             (static-reified type-num impl-fns)
+     (for [types (sm/get-val :types {})
+           :let [type-num (inc (count (seq types)))]
+           _ (sm/assoc-in-val (list :types type-num) type-num)
+           reify-fn-index (sm/get-val :reify-fn-index 0)
+           _ (sm/set-val :reify-fn-index 0)
+           impl-fns (apply* (sm/state-maybe list)
+                            (for [impl (seq impls)
+                                  impl-fn (second impl)]
+                              (emit-reified-fn (first impl) type-num impl-fn)))
+           _ (sm/set-val :reify-fn-index reify-fn-index)
+           reified-result (cond
+                           (= 0 (count (crush impl-fns second)))
+                           (static-reified type-num impl-fns)
 
-                             (reified-type type-num impl-fns))]
-         reified-result)))))
+                           (reified-type type-num impl-fns))]
+       reified-result))))
 
 (defn emit-proto-default [arity]
   (let [default-impl (get (nth arity 1 {}) :default :no-default)]
