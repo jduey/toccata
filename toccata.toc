@@ -1538,16 +1538,19 @@ toccata-compiler
                   (nth evalled-clauses 1 empty-list))))))
 
 (defn emit-extension [type-num proto]
-  (for [_ (traverse (nth proto 1 empty-list)
-                    (fn [impl]
-                      (let [impl-fn (nth impl 1 "")]
-                        (for [ext-fn (evaluate impl-fn emit-c)
-                              _ (write-strs (nth ext-fn 1 empty-list))
-                              _ (sm/assoc-in-val (list :protocols (first impl)
-                                                       :impls type-num)
-                                                 (first ext-fn))]
-                          ""))))]
-    (list "" empty-list)))
+  (let [protocol-name (first proto)]
+    (for [file-name (sm/get-val :file-name)
+          _ (traverse (nth proto 1 empty-list)
+                      (fn [impl]
+                        (let [impl-fn (nth impl 1 "")]
+                          (for [ext-fn (evaluate impl-fn emit-c)
+                                _ (write-strs (nth ext-fn 1 empty-list))
+                                _ (sm/assoc-in-val (list :protocols
+                                                         (first impl)
+                                                         :impls type-num)
+                                                   (first ext-fn))]
+                            ""))))]
+      (list "" empty-list))))
 
 (deftype extend-ast [type impls]
   AST
@@ -1561,6 +1564,7 @@ toccata-compiler
         ast (second name-ast)
         num-args (count (.args (.v (first (.arities (.v ast))))))]
     (for [evalled (evaluate ast emit-c)
+          file-name (sm/get-val :file-name)
           impl-sym (gensym "protoImpl_")
           fn-sym (gensym "protoFn_")
           :let [_ (cond
@@ -1676,7 +1680,7 @@ toccata-compiler
                       (sm/assoc-in-val (list :static-fns (str "(Value *)&" fn-sym) num-args) c-name))]
       (str "&" arity-sym))))
 
-(defn emit-proto-fn [proto]
+(defn emit-proto-fn [protocol-name proto]
   (let [name (first proto)
         arities (seq (second proto))]
     (for [impls-sym (gensym "protoImpls_")
@@ -1685,6 +1689,7 @@ toccata-compiler
           _ (write-strs (list "ProtoImpls *" impls-sym ";\n"))
           default-syms (crush arities emit-proto-default)
           arity-syms (traverse arities (partial emit-proto-arity name fn-sym impls-sym))
+          file-name (sm/get-val :file-name)
           _ (apply-to list
                       (cond
                        (empty? default-syms) (sm/state-maybe "")
@@ -1704,12 +1709,12 @@ toccata-compiler
                                                             :extern-def (str "extern Function " fn-sym ";")}))]
       fn-sym)))
 
-(deftype protocol-ast [prototypes]
+(deftype protocol-ast [protocol-name prototypes]
   AST
   (emit-c [ast]
     (flat-map (static-values)
               (fn [_]
-                (traverse (seq prototypes) emit-proto-fn)))))
+                (traverse (seq prototypes) (partial emit-proto-fn protocol-name))))))
 
 (defn replace-type [types type-val-num name]
   (cond
@@ -1731,7 +1736,12 @@ toccata-compiler
                        (fn [field]
                          (let [getter-name (symbol (str "." field))]
                            (comp (sm/get-in-val (list :protocols getter-name))
-                                 (emit-proto-fn (list getter-name (list (list 1 {})))))))))
+                                 (for [file-name (sm/get-val :file-name "")
+                                       _ (sm/set-val :file-name "getters")
+                                       result (emit-proto-fn 'Getter
+                                                             (list getter-name (list (list 1 {}))))
+                                       _ (sm/set-val :file-name file-name)]
+                                   result))))))
           _ (comp (sm/get-in-val (list :defined-syms name))
                   (forward-decl name))
           type-ast (analyze-expr (list 'reify
@@ -1752,7 +1762,7 @@ toccata-compiler
   (let [fields (rest fields)
         impls (comp
                (cons 'reify impls)
-               (cons 'BogusGetterProtocolName
+               (cons 'Getter
                      (map fields
                           (fn [field]
                             (list (symbol (str "." field)) (list 'vector '_)
@@ -2186,7 +2196,7 @@ toccata-compiler
                          (= 'defprotocol (first x)))))
         ;; TODO: make this only accept fixed arities
         arities (traverse (drop expr 2) analyze-proto-arity)]
-    (free (protocol-ast (apply merge-with comp arities)))))
+    (free (protocol-ast (second expr) (apply merge-with comp arities)))))
 
 (defn analyze-deftype []
   (for [expr (is-expr (fn [x]
@@ -2596,8 +2606,7 @@ toccata-compiler
                 (empty? protocols) (sm/state-maybe "")
                 (traverse (seq protocols)
                           (fn [proto]
-                            (let [proto-fn (nth proto 0 "")
-                                  proto-impls (nth proto 1 {})
+                            (let [proto-impls (nth proto 1 {})
                                   impls-sym (get proto-impls :impls-sym "")
                                   impls (get proto-impls :impls {})
                                   default (get impls :default :no-default)
@@ -2977,7 +2986,8 @@ toccata-compiler
                           "const int64_t FunctionType = " (get types 'Function 0) ";\n"
                           "List *empty_list = &(List){4,-1,0,0,0};\n")))
                       (base-fns)
-                      (emit-proto-fn (list 'invoke (map (range 8)
+                      (emit-proto-fn 'Function
+                                     (list 'invoke (map (range 8)
                                                         (fn [num-args]
                                                           (list (inc num-args) {}))))))
             (compile-source parser)
