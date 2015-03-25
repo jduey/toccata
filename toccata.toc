@@ -6,9 +6,6 @@ toccata-compiler
 (add-ns sm (module "core/state-maybe.toc"))
 (add-ns fr (module "core/free.toc"))
 
-;; (defprotocol FreeEval
-;;   (fr/evaluate [free-val eval-free]))
-
 (defprotocol Parser
   (recursive-descent [f]
     (sm/state-maybe (fn [& args]
@@ -1738,7 +1735,6 @@ toccata-compiler
                           core (slurp (second expr))]
                     _ (compile-core parser core)
                     :let [_ (standard-output)]
-                    _ (sm/set-val :bootstrapping false)
 
                     syms (sm/get-val :symbols {})
                     _ (sm/set-val :core-symbols syms)
@@ -2521,7 +2517,6 @@ toccata-compiler
 
 (defn finalize-protocols []
   (for [protocols (sm/get-val :protocols {})
-        bootstrapping (sm/get-val :bootstrapping false)
         result (cond
                 (empty? protocols) (sm/state-maybe "")
                 (traverse (seq protocols)
@@ -2538,9 +2533,7 @@ toccata-compiler
                                                      (= type :no-type) false
                                                      true))))]
                               (for [local-sym (gensym "localImpls_")
-                                    _ (cond
-                                       bootstrapping (sm/state-maybe "")
-                                       (write-strs (list "extern ProtoImpls *" impls-sym ";\n")))
+                                    _ (write-strs (list "extern ProtoImpls *" impls-sym ";\n"))
                                     _ (write-strs (list "ProtoImpls " local-sym " = "))
                                     _ (emit-impl default impls)]
                                 (list impls-sym local-sym))))))]
@@ -2550,12 +2543,8 @@ toccata-compiler
   (for [_ (sm/set-val :local-sym-count 0)
         main-sym (sm/get-val :main-sym :no-main)
         :when (not (= :no-main main-sym))
-        bootstrapping (sm/get-val :bootstrapping false)
-        :let [main-name (cond
-                         bootstrapping "toccataMain"
-                         "main")]
         proto-syms (finalize-protocols)
-        _ (write-strs (list "\nint " main-name "(int argc, char *argv[]) {\n"))
+        _ (write-strs (list "\nint main(int argc, char *argv[]) {\n"))
         _ (traverse proto-syms
                     (fn [proto-sym]
                       (let [impls-sym (nth proto-sym 0 "")
@@ -2874,14 +2863,12 @@ toccata-compiler
     ""))
 
 (defn compile-source [parser]
-  (flat-map (sm/set-val :debug-on true)
+  (flat-map (sm/set-val :parser parser)
             (fn [_]
-              (flat-map (sm/set-val :parser parser)
-                        (fn [_]
-                          (recur (for [expr parser
-                                       ast (analyze-expr expr)
-                                       _ (fr/evaluate ast emit-c)]
-                                   "")))))))
+              (recur (for [expr parser
+                           ast (analyze-expr expr)
+                           _ (fr/evaluate ast emit-c)]
+                       "")))))
 
 (defn compile-core [parser text]
   (apply-to list
