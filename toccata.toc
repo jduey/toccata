@@ -5,144 +5,24 @@ toccata-compiler
 
 (add-ns sm (module "core/state-maybe.toc"))
 (add-ns fr (module "core/free.toc"))
-
-(defprotocol Parser
-  (recursive-descent [f]
-    (sm/state-maybe (fn [& args]
-                   (list (apply f (map (remove args empty?)
-                                       first)))))))
-
-(deftype parser-terminal [term-str]
-  Parser
-  (recursive-descent [_]
-    (let [s-len (count term-str)]
-      (for [text (sm/get-val :text "")
-            :when (and (not (< (count text) s-len))
-                       (= term-str (subs text 0 s-len)))
-            _ (sm/set-val :text (subs text s-len))]
-        (list term-str)))))
-
-(defn term [term-str]
-  (fr/free (parser-terminal term-str)))
-
-(defn recur [rule]
-  (for [a rule
-        as (comp (recur rule)
-                 (sm/state-maybe empty-list))]
-    (cons a as)))
-
-(deftype repeat-rule [rule]
-  Parser
-  (recursive-descent [_]
-    (let [rule (fr/evaluate rule recursive-descent)]
-      (flat-map (recur rule)
-                (fn [v]
-                  (sm/state-maybe (list (apply comp v))))))))
-
-(defn one-or-more [rule]
-  (fr/free (repeat-rule rule)))
-
-(deftype ignore-rule [rule]
-  Parser
-  (recursive-descent [_]
-    (flat-map (fr/evaluate rule recursive-descent)
-              (fn [_]
-                (sm/state-maybe empty-list)))))
-
-(defn ignore [rule]
-  (fr/free (ignore-rule rule)))
-
-(deftype parser-always [v]
-  Parser
-  (recursive-descent [_]
-    (sm/state-maybe (list v))))
-
-(defn always [v]
-  (fr/free (parser-always v)))
-
-(defn all [& rules]
-  (apply* (fr/free comp) rules))
-
-(defn optional [rule]
-  (comp rule (always "")))
-
-(defn none-or-more [rule]
-  (comp (one-or-more rule)
-        (always empty-list)))
-
-(defn char-test [pred]
-  (for [txt (sm/get-val :text "")
-        :let [c (subs txt 0 1)]
-        :when (cond
-               (< 0 (count txt)) (pred c)
-               false)
-        _ (sm/set-val :text (subs txt 1))]
-    (list c)))
-
-(deftype parse-lower-alphas []
-  Parser
-  (recursive-descent [_]
-    (char-test (fn [c]
-                 (< (dec (char-code "a")) (char-code c) (inc (char-code "z")))))))
-
-(defn lower-alpha []
-  (fr/free (parse-lower-alphas)))
-
-(deftype parse-upper-alphas []
-  Parser
-  (recursive-descent [_]
-    (char-test (fn [c]
-                 (< (dec (char-code "A")) (char-code c) (inc (char-code "Z")))))))
-
-(defn upper-alpha []
-  (fr/free (parse-upper-alphas)))
-
-(defn alpha []
-  (comp (lower-alpha)
-        (upper-alpha)))
-
-(deftype parse-digit []
-  Parser
-  (recursive-descent [_]
-    (char-test (fn [c]
-                 (< (dec (char-code "0")) (char-code c) (inc (char-code "9")))))))
-
-(defn digit []
-  (fr/free (parse-digit)))
-
-(defn one-of [coll]
-  (let [coll (seq coll)]
-    (comp* (term (first coll))
-           (map (rest coll) term))))
+(add-ns parser (module "core/parser.toc"))
 
 (defn to-string [rule]
   (apply-to (fn [chars]
               (apply str chars))
             rule))
 
-(deftype parser-rule [name grammar]
-  Parser
-  (recursive-descent [_]
-    (let [parser (fr/evaluate grammar recursive-descent)
-          parser-fn (fn [s] (parser s))]
-      (for [_ (sm/assoc-in-val (list :parser-fns name) parser-fn)
-            result (sm/new-sm parser-fn)]
-        result))))
-
-(defn rule [name grammar]
-  (fr/free (parser-rule name grammar)))
-
 (defn symbol-start []
-  (comp (alpha) (one-of "._<>=+-*/")))
+  (comp (parser/alpha) (parser/one-of "._<>=+-*/")))
 
 (defn symbol-punct []
-  (one-of "._<>=*/+!-?"))
+  (parser/one-of "._<>=*/+!-?"))
 
 (defn symbol-char []
-  (comp (alpha) (digit) (symbol-punct)))
+  (comp (parser/alpha) (parser/digit) (symbol-punct)))
 
 (defn rest-of-symbol []
-  (none-or-more (symbol-char)))
+  (parser/none-or-more (symbol-char)))
 
 (defn read-symbol []
   (apply-to (fn [start the-rest]
@@ -153,51 +33,51 @@ toccata-compiler
 (defn read-keyword []
   (apply-to (fn [start the-rest]
               (keyword (apply str (cons start the-rest))))
-            (ignore (term ":"))
+            (parser/ignore (parser/term ":"))
             (symbol-start)
             (rest-of-symbol)))
 
 (defn backslash []
-  (term (char 92)))
+  (parser/term (char 92)))
 
 (defn read-string-newline []
-  (all (ignore (backslash))
-       (ignore (term "n"))
-       (always (char 10))))
+  (parser/all (parser/ignore (backslash))
+       (parser/ignore (parser/term "n"))
+       (parser/always (char 10))))
 
 (defn read-string-tab []
-  (all (ignore (backslash))
-       (ignore (term "t"))
-       (always (char 9))))
+  (parser/all (parser/ignore (backslash))
+       (parser/ignore (parser/term "t"))
+       (parser/always (char 9))))
 
 (defn read-string-backspace []
-  (all (ignore (backslash))
-       (ignore (term "b"))
-       (always (char 8))))
+  (parser/all (parser/ignore (backslash))
+       (parser/ignore (parser/term "b"))
+       (parser/always (char 8))))
 
 (defn read-string-return []
-  (all (ignore (backslash))
-       (ignore (term "r"))
-       (always (char 13))))
+  (parser/all (parser/ignore (backslash))
+       (parser/ignore (parser/term "r"))
+       (parser/always (char 13))))
 
 (defn read-string-formfeed []
-  (all (ignore (backslash))
-       (ignore (term "f"))
-       (always (char 12))))
+  (parser/all (parser/ignore (backslash))
+       (parser/ignore (parser/term "f"))
+       (parser/always (char 12))))
 
 (defn read-string-doublequote []
-  (all (ignore (backslash))
-       (ignore (term (char 34)))
-       (always (char 34))))
+  (parser/all (parser/ignore (backslash))
+       (parser/ignore (parser/term (char 34)))
+       (parser/always (char 34))))
 
 (defn read-string-backslash []
-  (all (ignore (backslash))
-       (ignore (backslash))
-       (always (char 92))))
+  (parser/all (parser/ignore (backslash))
+       (parser/ignore (backslash))
+       (parser/always (char 92))))
 
 (deftype parse-not-backslash []
   Parser
-  (recursive-descent [_]
+  (parser/recursive-descent [_]
     (for [txt (sm/get-val :text "")
           :let [x (subs txt 0 1)]
           :when (cond
@@ -211,9 +91,9 @@ toccata-compiler
   (fr/free (parse-not-backslash)))
 
 (defn read-const-string []
-  (all (ignore (term (char 34)))
+  (parser/all (parser/ignore (parser/term (char 34)))
        (to-string
-        (none-or-more
+        (parser/none-or-more
          (comp (not-backslash)
                (read-string-backslash)
                (read-string-doublequote)
@@ -222,7 +102,7 @@ toccata-compiler
                (read-string-return)
                (read-string-formfeed)
                (read-string-newline))))
-       (ignore (term (char 34)))))
+       (parser/ignore (parser/term (char 34)))))
 
 (defn str-to-int [negate? int-str]
   (let [magnitude (reduce int-str 0
@@ -246,12 +126,12 @@ toccata-compiler
 ;; only reads integers
 (defn read-number []
   (apply-to str-to-int
-            (optional (term "-"))
-            (one-or-more (digit))))
+            (parser/optional (parser/term "-"))
+            (parser/one-or-more (parser/digit))))
 
 (deftype parse-sub-form []
   Parser
-  (recursive-descent [_]
+  (parser/recursive-descent [_]
     (for [parser-fn (sm/get-in-val (list :parser-fns "form") :blah)
           result (sm/new-sm parser-fn)]
       result)))
@@ -260,27 +140,27 @@ toccata-compiler
   (fr/free (parse-sub-form)))
 
 (defn read-list []
-  (all (ignore (term "("))
-       (none-or-more (read-sub-form))
-       (ignore (term ")"))))
+  (parser/all (parser/ignore (parser/term "("))
+       (parser/none-or-more (read-sub-form))
+       (parser/ignore (parser/term ")"))))
 
 (defn read-hash-map []
   (apply-to cons
-            (ignore (term "{"))
-            (always 'hash-map)
-            (none-or-more (read-sub-form))
-            (ignore (term "}"))))
+            (parser/ignore (parser/term "{"))
+            (parser/always 'hash-map)
+            (parser/none-or-more (read-sub-form))
+            (parser/ignore (parser/term "}"))))
 
 (defn read-vector []
   (apply-to cons
-            (ignore (term "["))
-            (always 'vector)
-            (none-or-more (read-sub-form))
-            (ignore (term "]"))))
+            (parser/ignore (parser/term "["))
+            (parser/always 'vector)
+            (parser/none-or-more (read-sub-form))
+            (parser/ignore (parser/term "]"))))
 
 (deftype parse-not-eol []
   Parser
-  (recursive-descent [_]
+  (parser/recursive-descent [_]
     (for [txt (sm/get-val :text "")
           :let [x (subs txt 0 1)]
           :when (not (= x (char 10)))
@@ -291,136 +171,136 @@ toccata-compiler
   (fr/free (parse-not-eol)))
 
 (defn read-comment []
-  (all (term ";")
-       (ignore (none-or-more (not-eol)))
-       (term (char 10))))
+  (parser/all (parser/term ";")
+       (parser/ignore (parser/none-or-more (not-eol)))
+       (parser/term (char 10))))
 
 (defn whitespace []
-  (comp (one-of " ,")
-        (term (char 9))
-        (term (char 13))
-        (term (char 10))
+  (comp (parser/one-of " ,")
+        (parser/term (char 9))
+        (parser/term (char 13))
+        (parser/term (char 10))
         (read-comment)))
 
 (defn read-var-arg []
   (apply-to list
-            (ignore (none-or-more (whitespace)))
-            (term "&")
-            (ignore (one-or-more (whitespace)))
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (parser/term "&")
+            (parser/ignore (parser/one-or-more (whitespace)))
             (read-symbol)))
 
 (defn read-arg []
-  (all (ignore (none-or-more (whitespace)))
+  (parser/all (parser/ignore (parser/none-or-more (whitespace)))
        (read-symbol)
-       (ignore (none-or-more (whitespace)))))
+       (parser/ignore (parser/none-or-more (whitespace)))))
 
 (defn read-args []
   (apply-to comp
-            (ignore (none-or-more (whitespace)))
-            (ignore (term "["))
-            (none-or-more (read-arg))
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (parser/ignore (parser/term "["))
+            (parser/none-or-more (read-arg))
             (comp (read-var-arg)
-                  (always empty-list))
-            (ignore (term "]"))))
+                  (parser/always empty-list))
+            (parser/ignore (parser/term "]"))))
 
 (defn read-main []
   (apply-to list*
-            (ignore (term "("))
-            (ignore (none-or-more (whitespace)))
-            (ignore (term "main"))
-            (always 'main)
-            (ignore (one-or-more (whitespace)))
+            (parser/ignore (parser/term "("))
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (parser/ignore (parser/term "main"))
+            (parser/always 'main)
+            (parser/ignore (parser/one-or-more (whitespace)))
             (read-args)
-            (one-or-more (read-sub-form))
-            (ignore (none-or-more (whitespace)))
-            (ignore (term ")"))))
+            (parser/one-or-more (read-sub-form))
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (parser/ignore (parser/term ")"))))
 
 (defn read-single-arity []
   (apply-to (fn [& vs]
               (list vs))
-            (always 'fn-arity)
+            (parser/always 'fn-arity)
             (read-args)
-            (none-or-more (read-sub-form))))
+            (parser/none-or-more (read-sub-form))))
 
 (defn read-multi-arity []
   (apply-to list
-            (ignore (none-or-more (whitespace)))
-            (ignore (term "("))
-            (ignore (none-or-more (whitespace)))
-            (always 'fn-arity)
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (parser/ignore (parser/term "("))
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (parser/always 'fn-arity)
             (read-args)
-            (none-or-more (read-sub-form))
-            (ignore (none-or-more (whitespace)))
-            (ignore (term ")"))))
+            (parser/none-or-more (read-sub-form))
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (parser/ignore (parser/term ")"))))
 
 (defn read-arities []
   (comp (read-single-arity)
-        (one-or-more (read-multi-arity))))
+        (parser/one-or-more (read-multi-arity))))
 
 (defn read-defn []
   (apply-to (fn [name arities]
               (list 'def name (list 'fn name arities)))
-            (ignore (term "("))
-            (ignore (none-or-more (whitespace)))
-            (ignore (term "defn"))
-            (ignore (one-or-more (whitespace)))
+            (parser/ignore (parser/term "("))
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (parser/ignore (parser/term "defn"))
+            (parser/ignore (parser/one-or-more (whitespace)))
             (read-symbol)
-            (ignore (one-or-more (whitespace)))
+            (parser/ignore (parser/one-or-more (whitespace)))
             (read-arities)
-            (ignore (none-or-more (whitespace)))
-            (ignore (term ")"))))
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (parser/ignore (parser/term ")"))))
 
 (defn read-fn []
   (apply-to list
-            (ignore (term "("))
-            (ignore (none-or-more (whitespace)))
-            (ignore (term "fn"))
-            (always 'fn)
-            (ignore (one-or-more (whitespace)))
+            (parser/ignore (parser/term "("))
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (parser/ignore (parser/term "fn"))
+            (parser/always 'fn)
+            (parser/ignore (parser/one-or-more (whitespace)))
             (comp (read-symbol)
-                  (always 'anon))
-            (ignore (none-or-more (whitespace)))
+                  (parser/always 'anon))
+            (parser/ignore (parser/none-or-more (whitespace)))
             (read-arities)
-            (ignore (none-or-more (whitespace)))
-            (ignore (term ")"))))
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (parser/ignore (parser/term ")"))))
 
 (defn read-let-binding []
   (apply-to list
-            (ignore (none-or-more (whitespace)))
+            (parser/ignore (parser/none-or-more (whitespace)))
             (read-symbol)
-            (ignore (none-or-more (whitespace)))
+            (parser/ignore (parser/none-or-more (whitespace)))
             (read-sub-form)))
 
 (defn read-let []
   (apply-to list*
-            (ignore (term "("))
-            (ignore (none-or-more (whitespace)))
-            (ignore (term "let"))
-            (always 'let)
-            (ignore (one-or-more (whitespace)))
-            (ignore (term "["))
-            (none-or-more (read-let-binding))
-            (ignore (term "]"))
-            (one-or-more (read-sub-form))
-            (ignore (none-or-more (whitespace)))
-            (ignore (term ")"))))
+            (parser/ignore (parser/term "("))
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (parser/ignore (parser/term "let"))
+            (parser/always 'let)
+            (parser/ignore (parser/one-or-more (whitespace)))
+            (parser/ignore (parser/term "["))
+            (parser/none-or-more (read-let-binding))
+            (parser/ignore (parser/term "]"))
+            (parser/one-or-more (read-sub-form))
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (parser/ignore (parser/term ")"))))
 
 (defn read-for-let []
   (apply-to list
-            (ignore (none-or-more (whitespace)))
-            (ignore (term ":let"))
-            (always :let)
-            (ignore (one-or-more (whitespace)))
-            (ignore (term "["))
-            (none-or-more (read-let-binding))
-            (ignore (term "]"))))
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (parser/ignore (parser/term ":let"))
+            (parser/always :let)
+            (parser/ignore (parser/one-or-more (whitespace)))
+            (parser/ignore (parser/term "["))
+            (parser/none-or-more (read-let-binding))
+            (parser/ignore (parser/term "]"))))
 
 (defn read-for-when []
   (apply-to list
-            (ignore (none-or-more (whitespace)))
-            (ignore (term ":when"))
-            (always :when)
-            (ignore (one-or-more (whitespace)))
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (parser/ignore (parser/term ":when"))
+            (parser/always :when)
+            (parser/ignore (parser/one-or-more (whitespace)))
             (read-sub-form)))
 
 (defn read-for-binding []
@@ -442,30 +322,30 @@ toccata-compiler
                                    (list 'flat-map val
                                          (list 'fn 'anon
                                                (list (list 'fn-arity (list sym) (list expr))))))))))))
-            (ignore (term "("))
-            (ignore (none-or-more (whitespace)))
-            (ignore (term "for"))
-            (ignore (one-or-more (whitespace)))
-            (ignore (term "["))
-            (ignore (none-or-more (whitespace)))
+            (parser/ignore (parser/term "("))
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (parser/ignore (parser/term "for"))
+            (parser/ignore (parser/one-or-more (whitespace)))
+            (parser/ignore (parser/term "["))
+            (parser/ignore (parser/none-or-more (whitespace)))
             (read-symbol)
-            (ignore (one-or-more (whitespace)))
+            (parser/ignore (parser/one-or-more (whitespace)))
             (read-sub-form)
-            (none-or-more (read-for-binding))
-            (ignore (term "]"))
+            (parser/none-or-more (read-for-binding))
+            (parser/ignore (parser/term "]"))
             (read-sub-form)
-            (ignore (none-or-more (whitespace)))
-            (ignore (term ")"))))
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (parser/ignore (parser/term ")"))))
 
 (defn read-quoted []
   (apply-to list
-            (ignore (term "'"))
-            (always 'quote)
+            (parser/ignore (parser/term "'"))
+            (parser/always 'quote)
             (read-sub-form)))
 
 (defn read-form []
-  (rule "form"
-        (all (ignore (none-or-more (whitespace)))
+  (parser/rule "form"
+        (parser/all (parser/ignore (parser/none-or-more (whitespace)))
              (comp (read-number)
                    (read-keyword)
                    (read-symbol)
@@ -479,10 +359,10 @@ toccata-compiler
                    (read-hash-map)
                    (read-vector)
                    (read-list))
-             (ignore (none-or-more (whitespace))))))
+             (parser/ignore (parser/none-or-more (whitespace))))))
 
 (defn parser [grammar]
-  (fr/evaluate grammar recursive-descent))
+  (fr/evaluate grammar parser/recursive-descent))
 
 (defn make-parser []
   (let [p (parser (read-form))]
@@ -1053,12 +933,8 @@ toccata-compiler
 
              protos (sm/get-val :defined-protos {})
 
-             ;; _ (sm/set-val :defined-protos {})
-             ;; core-protos (sm/get-in-val (list :modules "core.toc" :protos) {})
-             ;; _ (traverse (seq core-protos)
-             ;;             (fn [proto-def]
-             ;;               (sm/assoc-in-val (list :defined-protos (first proto-def))
-             ;;                                (second proto-def))))
+             core-protos (sm/get-in-val (list :modules "core.toc" :protos) {})
+             _ (sm/set-val :defined-protos core-protos)
 
              file-name (sm/get-val :file-name)
              _ (sm/set-val :file-name module-name)
@@ -2047,13 +1923,13 @@ toccata-compiler
 
 (defn analyze-proto-impl []
   (for [name (is-form? symbol?)
-        fn-impls (recur (analyze-proto-fn))]
+        fn-impls (sm/recur (analyze-proto-fn))]
     (list name fn-impls)))
 
 (defn analyze-extensions [exts]
   (for [curr-expr (sm/get-val :expr empty-list)
         _ (sm/set-val :expr exts)
-        proto-impls (recur (analyze-proto-impl))
+        proto-impls (sm/recur (analyze-proto-impl))
         _ (sm/set-val :expr curr-expr)]
     (HashMap proto-impls)))
 
@@ -2077,7 +1953,7 @@ toccata-compiler
         file-name (sm/get-val :file-name)
         _ (sm/set-val :file-name (second expr))
         parser (sm/get-val :parser)
-        asts (recur (for [expr parser
+        asts (sm/recur (for [expr parser
                           ast (analyze-expr expr)]
                       ast))
         _ (sm/set-val :file-name file-name)
@@ -2865,7 +2741,7 @@ toccata-compiler
 (defn compile-source [parser]
   (flat-map (sm/set-val :parser parser)
             (fn [_]
-              (recur (for [expr parser
+              (sm/recur (for [expr parser
                            ast (analyze-expr expr)
                            _ (fr/evaluate ast emit-c)]
                        "")))))

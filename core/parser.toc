@@ -1,0 +1,118 @@
+
+(add-ns sm (module "core/state-maybe.toc"))
+(add-ns fr (module "core/free.toc"))
+
+(defprotocol Parser
+  (recursive-descent [f]
+    (sm/state-maybe (fn [& args]
+                      (list (apply f (map (remove args empty?)
+                                          first)))))))
+
+(deftype parser-terminal [term-str]
+  Parser
+  (recursive-descent [_]
+    (let [s-len (count term-str)]
+      (for [text (sm/get-val :text "")
+            :when (and (not (< (count text) s-len))
+                       (= term-str (subs text 0 s-len)))
+            _ (sm/set-val :text (subs text s-len))]
+        (list term-str)))))
+
+(defn term [term-str]
+  (fr/free (parser-terminal term-str)))
+
+(deftype repeat-rule [rule]
+  Parser
+  (recursive-descent [_]
+    (let [rule (fr/evaluate rule recursive-descent)]
+      (flat-map (sm/recur rule)
+                (fn [v]
+                  (sm/state-maybe (list (apply comp v))))))))
+
+(defn one-or-more [rule]
+  (fr/free (repeat-rule rule)))
+
+(deftype ignore-rule [rule]
+  Parser
+  (recursive-descent [_]
+    (flat-map (fr/evaluate rule recursive-descent)
+              (fn [_]
+                (sm/state-maybe empty-list)))))
+
+(defn ignore [rule]
+  (fr/free (ignore-rule rule)))
+
+(deftype parser-always [v]
+  Parser
+  (recursive-descent [_]
+    (sm/state-maybe (list v))))
+
+(defn always [v]
+  (fr/free (parser-always v)))
+
+(defn all [& rules]
+  (apply* (fr/free comp) rules))
+
+(defn optional [rule]
+  (comp rule (always "")))
+
+(defn none-or-more [rule]
+  (comp (one-or-more rule)
+        (always empty-list)))
+
+(defn char-test [pred]
+  (for [txt (sm/get-val :text "")
+        :let [c (subs txt 0 1)]
+        :when (cond
+               (< 0 (count txt)) (pred c)
+               false)
+        _ (sm/set-val :text (subs txt 1))]
+    (list c)))
+
+(deftype parse-lower-alphas []
+  Parser
+  (recursive-descent [_]
+    (char-test (fn [c]
+                 (< (dec (char-code "a")) (char-code c) (inc (char-code "z")))))))
+
+(defn lower-alpha []
+  (fr/free (parse-lower-alphas)))
+
+(deftype parse-upper-alphas []
+  Parser
+  (recursive-descent [_]
+    (char-test (fn [c]
+                 (< (dec (char-code "A")) (char-code c) (inc (char-code "Z")))))))
+
+(defn upper-alpha []
+  (fr/free (parse-upper-alphas)))
+
+(defn alpha []
+  (comp (lower-alpha)
+        (upper-alpha)))
+
+(deftype parse-digit []
+  Parser
+  (recursive-descent [_]
+    (char-test (fn [c]
+                 (< (dec (char-code "0")) (char-code c) (inc (char-code "9")))))))
+
+(defn digit []
+  (fr/free (parse-digit)))
+
+(defn one-of [coll]
+  (let [coll (seq coll)]
+    (comp* (term (first coll))
+           (map (rest coll) term))))
+
+(deftype parser-rule [name grammar]
+  Parser
+  (recursive-descent [_]
+    (let [parser (fr/evaluate grammar recursive-descent)
+          parser-fn (fn [s] (parser s))]
+      (for [_ (sm/assoc-in-val (list :parser-fns name) parser-fn)
+            result (sm/new-sm parser-fn)]
+        result))))
+
+(defn rule [name grammar]
+  (fr/free (parser-rule name grammar)))

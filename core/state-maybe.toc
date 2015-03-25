@@ -96,3 +96,9 @@
 (defn update-in-val [path f]
   (new-sm (fn [s]
               (list (get-in s path :not-found) (update-in s path f)))))
+
+(defn recur [mv]
+  (for [a mv
+        as (comp (recur mv)
+                 (state-maybe empty-list))]
+    (cons a as)))
