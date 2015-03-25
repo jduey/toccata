@@ -6413,6 +6413,146 @@ return(rslt7);
 // --------- rule main body --------------
 Function fn_1295 = {3, -1, "rule", 1, {&(FnArity){8, -1, 2, (List *)0, 0, arityImpl_1296}}};
 
+struct {int64_t type;
+ int32_t refs;
+   int64_t len;
+   char buffer[10];} _str_52 = {1, -1, 9,"._<>=+-*/"};
+struct {int64_t type;
+ int32_t refs;
+   int64_t len;
+   char buffer[12];} _str_53 = {1, -1, 11,"._<>=*/+!-?"};
+struct {int64_t type;
+ int32_t refs;
+   int64_t len;
+   char buffer[2];} _str_54 = {1, -1, 1,"n"};
+struct {int64_t type;
+ int32_t refs;
+   int64_t len;
+   char buffer[2];} _str_55 = {1, -1, 1,"t"};
+struct {int64_t type;
+ int32_t refs;
+   int64_t len;
+   char buffer[2];} _str_56 = {1, -1, 1,"b"};
+struct {int64_t type;
+ int32_t refs;
+   int64_t len;
+   char buffer[2];} _str_57 = {1, -1, 1,"r"};
+struct {int64_t type;
+ int32_t refs;
+   int64_t len;
+   char buffer[2];} _str_58 = {1, -1, 1,"f"};
+struct {int64_t type;
+ int32_t refs;
+   int64_t len;
+   char buffer[2];} _str_59 = {1, -1, 1,"1"};
+struct {int64_t type;
+ int32_t refs;
+   int64_t len;
+   char buffer[2];} _str_60 = {1, -1, 1,"2"};
+struct {int64_t type;
+ int32_t refs;
+   int64_t len;
+   char buffer[2];} _str_61 = {1, -1, 1,"3"};
+struct {int64_t type;
+ int32_t refs;
+   int64_t len;
+   char buffer[2];} _str_62 = {1, -1, 1,"4"};
+struct {int64_t type;
+ int32_t refs;
+   int64_t len;
+   char buffer[2];} _str_63 = {1, -1, 1,"5"};
+struct {int64_t type;
+ int32_t refs;
+   int64_t len;
+   char buffer[2];} _str_64 = {1, -1, 1,"6"};
+struct {int64_t type;
+ int32_t refs;
+   int64_t len;
+   char buffer[2];} _str_65 = {1, -1, 1,"7"};
+struct {int64_t type;
+ int32_t refs;
+   int64_t len;
+   char buffer[2];} _str_66 = {1, -1, 1,"8"};
+struct {int64_t type;
+ int32_t refs;
+   int64_t len;
+   char buffer[2];} _str_67 = {1, -1, 1,"-"};
+struct {int64_t type;
+ int32_t refs;
+   int64_t len;
+   char buffer[2];} _str_68 = {1, -1, 1,"["};
+struct {int64_t type;
+ int32_t refs;
+   int64_t len;
+   char buffer[2];} _str_69 = {1, -1, 1,"]"};
+struct {int64_t type;
+ int32_t refs;
+   int64_t len;
+   char buffer[2];} _str_70 = {1, -1, 1,";"};
+struct {int64_t type;
+ int32_t refs;
+   int64_t len;
+   char buffer[3];} _str_71 = {1, -1, 2," ,"};
+struct {int64_t type;
+ int32_t refs;
+   int64_t len;
+   char buffer[2];} _str_72 = {1, -1, 1,"&"};
+struct {int64_t type;
+ int32_t refs;
+   int64_t len;
+   char buffer[5];} _str_73 = {1, -1, 4,"main"};
+struct {int64_t type;
+ int32_t refs;
+   int64_t len;
+   char buffer[5];} _str_74 = {1, -1, 4,"defn"};
+struct {int64_t type;
+ int32_t refs;
+   int64_t len;
+   char buffer[3];} _str_75 = {1, -1, 2,"fn"};
+struct {int64_t type;
+ int32_t refs;
+   int64_t len;
+   char buffer[4];} _str_76 = {1, -1, 3,"let"};
+struct {int64_t type;
+ int32_t refs;
+   int64_t len;
+   char buffer[5];} _str_77 = {1, -1, 4,":let"};
+struct {int64_t type;
+ int32_t refs;
+   int64_t len;
+   char buffer[6];} _str_78 = {1, -1, 5,":when"};
+struct {int64_t type;
+ int32_t refs;
+   int64_t len;
+   char buffer[4];} _str_79 = {1, -1, 3,"for"};
+struct {int64_t type;
+ int32_t refs;
+   int64_t len;
+   char buffer[2];} _str_80 = {1, -1, 1,"'"};
+struct {int64_t type;
+ int32_t refs;
+   int64_t len;
+   char buffer[5];} _str_81 = {1, -1, 4,"form"};
+Number _num_24 = {2, -1, 92};
+Number _num_25 = {2, -1, 9};
+Number _num_26 = {2, -1, 13};
+Number _num_27 = {2, -1, -1};
+SubString _sym_0 = {7, -1, 8, 0, "hash-map"};
+SubString _sym_1 = {7, -1, 6, 0, "vector"};
+SubString _sym_2 = {7, -1, 4, 0, "main"};
+SubString _sym_3 = {7, -1, 8, 0, "fn-arity"};
+SubString _sym_4 = {7, -1, 3, 0, "def"};
+SubString _sym_5 = {7, -1, 2, 0, "fn"};
+SubString _sym_6 = {7, -1, 4, 0, "anon"};
+SubString _sym_7 = {7, -1, 3, 0, "let"};
+SubString _sym_8 = {7, -1, 15, 0, "some-unique-var"};
+SubString _sym_9 = {7, -1, 4, 0, "wrap"};
+SubString _sym_10 = {7, -1, 4, 0, "cond"};
+SubString _sym_11 = {7, -1, 4, 0, "zero"};
+SubString _sym_12 = {7, -1, 8, 0, "flat-map"};
+SubString _sym_13 = {7, -1, 5, 0, "quote"};
+SubString _kw_10 = {5, -1, 4, 0, ":let"};
+SubString _kw_11 = {5, -1, 5, 0, ":when"};
 
 // --------- to-string --------------
 Function fn_1298;
@@ -6422,6 +6562,20 @@ Function fn_1300;
 extern Function fn_579;
 extern Function fn_205;
 extern Function fn_208;
+extern String _str_39;
+extern String _str_38;
+extern String _str_34;
+extern String _str_32;
+extern Number _num_7;
+extern Number _num_6;
+extern Number _num_5;
+extern Number _num_4;
+extern Number _num_3;
+extern Number _num_2;
+extern Number _num_11;
+extern Number _num_8;
+extern Number _num_10;
+extern String _str_41;
 Value *arityImpl_206(List *, Value *);
 Value *arityImpl_1301(List *closures, Value *arg0) {
 List *varArgs0 = empty_list;
@@ -6462,10 +6616,6 @@ return(rslt2);
 // --------- to-string main body --------------
 Function fn_1298 = {3, -1, "to-string", 1, {&(FnArity){8, -1, 1, (List *)0, 0, arityImpl_1299}}};
 
-struct {int64_t type;
- int32_t refs;
-   int64_t len;
-   char buffer[10];} _str_52 = {1, -1, 9,"._<>=+-*/"};
 
 // --------- symbol-start --------------
 Function fn_1303;
@@ -6496,10 +6646,6 @@ return(rslt3);
 // --------- symbol-start main body --------------
 Function fn_1303 = {3, -1, "symbol-start", 1, {&(FnArity){8, -1, 0, (List *)0, 0, arityImpl_1304}}};
 
-struct {int64_t type;
- int32_t refs;
-   int64_t len;
-   char buffer[12];} _str_53 = {1, -1, 11,"._<>=*/+!-?"};
 
 // --------- symbol-punct --------------
 Function fn_1306;
@@ -6638,7 +6784,6 @@ Function fn_1320;
 // --------- anon --------------
 Function fn_1322;
 extern Function fn_750;
-extern String _str_41;
 Value *arityImpl_751(List *, Value *);
 Value *arityImpl_206(List *, Value *);
 Value *arityImpl_94(List *, Value *, Value *);
@@ -6703,7 +6848,6 @@ return(rslt6);
 // --------- read-keyword main body --------------
 Function fn_1320 = {3, -1, "read-keyword", 1, {&(FnArity){8, -1, 0, (List *)0, 0, arityImpl_1321}}};
 
-Number _num_24 = {2, -1, 92};
 
 // --------- backslash --------------
 Function fn_1325;
@@ -6724,14 +6868,9 @@ return(rslt1);
 // --------- backslash main body --------------
 Function fn_1325 = {3, -1, "backslash", 1, {&(FnArity){8, -1, 0, (List *)0, 0, arityImpl_1326}}};
 
-struct {int64_t type;
- int32_t refs;
-   int64_t len;
-   char buffer[2];} _str_54 = {1, -1, 1,"n"};
 
 // --------- read-string-newline --------------
 Function fn_1328;
-extern Number _num_10;
 Value *arityImpl_109(List *, Value *);
 Value *arityImpl_1329(List *closures) {
 Value *rslt0 = arityImpl_1326(empty_list);
@@ -6772,11 +6911,6 @@ return(rslt7);
 // --------- read-string-newline main body --------------
 Function fn_1328 = {3, -1, "read-string-newline", 1, {&(FnArity){8, -1, 0, (List *)0, 0, arityImpl_1329}}};
 
-struct {int64_t type;
- int32_t refs;
-   int64_t len;
-   char buffer[2];} _str_55 = {1, -1, 1,"t"};
-Number _num_25 = {2, -1, 9};
 
 // --------- read-string-tab --------------
 Function fn_1331;
@@ -6820,14 +6954,9 @@ return(rslt7);
 // --------- read-string-tab main body --------------
 Function fn_1331 = {3, -1, "read-string-tab", 1, {&(FnArity){8, -1, 0, (List *)0, 0, arityImpl_1332}}};
 
-struct {int64_t type;
- int32_t refs;
-   int64_t len;
-   char buffer[2];} _str_56 = {1, -1, 1,"b"};
 
 // --------- read-string-backspace --------------
 Function fn_1334;
-extern Number _num_8;
 Value *arityImpl_109(List *, Value *);
 Value *arityImpl_1335(List *closures) {
 Value *rslt0 = arityImpl_1326(empty_list);
@@ -6868,11 +6997,6 @@ return(rslt7);
 // --------- read-string-backspace main body --------------
 Function fn_1334 = {3, -1, "read-string-backspace", 1, {&(FnArity){8, -1, 0, (List *)0, 0, arityImpl_1335}}};
 
-struct {int64_t type;
- int32_t refs;
-   int64_t len;
-   char buffer[2];} _str_57 = {1, -1, 1,"r"};
-Number _num_26 = {2, -1, 13};
 
 // --------- read-string-return --------------
 Function fn_1337;
@@ -6916,14 +7040,9 @@ return(rslt7);
 // --------- read-string-return main body --------------
 Function fn_1337 = {3, -1, "read-string-return", 1, {&(FnArity){8, -1, 0, (List *)0, 0, arityImpl_1338}}};
 
-struct {int64_t type;
- int32_t refs;
-   int64_t len;
-   char buffer[2];} _str_58 = {1, -1, 1,"f"};
 
 // --------- read-string-formfeed --------------
 Function fn_1340;
-extern Number _num_11;
 Value *arityImpl_109(List *, Value *);
 Value *arityImpl_1341(List *closures) {
 Value *rslt0 = arityImpl_1326(empty_list);
@@ -7057,7 +7176,7 @@ Function fn_1346 = {3, -1, "read-string-backslash", 1, {&(FnArity){8, -1, 0, (Li
 // forward declaration for 'parse-not-backslash'
 Value *var_1349;
 
-Number _num_27 = {2, -1, 40};
+Number _num_28 = {2, -1, 40};
 
 // --------- instance?_impl --------------
 Function fn_1350;
@@ -7067,7 +7186,7 @@ Value *arityImpl_378(List *, Value *, Value *);
 Value *arityImpl_61(List *, Value *);
 Value *arityImpl_1351(List *closures, Value *arg0, Value *arg1) {
 Value *rslt0 = arityImpl_61(empty_list, arg1);
-Value *rslt1 = arityImpl_378(empty_list, (Value *)&_num_27, rslt0);
+Value *rslt1 = arityImpl_378(empty_list, (Value *)&_num_28, rslt0);
 incRef(rslt1);
 decRef(rslt0);
 my_free(rslt0);
@@ -7449,43 +7568,6 @@ return(rslt19);
 // --------- read-const-string main body --------------
 Function fn_1371 = {3, -1, "read-const-string", 1, {&(FnArity){8, -1, 0, (List *)0, 0, arityImpl_1372}}};
 
-struct {int64_t type;
- int32_t refs;
-   int64_t len;
-   char buffer[2];} _str_59 = {1, -1, 1,"1"};
-struct {int64_t type;
- int32_t refs;
-   int64_t len;
-   char buffer[2];} _str_60 = {1, -1, 1,"2"};
-struct {int64_t type;
- int32_t refs;
-   int64_t len;
-   char buffer[2];} _str_61 = {1, -1, 1,"3"};
-struct {int64_t type;
- int32_t refs;
-   int64_t len;
-   char buffer[2];} _str_62 = {1, -1, 1,"4"};
-struct {int64_t type;
- int32_t refs;
-   int64_t len;
-   char buffer[2];} _str_63 = {1, -1, 1,"5"};
-struct {int64_t type;
- int32_t refs;
-   int64_t len;
-   char buffer[2];} _str_64 = {1, -1, 1,"6"};
-struct {int64_t type;
- int32_t refs;
-   int64_t len;
-   char buffer[2];} _str_65 = {1, -1, 1,"7"};
-struct {int64_t type;
- int32_t refs;
-   int64_t len;
-   char buffer[2];} _str_66 = {1, -1, 1,"8"};
-struct {int64_t type;
- int32_t refs;
-   int64_t len;
-   char buffer[2];} _str_67 = {1, -1, 1,"-"};
-Number _num_28 = {2, -1, -1};
 
 // --------- str-to-int --------------
 Function fn_1374;
@@ -7495,12 +7577,6 @@ Function fn_1376;
 extern Function fn_522;
 extern Function fn_519;
 extern Function fn_391;
-extern Number _num_7;
-extern Number _num_6;
-extern Number _num_5;
-extern Number _num_4;
-extern Number _num_3;
-extern Number _num_2;
 Value *arityImpl_520(List *, Value *);
 Value *arityImpl_378(List *, Value *, Value *);
 Value *arityImpl_378(List *, Value *, Value *);
@@ -7679,8 +7755,8 @@ my_free(rslt3);
 List *varArgs4 = empty_list;
 incRef((Value *)rslt1);
 varArgs4 = (List *)listCons((Value *)rslt1, varArgs4);
-incRef((Value *)(Value *)&_num_28);
-varArgs4 = (List *)listCons((Value *)(Value *)&_num_28, varArgs4);
+incRef((Value *)(Value *)&_num_27);
+varArgs4 = (List *)listCons((Value *)(Value *)&_num_27, varArgs4);
 Value *rslt5 = arityImpl_523(empty_list, (Value *)varArgs4);
 decRef((Value *)varArgs4);
 my_free((Value *)varArgs4);
@@ -7746,12 +7822,8 @@ Function fn_1379 = {3, -1, "read-number", 1, {&(FnArity){8, -1, 0, (List *)0, 0,
 // forward declaration for 'parse-sub-form'
 Value *var_1382;
 
-struct {int64_t type;
- int32_t refs;
-   int64_t len;
-   char buffer[5];} _str_68 = {1, -1, 4,"form"};
 Number _num_29 = {2, -1, 42};
-SubString _kw_10 = {5, -1, 5, 0, ":blah"};
+SubString _kw_12 = {5, -1, 5, 0, ":blah"};
 
 // --------- instance?_impl --------------
 Function fn_1383;
@@ -7861,14 +7933,14 @@ return(rslt6);
 Value *protoFnImpl_163(List *, Value *, Value *);
 Value *arityImpl_1390(List *closures, Value *arg0) {
 List *varArgs0 = empty_list;
-incRef((Value *)(Value *)&_str_68);
-varArgs0 = (List *)listCons((Value *)(Value *)&_str_68, varArgs0);
+incRef((Value *)(Value *)&_str_81);
+varArgs0 = (List *)listCons((Value *)(Value *)&_str_81, varArgs0);
 incRef((Value *)(Value *)&_kw_9);
 varArgs0 = (List *)listCons((Value *)(Value *)&_kw_9, varArgs0);
 Value *rslt1 = arityImpl_212(empty_list, (Value *)varArgs0);
 decRef((Value *)varArgs0);
 my_free((Value *)varArgs0);
-Value *rslt2 = arityImpl_856(empty_list, rslt1, (Value *)&_kw_10);
+Value *rslt2 = arityImpl_856(empty_list, rslt1, (Value *)&_kw_12);
 FnArity *arity_3 = malloc_fnArity();
 arity_3->type = 8;
 arity_3->count = 1;
@@ -7988,8 +8060,6 @@ Function fn_1401 = {3, -1, "read-sub-form", 1, {&(FnArity){8, -1, 0, (List *)0, 
 
 // --------- read-list --------------
 Function fn_1404;
-extern String _str_34;
-extern String _str_32;
 Value *arityImpl_1405(List *closures) {
 Value *rslt0 = arityImpl_1101(empty_list, (Value *)&_str_32);
 Value *rslt1 = arityImpl_1152(empty_list, rslt0);
@@ -8029,12 +8099,9 @@ return(rslt7);
 // --------- read-list main body --------------
 Function fn_1404 = {3, -1, "read-list", 1, {&(FnArity){8, -1, 0, (List *)0, 0, arityImpl_1405}}};
 
-SubString _sym_0 = {7, -1, 8, 0, "hash-map"};
 
 // --------- read-hash-map --------------
 Function fn_1407;
-extern String _str_39;
-extern String _str_38;
 Value *arityImpl_209(List *, Value *);
 Value *arityImpl_1408(List *closures) {
 Value *rslt0 = arityImpl_1101(empty_list, (Value *)&_str_38);
@@ -8082,26 +8149,17 @@ return(rslt8);
 // --------- read-hash-map main body --------------
 Function fn_1407 = {3, -1, "read-hash-map", 1, {&(FnArity){8, -1, 0, (List *)0, 0, arityImpl_1408}}};
 
-struct {int64_t type;
- int32_t refs;
-   int64_t len;
-   char buffer[2];} _str_69 = {1, -1, 1,"["};
-struct {int64_t type;
- int32_t refs;
-   int64_t len;
-   char buffer[2];} _str_70 = {1, -1, 1,"]"};
-SubString _sym_1 = {7, -1, 6, 0, "vector"};
 
 // --------- read-vector --------------
 Function fn_1410;
 Value *arityImpl_209(List *, Value *);
 Value *arityImpl_1411(List *closures) {
-Value *rslt0 = arityImpl_1101(empty_list, (Value *)&_str_69);
+Value *rslt0 = arityImpl_1101(empty_list, (Value *)&_str_68);
 Value *rslt1 = arityImpl_1152(empty_list, rslt0);
 Value *rslt2 = arityImpl_1173(empty_list, (Value *)&_sym_1);
 Value *rslt3 = arityImpl_1402(empty_list);
 Value *rslt4 = arityImpl_1182(empty_list, rslt3);
-Value *rslt5 = arityImpl_1101(empty_list, (Value *)&_str_70);
+Value *rslt5 = arityImpl_1101(empty_list, (Value *)&_str_69);
 Value *rslt6 = arityImpl_1152(empty_list, rslt5);
 List *varArgs7 = empty_list;
 incRef((Value *)rslt6);
@@ -8401,16 +8459,12 @@ return(rslt7);
 // --------- not-eol main body --------------
 Function fn_1432 = {3, -1, "not-eol", 1, {&(FnArity){8, -1, 0, (List *)0, 0, arityImpl_1433}}};
 
-struct {int64_t type;
- int32_t refs;
-   int64_t len;
-   char buffer[2];} _str_71 = {1, -1, 1,";"};
 
 // --------- read-comment --------------
 Function fn_1435;
 Value *arityImpl_109(List *, Value *);
 Value *arityImpl_1436(List *closures) {
-Value *rslt0 = arityImpl_1101(empty_list, (Value *)&_str_71);
+Value *rslt0 = arityImpl_1101(empty_list, (Value *)&_str_70);
 Value *rslt1 = arityImpl_1433(empty_list);
 Value *rslt2 = arityImpl_1182(empty_list, rslt1);
 Value *rslt3 = arityImpl_1152(empty_list, rslt2);
@@ -8448,10 +8502,6 @@ return(rslt7);
 // --------- read-comment main body --------------
 Function fn_1435 = {3, -1, "read-comment", 1, {&(FnArity){8, -1, 0, (List *)0, 0, arityImpl_1436}}};
 
-struct {int64_t type;
- int32_t refs;
-   int64_t len;
-   char buffer[3];} _str_72 = {1, -1, 2," ,"};
 
 // --------- whitespace --------------
 Function fn_1438;
@@ -8460,7 +8510,7 @@ Value *arityImpl_109(List *, Value *);
 Value *arityImpl_109(List *, Value *);
 Value *arityImpl_109(List *, Value *);
 Value *arityImpl_1439(List *closures) {
-Value *rslt0 = arityImpl_1255(empty_list, (Value *)&_str_72);
+Value *rslt0 = arityImpl_1255(empty_list, (Value *)&_str_71);
 Value *rslt1 = arityImpl_109(empty_list, (Value *)&_num_25);
 Value *rslt2 = arityImpl_1101(empty_list, rslt1);
 Value *rslt3 = arityImpl_109(empty_list, (Value *)&_num_26);
@@ -8508,10 +8558,6 @@ return(rslt9);
 // --------- whitespace main body --------------
 Function fn_1438 = {3, -1, "whitespace", 1, {&(FnArity){8, -1, 0, (List *)0, 0, arityImpl_1439}}};
 
-struct {int64_t type;
- int32_t refs;
-   int64_t len;
-   char buffer[2];} _str_73 = {1, -1, 1,"&"};
 
 // --------- read-var-arg --------------
 Function fn_1441;
@@ -8520,7 +8566,7 @@ Value *arityImpl_1442(List *closures) {
 Value *rslt0 = arityImpl_1439(empty_list);
 Value *rslt1 = arityImpl_1182(empty_list, rslt0);
 Value *rslt2 = arityImpl_1152(empty_list, rslt1);
-Value *rslt3 = arityImpl_1101(empty_list, (Value *)&_str_73);
+Value *rslt3 = arityImpl_1101(empty_list, (Value *)&_str_72);
 Value *rslt4 = arityImpl_1439(empty_list);
 Value *rslt5 = arityImpl_1129(empty_list, rslt4);
 Value *rslt6 = arityImpl_1152(empty_list, rslt5);
@@ -8620,7 +8666,7 @@ Value *arityImpl_1448(List *closures) {
 Value *rslt0 = arityImpl_1439(empty_list);
 Value *rslt1 = arityImpl_1182(empty_list, rslt0);
 Value *rslt2 = arityImpl_1152(empty_list, rslt1);
-Value *rslt3 = arityImpl_1101(empty_list, (Value *)&_str_69);
+Value *rslt3 = arityImpl_1101(empty_list, (Value *)&_str_68);
 Value *rslt4 = arityImpl_1152(empty_list, rslt3);
 Value *rslt5 = arityImpl_1445(empty_list);
 Value *rslt6 = arityImpl_1182(empty_list, rslt5);
@@ -8634,7 +8680,7 @@ varArgs9 = (List *)listCons((Value *)rslt7, varArgs9);
 Value *rslt10 = arityImpl_345(empty_list, (Value *)varArgs9);
 decRef((Value *)varArgs9);
 my_free((Value *)varArgs9);
-Value *rslt11 = arityImpl_1101(empty_list, (Value *)&_str_70);
+Value *rslt11 = arityImpl_1101(empty_list, (Value *)&_str_69);
 Value *rslt12 = arityImpl_1152(empty_list, rslt11);
 List *varArgs13 = empty_list;
 incRef((Value *)rslt12);
@@ -8686,11 +8732,6 @@ return(rslt14);
 // --------- read-args main body --------------
 Function fn_1447 = {3, -1, "read-args", 1, {&(FnArity){8, -1, 0, (List *)0, 0, arityImpl_1448}}};
 
-struct {int64_t type;
- int32_t refs;
-   int64_t len;
-   char buffer[5];} _str_74 = {1, -1, 4,"main"};
-SubString _sym_2 = {7, -1, 4, 0, "main"};
 
 // --------- read-main --------------
 Function fn_1450;
@@ -8702,7 +8743,7 @@ Value *rslt1 = arityImpl_1152(empty_list, rslt0);
 Value *rslt2 = arityImpl_1439(empty_list);
 Value *rslt3 = arityImpl_1182(empty_list, rslt2);
 Value *rslt4 = arityImpl_1152(empty_list, rslt3);
-Value *rslt5 = arityImpl_1101(empty_list, (Value *)&_str_74);
+Value *rslt5 = arityImpl_1101(empty_list, (Value *)&_str_73);
 Value *rslt6 = arityImpl_1152(empty_list, rslt5);
 Value *rslt7 = arityImpl_1173(empty_list, (Value *)&_sym_2);
 Value *rslt8 = arityImpl_1439(empty_list);
@@ -8788,7 +8829,6 @@ return(rslt20);
 // --------- read-main main body --------------
 Function fn_1450 = {3, -1, "read-main", 1, {&(FnArity){8, -1, 0, (List *)0, 0, arityImpl_1451}}};
 
-SubString _sym_3 = {7, -1, 8, 0, "fn-arity"};
 
 // --------- read-single-arity --------------
 Function fn_1453;
@@ -8970,12 +9010,6 @@ return(rslt4);
 // --------- read-arities main body --------------
 Function fn_1461 = {3, -1, "read-arities", 1, {&(FnArity){8, -1, 0, (List *)0, 0, arityImpl_1462}}};
 
-struct {int64_t type;
- int32_t refs;
-   int64_t len;
-   char buffer[5];} _str_75 = {1, -1, 4,"defn"};
-SubString _sym_4 = {7, -1, 3, 0, "def"};
-SubString _sym_5 = {7, -1, 2, 0, "fn"};
 
 // --------- read-defn --------------
 Function fn_1464;
@@ -9024,7 +9058,7 @@ Value *rslt2 = arityImpl_1152(empty_list, rslt1);
 Value *rslt3 = arityImpl_1439(empty_list);
 Value *rslt4 = arityImpl_1182(empty_list, rslt3);
 Value *rslt5 = arityImpl_1152(empty_list, rslt4);
-Value *rslt6 = arityImpl_1101(empty_list, (Value *)&_str_75);
+Value *rslt6 = arityImpl_1101(empty_list, (Value *)&_str_74);
 Value *rslt7 = arityImpl_1152(empty_list, rslt6);
 Value *rslt8 = arityImpl_1439(empty_list);
 Value *rslt9 = arityImpl_1129(empty_list, rslt8);
@@ -9113,11 +9147,6 @@ return(rslt22);
 // --------- read-defn main body --------------
 Function fn_1464 = {3, -1, "read-defn", 1, {&(FnArity){8, -1, 0, (List *)0, 0, arityImpl_1465}}};
 
-struct {int64_t type;
- int32_t refs;
-   int64_t len;
-   char buffer[3];} _str_76 = {1, -1, 2,"fn"};
-SubString _sym_6 = {7, -1, 4, 0, "anon"};
 
 // --------- read-fn --------------
 Function fn_1469;
@@ -9129,7 +9158,7 @@ Value *rslt1 = arityImpl_1152(empty_list, rslt0);
 Value *rslt2 = arityImpl_1439(empty_list);
 Value *rslt3 = arityImpl_1182(empty_list, rslt2);
 Value *rslt4 = arityImpl_1152(empty_list, rslt3);
-Value *rslt5 = arityImpl_1101(empty_list, (Value *)&_str_76);
+Value *rslt5 = arityImpl_1101(empty_list, (Value *)&_str_75);
 Value *rslt6 = arityImpl_1152(empty_list, rslt5);
 Value *rslt7 = arityImpl_1173(empty_list, (Value *)&_sym_5);
 Value *rslt8 = arityImpl_1439(empty_list);
@@ -9289,11 +9318,6 @@ return(rslt9);
 // --------- read-let-binding main body --------------
 Function fn_1472 = {3, -1, "read-let-binding", 1, {&(FnArity){8, -1, 0, (List *)0, 0, arityImpl_1473}}};
 
-struct {int64_t type;
- int32_t refs;
-   int64_t len;
-   char buffer[4];} _str_77 = {1, -1, 3,"let"};
-SubString _sym_7 = {7, -1, 3, 0, "let"};
 
 // --------- read-let --------------
 Function fn_1475;
@@ -9304,17 +9328,17 @@ Value *rslt1 = arityImpl_1152(empty_list, rslt0);
 Value *rslt2 = arityImpl_1439(empty_list);
 Value *rslt3 = arityImpl_1182(empty_list, rslt2);
 Value *rslt4 = arityImpl_1152(empty_list, rslt3);
-Value *rslt5 = arityImpl_1101(empty_list, (Value *)&_str_77);
+Value *rslt5 = arityImpl_1101(empty_list, (Value *)&_str_76);
 Value *rslt6 = arityImpl_1152(empty_list, rslt5);
 Value *rslt7 = arityImpl_1173(empty_list, (Value *)&_sym_7);
 Value *rslt8 = arityImpl_1439(empty_list);
 Value *rslt9 = arityImpl_1129(empty_list, rslt8);
 Value *rslt10 = arityImpl_1152(empty_list, rslt9);
-Value *rslt11 = arityImpl_1101(empty_list, (Value *)&_str_69);
+Value *rslt11 = arityImpl_1101(empty_list, (Value *)&_str_68);
 Value *rslt12 = arityImpl_1152(empty_list, rslt11);
 Value *rslt13 = arityImpl_1473(empty_list);
 Value *rslt14 = arityImpl_1182(empty_list, rslt13);
-Value *rslt15 = arityImpl_1101(empty_list, (Value *)&_str_70);
+Value *rslt15 = arityImpl_1101(empty_list, (Value *)&_str_69);
 Value *rslt16 = arityImpl_1152(empty_list, rslt15);
 Value *rslt17 = arityImpl_1402(empty_list);
 Value *rslt18 = arityImpl_1129(empty_list, rslt17);
@@ -9409,11 +9433,6 @@ return(rslt25);
 // --------- read-let main body --------------
 Function fn_1475 = {3, -1, "read-let", 1, {&(FnArity){8, -1, 0, (List *)0, 0, arityImpl_1476}}};
 
-struct {int64_t type;
- int32_t refs;
-   int64_t len;
-   char buffer[5];} _str_78 = {1, -1, 4,":let"};
-SubString _kw_11 = {5, -1, 4, 0, ":let"};
 
 // --------- read-for-let --------------
 Function fn_1478;
@@ -9422,17 +9441,17 @@ Value *arityImpl_1479(List *closures) {
 Value *rslt0 = arityImpl_1439(empty_list);
 Value *rslt1 = arityImpl_1182(empty_list, rslt0);
 Value *rslt2 = arityImpl_1152(empty_list, rslt1);
-Value *rslt3 = arityImpl_1101(empty_list, (Value *)&_str_78);
+Value *rslt3 = arityImpl_1101(empty_list, (Value *)&_str_77);
 Value *rslt4 = arityImpl_1152(empty_list, rslt3);
-Value *rslt5 = arityImpl_1173(empty_list, (Value *)&_kw_11);
+Value *rslt5 = arityImpl_1173(empty_list, (Value *)&_kw_10);
 Value *rslt6 = arityImpl_1439(empty_list);
 Value *rslt7 = arityImpl_1129(empty_list, rslt6);
 Value *rslt8 = arityImpl_1152(empty_list, rslt7);
-Value *rslt9 = arityImpl_1101(empty_list, (Value *)&_str_69);
+Value *rslt9 = arityImpl_1101(empty_list, (Value *)&_str_68);
 Value *rslt10 = arityImpl_1152(empty_list, rslt9);
 Value *rslt11 = arityImpl_1473(empty_list);
 Value *rslt12 = arityImpl_1182(empty_list, rslt11);
-Value *rslt13 = arityImpl_1101(empty_list, (Value *)&_str_70);
+Value *rslt13 = arityImpl_1101(empty_list, (Value *)&_str_69);
 Value *rslt14 = arityImpl_1152(empty_list, rslt13);
 List *varArgs15 = empty_list;
 incRef((Value *)rslt14);
@@ -9494,11 +9513,6 @@ return(rslt16);
 // --------- read-for-let main body --------------
 Function fn_1478 = {3, -1, "read-for-let", 1, {&(FnArity){8, -1, 0, (List *)0, 0, arityImpl_1479}}};
 
-struct {int64_t type;
- int32_t refs;
-   int64_t len;
-   char buffer[6];} _str_79 = {1, -1, 5,":when"};
-SubString _kw_12 = {5, -1, 5, 0, ":when"};
 
 // --------- read-for-when --------------
 Function fn_1481;
@@ -9507,9 +9521,9 @@ Value *arityImpl_1482(List *closures) {
 Value *rslt0 = arityImpl_1439(empty_list);
 Value *rslt1 = arityImpl_1182(empty_list, rslt0);
 Value *rslt2 = arityImpl_1152(empty_list, rslt1);
-Value *rslt3 = arityImpl_1101(empty_list, (Value *)&_str_79);
+Value *rslt3 = arityImpl_1101(empty_list, (Value *)&_str_78);
 Value *rslt4 = arityImpl_1152(empty_list, rslt3);
-Value *rslt5 = arityImpl_1173(empty_list, (Value *)&_kw_12);
+Value *rslt5 = arityImpl_1173(empty_list, (Value *)&_kw_11);
 Value *rslt6 = arityImpl_1439(empty_list);
 Value *rslt7 = arityImpl_1129(empty_list, rslt6);
 Value *rslt8 = arityImpl_1152(empty_list, rslt7);
@@ -9594,15 +9608,6 @@ return(rslt4);
 // --------- read-for-binding main body --------------
 Function fn_1484 = {3, -1, "read-for-binding", 1, {&(FnArity){8, -1, 0, (List *)0, 0, arityImpl_1485}}};
 
-struct {int64_t type;
- int32_t refs;
-   int64_t len;
-   char buffer[4];} _str_80 = {1, -1, 3,"for"};
-SubString _sym_8 = {7, -1, 15, 0, "some-unique-var"};
-SubString _sym_9 = {7, -1, 4, 0, "wrap"};
-SubString _sym_10 = {7, -1, 4, 0, "cond"};
-SubString _sym_11 = {7, -1, 4, 0, "zero"};
-SubString _sym_12 = {7, -1, 8, 0, "flat-map"};
 
 // --------- read-for --------------
 Function fn_1487;
@@ -9640,7 +9645,7 @@ Value *rslt0 = protoFnImpl_314(empty_list, arg1);
 Value *rslt1 = protoFnImpl_319(empty_list, arg1);
 Value *rslt2 = protoFnImpl_314(empty_list, rslt1);
 Value *cond3;
-Value *rslt16 = arityImpl_378(empty_list, rslt0, (Value *)&_kw_11);
+Value *rslt16 = arityImpl_378(empty_list, rslt0, (Value *)&_kw_10);
 decRef(rslt16);
 my_free(rslt16);
 
@@ -9664,7 +9669,7 @@ my_free(rslt18);
 } else {
 decRef(rslt16);
 my_free(rslt16);
-Value *rslt19 = arityImpl_378(empty_list, rslt0, (Value *)&_kw_12);
+Value *rslt19 = arityImpl_378(empty_list, rslt0, (Value *)&_kw_11);
 decRef(rslt19);
 my_free(rslt19);
 
@@ -9859,12 +9864,12 @@ Value *rslt2 = arityImpl_1152(empty_list, rslt1);
 Value *rslt3 = arityImpl_1439(empty_list);
 Value *rslt4 = arityImpl_1182(empty_list, rslt3);
 Value *rslt5 = arityImpl_1152(empty_list, rslt4);
-Value *rslt6 = arityImpl_1101(empty_list, (Value *)&_str_80);
+Value *rslt6 = arityImpl_1101(empty_list, (Value *)&_str_79);
 Value *rslt7 = arityImpl_1152(empty_list, rslt6);
 Value *rslt8 = arityImpl_1439(empty_list);
 Value *rslt9 = arityImpl_1129(empty_list, rslt8);
 Value *rslt10 = arityImpl_1152(empty_list, rslt9);
-Value *rslt11 = arityImpl_1101(empty_list, (Value *)&_str_69);
+Value *rslt11 = arityImpl_1101(empty_list, (Value *)&_str_68);
 Value *rslt12 = arityImpl_1152(empty_list, rslt11);
 Value *rslt13 = arityImpl_1439(empty_list);
 Value *rslt14 = arityImpl_1182(empty_list, rslt13);
@@ -9876,7 +9881,7 @@ Value *rslt19 = arityImpl_1152(empty_list, rslt18);
 Value *rslt20 = arityImpl_1402(empty_list);
 Value *rslt21 = arityImpl_1485(empty_list);
 Value *rslt22 = arityImpl_1182(empty_list, rslt21);
-Value *rslt23 = arityImpl_1101(empty_list, (Value *)&_str_70);
+Value *rslt23 = arityImpl_1101(empty_list, (Value *)&_str_69);
 Value *rslt24 = arityImpl_1152(empty_list, rslt23);
 Value *rslt25 = arityImpl_1402(empty_list);
 Value *rslt26 = arityImpl_1439(empty_list);
@@ -9988,17 +9993,12 @@ return(rslt32);
 // --------- read-for main body --------------
 Function fn_1487 = {3, -1, "read-for", 1, {&(FnArity){8, -1, 0, (List *)0, 0, arityImpl_1488}}};
 
-struct {int64_t type;
- int32_t refs;
-   int64_t len;
-   char buffer[2];} _str_81 = {1, -1, 1,"'"};
-SubString _sym_13 = {7, -1, 5, 0, "quote"};
 
 // --------- read-quoted --------------
 Function fn_1494;
 Value *arityImpl_209(List *, Value *);
 Value *arityImpl_1495(List *closures) {
-Value *rslt0 = arityImpl_1101(empty_list, (Value *)&_str_81);
+Value *rslt0 = arityImpl_1101(empty_list, (Value *)&_str_80);
 Value *rslt1 = arityImpl_1152(empty_list, rslt0);
 Value *rslt2 = arityImpl_1173(empty_list, (Value *)&_sym_13);
 Value *rslt3 = arityImpl_1402(empty_list);
@@ -10096,7 +10096,7 @@ varArgs21 = (List *)listCons((Value *)rslt2, varArgs21);
 Value *rslt22 = arityImpl_1176(empty_list, (Value *)varArgs21);
 decRef((Value *)varArgs21);
 my_free((Value *)varArgs21);
-Value *rslt23 = arityImpl_1296(empty_list, (Value *)&_str_68, rslt22);
+Value *rslt23 = arityImpl_1296(empty_list, (Value *)&_str_81, rslt22);
 incRef(rslt23);
 decRef(rslt0);
 my_free(rslt0);
@@ -10170,7 +10170,10 @@ Function fn_1503;
 
 // --------- anon --------------
 Function fn_1505;
+extern Value *var_91;;
 extern Function protoFn_272;
+extern Function protoFn_312;
+extern Function protoFn_160;
 Value *protoFnImpl_274(List *, Value *);
 Value *protoFnImpl_314(List *, Value *);
 Value *arityImpl_1506(List *closures, Value *arg0) {
@@ -10292,6 +10295,7 @@ Function fn_1511;
 // --------- anon --------------
 Function fn_1513;
 extern Function fn_251;
+extern Function fn_211;
 Value *arityImpl_212(List *, Value *);
 Value *arityImpl_252(List *, Value *);
 Value *arityImpl_1514(List *closures, Value *arg0) {
@@ -10321,6 +10325,7 @@ my_free(rslt4);
 return(rslt4);
 };
 
+extern Function protoFn_1;
 Value *protoFnImpl_5(List *, Value *, Value *);
 Value *arityImpl_1512(List *closures, Value *arg0) {
 FnArity *arity_0 = malloc_fnArity();
@@ -10401,6 +10406,7 @@ return(rslt3);
 };
 
 extern Function protoFn_287;
+extern Function fn_377;
 Value *arityImpl_378(List *, Value *, Value *);
 Value *protoFnImpl_290(List *, Value *);
 Value *protoFnImpl_5(List *, Value *, Value *);
@@ -10485,6 +10491,9 @@ Function fn_1523;
 
 // --------- anon --------------
 Function fn_1525;
+extern Function fn_579;
+extern Function fn_51;
+extern Function protoFn_190;
 extern Function fn_516;
 Value *protoFnImpl_193(List *, Value *, Value *);
 Value *arityImpl_52(List *, Value *);
@@ -10812,6 +10821,7 @@ Function fn_1544;
 // --------- anon --------------
 Function fn_1546;
 extern Function fn_321;
+extern Function fn_391;
 Value *protoFnImpl_314(List *, Value *);
 Value *arityImpl_378(List *, Value *, Value *);
 Value *arityImpl_322(List *, Value *);
@@ -10855,6 +10865,7 @@ Function fn_1548;
 
 // --------- anon --------------
 Function fn_1550;
+extern Function fn_92;
 Value *arityImpl_94(List *, Value *, Value *);
 Value *arityImpl_212(List *, Value *);
 Value *arityImpl_212(List *, Value *);
@@ -11467,6 +11478,8 @@ Function fn_1573;
 
 // --------- anon --------------
 Function fn_1575;
+extern Function fn_208;
+extern Function fn_344;
 Value *arityImpl_212(List *, Value *);
 Value *arityImpl_322(List *, Value *);
 Value *arityImpl_1576(List *closures, Value *arg0) {
@@ -12651,6 +12664,7 @@ Function fn_1617 = {3, -1, "end-scope", 1, {&(FnArity){8, -1, 1, (List *)0, 0, a
 
 // --------- remember-local --------------
 Function fn_1620;
+extern Value *var_37;;
 Value *arityImpl_212(List *, Value *);
 Value *arityImpl_580(List *, Value *);
 Value *arityImpl_1621(List *closures, Value *arg0) {
@@ -12705,6 +12719,7 @@ Function fn_1626;
 
 // --------- anon --------------
 Function fn_1628;
+extern Function protoFn_335;
 Value *protoFnImpl_193(List *, Value *, Value *);
 Value *protoFnImpl_5(List *, Value *, Value *);
 Value *protoFnImpl_337(List *, Value *);
@@ -12822,6 +12837,7 @@ Function fn_1635;
 
 // --------- anon --------------
 Function fn_1637;
+extern Function fn_402;
 extern Function protoFn_325;
 extern String _str_6;
 Value *protoFnImpl_193(List *, Value *, Value *);
@@ -13265,6 +13281,7 @@ return(rslt4);
 
 // --------- anon --------------
 Function fn_1651;
+extern Function fn_388;
 Value *protoFnImpl_193(List *, Value *, Value *);
 Value *arityImpl_212(List *, Value *);
 Value *arityImpl_389(List *, Value *);
@@ -13745,6 +13762,7 @@ Function fn_1673;
 // --------- anon --------------
 Function fn_1675;
 extern Function fn_243;
+extern Function fn_205;
 extern Function fn_768;
 Value *arityImpl_94(List *, Value *, Value *);
 Value *arityImpl_580(List *, Value *);
@@ -14177,6 +14195,7 @@ Function fn_1697;
 
 // --------- anon --------------
 Function fn_1699;
+extern Function protoFn_317;
 Value *arityImpl_580(List *, Value *);
 Value *arityImpl_403(List *, Value *);
 Value *protoFnImpl_319(List *, Value *);
@@ -14904,7 +14923,7 @@ Value *val8 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_1529(empty_list, (Value *)&_str_76);
+Value *rslt0 = arityImpl_1529(empty_list, (Value *)&_str_75);
 FnArity *arity_1 = malloc_fnArity();
 arity_1->type = 8;
 arity_1->count = 1;
@@ -15434,7 +15453,7 @@ Value *val6 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *rslt0 = arityImpl_843(empty_list, (Value *)&_kw_24, (Value *)&_num_28);
+Value *rslt0 = arityImpl_843(empty_list, (Value *)&_kw_24, (Value *)&_num_27);
 FnArity *arity_1 = malloc_fnArity();
 arity_1->type = 8;
 arity_1->count = 1;
@@ -16422,6 +16441,7 @@ Number _num_31 = {2, -1, 46};
 
 // --------- instance?_impl --------------
 Function fn_1755;
+extern Function fn_60;
 Value *arityImpl_378(List *, Value *, Value *);
 Value *arityImpl_61(List *, Value *);
 Value *arityImpl_1756(List *closures, Value *arg0, Value *arg1) {
@@ -21354,6 +21374,7 @@ Function fn_2054;
 
 // --------- anon --------------
 Function fn_2056;
+extern Function fn_368;
 Value *arityImpl_369(List *, Value *);
 Value *arityImpl_322(List *, Value *);
 Value *arityImpl_580(List *, Value *);
@@ -24938,6 +24959,7 @@ Function fn_2200;
 
 // --------- anon --------------
 Function fn_2202;
+extern Value *var_38;;
 Value *protoFnImpl_193(List *, Value *, Value *);
 Value *arityImpl_206(List *, Value *);
 Value *protoFnImpl_337(List *, Value *);
@@ -25140,8 +25162,8 @@ closures = closures->tail;
 Value *rslt1 = protoFnImpl_880(empty_list, val0, (Value *)&protoFn_229);
 Value *rslt2 = protoFnImpl_314(empty_list, rslt1);
 List *varArgs3 = empty_list;
-incRef((Value *)(Value *)&_str_81);
-varArgs3 = (List *)listCons((Value *)(Value *)&_str_81, varArgs3);
+incRef((Value *)(Value *)&_str_80);
+varArgs3 = (List *)listCons((Value *)(Value *)&_str_80, varArgs3);
 incRef((Value *)rslt2);
 varArgs3 = (List *)listCons((Value *)rslt2, varArgs3);
 incRef((Value *)(Value *)&_str_217);
@@ -28529,8 +28551,8 @@ Value *rslt2 = arityImpl_212(empty_list, (Value *)varArgs1);
 decRef((Value *)varArgs1);
 my_free((Value *)varArgs1);
 List *varArgs4 = empty_list;
-incRef((Value *)(Value *)&_str_71);
-varArgs4 = (List *)listCons((Value *)(Value *)&_str_71, varArgs4);
+incRef((Value *)(Value *)&_str_70);
+varArgs4 = (List *)listCons((Value *)(Value *)&_str_70, varArgs4);
 incRef((Value *)val3);
 varArgs4 = (List *)listCons((Value *)val3, varArgs4);
 incRef((Value *)(Value *)&_str_6);
@@ -34202,8 +34224,8 @@ closures = closures->tail;
 List *varArgs2 = empty_list;
 incRef((Value *)val1);
 varArgs2 = (List *)listCons((Value *)val1, varArgs2);
-incRef((Value *)(Value *)&_str_73);
-varArgs2 = (List *)listCons((Value *)(Value *)&_str_73, varArgs2);
+incRef((Value *)(Value *)&_str_72);
+varArgs2 = (List *)listCons((Value *)(Value *)&_str_72, varArgs2);
 Value *rslt3 = arityImpl_580(empty_list, (Value *)varArgs2);
 decRef((Value *)varArgs2);
 my_free((Value *)varArgs2);
@@ -34981,8 +35003,8 @@ decRef(rslt62);
 my_free(rslt62);
 }
 List *varArgs66 = empty_list;
-incRef((Value *)(Value *)&_str_71);
-varArgs66 = (List *)listCons((Value *)(Value *)&_str_71, varArgs66);
+incRef((Value *)(Value *)&_str_70);
+varArgs66 = (List *)listCons((Value *)(Value *)&_str_70, varArgs66);
 incRef((Value *)val15);
 varArgs66 = (List *)listCons((Value *)val15, varArgs66);
 incRef((Value *)(Value *)&_str_285);
@@ -36123,6 +36145,7 @@ Function fn_2768;
 
 // --------- anon --------------
 Function fn_2770;
+extern Function fn_519;
 Value *arityImpl_345(List *, Value *);
 Value *arityImpl_212(List *, Value *);
 Value *arityImpl_212(List *, Value *);
@@ -37563,6 +37586,7 @@ extern Function fn_42;
 extern Function fn_129;
 extern Function fn_39;
 extern Function fn_528;
+extern Function fn_66;
 Value *arityImpl_212(List *, Value *);
 Value *arityImpl_67(List *, Value *, Value *);
 Value *arityImpl_322(List *, Value *);
@@ -42154,7 +42178,7 @@ extern Function fn_374;
 Value *arityImpl_378(List *, Value *, Value *);
 Value *arityImpl_610(List *, Value *, Value *, Value *);
 Value *arityImpl_3036(List *closures, Value *arg0) {
-Value *rslt0 = arityImpl_378(empty_list, (Value *)&_str_73, arg0);
+Value *rslt0 = arityImpl_378(empty_list, (Value *)&_str_72, arg0);
 incRef(rslt0);
 decRef(rslt0);
 my_free(rslt0);
@@ -42273,7 +42297,7 @@ Value *arityImpl_610(List *, Value *, Value *, Value *);
 Value *protoFnImpl_327(List *, Value *, Value *);
 Value *arityImpl_610(List *, Value *, Value *, Value *);
 Value *arityImpl_3047(List *closures, Value *arg0) {
-Value *rslt0 = arityImpl_378(empty_list, (Value *)&_str_73, arg0);
+Value *rslt0 = arityImpl_378(empty_list, (Value *)&_str_72, arg0);
 incRef(rslt0);
 decRef(rslt0);
 my_free(rslt0);

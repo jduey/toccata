@@ -1,0 +1,358 @@
+
+(add-ns sm (module "core/state-maybe.toc"))
+(add-ns fr (module "core/free.toc"))
+(add-ns parser (module "core/parser.toc"))
+
+(defn to-string [rule]
+  (apply-to (fn [chars]
+              (apply str chars))
+            rule))
+
+(defn symbol-start []
+  (comp (parser/alpha) (parser/one-of "._<>=+-*/")))
+
+(defn symbol-punct []
+  (parser/one-of "._<>=*/+!-?"))
+
+(defn symbol-char []
+  (comp (parser/alpha) (parser/digit) (symbol-punct)))
+
+(defn rest-of-symbol []
+  (parser/none-or-more (symbol-char)))
+
+(defn read-symbol []
+  (apply-to (fn [start the-rest]
+              (symbol (apply str (cons start the-rest))))
+            (symbol-start)
+            (rest-of-symbol)))
+
+(defn read-keyword []
+  (apply-to (fn [start the-rest]
+              (keyword (apply str (cons start the-rest))))
+            (parser/ignore (parser/term ":"))
+            (symbol-start)
+            (rest-of-symbol)))
+
+(defn backslash []
+  (parser/term (char 92)))
+
+(defn read-string-newline []
+  (parser/all (parser/ignore (backslash))
+       (parser/ignore (parser/term "n"))
+       (parser/always (char 10))))
+
+(defn read-string-tab []
+  (parser/all (parser/ignore (backslash))
+       (parser/ignore (parser/term "t"))
+       (parser/always (char 9))))
+
+(defn read-string-backspace []
+  (parser/all (parser/ignore (backslash))
+       (parser/ignore (parser/term "b"))
+       (parser/always (char 8))))
+
+(defn read-string-return []
+  (parser/all (parser/ignore (backslash))
+       (parser/ignore (parser/term "r"))
+       (parser/always (char 13))))
+
+(defn read-string-formfeed []
+  (parser/all (parser/ignore (backslash))
+       (parser/ignore (parser/term "f"))
+       (parser/always (char 12))))
+
+(defn read-string-doublequote []
+  (parser/all (parser/ignore (backslash))
+       (parser/ignore (parser/term (char 34)))
+       (parser/always (char 34))))
+
+(defn read-string-backslash []
+  (parser/all (parser/ignore (backslash))
+       (parser/ignore (backslash))
+       (parser/always (char 92))))
+
+(deftype parse-not-backslash []
+  Parser
+  (parser/recursive-descent [_]
+    (for [txt (sm/get-val :text "")
+          :let [x (subs txt 0 1)]
+          :when (cond
+                 (= x (char 92)) false
+                 (= x (char 34)) false
+                 true)
+          _ (sm/set-val :text (subs txt 1))]
+      (list x))))
+
+(defn not-backslash []
+  (fr/free (parse-not-backslash)))
+
+(defn read-const-string []
+  (parser/all (parser/ignore (parser/term (char 34)))
+       (to-string
+        (parser/none-or-more
+         (comp (not-backslash)
+               (read-string-backslash)
+               (read-string-doublequote)
+               (read-string-tab)
+               (read-string-backspace)
+               (read-string-return)
+               (read-string-formfeed)
+               (read-string-newline))))
+       (parser/ignore (parser/term (char 34)))))
+
+(defn str-to-int [negate? int-str]
+  (let [magnitude (reduce int-str 0
+                          (fn [n c]
+                            (+ (* n 10)
+                               (cond
+                                (= c "1") 1
+                                (= c "2") 2
+                                (= c "3") 3
+                                (= c "4") 4
+                                (= c "5") 5
+                                (= c "6") 6
+                                (= c "7") 7
+                                (= c "8") 8
+                                (= c "9") 9
+                                0))))]
+    (cond
+     (= "-" negate?) (* -1 magnitude)
+     magnitude)))
+
+;; only reads integers
+(defn read-number []
+  (apply-to str-to-int
+            (parser/optional (parser/term "-"))
+            (parser/one-or-more (parser/digit))))
+
+(deftype parse-sub-form []
+  Parser
+  (parser/recursive-descent [_]
+    (for [parser-fn (sm/get-in-val (list :parser-fns "form") :blah)
+          result (sm/new-sm parser-fn)]
+      result)))
+
+(defn read-sub-form []
+  (fr/free (parse-sub-form)))
+
+(defn read-list []
+  (parser/all (parser/ignore (parser/term "("))
+       (parser/none-or-more (read-sub-form))
+       (parser/ignore (parser/term ")"))))
+
+(defn read-hash-map []
+  (apply-to cons
+            (parser/ignore (parser/term "{"))
+            (parser/always 'hash-map)
+            (parser/none-or-more (read-sub-form))
+            (parser/ignore (parser/term "}"))))
+
+(defn read-vector []
+  (apply-to cons
+            (parser/ignore (parser/term "["))
+            (parser/always 'vector)
+            (parser/none-or-more (read-sub-form))
+            (parser/ignore (parser/term "]"))))
+
+(deftype parse-not-eol []
+  Parser
+  (parser/recursive-descent [_]
+    (for [txt (sm/get-val :text "")
+          :let [x (subs txt 0 1)]
+          :when (not (= x (char 10)))
+          _ (sm/set-val :text (subs txt 1))]
+      (list x))))
+
+(defn not-eol []
+  (fr/free (parse-not-eol)))
+
+(defn read-comment []
+  (parser/all (parser/term ";")
+       (parser/ignore (parser/none-or-more (not-eol)))
+       (parser/term (char 10))))
+
+(defn whitespace []
+  (comp (parser/one-of " ,")
+        (parser/term (char 9))
+        (parser/term (char 13))
+        (parser/term (char 10))
+        (read-comment)))
+
+(defn read-var-arg []
+  (apply-to list
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (parser/term "&")
+            (parser/ignore (parser/one-or-more (whitespace)))
+            (read-symbol)))
+
+(defn read-arg []
+  (parser/all (parser/ignore (parser/none-or-more (whitespace)))
+       (read-symbol)
+       (parser/ignore (parser/none-or-more (whitespace)))))
+
+(defn read-args []
+  (apply-to comp
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (parser/ignore (parser/term "["))
+            (parser/none-or-more (read-arg))
+            (comp (read-var-arg)
+                  (parser/always empty-list))
+            (parser/ignore (parser/term "]"))))
+
+(defn read-main []
+  (apply-to list*
+            (parser/ignore (parser/term "("))
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (parser/ignore (parser/term "main"))
+            (parser/always 'main)
+            (parser/ignore (parser/one-or-more (whitespace)))
+            (read-args)
+            (parser/one-or-more (read-sub-form))
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (parser/ignore (parser/term ")"))))
+
+(defn read-single-arity []
+  (apply-to (fn [& vs]
+              (list vs))
+            (parser/always 'fn-arity)
+            (read-args)
+            (parser/none-or-more (read-sub-form))))
+
+(defn read-multi-arity []
+  (apply-to list
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (parser/ignore (parser/term "("))
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (parser/always 'fn-arity)
+            (read-args)
+            (parser/none-or-more (read-sub-form))
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (parser/ignore (parser/term ")"))))
+
+(defn read-arities []
+  (comp (read-single-arity)
+        (parser/one-or-more (read-multi-arity))))
+
+(defn read-defn []
+  (apply-to (fn [name arities]
+              (list 'def name (list 'fn name arities)))
+            (parser/ignore (parser/term "("))
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (parser/ignore (parser/term "defn"))
+            (parser/ignore (parser/one-or-more (whitespace)))
+            (read-symbol)
+            (parser/ignore (parser/one-or-more (whitespace)))
+            (read-arities)
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (parser/ignore (parser/term ")"))))
+
+(defn read-fn []
+  (apply-to list
+            (parser/ignore (parser/term "("))
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (parser/ignore (parser/term "fn"))
+            (parser/always 'fn)
+            (parser/ignore (parser/one-or-more (whitespace)))
+            (comp (read-symbol)
+                  (parser/always 'anon))
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (read-arities)
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (parser/ignore (parser/term ")"))))
+
+(defn read-let-binding []
+  (apply-to list
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (read-symbol)
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (read-sub-form)))
+
+(defn read-let []
+  (apply-to list*
+            (parser/ignore (parser/term "("))
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (parser/ignore (parser/term "let"))
+            (parser/always 'let)
+            (parser/ignore (parser/one-or-more (whitespace)))
+            (parser/ignore (parser/term "["))
+            (parser/none-or-more (read-let-binding))
+            (parser/ignore (parser/term "]"))
+            (parser/one-or-more (read-sub-form))
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (parser/ignore (parser/term ")"))))
+
+(defn read-for-let []
+  (apply-to list
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (parser/ignore (parser/term ":let"))
+            (parser/always :let)
+            (parser/ignore (parser/one-or-more (whitespace)))
+            (parser/ignore (parser/term "["))
+            (parser/none-or-more (read-let-binding))
+            (parser/ignore (parser/term "]"))))
+
+(defn read-for-when []
+  (apply-to list
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (parser/ignore (parser/term ":when"))
+            (parser/always :when)
+            (parser/ignore (parser/one-or-more (whitespace)))
+            (read-sub-form)))
+
+(defn read-for-binding []
+  (comp (read-for-let)
+        (read-for-when)
+        (read-let-binding)))
+
+(defn read-for []
+  (apply-to (fn [bound val bindings body]
+              (let [bindings (cons (list bound 'some-unique-var) bindings)]
+                (list 'let (list (list 'some-unique-var val))
+                      (reduce (reverse bindings) (list 'wrap 'some-unique-var body)
+                              (fn [expr sym-val]
+                                (let [sym (first sym-val)
+                                      val (first (rest sym-val))]
+                                  (cond
+                                   (= sym :let) (list 'let val expr)
+                                   (= sym :when) (list 'cond val expr (list 'zero 'some-unique-var))
+                                   (list 'flat-map val
+                                         (list 'fn 'anon
+                                               (list (list 'fn-arity (list sym) (list expr))))))))))))
+            (parser/ignore (parser/term "("))
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (parser/ignore (parser/term "for"))
+            (parser/ignore (parser/one-or-more (whitespace)))
+            (parser/ignore (parser/term "["))
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (read-symbol)
+            (parser/ignore (parser/one-or-more (whitespace)))
+            (read-sub-form)
+            (parser/none-or-more (read-for-binding))
+            (parser/ignore (parser/term "]"))
+            (read-sub-form)
+            (parser/ignore (parser/none-or-more (whitespace)))
+            (parser/ignore (parser/term ")"))))
+
+(defn read-quoted []
+  (apply-to list
+            (parser/ignore (parser/term "'"))
+            (parser/always 'quote)
+            (read-sub-form)))
+
+(defn read-form []
+  (parser/rule "form"
+        (parser/all (parser/ignore (parser/none-or-more (whitespace)))
+             (comp (read-number)
+                   (read-keyword)
+                   (read-symbol)
+                   (read-quoted)
+                   (read-const-string)
+                   (read-let)
+                   (read-main)
+                   (read-defn)
+                   (read-fn)
+                   (read-for)
+                   (read-hash-map)
+                   (read-vector)
+                   (read-list))
+             (parser/ignore (parser/none-or-more (whitespace))))))
