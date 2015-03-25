@@ -7,6 +7,13 @@ toccata-compiler
 (add-ns fr (module "core/free.toc"))
 (add-ns parser (module "core/parser.toc"))
 (add-ns grmr (module "core/grammar.toc"))
+(add-ns ast (module "core/ast.toc"))
+
+(defn debug [& args]
+  (comp (for [debugging (sm/get-val :debug-on false)
+              :when debugging]
+          (apply print-err args))
+        (sm/state-maybe "")))
 
 (defn types []
   ;; type numbers must start at 1 and be contiguous
@@ -22,13 +29,13 @@ toccata-compiler
 
 (defn write [str]
   (sm/new-sm (fn [s]
-            (list (print str) s))))
+               (list (print str) s))))
 
 (defn write-strs [str-list]
   (cond
    (= 0 (count str-list)) (sm/state-maybe "")
    (sm/new-sm (fn [s]
-             (list (map str-list print) s)))))
+                (list (map str-list print) s)))))
 
 (defn gensym [pre]
   (for [sym-count (sm/get-val :gensym-count 0)
@@ -55,9 +62,9 @@ toccata-compiler
         closure-sym (cond
                      (= closure-sym :not-found) (for [closure-sym (genlocal "val")
                                                       _ (sm/update-in-val (list :closed-over)
-                                                                       (fn [closures]
-                                                                         (cons (list closure-sym sym)
-                                                                               closures)))]
+                                                                          (fn [closures]
+                                                                            (cons (list closure-sym sym)
+                                                                                  closures)))]
                                                   closure-sym)
                      (sm/state-maybe closure-sym))]
     (list closure-sym empty-list)))
@@ -70,8 +77,8 @@ toccata-compiler
   (for [ext-ref (sm/get-in-val (list :core-defined-syms sym))
         _ (sm/assoc-in-val (list :defined-syms sym) ext-ref)
         _ (sm/update-in-val (list :new-externs)
-                         (fn [externs]
-                           (cons (first ext-ref) externs)))]
+                            (fn [externs]
+                              (cons (first ext-ref) externs)))]
     ext-ref))
 
 ;; A symbol can be a local, from the context, from the dictionary or
@@ -83,8 +90,8 @@ toccata-compiler
         (apply-to (fn [ext-ref] (list (second ext-ref) empty-list))
                   (core-def sym))
         (sm/new-sm (fn [s]
-                  (print-err "Undefined symbol:" sym "at" (get s :file-name "") ":" (get s :line-num ""))
-                  (abort)))))
+                     (print-err "Undefined symbol:" sym "at" (get s :file-name "") ":" (get s :line-num ""))
+                     (abort)))))
 
 (defn reset-fn-context [arity-fn-sym num-args]
   (for [locals (sm/get-val :local-syms {})
@@ -152,11 +159,11 @@ toccata-compiler
 
 (defn static-arity [arity-fn-sym arg-syms variadic]
   (sm/state-maybe (list (str "&(FnArity){" (get (types) 'FnArity :no-fn-type) ", -1, "
-                          (count arg-syms) ", (List *)0, " variadic ", " arity-fn-sym "}")
-                     empty-list
-                     (cond
-                      variadic {:variadic arity-fn-sym}
-                      {(count arg-syms) arity-fn-sym}))))
+                             (count arg-syms) ", (List *)0, " variadic ", " arity-fn-sym "}")
+                        empty-list
+                        (cond
+                         variadic {:variadic arity-fn-sym}
+                         {(count arg-syms) arity-fn-sym}))))
 
 (defn arity-closes-over [arity-sym arity-fn-sym arg-syms closures variadic]
   (for [closed-over (traverse closures
@@ -193,8 +200,8 @@ toccata-compiler
         args (apply str (interpose args ", "))]
     (for [arity-sym (sm/get-in-val (list :core-static-fns target-sym num-args))
           _ (sm/update-in-val (list :new-static-fns)
-                           (fn [s-fns]
-                             (cons (str "Value *" arity-sym "(" args ");\n") s-fns)))]
+                              (fn [s-fns]
+                                (cons (str "Value *" arity-sym "(" args ");\n") s-fns)))]
       arity-sym)))
 
 (defn lookup-static-fn [target-sym num-args]
@@ -310,45 +317,37 @@ toccata-compiler
              "")]
       (list (str "(Value *)&" sym-val) empty-list))))
 
-(defprotocol AST
+(defprotocol Emitter
   (emit-c [ast]
     (sm/state-maybe ast)))
 
-(def analyze-expr)
+(extend-type ast/inline-ast
+  Emitter
+  (emit-c [ast]
+    (sm/state-maybe (list "" (list (.txt ast))))))
 
-(deftype inline-ast [txt]
-  AST
-  (emit-c [_]
-    (sm/state-maybe (list "" (list txt)))))
+(extend-type ast/symbol-ast
+  Emitter
+  (emit-c [ast]
+    (lookup-sym (.sym ast))))
 
-(deftype symbol-ast [sym]
-  Stringable
-  (string-list [f] (list (str sym)))
-
-  AST
-  (emit-c [_]
-    (lookup-sym sym)))
-
-(deftype keyword-ast [kw]
-  AST
-  (emit-c [_]
-    (for [static-kw (sm/get-in-val (list :keywords kw))]
+(extend-type ast/keyword-ast
+  Emitter
+  (emit-c [ast]
+    (for [static-kw (sm/get-in-val (list :keywords (.kw ast)))]
       (list (str "(Value *)&" static-kw) empty-list (str "SubString " static-kw)))))
 
-(deftype const-number-ast [num]
-  Stringable
-  (string-list [_] (list (str num)))
-
-  AST
-  (emit-c [_]
-    (for [static-num (comp (sm/get-in-val (list :numbers num))
-                           (sm/get-in-val (list :new-numbers num)))]
+(extend-type ast/const-number-ast
+  Emitter
+  (emit-c [ast]
+    (for [static-num (comp (sm/get-in-val (list :numbers (.num ast)))
+                           (sm/get-in-val (list :new-numbers (.num ast))))]
       (list (str "(Value *)&" static-num) empty-list))))
 
-(deftype const-string-ast [const-str]
-  AST
+(extend-type ast/const-string-ast
+  Emitter
   (emit-c [ast]
-    (for [static-str (sm/get-in-val (list :strings const-str) :no-static-str)]
+    (for [static-str (sm/get-in-val (list :strings (.const-str ast)) :no-static-str)]
       (list (str "(Value *)&" static-str) empty-list (str "String " static-str)))))
 
 (defn eval-exprs [ast]
@@ -454,12 +453,12 @@ toccata-compiler
      (traverse syms
                (fn [sym]
                  (write-strs (list "SubString "
-                             (nth sym 1 "no_symbol_val")
-                             " = {"
-                             sym-type
-                             ", -1, " (count (str (nth sym 0 "no_symbol_name"))) ", 0, \""
-                             (nth sym 0 "no_symbol_name")
-                             "\"};\n"))))
+                                   (nth sym 1 "no_symbol_val")
+                                   " = {"
+                                   sym-type
+                                   ", -1, " (count (str (nth sym 0 "no_symbol_name"))) ", 0, \""
+                                   (nth sym 0 "no_symbol_name")
+                                   "\"};\n"))))
 
      (sm/state-maybe ""))))
 
@@ -470,12 +469,12 @@ toccata-compiler
      (traverse nums
                (fn [num]
                  (write-strs (list "Number "
-                             (nth num 1 "noNumber_sym")
-                             " = {"
-                             num-type
-                             ", -1, "
-                             (nth num 0 "noNumber_val")
-                             "};\n"))))
+                                   (nth num 1 "noNumber_sym")
+                                   " = {"
+                                   num-type
+                                   ", -1, "
+                                   (nth num 0 "noNumber_val")
+                                   "};\n"))))
 
      (sm/state-maybe ""))))
 
@@ -485,32 +484,32 @@ toccata-compiler
           _ (apply-to list
                       (const-strings strs (get types 'String "no_String_type"))
                       (sm/update-in-val (list :strings)
-                                     (fn [old-strs]
-                                       (comp old-strs strs)))
+                                        (fn [old-strs]
+                                          (comp old-strs strs)))
                       (sm/assoc-in-val (list :new-strings) {}))
 
           nums (sm/get-in-val (list :new-numbers) empty-list)
           _ (apply-to list
                       (static-numbers nums (get types 'Number "no_Number_type"))
                       (sm/update-in-val (list :numbers)
-                                     (fn [old-nums]
-                                       (comp old-nums nums)))
+                                        (fn [old-nums]
+                                          (comp old-nums nums)))
                       (sm/assoc-in-val (list :new-numbers) {}))
 
           syms (sm/get-in-val (list :new-symbols) empty-list)
           _ (apply-to list
                       (static-syms syms (get types 'Symbol "no_Symbol_type"))
                       (sm/update-in-val (list :symbols)
-                                     (fn [old-sys]
-                                       (comp old-sys syms)))
+                                        (fn [old-sys]
+                                          (comp old-sys syms)))
                       (sm/assoc-in-val (list :new-symbols) {}))
 
           kws (sm/get-in-val (list :new-keywords) empty-list)
           _ (apply-to list
                       (static-syms kws (get types 'Keyword "no_Keyword_type"))
                       (sm/update-in-val (list :keywords)
-                                     (fn [old-kws]
-                                       (comp old-kws kws)))
+                                        (fn [old-kws]
+                                          (comp old-kws kws)))
                       (sm/assoc-in-val (list :new-keywords) {}))]
       "")))
 
@@ -538,10 +537,10 @@ toccata-compiler
                        (cond
                         (= "." (first (str (first sym-def))))
                         (sm/assoc-in-val (list :defined-syms (first sym-def))
-                                        (second sym-def))
+                                         (second sym-def))
 
                         (sm/assoc-in-val (list :defined-syms (symbol (str ns-sym "/" (first sym-def))))
-                                        (second sym-def))))))
+                                         (second sym-def))))))
 
         new-mod-protos (sm/get-in-val (list :modules module-name :protos) {})
         _ (cond
@@ -555,32 +554,49 @@ toccata-compiler
                                            (second proto-def))
 
                           (sm/assoc-in-val (list :defined-protos ns-name)
-                                           (second proto-def)))))))]
+                                           (second proto-def)))))))
+
+        new-mod-types (sm/get-in-val (list :modules module-name :types) {})
+        _ (cond
+           (empty? new-mod-types) (sm/state-maybe "")
+           (traverse (seq new-mod-types)
+                     (fn [type-def]
+                       (let [ns-name (symbol (str ns-sym "/" (first type-def)))]
+                         (sm/assoc-in-val (list :defined-types ns-name)
+                                          (second type-def))))))]
     (list "" empty-list)))
 
-(deftype add-ns-ast [ns-sym asts]
-  AST
-  (emit-c [_]
-    (let [module-name (.const-str (.v (first asts)))]
+(extend-type ast/add-ns-ast
+  Emitter
+  (emit-c [ast]
+    (let [module-name (.const-str (.v (first (.asts ast))))]
       (comp
-       (add-module-info ns-sym module-name)
+       (add-module-info (.ns-sym ast) module-name)
        (for [syms (sm/get-val :defined-syms {})
              _ (sm/set-val :defined-syms {})
 
-             protos (sm/get-val :defined-protos {})
+             types (sm/get-val :defined-types {})
+             _ (sm/set-val :defined-types {})
 
+             protos (sm/get-val :defined-protos {})
              core-protos (sm/get-in-val (list :modules "core.toc" :protos) {})
-             _ (sm/set-val :defined-protos core-protos)
+             _ (sm/set-val :defined-protos (reduce (filter (seq protos)
+                                                           (fn [x]
+                                                             (= "." (first (str (first x))))))
+                                                   core-protos
+                                                   (fn [m proto]
+                                                     (assoc m (first proto) (second proto)))))
 
              file-name (sm/get-val :file-name)
              _ (sm/set-val :file-name module-name)
-             _ (fr/evaluate (fr/free-app (fr/free list) asts) emit-c)
+             _ (fr/evaluate (fr/free-app (fr/free list) (.asts ast)) emit-c)
 
              _ (sm/set-val :file-name file-name)
              _ (sm/set-val :defined-syms syms)
              _ (sm/set-val :defined-protos protos)
+             _ (sm/set-val :defined-types types)
 
-             _ (add-module-info ns-sym module-name)]
+             _ (add-module-info (.ns-sym ast) module-name)]
          (list "" empty-list))))))
 
 (defn unpack-closures [arg-syms]
@@ -593,17 +609,17 @@ toccata-compiler
             "argsList = argsList->tail;\n"
             results))))
 
-(deftype variadic-arity-ast [args body]
-  AST
-  (emit-c [_]
+(extend-type ast/variadic-arity-ast
+  Emitter
+  (emit-c [ast]
     (let [c-args (list "closures" "varArgs")
-          arg-count (count args)]
+          arg-count (count (.args ast))]
       (for [arity-fn-sym (gensym "arityImpl_")
             arity-sym (genlocal "arity_")
             fn-context (reset-fn-context arity-fn-sym arg-count)
-            arg-syms (gen-arg-syms args)
+            arg-syms (gen-arg-syms (.args ast))
             scope-info (begin-scope)
-            body-exprs (eval-exprs body)
+            body-exprs (eval-exprs (.body ast))
             _ (emit-externs)
             _ (write-strs (list "Value *" arity-fn-sym "(List *closures, Value *varArgs) {\n"
                                 "List *argsList = (List *)varArgs;\n"))
@@ -637,15 +653,15 @@ toccata-compiler
                     (static-arity arity-fn-sym c-args 1))]
         result))))
 
-(deftype fn-arity-ast [args body]
-  AST
-  (emit-c [_]
+(extend-type ast/fn-arity-ast
+  Emitter
+  (emit-c [ast]
     (for [arity-sym (genlocal "arity_")
           arity-fn-sym (gensym "arityImpl_")
-          fn-context (reset-fn-context arity-fn-sym (count args))
-          arg-syms (gen-arg-syms args)
+          fn-context (reset-fn-context arity-fn-sym (count (.args ast)))
+          arg-syms (gen-arg-syms (.args ast))
           scope-info (begin-scope)
-          body-exprs (eval-exprs body)
+          body-exprs (eval-exprs (.body ast))
           _ (emit-externs)
 
           :let [result-sym (first body-exprs)]
@@ -682,16 +698,16 @@ toccata-compiler
                   (static-arity arity-fn-sym arg-syms 0))]
       result)))
 
-(deftype main-ast [args body]
-  AST
-  (emit-c [_]
+(extend-type ast/main-ast
+  Emitter
+  (emit-c [ast]
     (for [_ (static-values)
           main-sym (gensym "main_")
           _ (sm/set-val :main-sym main-sym)
-          arg-syms (gen-arg-syms args)
+          arg-syms (gen-arg-syms (.args ast))
           _ (sm/set-val :local-sym-count 0)
           scope-info (begin-scope)
-          body (eval-exprs body)
+          body (eval-exprs (.body ast))
           _ (emit-externs)
           _ (write-strs (list "\nint " main-sym " ("))
           _ (write-strs (interpose (map arg-syms (fn [arg] (str "Value *" arg)))
@@ -721,42 +737,36 @@ toccata-compiler
                  (list (comp syms (list sym))
                        (comp stmts evalled-stmts))))))))
 
-(defn debug [& args]
-  (comp (for [debugging (sm/get-val :debug-on false)
-              :when debugging]
-          (apply print-err args))
-        (sm/state-maybe "")))
-
-(deftype call-ast [callee params]
-  AST
-  (emit-c [_]
-    (for [target (fr/evaluate callee emit-c)
-          args (eval-args params)
+(extend-type ast/call-ast
+  Emitter
+  (emit-c [ast]
+    (for [target (fr/evaluate (.callee ast) emit-c)
+          args (eval-args (.params ast))
           result (comp (call-static-fixed target args)
                        (call-static-variadic target args)
                        (call-recursive target args)
                        (call-dynamic-fn target args)
                        (sm/new-sm (fn [s]
-                                 (print-err (str "could not emit callsite for '"
-                                                 (first (fr/evaluate callee string-list))
-                                                 "'"))
-                                 (print-err :target (first target))
-                                 (abort))))]
+                                    (print-err (str "could not emit callsite for '"
+                                                    (first (fr/evaluate (.callee ast) string-list))
+                                                    "'"))
+                                    (print-err :target (first target))
+                                    (abort))))]
       result)))
 
-(deftype binding-ast [binding val]
-  AST
-  (emit-c [_]
-    (for [evalled (fr/evaluate val emit-c)
-          _ (sm/assoc-in-val (list :local-syms binding) (nth evalled 0 ""))]
+(extend-type ast/binding-ast
+  Emitter
+  (emit-c [ast]
+    (for [evalled (fr/evaluate (.val ast) emit-c)
+          _ (sm/assoc-in-val (list :local-syms (.binding ast)) (nth evalled 0 ""))]
       (list "" (nth evalled 1 empty-list)))))
 
-(deftype let-ast [bindings body]
-  AST
-  (emit-c [_]
+(extend-type ast/let-ast
+  Emitter
+  (emit-c [ast]
     (for [locals (sm/get-val :local-syms {})
-          bindings (fr/evaluate bindings emit-c)
-          body-exprs (eval-exprs body)
+          bindings (fr/evaluate (.bindings ast) emit-c)
+          body-exprs (eval-exprs (.body ast))
           _ (sm/set-val :local-syms locals)]
       (let [binding-stmts (crush bindings (fn [binding]
                                             (nth binding 1 empty-list)))
@@ -764,23 +774,23 @@ toccata-compiler
             body-stmts (nth body-exprs 1 empty-list)]
         (list result-sym (comp binding-stmts body-stmts))))))
 
-(deftype fn-ast [name arities]
-  AST
-  (emit-c [_]
-    (let [arity-count (count arities)]
+(extend-type ast/fn-ast
+  Emitter
+  (emit-c [ast]
+    (let [arity-count (count (.arities ast))]
       (for [_ (static-values)
             curr-fn-sym (sm/get-val :curr-fn-sym "")
             fn-sym (gensym "fn_")
             _ (sm/set-val :curr-fn-sym fn-sym)
-            _ (write-strs (list "\n// --------- " name " --------------\n"
+            _ (write-strs (list "\n// --------- " (.args ast) " --------------\n"
                                 "Function " fn-sym ";\n"))
             _ (remember-local (str "(Value *)" fn-sym))
             ;; TODO: check for anon fn, save previous value of
             ;; :defined-sym and restore at end
-            _ (sm/assoc-in-val (list :defined-syms name) (list (str "Function " fn-sym)
-                                                            (str "(Value *)&" fn-sym)))
-            arity-vals (traverse arities (fn [arity]
-                                           (fr/evaluate arity emit-c)))
+            _ (sm/assoc-in-val (list :defined-syms (.args ast)) (list (str "Function " fn-sym)
+                                                                     (str "(Value *)&" fn-sym)))
+            arity-vals (traverse (.arities ast) (fn [arity]
+                                                  (fr/evaluate arity emit-c)))
             :let [arity-syms (map arity-vals first)
                   arity-init (crush arity-vals second)
                   static-arities (crush arity-vals (fn [av]
@@ -788,10 +798,10 @@ toccata-compiler
             _ (cond
                (= 0 (count arity-init))
                (apply-to list
-                         (write-strs (list "\n// --------- " name " main body --------------\n"
+                         (write-strs (list "\n// --------- " (.args ast) " main body --------------\n"
                                            "Function " fn-sym " = {"
                                            (get (types) 'Function :no-fn-type) ", -1, \""
-                                           name "\", " arity-count ", "
+                                           (.args ast) "\", " arity-count ", "
                                            "{" (apply str (interpose arity-syms ", ")) "}};\n\n"))
                          (sm/assoc-in-val (list :scope-locals (str "(Value *)" fn-sym)) false)
                          (sm/assoc-in-val (list :static-fns (str "(Value *)&" fn-sym)) static-arities))
@@ -806,7 +816,7 @@ toccata-compiler
                (comp arity-init
                      (list (str "Function *" fn-sym " = malloc_function(" arity-count ");\n")
                            (str fn-sym "->type = " (get (types) 'Function :no-fn-type) ";\n")
-                           (str fn-sym "->name = \"" name "\";\n")
+                           (str fn-sym "->name = \"" (.args ast) "\";\n")
                            (str fn-sym "->arityCount = " arity-count ";\n"))
                      (map (range arity-count)
                           (fn [index]
@@ -814,10 +824,10 @@ toccata-compiler
                                  (nth arity-syms index "") ";\n"))))
                (str "Function " fn-sym)))))))
 
-(deftype quoted-ast [sym]
-  AST
-  (emit-c [_]
-    (emit-static-sym sym)))
+(extend-type ast/quoted-ast
+  Emitter
+  (emit-c [ast]
+    (emit-static-sym (.sym ast))))
 
 (defn forward-decl [name]
   (for [c-name (gensym "var_")
@@ -841,7 +851,7 @@ toccata-compiler
         _ (cond
            (= result-sym "") (write-strs (list "Value *" c-name " = " (first initialization)))
            (< 1 init-count) (sm/state-maybe (let [_ (print-err (str "invalid definition: " name))]
-                                           (abort)))
+                                              (abort)))
            (write-strs (list (first initialization)
                              Value* c-name " = " result-sym ";\n")))]
     ""))
@@ -850,7 +860,7 @@ toccata-compiler
   (for [c-name (gensym "var_")
         _ (write-strs (list Value* c-name " = " (first initialization) ";\n"))
         _ (sm/assoc-in-val (list :defined-syms name) (list (str "Value *" c-name ";")
-                                                        c-name))]
+                                                           c-name))]
     c-name))
 
 (defn expression-definition [name result-sym initialization extern-def]
@@ -871,19 +881,19 @@ toccata-compiler
         _ (cond
            (= result-sym "") (inline-text-definition name initialization)
            (< 1 (count initialization)) (sm/state-maybe (let [_ (print-err (str "invalid definition: " name))]
-                                                       (abort)))
+                                                          (abort)))
            (expression-definition name result-sym initialization extern-def))]
     ""))
 
-(deftype definition-ast [name value]
-  AST
-  (emit-c [_]
+(extend-type ast/definition-ast
+  Emitter
+  (emit-c [ast]
     (flat-map (static-values)
               (fn [_]
                 (cond
-                 (= :no-value value) (forward-decl name)
-                 (comp (define-fwd-decl name value)
-                       (define-value name value)))))))
+                 (= :no-value (.value ast)) (forward-decl (.name ast))
+                 (comp (define-fwd-decl (.name ast) (.value ast))
+                       (define-value (.name ast) (.value ast))))))))
 
 (defn eval-cond-clause [clauses default cond-result]
   (cond
@@ -930,13 +940,13 @@ toccata-compiler
                    (nth cond-rest 1 empty-list)
                    (list "}\n")))))))
 
-(deftype cond-ast [clauses default]
-  AST
-  (emit-c [_]
+(extend-type ast/cond-ast
+  Emitter
+  (emit-c [ast]
     (for [cond-result (genlocal "cond")
           :let [cond-result (str cond-result)]
           scope-info (begin-scope)
-          default (fr/evaluate default emit-c)
+          default (fr/evaluate (.default ast) emit-c)
           :let [default-result (nth default 0 "")]
           default-suffix (for [scope-locals (sm/get-val :scope-locals)]
                            (map (seq scope-locals)
@@ -950,7 +960,7 @@ toccata-compiler
                                     (list cond-result " = " default-result ";\n")
                                     default-suffix)
                 default (list default-result default-stmts)]
-          evalled-clauses (eval-cond-clause clauses default cond-result)
+          evalled-clauses (eval-cond-clause (.clauses ast) default cond-result)
           _ (end-scope scope-info)
           _ (remember-local cond-result)]
       (list cond-result
@@ -970,11 +980,12 @@ toccata-compiler
                           ""))))]
     (list "" empty-list)))
 
-(deftype extend-ast [type impls]
-  AST
-  (emit-c [_]
-    (for [type-num (sm/get-in-val (list :types type))
-          _ (traverse (seq impls) (partial emit-extension type-num))]
+(extend-type ast/extend-ast
+  Emitter
+  (emit-c [ast]
+    (for [type-num (comp (sm/get-in-val (list :defined-types (.type ast)))
+                         (sm/get-in-val (list :types (.type ast)) :bogus-type-num))
+          _ (traverse (seq (.impls ast)) (partial emit-extension type-num))]
       "")))
 
 (defn emit-reified-fn [protocol-name type-num name-ast]
@@ -1034,19 +1045,19 @@ toccata-compiler
                             "}};\n"))]
     (list (str "(Value *)&" reified-sym) empty-list (str "ReifiedVal " reified-sym))))
 
-(deftype reify-ast [impls]
-  AST
-  (emit-c [_]
+(extend-type ast/reify-ast
+  Emitter
+  (emit-c [ast]
     (cond
-     (empty? impls) (let [_ (print-err :no-impls)]
-                      (list "" empty-list))
+     (empty? (.impls ast)) (let [_ (print-err :no-impls)]
+                             (list "" empty-list))
      (for [types (sm/get-val :types {})
            :let [type-num (inc (count (seq types)))]
            _ (sm/assoc-in-val (list :types type-num) type-num)
            reify-fn-index (sm/get-val :reify-fn-index 0)
            _ (sm/set-val :reify-fn-index 0)
            impl-fns (apply* (sm/state-maybe list)
-                            (for [impl (seq impls)
+                            (for [impl (seq (.impls ast))
                                   impl-fn (second impl)]
                               (emit-reified-fn (first impl) type-num impl-fn)))
            _ (sm/set-val :reify-fn-index reify-fn-index)
@@ -1137,13 +1148,13 @@ toccata-compiler
                                         :extern-def (str "extern Function " fn-sym ";")}))]
       fn-sym)))
 
-(deftype protocol-ast [protocol-name prototypes]
-  AST
+(extend-type ast/protocol-ast
+  Emitter
   (emit-c [ast]
     (for [_ (static-values)
           file-name (sm/get-val :file-name "")
-          :let [qualified-proto-name (str file-name "/" protocol-name "/")]
-          result (traverse (seq prototypes) (partial emit-proto-fn qualified-proto-name))]
+          :let [qualified-proto-name (str file-name "/" (.protocol-name ast) "/")]
+          result (traverse (seq (.prototypes ast)) (partial emit-proto-fn qualified-proto-name))]
       result)))
 
 (defn replace-type [types type-val-num name]
@@ -1153,48 +1164,43 @@ toccata-compiler
                                                 (rest types))
    (cons (first types) (replace-type (rest types) type-val-num name))))
 
-(deftype type-ast-val [name fields impls]
-  AST
-  (emit-c [_]
+(def analyze-expr)
+
+(extend-type ast/type-ast-val
+  Emitter
+  (emit-c [ast]
     (for [types (sm/get-val :types {})
           :let [type-val-num (+ 2 (count (seq types)))]
 
           _ (analyze-expr type-val-num)
           _ (cond
-             (empty? fields) (sm/state-maybe "")
-             (traverse fields
+             (empty? (.fields ast)) (sm/state-maybe "")
+             (traverse (.fields ast)
                        (fn [field]
                          (let [getter-name (symbol (str "." field))]
                            (comp (sm/get-in-val (list :protocols (str "Getter/" getter-name)))
                                  (emit-proto-fn "Getter/"
                                                 (list getter-name (list (list 1 {})))))))))
-          _ (comp (sm/get-in-val (list :defined-syms name))
-                  (forward-decl name))
+          _ (comp (sm/get-in-val (list :defined-syms (.name ast)))
+                  (forward-decl (.name ast)))
           type-ast (analyze-expr (list 'reify
                                        'Type
                                        (list 'instance? (list 'vector '_ 'v)
                                              (list '= type-val-num (list 'get-type 'v)))
                                        'Function
-                                       (list 'invoke (cons 'vector (cons '_ fields))
-                                             impls)))
+                                       (list 'invoke (cons 'vector (cons '_ (.fields ast)))
+                                             (.impls ast))))
           _ (static-values)
-          result (define-fwd-decl name type-ast)
+          result (define-fwd-decl (.name ast) type-ast)
+
+          file-name (sm/get-val :file-name)
+          _ (sm/assoc-in-val (list :modules file-name :types (.name ast)) type-val-num)
+          _ (sm/assoc-in-val (list :defined-types (.name ast)) type-val-num)
+
           _ (sm/update-in-val (list :types)
-                           (fn [types]
-                             (HashMap (replace-type (seq types) type-val-num name))))]
+                              (fn [types]
+                                (HashMap (replace-type (seq types) type-val-num (.name ast)))))]
       result)))
-
-(defn type-ast [name fields impls]
-  (let [fields (rest fields)
-        impls (comp
-               (cons 'reify impls)
-               (cons 'Getter
-                     (map fields
-                          (fn [field]
-                            (list (symbol (str "." field)) (list 'vector '_)
-                                  field)))))]
-    (type-ast-val name fields impls)))
-
 
 (def compile-core)
 
@@ -1236,62 +1242,62 @@ toccata-compiler
                          (< (count x) 2) false
                          (= (first x) 'toccata-core))))]
     (fr/free (reify
-            AST
-            (emit-c [_]
-              (for [text (sm/get-val :text)
-                    parser (sm/get-val :parser)
-                    file-name (sm/get-val :file-name)
-                    _ (sm/set-val :file-name (second expr))
-                    :let [out-file (str (subs (second expr) 0 (- (count (second expr)) 3)) "c")
-                          _ (output-to-file out-file)
-                          core (slurp (second expr))]
-                    _ (compile-core parser core)
-                    :let [_ (standard-output)]
+               Emitter
+               (emit-c [_]
+                 (for [text (sm/get-val :text)
+                       parser (sm/get-val :parser)
+                       file-name (sm/get-val :file-name)
+                       _ (sm/set-val :file-name (second expr))
+                       :let [out-file (str (subs (second expr) 0 (- (count (second expr)) 3)) "c")
+                             _ (output-to-file out-file)
+                             core (slurp (second expr))]
+                       _ (compile-core parser core)
+                       :let [_ (standard-output)]
 
-                    syms (sm/get-val :symbols {})
-                    _ (sm/set-val :core-symbols syms)
-                    _ (sm/set-val :symbols {})
+                       syms (sm/get-val :symbols {})
+                       _ (sm/set-val :core-symbols syms)
+                       _ (sm/set-val :symbols {})
 
-                    kws (sm/get-val :keywords {})
-                    _ (sm/set-val :core-keywords kws)
-                    _ (sm/set-val :keywords {})
+                       kws (sm/get-val :keywords {})
+                       _ (sm/set-val :core-keywords kws)
+                       _ (sm/set-val :keywords {})
 
-                    strs (sm/get-val :strings {})
-                    _ (sm/set-val :core-strings strs)
-                    _ (sm/set-val :strings {})
+                       strs (sm/get-val :strings {})
+                       _ (sm/set-val :core-strings strs)
+                       _ (sm/set-val :strings {})
 
-                    nums (sm/get-val :numbers {})
-                    _ (sm/set-val :core-numbers nums)
-                    _ (sm/set-val :numbers {})
+                       nums (sm/get-val :numbers {})
+                       _ (sm/set-val :core-numbers nums)
+                       _ (sm/set-val :numbers {})
 
-                    def-syms (sm/get-val :defined-syms {})
-                    _ (sm/set-val :core-defined-syms def-syms)
-                    _ (sm/set-val :defined-syms {})
+                       def-syms (sm/get-val :defined-syms {})
+                       _ (sm/set-val :core-defined-syms def-syms)
+                       _ (sm/set-val :defined-syms {})
 
-                    s-funs (sm/get-val :static-fns {})
-                    _ (sm/set-val :core-static-fns s-funs)
-                    _ (sm/set-val :static-fns {})
+                       s-funs (sm/get-val :static-fns {})
+                       _ (sm/set-val :core-static-fns s-funs)
+                       _ (sm/set-val :static-fns {})
 
-                    _ (base-types)
+                       _ (base-types)
 
-                    protos (sm/get-val :protocols)
-                    _ (traverse (seq protos)
-                                (fn [proto]
-                                  (let [impls (get (second proto) :impls {})]
-                                    (cond
-                                     (empty? impls) (sm/state-maybe "")
-                                     (traverse (seq impls)
-                                               (fn [impl]
-                                                 (write-strs (list "extern Function "
-                                                                   (subs (second impl) 10) ";\n"))))))))
+                       protos (sm/get-val :protocols)
+                       _ (traverse (seq protos)
+                                   (fn [proto]
+                                     (let [impls (get (second proto) :impls {})]
+                                       (cond
+                                        (empty? impls) (sm/state-maybe "")
+                                        (traverse (seq impls)
+                                                  (fn [impl]
+                                                    (write-strs (list "extern Function "
+                                                                      (subs (second impl) 10) ";\n"))))))))
 
-                    _ (extern-functions)
-                    _ (core-base-fns)
-                    _ (fixed-fn-types)
+                       _ (extern-functions)
+                       _ (core-base-fns)
+                       _ (fixed-fn-types)
 
-                    _ (sm/set-val :file-name file-name)
-                    _ (sm/set-val :text text)]
-                (list "" empty-list)))))))
+                       _ (sm/set-val :file-name file-name)
+                       _ (sm/set-val :text text)]
+                   (list "" empty-list)))))))
 
 (defn analyze-inline-text []
   (for [expr (is-expr (fn [x]
@@ -1299,11 +1305,11 @@ toccata-compiler
                          (not (seq? x)) false
                          (empty? x) false
                          (= (first x) 'inline-text))))]
-    (fr/free (inline-ast (nth expr 1 "")))))
+    (fr/free (ast/inline-ast (nth expr 1 "")))))
 
 (defn analyze-symbol []
   (for [sym (is-expr symbol?)]
-    (fr/free (symbol-ast sym))))
+    (fr/free (ast/symbol-ast sym))))
 
 (defn keyword-already-defined? [kw]
   (sm/get-in-val (list :keywords kw)))
@@ -1315,15 +1321,15 @@ toccata-compiler
   (for [ext-kw (sm/get-in-val (list :core-keywords kw))
         _ (sm/assoc-in-val (list :keywords kw) ext-kw)
         _ (sm/update-in-val (list :new-externs)
-                         (fn [externs]
-                           (cons (str "SubString " ext-kw) externs)))]
+                            (fn [externs]
+                              (cons (str "SubString " ext-kw) externs)))]
     ext-kw))
 
 (defn make-static-keyword [kw]
   (for [kw-idx (sm/get-val :kw-count 0)
         _ (sm/set-val :kw-count (inc kw-idx))
         _ (sm/assoc-in-val (list :new-keywords kw)
-                        (str "_kw_" kw-idx))]
+                           (str "_kw_" kw-idx))]
     ""))
 
 (defn analyze-keyword []
@@ -1332,7 +1338,7 @@ toccata-compiler
                 (keyword-recently-defined? kw)
                 (keyword-defined-in-core kw)
                 (make-static-keyword kw))]
-    (fr/free (keyword-ast kw))))
+    (fr/free (ast/keyword-ast kw))))
 
 (defn number-already-defined? [num]
   (sm/get-in-val (list :numbers num)))
@@ -1344,15 +1350,15 @@ toccata-compiler
   (for [ext-num (sm/get-in-val (list :core-numbers num))
         _ (sm/assoc-in-val (list :numbers num) ext-num)
         _ (sm/update-in-val (list :new-externs)
-                         (fn [externs]
-                           (cons (str "Number " ext-num) externs)))]
+                            (fn [externs]
+                              (cons (str "Number " ext-num) externs)))]
     ext-num))
 
 (defn make-static-number [num]
   (for [num-idx (sm/get-val :num-count 0)
         _ (sm/set-val :num-count (inc num-idx))
         _ (sm/assoc-in-val (list :new-numbers num)
-                        (str "_num_" num-idx))]
+                           (str "_num_" num-idx))]
     ""))
 
 (defn analyze-number []
@@ -1361,7 +1367,7 @@ toccata-compiler
                 (number-recently-defined? num)
                 (number-defined-in-core num)
                 (make-static-number num))]
-    (fr/free (const-number-ast num))))
+    (fr/free (ast/const-number-ast num))))
 
 (defn string-already-defined? [str-val]
   (sm/get-in-val (list :strings str-val)))
@@ -1373,15 +1379,15 @@ toccata-compiler
   (for [ext-str (sm/get-in-val (list :core-strings str-val))
         _ (sm/assoc-in-val (list :strings str-val) ext-str)
         _ (sm/update-in-val (list :new-externs)
-                         (fn [externs]
-                           (cons (str "String " ext-str) externs)))]
+                            (fn [externs]
+                              (cons (str "String " ext-str) externs)))]
     ext-str))
 
 (defn make-static-string [str-val]
   (for [str-idx (sm/get-val :str-count 0)
         _ (sm/set-val :str-count (inc str-idx))
         _ (sm/assoc-in-val (list :new-strings str-val)
-                        (str "_str_" str-idx))]
+                           (str "_str_" str-idx))]
     ""))
 
 (defn analyze-string []
@@ -1390,12 +1396,12 @@ toccata-compiler
                 (string-recently-defined? str-val)
                 (string-defined-in-core str-val)
                 (make-static-string str-val))]
-    (fr/free (const-string-ast str-val))))
+    (fr/free (ast/const-string-ast str-val))))
 
 (defn analyze-call []
   (for [expr (is-expr (fn [s] (not-empty? s)))
         asts (traverse expr analyze-expr)]
-    (fr/free (call-ast (first asts) (rest asts)))))
+    (fr/free (ast/call-ast (first asts) (rest asts)))))
 
 (defn analyze-let-binding [binding-pair]
   (cond
@@ -1407,7 +1413,7 @@ toccata-compiler
            binding (is-expr symbol?)
            ast (analyze-expr expr)
            _ (sm/set-val :expr curr-expr)]
-       (fr/free (binding-ast binding ast))))))
+       (fr/free (ast/binding-ast binding ast))))))
 
 (defn analyze-let []
   (for [expr (is-expr (fn [x]
@@ -1418,8 +1424,8 @@ toccata-compiler
         bindings (traverse (nth expr 1 empty-list)
                            analyze-let-binding)
         body (traverse (drop expr 2) analyze-expr)]
-    (fr/free (let-ast (apply* (fr/free list) bindings)
-                      (apply* (fr/free list) body)))))
+    (fr/free (ast/let-ast (apply* (fr/free list) bindings)
+                          (apply* (fr/free list) body)))))
 
 (defn variadic? [expr]
   (let [args (nth expr 1 empty-list)]
@@ -1432,9 +1438,9 @@ toccata-compiler
                          (not (= (first x) 'fn-arity)) false
                          (variadic? x))))
         body (traverse (nth expr 2 empty-list) analyze-expr)]
-    (fr/free (variadic-arity-ast (remove (nth expr 1 empty-list) (fn [arg]
-                                                                (= "&" arg)))
-                              (apply* (fr/free list) body)))))
+    (fr/free (ast/variadic-arity-ast (remove (nth expr 1 empty-list) (fn [arg]
+                                                                       (= "&" arg)))
+                                     (apply* (fr/free list) body)))))
 
 (defn analyze-fn-arity []
   (for [expr (is-expr (fn [x]
@@ -1444,8 +1450,8 @@ toccata-compiler
                          (not (variadic? x)))))
         file-name (sm/get-val :file-name "")
         body (traverse (nth expr 2 empty-list) analyze-expr)]
-    (fr/free (fn-arity-ast (nth expr 1 empty-list)
-                        (apply* (fr/free list) body)))))
+    (fr/free (ast/fn-arity-ast (nth expr 1 empty-list)
+                               (apply* (fr/free list) body)))))
 
 ;; TODO: let anonymous function closures reference themselves by name
 (defn analyze-fn []
@@ -1455,7 +1461,7 @@ toccata-compiler
                          (not (< 1 (count x))) false
                          (= (first x) 'fn))))
         arities (traverse (nth expr 2 empty-list) analyze-expr)]
-    (fr/free (fn-ast (nth expr 1 "no-name") arities))))
+    (fr/free (ast/fn-ast (nth expr 1 "no-name") arities))))
 
 (defn analyze-proto-arity [args]
   (cond
@@ -1479,15 +1485,15 @@ toccata-compiler
   (for [ext-sym (sm/get-in-val (list :core-symbols sym))
         _ (sm/assoc-in-val (list :symbols sym) ext-sym)
         _ (sm/update-in-val (list :new-externs)
-                         (fn [externs]
-                           (cons (str "SubString " ext-sym) externs)))]
+                            (fn [externs]
+                              (cons (str "SubString " ext-sym) externs)))]
     ext-sym))
 
 (defn make-static-symbol [sym]
   (for [sym-idx (sm/get-val :sym-count 0)
         _ (sm/set-val :sym-count (inc sym-idx))
         _ (sm/assoc-in-val (list :new-symbols sym)
-                        (str "_sym_" sym-idx))]
+                           (str "_sym_" sym-idx))]
     ""))
 
 (defn make-symbols [quoted-form]
@@ -1505,7 +1511,7 @@ toccata-compiler
                          (not (= 2 (count x))) false
                          (= (first x) 'quote))))
         _ (make-symbols (second expr))]
-    (fr/free (quoted-ast (second expr)))))
+    (fr/free (ast/quoted-ast (second expr)))))
 
 (defn analyze-def []
   (for [curr-expr (sm/get-val :expr :no-expr)
@@ -1520,7 +1526,7 @@ toccata-compiler
         val-ast (cond
                  (= value :no-value) (sm/state-maybe :no-value)
                  (analyze-expr value))]
-    (fr/free (definition-ast name val-ast))))
+    (fr/free (ast/definition-ast name val-ast))))
 
 (defn analyze-cond []
   (for [expr (is-expr seq?)
@@ -1531,8 +1537,8 @@ toccata-compiler
     (let [clauses (partition-all clause-pairs 2)
           default (last clauses empty-list)]
       (cond
-       (= 1 (count default)) (fr/free (cond-ast (butlast clauses)
-                                             (first default)))
+       (= 1 (count default)) (fr/free (ast/cond-ast (butlast clauses)
+                                                    (first default)))
        (print-err "cond must have a default clause")))))
 
 (defn next-form []
@@ -1553,9 +1559,9 @@ toccata-compiler
                           (< 2 (count x)))))
         body (traverse (drop expr 2) analyze-expr)]
     (list (nth expr 0 'no-name)
-          (fr/free (fn-ast (str (nth expr 0 'no-name) "_impl")
-                        (list (fr/free (fn-arity-ast (rest (nth expr 1 empty-list))
-                                                  (apply* (fr/free list) body)))))))))
+          (fr/free (ast/fn-ast (str (nth expr 0 'no-name) "_impl")
+                               (list (fr/free (ast/fn-arity-ast (rest (nth expr 1 empty-list))
+                                                                (apply* (fr/free list) body)))))))))
 
 (defn analyze-proto-impl []
   (for [name (is-form? symbol?)
@@ -1576,7 +1582,7 @@ toccata-compiler
                          (not (< 1 (count x))) false
                          (= 'extend-type (first x)))))
         proto-specs (analyze-extensions (drop expr 2))]
-    (fr/free (extend-ast (nth expr 1 :no-type) proto-specs))))
+    (fr/free (ast/extend-ast (nth expr 1 :no-type) proto-specs))))
 
 (defn analyze-module []
   (for [expr (is-expr (fn [x]
@@ -1590,11 +1596,11 @@ toccata-compiler
         _ (sm/set-val :file-name (second expr))
         parser (sm/get-val :parser)
         asts (sm/recur (for [expr parser
-                          ast (analyze-expr expr)]
-                      ast))
+                             ast (analyze-expr expr)]
+                         ast))
         _ (sm/set-val :file-name file-name)
         _ (sm/set-val :text text)]
-    (cons (fr/free (const-string-ast (second expr)))
+    (cons (fr/free (ast/const-string-ast (second expr)))
           asts)))
 
 (defn analyze-add-ns []
@@ -1605,7 +1611,7 @@ toccata-compiler
                          (and (= 'add-ns (first x))
                               (symbol? (second x))))))
         asts (analyze-expr (nth expr 2))]
-    (fr/free (add-ns-ast (second expr) asts))))
+    (fr/free (ast/add-ns-ast (second expr) asts))))
 
 ;; TODO: handle multi-arity reified fns
 (defn analyze-reify []
@@ -1614,7 +1620,7 @@ toccata-compiler
                          (not (seq? x)) false
                          (= 'reify (nth x 0 :not-reify)))))
         proto-specs (analyze-extensions (rest expr))]
-    (fr/free (reify-ast proto-specs))))
+    (fr/free (ast/reify-ast proto-specs))))
 
 (defn analyze-protocol []
   (for [expr (is-expr (fn [x]
@@ -1624,7 +1630,7 @@ toccata-compiler
                          (= 'defprotocol (first x)))))
         ;; TODO: make this only accept fixed arities
         arities (traverse (drop expr 2) analyze-proto-arity)]
-    (fr/free (protocol-ast (second expr) (apply merge-with comp arities)))))
+    (fr/free (ast/protocol-ast (second expr) (apply merge-with comp arities)))))
 
 (defn analyze-deftype []
   (for [expr (is-expr (fn [x]
@@ -1632,9 +1638,9 @@ toccata-compiler
                          (not (seq? x)) false
                          (< (count x) 3) false
                          (= 'deftype (first x)))))]
-    (fr/free (type-ast (second expr) ;; name
-                    (nth expr 2) ;; fields
-                    (drop expr 3)))))
+    (fr/free (ast/type-ast (second expr) ;; name
+                           (nth expr 2) ;; fields
+                           (drop expr 3)))))
 
 (defn analyze-main []
   (for [expr (is-expr (fn [x]
@@ -1643,8 +1649,8 @@ toccata-compiler
                          (not (< 2 (count x))) false
                          (= 'main (first x)))))
         body (traverse (drop expr 2) analyze-expr)]
-    (fr/free (main-ast (nth expr 1 empty-list)
-                    (apply* (fr/free list) body)))))
+    (fr/free (ast/main-ast (nth expr 1 empty-list)
+                           (apply* (fr/free list) body)))))
 
 (defn expr-to-ast []
   (comp (analyze-symbol)
@@ -2190,10 +2196,10 @@ toccata-compiler
                                                     (cond
                                                      (= :variadic arg-count)
                                                      (list "arityInfo = listCons(keywordValue(\":variadic\")"
-                                                          ", arityInfo);\n")
+                                                           ", arityInfo);\n")
 
                                                      (list "arityInfo = listCons(numberValue(" arg-count
-                                                          "), arityInfo);\n"))
+                                                           "), arityInfo);\n"))
                                                     (list "fnInfo = listCons((Value *)arityInfo, fnInfo);\n")))))
                                      (list "fnInfo = listCons((Value *)fnInfo, empty_list);\n"
                                            "fnInfo = listCons(stringValue(\"" name "\"), fnInfo);\n"
@@ -2378,19 +2384,19 @@ toccata-compiler
   (flat-map (sm/set-val :parser parser)
             (fn [_]
               (sm/recur (for [expr parser
-                           ast (analyze-expr expr)
-                           _ (fr/evaluate ast emit-c)]
-                       "")))))
+                              ast (analyze-expr expr)
+                              _ (fr/evaluate ast emit-c)]
+                          "")))))
 
 (defn compile-core [parser text]
   (apply-to list
             (sm/set-val :text text)
             (sm/assoc-in-val (list :new-numbers)
-                          (reduce (seq (types)) {}
-                                  (fn [m type]
-                                    (assoc m
-                                      (nth type 1 0)
-                                      (str "_num_" (nth type 1 0))))))
+                             (reduce (seq (types)) {}
+                                     (fn [m type]
+                                       (assoc m
+                                         (nth type 1 0)
+                                         (str "_num_" (nth type 1 0))))))
             (apply-to list
                       (base-types)
                       (extern-functions)
@@ -2460,6 +2466,7 @@ toccata-compiler
         compiling-fn (comp (compile-compiler parser text)
                            (compile-main parser text))]
     (compiling-fn {:file-name (first src-files)
+                   :debug-on true
                    :line-num 0
                    :types (types)
                    :symbols {}

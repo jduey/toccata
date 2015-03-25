@@ -1,0 +1,55 @@
+
+(deftype inline-ast [txt])
+
+(deftype symbol-ast [sym]
+  Stringable
+  (string-list [f] (list (str sym))))
+
+(deftype keyword-ast [kw])
+
+(deftype const-number-ast [num]
+  Stringable
+  (string-list [_] (list (str num))))
+
+(deftype const-string-ast [const-str])
+
+(deftype add-ns-ast [ns-sym asts])
+
+(deftype extend-ast [type impls])
+
+(deftype cond-ast [clauses default])
+
+(deftype reify-ast [impls])
+
+(deftype protocol-ast [protocol-name prototypes])
+
+(deftype call-ast [callee params])
+
+(deftype binding-ast [binding val])
+
+(deftype let-ast [bindings body])
+
+(deftype quoted-ast [sym])
+
+(deftype main-ast [args body])
+
+(deftype variadic-arity-ast [args body])
+
+(deftype fn-arity-ast [args body])
+
+(deftype fn-ast [args arities])
+
+(deftype definition-ast [name value])
+
+(deftype type-ast-val [name fields impls])
+
+(defn type-ast [name fields impls]
+  (let [fields (rest fields)
+        impls (comp
+               (cons 'reify impls)
+               (cons 'Getter
+                     (map fields
+                          (fn [field]
+                            (list (symbol (str "." field)) (list 'vector '_)
+                                  field)))))]
+    (type-ast-val name fields impls)))
