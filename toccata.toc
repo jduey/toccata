@@ -8,17 +8,6 @@ toccata-compiler
 (add-ns parser (module "core/parser.toc"))
 (add-ns grmr (module "core/grammar.toc"))
 
-(defn parser [grammar]
-  (fr/evaluate grammar parser/recursive-descent))
-
-(defn make-parser []
-  (let [p (parser (grmr/read-form))]
-    (flat-map p (fn [v]
-                  (cond
-                   (empty? v) empty-list
-                   (sm/state-maybe (first v)))))))
-
-
 (defn types []
   ;; type numbers must start at 1 and be contiguous
   {'String 1
@@ -2462,7 +2451,11 @@ toccata-compiler
             (emit-main)))
 
 (defn compile-module [src-files]
-  (let [parser (make-parser)
+  (let [p (fr/evaluate (grmr/read-form) parser/recursive-descent)
+        parser (flat-map p (fn [v]
+                             (cond
+                              (empty? v) empty-list
+                              (sm/state-maybe (first v)))))
         text (slurp (first src-files))
         compiling-fn (comp (compile-compiler parser text)
                            (compile-main parser text))]
