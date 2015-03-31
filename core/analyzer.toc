@@ -1,0 +1,401 @@
+
+(add-ns ast (module "core/ast.toc"))
+(add-ns sm (module "core/state-maybe.toc"))
+(add-ns fr (module "core/free.toc"))
+
+(defn set-expr [expr]
+  (sm/set-val :expr expr))
+
+(defn is-expr [pred]
+  (for [expr (sm/get-val :expr)
+        :when (pred expr)]
+    expr))
+
+(def analyze-expr)
+
+(defn analyze-inline-text []
+  (for [expr (is-expr (fn [x]
+                        (cond
+                         (not (seq? x)) false
+                         (empty? x) false
+                         (= (first x) 'inline-text))))]
+    (fr/free (ast/inline-ast (nth expr 1 "")))))
+
+(defn analyze-symbol []
+  (for [sym (is-expr symbol?)]
+    (fr/free (ast/symbol-ast sym))))
+
+(defn keyword-already-defined? [kw]
+  (sm/get-in-val (list :keywords kw)))
+
+(defn keyword-recently-defined? [kw]
+  (sm/get-in-val (list :new-keywords kw)))
+
+(defn keyword-defined-in-core [kw]
+  (for [ext-kw (sm/get-in-val (list :core-keywords kw))
+        _ (sm/assoc-in-val (list :keywords kw) ext-kw)
+        _ (sm/update-in-val (list :new-externs)
+                            (fn [externs]
+                              (cons (str "SubString " ext-kw) externs)))]
+    ext-kw))
+
+(defn make-static-keyword [kw]
+  (for [kw-idx (sm/get-val :kw-count 0)
+        _ (sm/set-val :kw-count (inc kw-idx))
+        _ (sm/assoc-in-val (list :new-keywords kw)
+                           (str "_kw_" kw-idx))]
+    ""))
+
+(defn analyze-keyword []
+  (for [kw (is-expr keyword?)
+        _ (comp (keyword-already-defined? kw)
+                (keyword-recently-defined? kw)
+                (keyword-defined-in-core kw)
+                (make-static-keyword kw))]
+    (fr/free (ast/keyword-ast kw))))
+
+(defn number-already-defined? [num]
+  (sm/get-in-val (list :numbers num)))
+
+(defn number-recently-defined? [num]
+  (sm/get-in-val (list :new-numbers num)))
+
+(defn number-defined-in-core [num]
+  (for [ext-num (sm/get-in-val (list :core-numbers num))
+        _ (sm/assoc-in-val (list :numbers num) ext-num)
+        _ (sm/update-in-val (list :new-externs)
+                            (fn [externs]
+                              (cons (str "Number " ext-num) externs)))]
+    ext-num))
+
+(defn make-static-number [num]
+  (for [num-idx (sm/get-val :num-count 0)
+        _ (sm/set-val :num-count (inc num-idx))
+        _ (sm/assoc-in-val (list :new-numbers num)
+                           (str "_num_" num-idx))]
+    ""))
+
+(defn analyze-number []
+  (for [num (is-expr number?)
+        _ (comp (number-already-defined? num)
+                (number-recently-defined? num)
+                (number-defined-in-core num)
+                (make-static-number num))]
+    (fr/free (ast/const-number-ast num))))
+
+(defn string-already-defined? [str-val]
+  (sm/get-in-val (list :strings str-val)))
+
+(defn string-recently-defined? [str-val]
+  (sm/get-in-val (list :new-strings str-val)))
+
+(defn string-defined-in-core [str-val]
+  (for [ext-str (sm/get-in-val (list :core-strings str-val))
+        _ (sm/assoc-in-val (list :strings str-val) ext-str)
+        _ (sm/update-in-val (list :new-externs)
+                            (fn [externs]
+                              (cons (str "String " ext-str) externs)))]
+    ext-str))
+
+(defn make-static-string [str-val]
+  (for [str-idx (sm/get-val :str-count 0)
+        _ (sm/set-val :str-count (inc str-idx))
+        _ (sm/assoc-in-val (list :new-strings str-val)
+                           (str "_str_" str-idx))]
+    ""))
+
+(defn analyze-string []
+  (for [str-val (is-expr string?)
+        _ (comp (string-already-defined? str-val)
+                (string-recently-defined? str-val)
+                (string-defined-in-core str-val)
+                (make-static-string str-val))]
+    (fr/free (ast/const-string-ast str-val))))
+
+(defn analyze-call []
+  (for [expr (is-expr (fn [s] (not-empty? s)))
+        asts (traverse expr analyze-expr)]
+    (fr/free (ast/call-ast (first asts) (rest asts)))))
+
+(defn analyze-let-binding [binding-pair]
+  (cond
+   (not (= 2 (count binding-pair))) empty-list
+   (let [binding (first binding-pair)
+         expr (second binding-pair)]
+     (for [curr-expr (sm/get-val :expr)
+           _ (set-expr binding)
+           binding (is-expr symbol?)
+           ast (analyze-expr expr)
+           _ (sm/set-val :expr curr-expr)]
+       (fr/free (ast/binding-ast binding ast))))))
+
+(defn analyze-let []
+  (for [expr (is-expr (fn [x]
+                        (cond
+                         (not (seq? x)) false
+                         (not (< 2 (count x))) false
+                         (= (nth x 0 :not-let) 'let))))
+        bindings (traverse (nth expr 1 empty-list)
+                           analyze-let-binding)
+        body (traverse (drop expr 2) analyze-expr)]
+    (fr/free (ast/let-ast (apply* (fr/free list) bindings)
+                          (apply* (fr/free list) body)))))
+
+(defn variadic? [expr]
+  (let [args (nth expr 1 empty-list)]
+    (apply or (map args (fn [arg] (= "&" arg))))))
+
+(defn analyze-variadic []
+  (for [expr (is-expr (fn [x]
+                        (cond
+                         (not (< 1 (count x))) false
+                         (not (= (first x) 'fn-arity)) false
+                         (variadic? x))))
+        body (traverse (nth expr 2 empty-list) analyze-expr)]
+    (fr/free (ast/variadic-arity-ast (remove (nth expr 1 empty-list) (fn [arg]
+                                                                       (= "&" arg)))
+                                     (apply* (fr/free list) body)))))
+
+(defn analyze-fn-arity []
+  (for [expr (is-expr (fn [x]
+                        (cond
+                         (not (< 1 (count x))) false
+                         (not (= (first x) 'fn-arity)) false
+                         (not (variadic? x)))))
+        file-name (sm/get-val :file-name "")
+        body (traverse (nth expr 2 empty-list) analyze-expr)]
+    (fr/free (ast/fn-arity-ast (nth expr 1 empty-list)
+                               (apply* (fr/free list) body)))))
+
+;; TODO: let anonymous function closures reference themselves by name
+(defn analyze-fn []
+  (for [expr (is-expr (fn [x]
+                        (cond
+                         (not (seq? x)) false
+                         (not (< 1 (count x))) false
+                         (= (first x) 'fn))))
+        arities (traverse (nth expr 2 empty-list) analyze-expr)]
+    (fr/free (ast/fn-ast (nth expr 1 "no-name") arities))))
+
+(defn analyze-proto-arity [args]
+  (cond
+   (< (count args) 2) empty-list
+   (let [fn-name (first args)
+         params (rest (second args))
+         body (drop args 2)
+         default-fn-expr (list 'fn-arity params body)]
+     (cond
+      (< 0 (count body)) (for [default (analyze-expr default-fn-expr)]
+                           {fn-name {(count params) {:default default}}})
+      (sm/state-maybe {fn-name {(count params) {}}})))))
+
+(defn sym-already-defined? [sym]
+  (sm/get-in-val (list :symbols sym)))
+
+(defn sym-recently-defined? [sym]
+  (sm/get-in-val (list :new-symbols sym)))
+
+(defn sym-defined-in-core [sym]
+  (for [ext-sym (sm/get-in-val (list :core-symbols sym))
+        _ (sm/assoc-in-val (list :symbols sym) ext-sym)
+        _ (sm/update-in-val (list :new-externs)
+                            (fn [externs]
+                              (cons (str "SubString " ext-sym) externs)))]
+    ext-sym))
+
+(defn make-static-symbol [sym]
+  (for [sym-idx (sm/get-val :sym-count 0)
+        _ (sm/set-val :sym-count (inc sym-idx))
+        _ (sm/assoc-in-val (list :new-symbols sym)
+                           (str "_sym_" sym-idx))]
+    ""))
+
+(defn make-symbols [quoted-form]
+  (cond
+   (symbol? quoted-form) (comp (sym-already-defined? quoted-form)
+                               (sym-recently-defined? quoted-form)
+                               (sym-defined-in-core quoted-form)
+                               (make-static-symbol quoted-form))
+   (seq? quoted-form) (traverse quoted-form make-symbols)
+   (sm/state-maybe "")))
+
+(defn analyze-quoted []
+  (for [expr (is-expr (fn [x]
+                        (cond
+                         (not (= 2 (count x))) false
+                         (= (first x) 'quote))))
+        _ (make-symbols (second expr))]
+    (fr/free (ast/quoted-ast (second expr)))))
+
+(defn analyze-def []
+  (for [curr-expr (sm/get-val :expr :no-expr)
+        expr (is-expr (fn [x]
+                        (cond
+                         (not (seq? x)) false
+                         (< 1 (count x)))))
+        :let [def (nth expr 0 :not-def)
+              name (nth expr 1 'no-name)
+              value (nth expr 2 :no-value)]
+        :when (and (= def 'def) (symbol? name))
+        val-ast (cond
+                 (= value :no-value) (sm/state-maybe :no-value)
+                 (analyze-expr value))]
+    (fr/free (ast/definition-ast name val-ast))))
+
+(defn analyze-cond []
+  (for [expr (is-expr seq?)
+        :when (cond
+               (empty? expr) false
+               (= (first expr) 'cond))
+        clause-pairs (traverse (rest expr) analyze-expr)]
+    (let [clauses (partition-all clause-pairs 2)
+          default (last clauses empty-list)]
+      (cond
+       (= 1 (count default)) (fr/free (ast/cond-ast (butlast clauses)
+                                                    (first default)))
+       (print-err "cond must have a default clause")))))
+
+(defn next-form []
+  (for [expr (sm/get-val :expr empty-list)
+        _ (sm/set-val :expr (rest expr))
+        :when (< 0 (count expr))]
+    (first expr)))
+
+(defn is-form? [pred]
+  (for [frm (next-form)
+        :when (pred frm)]
+    frm))
+
+(defn analyze-proto-fn []
+  (for [expr (is-form? (fn [x]
+                         (cond
+                          (not (seq? x)) false
+                          (< 2 (count x)))))
+        body (traverse (drop expr 2) analyze-expr)]
+    (list (nth expr 0 'no-name)
+          (fr/free (ast/fn-ast (str (nth expr 0 'no-name) "_impl")
+                               (list (fr/free (ast/fn-arity-ast (rest (nth expr 1 empty-list))
+                                                                (apply* (fr/free list) body)))))))))
+
+(defn analyze-proto-impl []
+  (for [name (is-form? symbol?)
+        fn-impls (sm/recur (analyze-proto-fn))]
+    (list name fn-impls)))
+
+(defn analyze-extensions [exts]
+  (for [curr-expr (sm/get-val :expr empty-list)
+        _ (sm/set-val :expr exts)
+        proto-impls (sm/recur (analyze-proto-impl))
+        _ (sm/set-val :expr curr-expr)]
+    (HashMap proto-impls)))
+
+(defn analyze-extend-type []
+  (for [expr (is-expr (fn [x]
+                        (cond
+                         (not (seq? x)) false
+                         (not (< 1 (count x))) false
+                         (= 'extend-type (first x)))))
+        proto-specs (analyze-extensions (drop expr 2))]
+    (fr/free (ast/extend-ast (nth expr 1 :no-type) proto-specs))))
+
+(defn analyze-module []
+  (for [expr (is-expr (fn [x]
+                        (cond
+                         (not (seq? x)) false
+                         (not (= 2 (count x))) false
+                         (= 'module (first x)))))
+        text (sm/get-val :text)
+        _ (sm/set-val :text (slurp (second expr)))
+        file-name (sm/get-val :file-name)
+        _ (sm/set-val :file-name (second expr))
+        parser (sm/get-val :parser)
+        asts (sm/recur (for [expr parser
+                             ast (analyze-expr expr)]
+                         ast))
+        _ (sm/set-val :file-name file-name)
+        _ (sm/set-val :text text)]
+    (cons (fr/free (ast/const-string-ast (second expr)))
+          asts)))
+
+(defn analyze-add-ns []
+  (for [expr (is-expr (fn [x]
+                        (cond
+                         (not (seq? x)) false
+                         (not (= 3 (count x))) false
+                         (and (= 'add-ns (first x))
+                              (symbol? (second x))))))
+        asts (analyze-expr (nth expr 2))]
+    (fr/free (ast/add-ns-ast (second expr) asts))))
+
+;; TODO: handle multi-arity reified fns
+(defn analyze-reify []
+  (for [expr (is-expr (fn [x]
+                        (cond
+                         (not (seq? x)) false
+                         (= 'reify (nth x 0 :not-reify)))))
+        proto-specs (analyze-extensions (rest expr))]
+    (fr/free (ast/reify-ast proto-specs))))
+
+(defn analyze-protocol []
+  (for [expr (is-expr (fn [x]
+                        (cond
+                         (not (seq? x)) false
+                         (not (< 2 (count x))) false
+                         (= 'defprotocol (first x)))))
+        ;; TODO: make this only accept fixed arities
+        arities (traverse (drop expr 2) analyze-proto-arity)]
+    (fr/free (ast/protocol-ast (second expr) (apply merge-with comp arities)))))
+
+(defn analyze-deftype []
+  (for [expr (is-expr (fn [x]
+                        (cond
+                         (not (seq? x)) false
+                         (< (count x) 3) false
+                         (= 'deftype (first x)))))]
+    (fr/free (ast/type-ast (second expr) ;; name
+                           (nth expr 2) ;; fields
+                           (drop expr 3)))))
+
+(defn analyze-main []
+  (for [expr (is-expr (fn [x]
+                        (cond
+                         (not (seq? x)) false
+                         (not (< 2 (count x))) false
+                         (= 'main (first x)))))
+        body (traverse (drop expr 2) analyze-expr)]
+    (fr/free (ast/main-ast (nth expr 1 empty-list)
+                           (apply* (fr/free list) body)))))
+
+(defn expr-to-ast []
+  (comp (analyze-symbol)
+        (analyze-keyword)
+        (analyze-number)
+        (analyze-string)
+        (analyze-fn)
+        (analyze-deftype)
+        (analyze-protocol)
+        (analyze-main)
+        (analyze-def)
+        (analyze-cond)
+        (analyze-extend-type)
+        (analyze-reify)
+        (analyze-module)
+        (analyze-add-ns)
+        (analyze-inline-text)
+        (analyze-fn-arity)
+        (analyze-variadic)
+        (analyze-let)
+        (analyze-quoted)
+        (analyze-call)
+        (flat-map (sm/get-val :expr :expr-nil)
+                  (fn [e]
+                    (print-err "could not analyze" e)
+                    empty-list))))
+
+(defn analyze-expr [expr]
+  (for [curr-expr (sm/get-val :expr :no-expr)
+        _ (set-expr expr)
+        ast (expr-to-ast)
+        _ (set-expr curr-expr)]
+    ast))
+
