@@ -1,6 +1,4 @@
 
-toccata-compiler
-
 (toccata-core "core.toc")
 
 (add-ns sm (module "core/state-maybe.toc"))
@@ -2034,8 +2032,6 @@ toccata-compiler
   (apply-to list
             (sm/set-val :text text)
             (for [expr parser
-                  :when (= expr 'toccata-compiler)
-                  expr parser
                   _ (an/set-expr expr)
                   _ (sm/set-val :parser parser)
                   ast (analyze-toccata-core)
