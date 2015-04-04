@@ -7,7 +7,7 @@
 (add-ns grmr (module "core/grammar.toc"))
 (add-ns ast (module "core/ast.toc"))
 (add-ns an (module "core/analyzer.toc"))
-;; (add-ns fio (module "core/file-io.toc"))
+(add-ns fio (module "core/file-io.toc"))
 
 (defn debug [& args]
   (comp (for [debugging (sm/get-val :debug-on false)
@@ -574,7 +574,7 @@
              _ (sm/set-val :defined-types {})
 
              protos (sm/get-val :defined-protos {})
-             core-protos (sm/get-in-val (list :modules "core.toc" :protos) {})
+             core-protos (sm/get-in-val (list :modules "core" :protos) {})
              _ (sm/set-val :defined-protos (reduce (filter (seq protos)
                                                            (fn [x]
                                                              (= "." (first (str (first x))))))
@@ -1137,6 +1137,7 @@
 
                       (sm/assoc-in-val (list :protocols qualified-name)
                                        {:impls-sym impls-sym
+                                        :name name
                                         :impls (cond
                                                 (empty? default-syms) {}
                                                 {:default (str "(Value *)&" default-fn-sym)})
@@ -1651,15 +1652,22 @@
   (let [protos (protocols)
         protos (map protos
                     (fn [proto-info]
-                      (let [proto-name (first proto-info)
-                            impls-sym (second proto-info)
+                      (let [proto-name (nth proto-info 0)
+                            impls-sym (nth proto-info 1)
                             extern-def (nth proto-info 2)
-                            impls (HashMap (nth proto-info 3))]
+                            impls (HashMap (nth proto-info 3))
+                            name (nth proto-info 4)]
                         (list proto-name {:impls-sym impls-sym
+                                          :name name
                                           :extern-def extern-def
                                           :impls impls}))))]
     (apply-to list
               (sm/set-val :protocols (HashMap protos))
+              (sm/set-val :defined-protos (HashMap (map protos
+                                                        (fn [proto]
+                                                          (let [qualified-name (first proto)
+                                                                name (:name (second proto))]
+                                                            (list name qualified-name))))))
               (traverse protos
                         (fn [proto]
                           (let [impls (get (second proto) :impls {})]
@@ -1667,7 +1675,8 @@
                              (empty? impls) (sm/state-maybe "")
                              (traverse (seq impls)
                                        (fn [impl]
-                                         (write-strs (list "extern Function " (subs (second impl) 10) ";\n")))))))))))
+                                         (write-strs (list "extern Function "
+                                                           (subs (second impl) 10) ";\n")))))))))))
 
 (defn serialize-protocols []
   (for [protos (sm/get-val :protocols {})
@@ -1679,6 +1688,7 @@
         _ (write-strs (flat-map (seq protos)
                                 (fn [proto-inf]
                                   (let [impls-info (nth proto-inf 1 empty-list)
+                                        impl-fn-name (get impls-info :name "")
                                         impls-sym (get impls-info :impls-sym "")
                                         extern-def (get impls-info :extern-def "")
                                         impls (seq (get impls-info :impls empty-list))]
@@ -1698,7 +1708,9 @@
                                                          (str "numberValue(" impl-type ")"))
                                                         ", impl);\n"
                                                         "impls = listCons((Value *)impl, impls);\n"))))
-                                          (list "protoInfo = listCons((Value *)impls, protoInfo);\n"
+                                          (list "protoInfo = listCons(symbolValue(\"" impl-fn-name
+                                                             "\"), protoInfo);\n"
+                                                "protoInfo = listCons((Value *)impls, protoInfo);\n"
                                                 "protoInfo = listCons(stringValue(\"" extern-def "\"), protoInfo);\n"
                                                 "protoInfo = listCons(stringValue(\"" impls-sym "\"), protoInfo);\n"
                                                 "protoInfo = listCons(symbolValue(\"" (first proto-inf)
@@ -1987,7 +1999,7 @@
                  (for [text (sm/get-val :text)
                        parser (sm/get-val :parser)
                        file-name (sm/get-val :file-name)
-                       _ (sm/set-val :file-name (second expr))
+                       _ (sm/set-val :file-name "core")
                        :let [out-file (str (subs (second expr) 0 (- (count (second expr)) 3)) "c")
                              _ (output-to-file out-file)
                              core (slurp (second expr))]
