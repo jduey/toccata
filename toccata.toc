@@ -7,6 +7,7 @@
 (add-ns grmr (module "core/grammar.toc"))
 (add-ns ast (module "core/ast.toc"))
 (add-ns an (module "core/analyzer.toc"))
+;; (add-ns fio (module "core/file-io.toc"))
 
 (defn debug [& args]
   (comp (for [debugging (sm/get-val :debug-on false)
@@ -24,6 +25,7 @@
    'SubStr 6
    'Symbol 7
    'FnArity 8
+   'Opaque 9
    })
 
 (defn write [str]
@@ -377,6 +379,7 @@
                  ProtoImpl
                  ProtoImpls
                  ReifiedVal
+                 OpaqueVal
                  "List *listCons(Value *x, List *l);\n"
                  "Value *stringValue(char *s);\n"
                  "const int64_t NumberType;\n"
@@ -386,6 +389,7 @@
                  "const int64_t SubStringType;\n"
                  "const int64_t ListType;\n"
                  "const int64_t FunctionType;\n"
+                 "const int64_t OpaqueType;\n"
                  "List *empty_list;\n"
                  "Value *number_literals();\n"
                  "Value *counts();\n"
@@ -1442,6 +1446,12 @@
                     ;; "#ifdef REF_COUNT\n"
                     ;; "    free(v);\n"
                     ;; "#endif\n"
+                    "  } else if (v->type == " (get (types) 'Opaque 10000) ") {\n"
+                    "    v->refs = -10;\n"
+                    "    free_count++;\n"
+                    "#ifdef REF_COUNT\n"
+                    "    free(v);\n"
+                    "#endif\n"
                     "  } else {\n"
                     "    ReifiedVal *rv = (ReifiedVal *)v;\n"
                     "    for (int i = 0; i < rv->implCount; i++) {\n"
@@ -1947,6 +1957,7 @@
                           "const int64_t SubStringType = " (get types 'SubStr 0) ";\n"
                           "const int64_t ListType = " (get types 'List 0) ";\n"
                           "const int64_t FunctionType = " (get types 'Function 0) ";\n"
+                          "const int64_t OpaqueType = " (get types 'Opaque 0) ";\n"
                           "List *empty_list = &(List){4,-1,0,0,0};\n")))
                       (base-fns)
                       (emit-proto-fn "Function/"
