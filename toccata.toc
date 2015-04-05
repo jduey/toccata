@@ -584,6 +584,8 @@
 
              file-name (sm/get-val :file-name)
              _ (sm/set-val :file-name module-name)
+
+             ;; TODO: traverse?
              _ (fr/evaluate (fr/free-app (fr/free list) (.asts ast)) emit-c)
 
              _ (sm/set-val :file-name file-name)
@@ -1660,14 +1662,16 @@
                         (list proto-name {:impls-sym impls-sym
                                           :name name
                                           :extern-def extern-def
-                                          :impls impls}))))]
+                                          :impls impls}))))
+        proto-map (HashMap (map protos
+                                (fn [proto]
+                                  (let [qualified-name (first proto)
+                                        name (:name (second proto))]
+                                    (list name qualified-name)))))]
     (apply-to list
               (sm/set-val :protocols (HashMap protos))
-              (sm/set-val :defined-protos (HashMap (map protos
-                                                        (fn [proto]
-                                                          (let [qualified-name (first proto)
-                                                                name (:name (second proto))]
-                                                            (list name qualified-name))))))
+              (sm/assoc-in-val (list :modules "core" :protos) proto-map)
+              (sm/set-val :defined-protos proto-map)
               (traverse protos
                         (fn [proto]
                           (let [impls (get (second proto) :impls {})]
