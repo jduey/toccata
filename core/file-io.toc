@@ -1,0 +1,59 @@
+
+(add-ns st (module "core/stream.toc"))
+
+(defn fopen-read [file-path]
+  (inline-text
+   "String *arg0Str = (String *)my_malloc(sizeof(String) + ((String *)arg0)->len + 5);
+    if (arg0->type == StringType)
+      snprintf(arg0Str->buffer, ((String *)arg0)->len + 1, \"%s\", ((String *)arg0)->buffer);
+    else if (arg0->type == SubStringType)
+      snprintf(arg0Str->buffer, ((String *)arg0)->len + 1, \"%s\", ((SubString *)arg0)->buffer);
+    else {
+      fprintf(stderr, \"\\ninvalid type for 'fopen'\\n\");
+      abort();
+    }
+
+    Opaque *ptrVal = (Opaque *)my_malloc(sizeof(Opaque));
+    ptrVal->type = OpaqueType;
+    ptrVal->ptr = (void *)fopen(arg0Str->buffer, \"r\");
+    decRef((Value *)arg0Str);
+    my_free((Value *)arg0Str);
+    return((Value *)ptrVal);\n"))
+
+(defn fclose [fptr]
+  (inline-text
+   "fseek((FILE *)((Opaque *)arg0)->ptr, ((Number *)arg0)->numVal, 0);
+    incRef(arg0);
+    return(arg0);\n"))
+
+(defn read-byte
+  ([fptr offset]
+     (inline-text
+      "String *strVal = (String *)my_malloc(sizeof(String) + 2);
+       fseek((FILE *)((Opaque *)arg0)->ptr, ((Number *)arg1)->numVal, 0);
+       size_t bytesRead = fread(strVal->buffer, 1, 1, (FILE *)((Opaque *)arg0)->ptr);
+       strVal->type = StringType;
+       strVal->buffer[bytesRead] = 0;\n
+       strVal->len = bytesRead;
+       return((Value *)strVal);\n"))
+  ([fptr]
+      (inline-text
+       "String *strVal = (String *)my_malloc(sizeof(String) + 2);
+        size_t bytesRead = fread(strVal->buffer, 1, 1, (FILE *)((Opaque *)arg0)->ptr);
+        strVal->type = StringType;
+        strVal->buffer[bytesRead] = 0;\n
+        strVal->len = bytesRead;
+        return((Value *)strVal);\n")))
+
+(defn file-stream [frdr]
+  (st/stream (list frdr 0)
+             (fn [strm-info]
+               (let [byte (read-byte frdr (second strm-info))]
+                 (cond
+                  (= 0 (count byte)) nothing
+                  (maybe byte))))
+             (fn [strm-info]
+               (list frdr (inc (second strm-info))))))
+
+(defn close-stream [s]
+  (fclose (first (.carrier s))))

@@ -530,7 +530,7 @@
            (traverse (seq new-mod-syms)
                      (fn [sym-def]
                        (cond
-                        (= "." (first (str (first sym-def))))
+                        (= "." (subs (str (first sym-def)) 0 1))
                         (sm/assoc-in-val (list :defined-syms (first sym-def))
                                          (second sym-def))
 
@@ -544,7 +544,7 @@
                      (fn [proto-def]
                        (let [ns-name (symbol (str ns-sym "/" (first proto-def)))]
                          (cond
-                          (= "." (first (str (first proto-def))))
+                          (= "." (subs (str (first proto-def)) 0 1))
                           (sm/assoc-in-val (list :defined-protos (first proto-def))
                                            (second proto-def))
 
@@ -577,7 +577,7 @@
              core-protos (sm/get-in-val (list :modules "core" :protos) {})
              _ (sm/set-val :defined-protos (reduce (filter (seq protos)
                                                            (fn [x]
-                                                             (= "." (first (str (first x))))))
+                                                             (= "." (subs (str (first x)) 0 1))))
                                                    core-protos
                                                    (fn [m proto]
                                                      (assoc m (first proto) (second proto)))))
@@ -2006,9 +2006,10 @@
                        _ (sm/set-val :file-name "core")
                        :let [out-file (str (subs (second expr) 0 (- (count (second expr)) 3)) "c")
                              _ (output-to-file out-file)
-                             core (slurp (second expr))]
+                             core (fio/file-stream (fio/fopen-read (second expr)))]
                        _ (compile-core parser core)
-                       :let [_ (standard-output)]
+                       :let [_ (fio/close-stream core)
+                             _ (standard-output)]
 
                        syms (sm/get-val :symbols {})
                        _ (sm/set-val :core-symbols syms)
@@ -2092,7 +2093,7 @@
                              (cond
                               (empty? v) empty-list
                               (sm/state-maybe (first v)))))
-        text (slurp (first src-files))
+        text (fio/file-stream (fio/fopen-read (first src-files)))
         compiling-fn (comp (compile-compiler parser text)
                            (compile-main parser text))]
     (compiling-fn {:file-name (first src-files)
@@ -2112,7 +2113,8 @@
                                              (first type)
                                              (list (str "Number _num_" (second type))
                                                    (str "(Value *)&_num_" (second type))))))
-                   :num-count (inc (count (seq (types))))})))
+                   :num-count (inc (count (seq (types))))})
+    (fio/close-stream text)))
 
 (main [argList]
       (compile-module (rest argList)))

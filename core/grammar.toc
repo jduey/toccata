@@ -74,14 +74,14 @@
 (deftype parse-not-backslash []
   Parser
   (parser/recursive-descent [_]
-    (for [txt (sm/get-val :text "")
-          :let [x (subs txt 0 1)]
-          :when (cond
-                 (= x (char 92)) false
-                 (= x (char 34)) false
-                 true)
-          _ (sm/set-val :text (subs txt 1))]
-      (list x))))
+    (sm/new-sm (fn [s]
+                 (.v (comp (for [c (first (:text s))
+                                 :when (cond
+                                        (= c (char 92)) false
+                                        (= c (char 34)) false
+                                        true)]
+                             (list (list c) (update-in s (list :text) rest)))
+                           (maybe empty-list)))))))
 
 (defn not-backslash []
   (fr/free (parse-not-backslash)))
@@ -157,11 +157,11 @@
 (deftype parse-not-eol []
   Parser
   (parser/recursive-descent [_]
-    (for [txt (sm/get-val :text "")
-          :let [x (subs txt 0 1)]
-          :when (not (= x (char 10)))
-          _ (sm/set-val :text (subs txt 1))]
-      (list x))))
+    (sm/new-sm (fn [s]
+                 (.v (comp (for [c (first (:text s))
+                                 :when (not (= c (char 10)))]
+                             (list (list c) (update-in s (list :text) rest)))
+                           (maybe empty-list)))))))
 
 (defn not-eol []
   (fr/free (parse-not-eol)))

@@ -2,6 +2,7 @@
 (add-ns ast (module "core/ast.toc"))
 (add-ns sm (module "core/state-maybe.toc"))
 (add-ns fr (module "core/free.toc"))
+(add-ns fio (module "core/file-io.toc"))
 
 (defn set-expr [expr]
   (sm/set-val :expr expr))
@@ -304,18 +305,29 @@
                          (not (seq? x)) false
                          (not (= 2 (count x))) false
                          (= 'module (first x)))))
-        text (sm/get-val :text)
-        _ (sm/set-val :text (slurp (second expr)))
-        file-name (sm/get-val :file-name)
-        _ (sm/set-val :file-name (second expr))
-        parser (sm/get-val :parser)
-        asts (sm/recur (for [expr parser
-                             ast (analyze-expr expr)]
-                         ast))
-        _ (sm/set-val :file-name file-name)
-        _ (sm/set-val :text text)]
-    (cons (fr/free (ast/const-string-ast (second expr)))
-          asts)))
+        module-ast (comp
+                    (for [_ (sm/get-in-val (list :modules (second expr) :syms))]
+                      (list (fr/free (ast/const-string-ast (second expr)))))
+                    (for [expr (is-expr (fn [x]
+                                          (cond
+                                           (not (seq? x)) false
+                                           (not (= 2 (count x))) false
+                                           (= 'module (first x)))))
+                          text (sm/get-val :text)
+                          :let [module-stream (fio/file-stream (fio/fopen-read (second expr)))]
+                          _ (sm/set-val :text module-stream)
+                          file-name (sm/get-val :file-name)
+                          _ (sm/set-val :file-name (second expr))
+                          parser (sm/get-val :parser)
+                          asts (sm/recur (for [expr parser
+                                               ast (analyze-expr expr)]
+                                           ast))
+                          :let [_ (fio/close-stream module-stream)]
+                          _ (sm/set-val :file-name file-name)
+                          _ (sm/set-val :text text)]
+                      (cons (fr/free (ast/const-string-ast (second expr)))
+                            asts)))]
+    module-ast))
 
 (defn analyze-add-ns []
   (for [expr (is-expr (fn [x]

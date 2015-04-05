@@ -1,0 +1,13 @@
+
+(deftype stream [carrier hd-fn tl-fn]
+  Seqable
+  (first [s]
+    (hd-fn carrier))
+  (rest [s]
+    (stream (tl-fn carrier) hd-fn tl-fn))
+
+  Comonad
+  (extract [s]
+    (first s))
+  (extend [s f]
+    (stream s f rest)))

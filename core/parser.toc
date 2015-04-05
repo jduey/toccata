@@ -1,6 +1,7 @@
 
 (add-ns sm (module "core/state-maybe.toc"))
 (add-ns fr (module "core/free.toc"))
+(add-ns st (module "core/state.toc"))
 
 (defprotocol Parser
   (recursive-descent [f]
@@ -11,12 +12,14 @@
 (deftype parser-terminal [term-str]
   Parser
   (recursive-descent [_]
-    (let [s-len (count term-str)]
-      (for [text (sm/get-val :text "")
-            :when (and (not (< (count text) s-len))
-                       (= term-str (subs text 0 s-len)))
-            _ (sm/set-val :text (subs text s-len))]
-        (list term-str)))))
+    (for [_ (traverse (seq term-str)
+                      (fn [term-c]
+                        (sm/new-sm (fn [s]
+                                     (.v (comp (for [c (first (:text s))
+                                                     :when (= term-c c)]
+                                                 (list (list c) (update-in s (list :text) rest)))
+                                               (maybe empty-list)))))))]
+      (list term-str))))
 
 (defn term [term-str]
   (fr/free (parser-terminal term-str)))
@@ -61,13 +64,11 @@
         (always empty-list)))
 
 (defn char-test [pred]
-  (for [txt (sm/get-val :text "")
-        :let [c (subs txt 0 1)]
-        :when (cond
-               (< 0 (count txt)) (pred c)
-               false)
-        _ (sm/set-val :text (subs txt 1))]
-    (list c)))
+  (sm/new-sm (fn [s]
+               (.v (comp (for [c (first (:text s))
+                               :when (pred c)]
+                           (list (list c) (update-in s (list :text) rest)))
+                         (maybe empty-list))))))
 
 (deftype parse-lower-alphas []
   Parser

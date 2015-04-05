@@ -1,3 +1,4 @@
+
 (defn reduce-args [args s]
   (cond
    (empty? args) (list empty-list s)
