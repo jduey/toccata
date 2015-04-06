@@ -1,4 +1,23 @@
 
+;; TODO:
+;; quoted lists
+;; implements?
+;; persistent data structures; maps, vectors
+;; compact lists cdr coding
+;; optimize calls to invoke fns
+;; fn meta data; doc strings and ast
+;; pattern matching
+;; macro system
+;; REPL
+;; green threads
+;; async
+;; dependencies
+;; supercompilation
+;; FFI
+;; Android/iOS
+;; native arrays
+;; linear algebra
+
 (toccata-core "core.toc")
 
 (add-ns sm (module "core/state-maybe.toc"))
@@ -585,8 +604,7 @@
              file-name (sm/get-val :file-name)
              _ (sm/set-val :file-name module-name)
 
-             ;; TODO: traverse?
-             _ (fr/evaluate (fr/free-app (fr/free list) (.asts ast)) emit-c)
+             _ (traverse (.asts ast) (fn [ast] (fr/evaluate ast emit-c)))
 
              _ (sm/set-val :file-name file-name)
              _ (sm/set-val :defined-syms syms)
