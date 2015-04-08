@@ -2,6 +2,7 @@
 ;; TODO:
 ;; quoted lists
 ;; implements?
+;; add .type-name to values
 ;; persistent data structures; maps, vectors
 ;; compact lists cdr coding
 ;; optimize calls to invoke fns
