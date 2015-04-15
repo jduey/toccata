@@ -2000,7 +2000,7 @@
                                                         (fn [num-args]
                                                           (list (inc num-args) {})))))
                       (emit-proto-fn "Getter/"
-                                     (list 'type-name (list (list 2 {})))))
+                                     (list 'type-name (list (list 1 {})))))
             (compile-source parser)
             (serialize-symbol-literals)
             (serialize-number-literals)

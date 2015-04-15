@@ -48,7 +48,7 @@
         impls (comp
                (cons 'reify impls)
                (cons 'Getter
-                     (cons (list 'type-name (list 'vector '_) name)
+                     (cons (list 'type-name (list 'vector '_) (str name))
                            (map fields
                                 (fn [field]
                                   (list (symbol (str "." field)) (list 'vector '_)
