@@ -683,7 +683,7 @@
 
 (defprotocol Monad
   (flat-map [mval func]
-    (print-err "*** 'flat-map' not implemented")
+    (print-err "'flat-map' not implemented: " (type-name mval))
     (abort))
   (flatten [mval]
     (flat-map mval (fn [x] x))))
@@ -691,7 +691,8 @@
 (defprotocol Comonad
   (extract [wv])
   (extend [wv f])
-  (duplicate [wv]))
+  (duplicate [wv]
+    (print-err "'duplicate' not implemented: " (type-name wv))))
 
 (def comprehend)
 

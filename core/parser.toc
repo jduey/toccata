@@ -63,6 +63,26 @@
   (comp (one-or-more rule)
         (always empty-list)))
 
+(deftype parser-rule [name grammar]
+  Parser
+  (recursive-descent [_]
+    (fr/evaluate grammar recursive-descent)))
+
+(defn rule [name grammar]
+  (fr/free (parser-rule name grammar)))
+
+(deftype recursive-parser-rule [name grammar]
+  Parser
+  (recursive-descent [_]
+    (let [parser (fr/evaluate grammar recursive-descent)
+          parser-fn (fn [s] (parser s))]
+      (for [_ (sm/assoc-in-val (list :parser-fns name) parser-fn)
+            result (sm/new-sm parser-fn)]
+        result))))
+
+(defn recursive-rule [name grammar]
+  (fr/free (recursive-parser-rule name grammar)))
+
 (defn char-test [pred]
   (sm/new-sm (fn [s]
                (.v (comp (for [c (first (:text s))
@@ -105,23 +125,3 @@
   (let [coll (seq coll)]
     (comp* (term (first coll))
            (map (rest coll) term))))
-
-(deftype parser-rule [name grammar]
-  Parser
-  (recursive-descent [_]
-    (fr/evaluate grammar recursive-descent)))
-
-(defn rule [name grammar]
-  (fr/free (parser-rule name grammar)))
-
-(deftype recursive-parser-rule [name grammar]
-  Parser
-  (recursive-descent [_]
-    (let [parser (fr/evaluate grammar recursive-descent)
-          parser-fn (fn [s] (parser s))]
-      (for [_ (sm/assoc-in-val (list :parser-fns name) parser-fn)
-            result (sm/new-sm parser-fn)]
-        result))))
-
-(defn recursive-rule [name grammar]
-  (fr/free (recursive-parser-rule name grammar)))
