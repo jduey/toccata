@@ -2000,7 +2000,31 @@
                                                         (fn [num-args]
                                                           (list (inc num-args) {})))))
                       (emit-proto-fn "Getter/"
-                                     (list 'type-name (list (list 1 {})))))
+                                       (list 'type-name (list (list 1 {}))))
+                      (for [expr (sm/get-val :expr)
+                            type-names (traverse
+                                        (seq (types))
+                                        (fn [type]
+                                          (let [type-name (str (first type))
+                                                type-num (second type)
+                                                impl-ast (fr/free
+                                                          (ast/fn-ast
+                                                           "type-name_impl"
+                                                           (list
+                                                            (fr/free
+                                                             (ast/fn-arity-ast
+                                                              (list '_)
+                                                              (apply* (fr/free list)
+                                                                      (list (fr/free
+                                                                             (ast/const-string-ast type-name)))))))))]
+                                            (for [_ (sm/set-val :expr type-name)
+                                                  _ (an/analyze-string)
+                                                  _ (emit-extension type-num (list 'Getter (list (list 'type-name
+                                                                                                       impl-ast))))]
+                                              ""))))
+
+                            _ (sm/set-val :expr expr)]
+                        ""))
             (compile-source parser)
             (serialize-symbol-literals)
             (serialize-number-literals)
