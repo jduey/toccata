@@ -1101,11 +1101,10 @@
         args (map (range num-args) (fn [idx] (str "arg" idx)))]
     (for [c-name (gensym "protoFnImpl_")
           arity-sym (gensym "protoFnArity_")
-          ;; type-name-fn (comp (for [type-name-sym (lookup-sym* 'type-name)
-          ;;                          type-name-arity-sym (lookup-static-fn (first type-name-sym) 1)]
-          ;;                      (str "%s\\n\", extractStr(" type-name-arity-sym "(arg0))"))
-          ;;                    (state-maybe "%lld\\n\", arg0->type"))
-          ;; :let [_ (print-err :type-name-arity-sym type-name-arity-sym)]
+          type-name-fn (comp (for [type-name-sym (lookup-sym* 'type-name)
+                                   type-name-arity-sym (lookup-static-fn (first type-name-sym) 1)]
+                               (str "%s\\n\", extractStr(" type-name-arity-sym "(empty_list, arg0))"))
+                             (sm/state-maybe "%lld\\n\", arg0->type"))
           _ (apply-to list
                       (write-strs (list "Value *" c-name "("))
                       (write-strs
@@ -1117,7 +1116,7 @@
                              impls-sym ");\n"
                              "  if(implFn == (Function *)0) {\n"
                              "   fprintf(stderr, \"\\n*** Could not find proto impl for '"
-                             name "' %lld\\n\", arg0->type);\nabort();\n}\n"
+                             name "' " type-name-fn ");\nabort();\n}\n"
                              "  FnArity *_arity = findFnArity((Value *)implFn, " num-args ");\n"
                              "  if(_arity == (FnArity *)0 || _arity->variadic) {\n"
                              "    fprintf(stderr, \"\\n*** Invalid number of args in call to '"
@@ -1236,6 +1235,7 @@
                     "Value* false;\n"
                     "Number trueVal;\n"
                     "Number falseVal;\n"
+                    "char *extractStr(Value *v);\n"
                     "Value *my_malloc(int64_t);\n"
                     "SubString *malloc_substring();\n"
                     "FnArity *malloc_fnArity();\n"
@@ -2015,12 +2015,12 @@
                           "const int64_t OpaqueType = " (get types 'Opaque 0) ";\n"
                           "List *empty_list = &(List){4,-1,0,0,0};\n")))
                       (base-fns)
+                      (emit-proto-fn "Getter/"
+                                       (list 'type-name (list (list 1 {}))))
                       (emit-proto-fn "Function/"
                                      (list 'invoke (map (range 8)
                                                         (fn [num-args]
                                                           (list (inc num-args) {})))))
-                      (emit-proto-fn "Getter/"
-                                       (list 'type-name (list (list 1 {}))))
                       (for [expr (sm/get-val :expr)
                             type-names (traverse
                                         (seq (types))
@@ -2117,6 +2117,12 @@
                        _ (core-base-fns)
                        _ (fixed-fn-types)
 
+                       type-name-sym (lookup-sym* 'type-name)
+                       type-name-arity-sym (lookup-static-fn (first type-name-sym) 1)
+                       _ (write-strs (list "Value *"
+                                           type-name-arity-sym
+                                           "(List *closures, Value *arg0);\n"))
+
                        _ (sm/set-val :file-name file-name)
                        _ (sm/set-val :text text)]
                    (list "" empty-list)))))))
@@ -2149,6 +2155,10 @@
             (load-protocols)
             (load-static-fns)
             (load-types)
+            (for [type-name-sym (lookup-sym* 'type-name)
+                  type-name-arity-sym (lookup-static-fn (first type-name-sym) 1)
+                  _ (write-strs (list "Value *" type-name-arity-sym "(List *closures, Value *arg0);\n"))]
+              "")
             (compile-source parser)
             (emit-main)))
 

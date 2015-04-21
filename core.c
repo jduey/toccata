@@ -395,136 +395,6 @@ ProtoImpls *protoImpls_0;
 Value *protoFnImpl_3(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_0);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'invoke' %lld\n", arg0->type);
-abort();
-}
-  FnArity *_arity = findFnArity((Value *)implFn, 1);
-  if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\n*** Invalid number of args in call to 'invoke'\n");
-    abort();
-}
-  FnType1 *_fn = (FnType1 *)_arity->fn;
-  return(_fn(_arity->closures, arg0));
-}
-FnArity protoFnArity_4 = {8, -1, 1, (List *)0, 0, protoFnImpl_3};
-Value *protoFnImpl_5(List *closures, Value *arg0, Value *arg1) {
-  Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_0);
-  if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'invoke' %lld\n", arg0->type);
-abort();
-}
-  FnArity *_arity = findFnArity((Value *)implFn, 2);
-  if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\n*** Invalid number of args in call to 'invoke'\n");
-    abort();
-}
-  FnType2 *_fn = (FnType2 *)_arity->fn;
-  return(_fn(_arity->closures, arg0, arg1));
-}
-FnArity protoFnArity_6 = {8, -1, 2, (List *)0, 0, protoFnImpl_5};
-Value *protoFnImpl_7(List *closures, Value *arg0, Value *arg1, Value *arg2) {
-  Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_0);
-  if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'invoke' %lld\n", arg0->type);
-abort();
-}
-  FnArity *_arity = findFnArity((Value *)implFn, 3);
-  if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\n*** Invalid number of args in call to 'invoke'\n");
-    abort();
-}
-  FnType3 *_fn = (FnType3 *)_arity->fn;
-  return(_fn(_arity->closures, arg0, arg1, arg2));
-}
-FnArity protoFnArity_8 = {8, -1, 3, (List *)0, 0, protoFnImpl_7};
-Value *protoFnImpl_9(List *closures, Value *arg0, Value *arg1, Value *arg2, Value *arg3) {
-  Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_0);
-  if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'invoke' %lld\n", arg0->type);
-abort();
-}
-  FnArity *_arity = findFnArity((Value *)implFn, 4);
-  if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\n*** Invalid number of args in call to 'invoke'\n");
-    abort();
-}
-  FnType4 *_fn = (FnType4 *)_arity->fn;
-  return(_fn(_arity->closures, arg0, arg1, arg2, arg3));
-}
-FnArity protoFnArity_10 = {8, -1, 4, (List *)0, 0, protoFnImpl_9};
-Value *protoFnImpl_11(List *closures, Value *arg0, Value *arg1, Value *arg2, Value *arg3, Value *arg4) {
-  Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_0);
-  if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'invoke' %lld\n", arg0->type);
-abort();
-}
-  FnArity *_arity = findFnArity((Value *)implFn, 5);
-  if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\n*** Invalid number of args in call to 'invoke'\n");
-    abort();
-}
-  FnType5 *_fn = (FnType5 *)_arity->fn;
-  return(_fn(_arity->closures, arg0, arg1, arg2, arg3, arg4));
-}
-FnArity protoFnArity_12 = {8, -1, 5, (List *)0, 0, protoFnImpl_11};
-Value *protoFnImpl_13(List *closures, Value *arg0, Value *arg1, Value *arg2, Value *arg3, Value *arg4, Value *arg5) {
-  Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_0);
-  if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'invoke' %lld\n", arg0->type);
-abort();
-}
-  FnArity *_arity = findFnArity((Value *)implFn, 6);
-  if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\n*** Invalid number of args in call to 'invoke'\n");
-    abort();
-}
-  FnType6 *_fn = (FnType6 *)_arity->fn;
-  return(_fn(_arity->closures, arg0, arg1, arg2, arg3, arg4, arg5));
-}
-FnArity protoFnArity_14 = {8, -1, 6, (List *)0, 0, protoFnImpl_13};
-Value *protoFnImpl_15(List *closures, Value *arg0, Value *arg1, Value *arg2, Value *arg3, Value *arg4, Value *arg5, Value *arg6) {
-  Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_0);
-  if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'invoke' %lld\n", arg0->type);
-abort();
-}
-  FnArity *_arity = findFnArity((Value *)implFn, 7);
-  if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\n*** Invalid number of args in call to 'invoke'\n");
-    abort();
-}
-  FnType7 *_fn = (FnType7 *)_arity->fn;
-  return(_fn(_arity->closures, arg0, arg1, arg2, arg3, arg4, arg5, arg6));
-}
-FnArity protoFnArity_16 = {8, -1, 7, (List *)0, 0, protoFnImpl_15};
-Value *protoFnImpl_17(List *closures, Value *arg0, Value *arg1, Value *arg2, Value *arg3, Value *arg4, Value *arg5, Value *arg6, Value *arg7) {
-  Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_0);
-  if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'invoke' %lld\n", arg0->type);
-abort();
-}
-  FnArity *_arity = findFnArity((Value *)implFn, 8);
-  if(_arity == (FnArity *)0 || _arity->variadic) {
-    fprintf(stderr, "\n*** Invalid number of args in call to 'invoke'\n");
-    abort();
-}
-  FnType8 *_fn = (FnType8 *)_arity->fn;
-  return(_fn(_arity->closures, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
-}
-FnArity protoFnArity_18 = {8, -1, 8, (List *)0, 0, protoFnImpl_17};
-Function protoFn_1 = {3, -1, "invoke", 8, {&protoFnArity_4,
-&protoFnArity_6,
-&protoFnArity_8,
-&protoFnArity_10,
-&protoFnArity_12,
-&protoFnArity_14,
-&protoFnArity_16,
-&protoFnArity_18}};
-
-ProtoImpls *protoImpls_19;
-Value *protoFnImpl_22(List *closures, Value *arg0) {
-  Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_19);
-  if(implFn == (Function *)0) {
    fprintf(stderr, "\n*** Could not find proto impl for 'type-name' %lld\n", arg0->type);
 abort();
 }
@@ -536,8 +406,138 @@ abort();
   FnType1 *_fn = (FnType1 *)_arity->fn;
   return(_fn(_arity->closures, arg0));
 }
-FnArity protoFnArity_23 = {8, -1, 1, (List *)0, 0, protoFnImpl_22};
-Function protoFn_20 = {3, -1, "type-name", 1, {&protoFnArity_23}};
+FnArity protoFnArity_4 = {8, -1, 1, (List *)0, 0, protoFnImpl_3};
+Function protoFn_1 = {3, -1, "type-name", 1, {&protoFnArity_4}};
+
+ProtoImpls *protoImpls_5;
+Value *protoFnImpl_8(List *closures, Value *arg0) {
+  Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_5);
+  if(implFn == (Function *)0) {
+   fprintf(stderr, "\n*** Could not find proto impl for 'invoke' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
+abort();
+}
+  FnArity *_arity = findFnArity((Value *)implFn, 1);
+  if(_arity == (FnArity *)0 || _arity->variadic) {
+    fprintf(stderr, "\n*** Invalid number of args in call to 'invoke'\n");
+    abort();
+}
+  FnType1 *_fn = (FnType1 *)_arity->fn;
+  return(_fn(_arity->closures, arg0));
+}
+FnArity protoFnArity_9 = {8, -1, 1, (List *)0, 0, protoFnImpl_8};
+Value *protoFnImpl_10(List *closures, Value *arg0, Value *arg1) {
+  Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_5);
+  if(implFn == (Function *)0) {
+   fprintf(stderr, "\n*** Could not find proto impl for 'invoke' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
+abort();
+}
+  FnArity *_arity = findFnArity((Value *)implFn, 2);
+  if(_arity == (FnArity *)0 || _arity->variadic) {
+    fprintf(stderr, "\n*** Invalid number of args in call to 'invoke'\n");
+    abort();
+}
+  FnType2 *_fn = (FnType2 *)_arity->fn;
+  return(_fn(_arity->closures, arg0, arg1));
+}
+FnArity protoFnArity_11 = {8, -1, 2, (List *)0, 0, protoFnImpl_10};
+Value *protoFnImpl_12(List *closures, Value *arg0, Value *arg1, Value *arg2) {
+  Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_5);
+  if(implFn == (Function *)0) {
+   fprintf(stderr, "\n*** Could not find proto impl for 'invoke' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
+abort();
+}
+  FnArity *_arity = findFnArity((Value *)implFn, 3);
+  if(_arity == (FnArity *)0 || _arity->variadic) {
+    fprintf(stderr, "\n*** Invalid number of args in call to 'invoke'\n");
+    abort();
+}
+  FnType3 *_fn = (FnType3 *)_arity->fn;
+  return(_fn(_arity->closures, arg0, arg1, arg2));
+}
+FnArity protoFnArity_13 = {8, -1, 3, (List *)0, 0, protoFnImpl_12};
+Value *protoFnImpl_14(List *closures, Value *arg0, Value *arg1, Value *arg2, Value *arg3) {
+  Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_5);
+  if(implFn == (Function *)0) {
+   fprintf(stderr, "\n*** Could not find proto impl for 'invoke' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
+abort();
+}
+  FnArity *_arity = findFnArity((Value *)implFn, 4);
+  if(_arity == (FnArity *)0 || _arity->variadic) {
+    fprintf(stderr, "\n*** Invalid number of args in call to 'invoke'\n");
+    abort();
+}
+  FnType4 *_fn = (FnType4 *)_arity->fn;
+  return(_fn(_arity->closures, arg0, arg1, arg2, arg3));
+}
+FnArity protoFnArity_15 = {8, -1, 4, (List *)0, 0, protoFnImpl_14};
+Value *protoFnImpl_16(List *closures, Value *arg0, Value *arg1, Value *arg2, Value *arg3, Value *arg4) {
+  Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_5);
+  if(implFn == (Function *)0) {
+   fprintf(stderr, "\n*** Could not find proto impl for 'invoke' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
+abort();
+}
+  FnArity *_arity = findFnArity((Value *)implFn, 5);
+  if(_arity == (FnArity *)0 || _arity->variadic) {
+    fprintf(stderr, "\n*** Invalid number of args in call to 'invoke'\n");
+    abort();
+}
+  FnType5 *_fn = (FnType5 *)_arity->fn;
+  return(_fn(_arity->closures, arg0, arg1, arg2, arg3, arg4));
+}
+FnArity protoFnArity_17 = {8, -1, 5, (List *)0, 0, protoFnImpl_16};
+Value *protoFnImpl_18(List *closures, Value *arg0, Value *arg1, Value *arg2, Value *arg3, Value *arg4, Value *arg5) {
+  Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_5);
+  if(implFn == (Function *)0) {
+   fprintf(stderr, "\n*** Could not find proto impl for 'invoke' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
+abort();
+}
+  FnArity *_arity = findFnArity((Value *)implFn, 6);
+  if(_arity == (FnArity *)0 || _arity->variadic) {
+    fprintf(stderr, "\n*** Invalid number of args in call to 'invoke'\n");
+    abort();
+}
+  FnType6 *_fn = (FnType6 *)_arity->fn;
+  return(_fn(_arity->closures, arg0, arg1, arg2, arg3, arg4, arg5));
+}
+FnArity protoFnArity_19 = {8, -1, 6, (List *)0, 0, protoFnImpl_18};
+Value *protoFnImpl_20(List *closures, Value *arg0, Value *arg1, Value *arg2, Value *arg3, Value *arg4, Value *arg5, Value *arg6) {
+  Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_5);
+  if(implFn == (Function *)0) {
+   fprintf(stderr, "\n*** Could not find proto impl for 'invoke' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
+abort();
+}
+  FnArity *_arity = findFnArity((Value *)implFn, 7);
+  if(_arity == (FnArity *)0 || _arity->variadic) {
+    fprintf(stderr, "\n*** Invalid number of args in call to 'invoke'\n");
+    abort();
+}
+  FnType7 *_fn = (FnType7 *)_arity->fn;
+  return(_fn(_arity->closures, arg0, arg1, arg2, arg3, arg4, arg5, arg6));
+}
+FnArity protoFnArity_21 = {8, -1, 7, (List *)0, 0, protoFnImpl_20};
+Value *protoFnImpl_22(List *closures, Value *arg0, Value *arg1, Value *arg2, Value *arg3, Value *arg4, Value *arg5, Value *arg6, Value *arg7) {
+  Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_5);
+  if(implFn == (Function *)0) {
+   fprintf(stderr, "\n*** Could not find proto impl for 'invoke' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
+abort();
+}
+  FnArity *_arity = findFnArity((Value *)implFn, 8);
+  if(_arity == (FnArity *)0 || _arity->variadic) {
+    fprintf(stderr, "\n*** Invalid number of args in call to 'invoke'\n");
+    abort();
+}
+  FnType8 *_fn = (FnType8 *)_arity->fn;
+  return(_fn(_arity->closures, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
+}
+FnArity protoFnArity_23 = {8, -1, 8, (List *)0, 0, protoFnImpl_22};
+Function protoFn_6 = {3, -1, "invoke", 8, {&protoFnArity_9,
+&protoFnArity_11,
+&protoFnArity_13,
+&protoFnArity_15,
+&protoFnArity_17,
+&protoFnArity_19,
+&protoFnArity_21,
+&protoFnArity_23}};
 
 struct {int64_t type;
  int32_t refs;
@@ -1648,7 +1648,7 @@ ProtoImpls *protoImpls_165;
 Value *protoFnImpl_168(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_165);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'bippity' %lld\n", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'bippity' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
@@ -1674,7 +1674,7 @@ return(rslt0);
 Value *protoFnImpl_174(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_170);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'match*' %lld\n", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'match*' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
@@ -1689,7 +1689,7 @@ FnArity protoFnArity_175 = {8, -1, 1, (List *)0, 0, protoFnImpl_174};
 Value *protoFnImpl_176(List *closures, Value *arg0, Value *arg1) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_170);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'match*' %lld\n", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'match*' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 2);
@@ -1710,7 +1710,7 @@ ProtoImpls *protoImpls_178;
 Value *protoFnImpl_181(List *closures, Value *arg0, Value *arg1) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_178);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'instance?' %lld\n", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'instance?' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 2);
@@ -1730,10 +1730,10 @@ struct {int64_t type;
    char buffer[29];} _str_28 = {1, -1, 28,"'flat-map' not implemented: "};
 ProtoImpls *protoImpls_183;
 Value *arityImpl_186(List *closures, Value *arg0, Value *arg1) {
-Value *rslt0 = protoFnImpl_22(empty_list, arg0);
+Value *rslt0 = protoFnImpl_3(empty_list, arg0);
 Value *rslt4;
 if((var_42)->type != 3) {
-rslt4 = protoFnImpl_7(empty_list, var_42, (Value *)&_str_28, rslt0);
+rslt4 = protoFnImpl_12(empty_list, var_42, (Value *)&_str_28, rslt0);
 } else {
 FnArity *arity1 = findFnArity(var_42, 2);
 if(arity1 != (FnArity *)0 && !arity1->variadic) {
@@ -1768,7 +1768,7 @@ return(rslt5);
 Value *protoFnImpl_187(List *closures, Value *arg0, Value *arg1) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_183);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'flat-map' %lld\n", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'flat-map' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 2);
@@ -1808,7 +1808,7 @@ return(rslt1);
 Value *protoFnImpl_195(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_189);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'flatten' %lld\n", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'flatten' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
@@ -1832,7 +1832,7 @@ ProtoImpls *protoImpls_197;
 Value *protoFnImpl_200(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_197);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'extract' %lld\n", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'extract' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
@@ -1850,7 +1850,7 @@ ProtoImpls *protoImpls_202;
 Value *protoFnImpl_205(List *closures, Value *arg0, Value *arg1) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_202);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'extend' %lld\n", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'extend' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 2);
@@ -1866,10 +1866,10 @@ Function protoFn_203 = {3, -1, "extend", 1, {&protoFnArity_206}};
 
 ProtoImpls *protoImpls_207;
 Value *arityImpl_210(List *closures, Value *arg0) {
-Value *rslt0 = protoFnImpl_22(empty_list, arg0);
+Value *rslt0 = protoFnImpl_3(empty_list, arg0);
 Value *rslt4;
 if((var_42)->type != 3) {
-rslt4 = protoFnImpl_7(empty_list, var_42, (Value *)&_str_29, rslt0);
+rslt4 = protoFnImpl_12(empty_list, var_42, (Value *)&_str_29, rslt0);
 } else {
 FnArity *arity1 = findFnArity(var_42, 2);
 if(arity1 != (FnArity *)0 && !arity1->variadic) {
@@ -1901,7 +1901,7 @@ return(rslt4);
 Value *protoFnImpl_211(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_207);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'duplicate' %lld\n", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'duplicate' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
@@ -1929,7 +1929,7 @@ ProtoImpls *protoImpls_214;
 Value *arityImpl_217(List *closures, Value *arg0, Value *arg1) {
 Value *rslt3;
 if((var_42)->type != 3) {
-rslt3 = protoFnImpl_5(empty_list, var_42, (Value *)&_str_30);
+rslt3 = protoFnImpl_10(empty_list, var_42, (Value *)&_str_30);
 } else {
 FnArity *arity0 = findFnArity(var_42, 1);
 if(arity0 != (FnArity *)0 && !arity0->variadic) {
@@ -1957,7 +1957,7 @@ return(rslt3);
 Value *protoFnImpl_218(List *closures, Value *arg0, Value *arg1) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_214);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'wrap' %lld\n", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'wrap' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 2);
@@ -1984,7 +1984,7 @@ closures->tail->len = closures->len - 1;
 closures = closures->tail;
 Value *rslt4;
 if((var_213)->type != 3) {
-rslt4 = protoFnImpl_7(empty_list, var_213, arg0, val0);
+rslt4 = protoFnImpl_12(empty_list, var_213, arg0, val0);
 } else {
 FnArity *arity1 = findFnArity(var_213, 2);
 if(arity1 != (FnArity *)0 && !arity1->variadic) {
@@ -2021,7 +2021,7 @@ closures->tail->len = closures->len - 1;
 closures = closures->tail;
 Value *rslt4;
 if((arg0)->type != 3) {
-rslt4 = protoFnImpl_3(empty_list, arg0);
+rslt4 = protoFnImpl_8(empty_list, arg0);
 } else {
 FnArity *arity1 = findFnArity(arg0, 0);
 if(arity1 != (FnArity *)0 && !arity1->variadic) {
@@ -2112,7 +2112,7 @@ return(cond0);
 Value *protoFnImpl_228(List *closures, Value *arg0, Value *arg1) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_220);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'apply*' %lld\n", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'apply*' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 2);
@@ -2169,7 +2169,7 @@ decRef(rslt5);
 my_free(rslt5);
 Value *rslt9;
 if((arg0)->type != 3) {
-rslt9 = protoFnImpl_3(empty_list, arg0);
+rslt9 = protoFnImpl_8(empty_list, arg0);
 } else {
 FnArity *arity6 = findFnArity(arg0, 0);
 if(arity6 != (FnArity *)0 && !arity6->variadic) {
@@ -2242,7 +2242,7 @@ closures->tail->len = closures->len - 1;
 closures = closures->tail;
 Value *rslt5;
 if((val1)->type != 3) {
-rslt5 = protoFnImpl_5(empty_list, val1, arg0);
+rslt5 = protoFnImpl_10(empty_list, val1, arg0);
 } else {
 FnArity *arity2 = findFnArity(val1, 1);
 if(arity2 != (FnArity *)0 && !arity2->variadic) {
@@ -2298,7 +2298,7 @@ return(rslt1);
 Value *protoFnImpl_245(List *closures, Value *arg0, Value *arg1) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_239);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'map' %lld\n", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'map' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 2);
@@ -2323,7 +2323,7 @@ Value *arityImpl_250(List *closures, Value *arg0) {
 Value *rslt0 = arityImpl_85(empty_list, arg0);
 Value *rslt4;
 if((var_42)->type != 3) {
-rslt4 = protoFnImpl_7(empty_list, var_42, (Value *)&_str_31, rslt0);
+rslt4 = protoFnImpl_12(empty_list, var_42, (Value *)&_str_31, rslt0);
 } else {
 FnArity *arity1 = findFnArity(var_42, 2);
 if(arity1 != (FnArity *)0 && !arity1->variadic) {
@@ -2358,7 +2358,7 @@ return(rslt5);
 Value *protoFnImpl_251(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_247);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'name' %lld\n", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'name' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
@@ -2383,7 +2383,7 @@ Value *arityImpl_256(List *closures, Value *arg0) {
 Value *rslt0 = arityImpl_85(empty_list, arg0);
 Value *rslt4;
 if((var_42)->type != 3) {
-rslt4 = protoFnImpl_7(empty_list, var_42, (Value *)&_str_32, rslt0);
+rslt4 = protoFnImpl_12(empty_list, var_42, (Value *)&_str_32, rslt0);
 } else {
 FnArity *arity1 = findFnArity(var_42, 2);
 if(arity1 != (FnArity *)0 && !arity1->variadic) {
@@ -2418,7 +2418,7 @@ return(rslt5);
 Value *protoFnImpl_257(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_253);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'string-list' %lld\n", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'string-list' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
@@ -2443,7 +2443,7 @@ Value *arityImpl_262(List *closures, Value *arg0) {
 Value *rslt0 = arityImpl_85(empty_list, arg0);
 Value *rslt4;
 if((var_42)->type != 3) {
-rslt4 = protoFnImpl_7(empty_list, var_42, (Value *)&_str_33, rslt0);
+rslt4 = protoFnImpl_12(empty_list, var_42, (Value *)&_str_33, rslt0);
 } else {
 FnArity *arity1 = findFnArity(var_42, 2);
 if(arity1 != (FnArity *)0 && !arity1->variadic) {
@@ -2478,7 +2478,7 @@ return(rslt5);
 Value *protoFnImpl_263(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_259);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'serialize' %lld\n", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'serialize' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
@@ -2730,7 +2730,7 @@ return(rslt2);
 Value *protoFnImpl_288(List *closures, Value *arg0, Value *arg1) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_284);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for '=*' %lld\n", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for '=*' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 2);
@@ -2772,7 +2772,7 @@ return(rslt2);
 Value *protoFnImpl_294(List *closures, Value *arg0, Value *arg1) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_290);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for '<*' %lld\n", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for '<*' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 2);
@@ -2796,7 +2796,7 @@ ProtoImpls *protoImpls_296;
 Value *protoFnImpl_299(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_296);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'empty?' %lld\n", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'empty?' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
@@ -2814,7 +2814,7 @@ ProtoImpls *protoImpls_301;
 Value *protoFnImpl_304(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_301);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'empty' %lld\n", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'empty' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
@@ -2832,7 +2832,7 @@ ProtoImpls *protoImpls_306;
 Value *protoFnImpl_309(List *closures, Value *arg0, Value *arg1) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_306);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'destruct' %lld\n", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'destruct' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 2);
@@ -2868,7 +2868,7 @@ return(rslt2);
 Value *protoFnImpl_315(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_311);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'count' %lld\n", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'count' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
@@ -2888,7 +2888,7 @@ ProtoImpls *protoImpls_317;
 Value *protoFnImpl_320(List *closures, Value *arg0, Value *arg1) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_317);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'conj' %lld\n", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'conj' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 2);
@@ -2941,7 +2941,7 @@ return(var_62);
 Value *protoFnImpl_329(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_325);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'seq?' %lld\n", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'seq?' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
@@ -2961,7 +2961,7 @@ ProtoImpls *protoImpls_331;
 Value *protoFnImpl_334(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_331);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'seq' %lld\n", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'seq' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
@@ -2979,7 +2979,7 @@ ProtoImpls *protoImpls_336;
 Value *protoFnImpl_339(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_336);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'first' %lld\n", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'first' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
@@ -2997,7 +2997,7 @@ ProtoImpls *protoImpls_341;
 Value *protoFnImpl_344(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_341);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'rest' %lld\n", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'rest' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
@@ -3033,7 +3033,7 @@ ProtoImpls *protoImpls_349;
 Value *protoFnImpl_352(List *closures, Value *arg0, Value *arg1) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_349);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'traverse' %lld\n", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'traverse' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 2);
@@ -3051,7 +3051,7 @@ ProtoImpls *protoImpls_354;
 Value *protoFnImpl_357(List *closures, Value *arg0, Value *arg1) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_354);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'crush' %lld\n", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'crush' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 2);
@@ -3069,7 +3069,7 @@ ProtoImpls *protoImpls_359;
 Value *protoFnImpl_362(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_359);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'zero' %lld\n", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'zero' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
@@ -3087,7 +3087,7 @@ ProtoImpls *protoImpls_364;
 Value *protoFnImpl_367(List *closures, Value *arg0, Value *arg1) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_364);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'comp*' %lld\n", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'comp*' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 2);
@@ -3148,7 +3148,7 @@ ProtoImpls *protoImpls_372;
 Value *protoFnImpl_375(List *closures, Value *arg0, Value *arg1, Value *arg2) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_372);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'assoc' %lld\n", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'assoc' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 3);
@@ -3190,7 +3190,7 @@ return(rslt2);
 Value *protoFnImpl_381(List *closures, Value *arg0, Value *arg1, Value *arg2) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_377);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'get' %lld\n", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'get' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 3);
@@ -3210,7 +3210,7 @@ ProtoImpls *protoImpls_383;
 Value *protoFnImpl_386(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_383);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'keys' %lld\n", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'keys' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
@@ -3228,7 +3228,7 @@ ProtoImpls *protoImpls_388;
 Value *protoFnImpl_391(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_388);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for 'vals' %lld\n", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for 'vals' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
@@ -3639,7 +3639,7 @@ Value *rslt1 = protoFnImpl_339(empty_list, arg0);
 Value *rslt2 = protoFnImpl_344(empty_list, arg0);
 Value *rslt6;
 if((arg2)->type != 3) {
-rslt6 = protoFnImpl_7(empty_list, arg2, arg1, rslt1);
+rslt6 = protoFnImpl_12(empty_list, arg2, arg1, rslt1);
 } else {
 FnArity *arity3 = findFnArity(arg2, 2);
 if(arity3 != (FnArity *)0 && !arity3->variadic) {
@@ -3718,7 +3718,7 @@ List *l = (List *)arg0;
         for(Value *x = l->head; x != (Value *)0; l = l->tail, x = l->head) {
           Value *y;
           if(arg1->type != 3) {
-            y = protoFnImpl_5(empty_list, arg1, x);
+            y = protoFnImpl_10(empty_list, arg1, x);
           } else {
             FnArity *arity2 = findFnArity(arg1, 1);
             if(arity2 != (FnArity *)0 && !arity2->variadic) {
@@ -3787,7 +3787,7 @@ closures->tail->len = closures->len - 1;
 closures = closures->tail;
 Value *rslt4;
 if((val0)->type != 3) {
-rslt4 = protoFnImpl_5(empty_list, val0, arg0);
+rslt4 = protoFnImpl_10(empty_list, val0, arg0);
 } else {
 FnArity *arity1 = findFnArity(val0, 1);
 if(arity1 != (FnArity *)0 && !arity1->variadic) {
@@ -3931,7 +3931,7 @@ Function fn_441;
 Value *arityImpl_442(List *closures, Value *arg0, Value *arg1) {
 Value *rslt3;
 if((arg1)->type != 3) {
-rslt3 = protoFnImpl_5(empty_list, arg1, arg0);
+rslt3 = protoFnImpl_10(empty_list, arg1, arg0);
 } else {
 FnArity *arity0 = findFnArity(arg1, 1);
 if(arity0 != (FnArity *)0 && !arity0->variadic) {
@@ -4027,7 +4027,7 @@ decRef(rslt5);
 my_free(rslt5);
 Value *rslt9;
 if((arg0)->type != 3) {
-rslt9 = protoFnImpl_3(empty_list, arg0);
+rslt9 = protoFnImpl_8(empty_list, arg0);
 } else {
 FnArity *arity6 = findFnArity(arg0, 0);
 if(arity6 != (FnArity *)0 && !arity6->variadic) {
@@ -4149,7 +4149,7 @@ my_free(rslt3);
 Value *rslt4 = protoFnImpl_339(empty_list, arg1);
 Value *rslt8;
 if((arg0)->type != 3) {
-rslt8 = protoFnImpl_5(empty_list, arg0, rslt4);
+rslt8 = protoFnImpl_10(empty_list, arg0, rslt4);
 } else {
 FnArity *arity5 = findFnArity(arg0, 1);
 if(arity5 != (FnArity *)0 && !arity5->variadic) {
@@ -4205,7 +4205,7 @@ ProtoImpls *protoImpls_454;
 Value *protoFnImpl_457(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_454);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for '.v' %lld\n", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for '.v' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
@@ -4633,7 +4633,7 @@ closures->tail->len = closures->len - 1;
 closures = closures->tail;
 Value *rslt5;
 if((val1)->type != 3) {
-rslt5 = protoFnImpl_5(empty_list, val1, arg0);
+rslt5 = protoFnImpl_10(empty_list, val1, arg0);
 } else {
 FnArity *arity2 = findFnArity(val1, 1);
 if(arity2 != (FnArity *)0 && !arity2->variadic) {
@@ -4672,7 +4672,7 @@ decRef(rslt16);
 my_free(rslt16);
 Value *rslt20;
 if((arg0)->type != 3) {
-rslt20 = protoFnImpl_3(empty_list, arg0);
+rslt20 = protoFnImpl_8(empty_list, arg0);
 } else {
 FnArity *arity17 = findFnArity(arg0, 0);
 if(arity17 != (FnArity *)0 && !arity17->variadic) {
@@ -4966,7 +4966,7 @@ closures->tail->len = closures->len - 1;
 closures = closures->tail;
 Value *rslt4;
 if((val0)->type != 3) {
-rslt4 = protoFnImpl_5(empty_list, val0, arg1);
+rslt4 = protoFnImpl_10(empty_list, val0, arg1);
 } else {
 FnArity *arity1 = findFnArity(val0, 1);
 if(arity1 != (FnArity *)0 && !arity1->variadic) {
@@ -5006,7 +5006,7 @@ Value *rslt0 = arityImpl_127(empty_list, arg0);
 Value *rslt1 = arityImpl_124(empty_list, arg0);
 Value *rslt5;
 if((arg1)->type != 3) {
-rslt5 = protoFnImpl_5(empty_list, arg1, rslt1);
+rslt5 = protoFnImpl_10(empty_list, arg1, rslt1);
 } else {
 FnArity *arity2 = findFnArity(arg1, 1);
 if(arity2 != (FnArity *)0 && !arity2->variadic) {
@@ -5358,7 +5358,7 @@ List *l = (List *)arg0;
         for(Value *x = l->head; x != (Value *)0; l = l->tail, x = l->head) {
           Value *y;
           if(arg1->type != 3) {
-            y = protoFnImpl_5(empty_list, arg1, x);
+            y = protoFnImpl_10(empty_list, arg1, x);
           } else {
             FnArity *arity2 = findFnArity(arg1, 1);
             if(arity2 != (FnArity *)0 && !arity2->variadic) {
@@ -5489,7 +5489,7 @@ my_free(rslt3);
 Value *rslt4 = protoFnImpl_339(empty_list, arg0);
 Value *rslt8;
 if((arg1)->type != 3) {
-rslt8 = protoFnImpl_5(empty_list, arg1, rslt4);
+rslt8 = protoFnImpl_10(empty_list, arg1, rslt4);
 } else {
 FnArity *arity5 = findFnArity(arg1, 1);
 if(arity5 != (FnArity *)0 && !arity5->variadic) {
@@ -5848,7 +5848,7 @@ Function fn_581;
 Value *arityImpl_582(List *closures, Value *arg0, Value *arg1) {
 Value *rslt3;
 if((var_560)->type != 3) {
-rslt3 = protoFnImpl_5(empty_list, var_560, arg1);
+rslt3 = protoFnImpl_10(empty_list, var_560, arg1);
 } else {
 FnArity *arity0 = findFnArity(var_560, 1);
 if(arity0 != (FnArity *)0 && !arity0->variadic) {
@@ -6135,7 +6135,7 @@ closures->tail->len = closures->len - 1;
 closures = closures->tail;
 Value *rslt4;
 if((arg1)->type != 3) {
-rslt4 = protoFnImpl_5(empty_list, arg1, val0);
+rslt4 = protoFnImpl_10(empty_list, arg1, val0);
 } else {
 FnArity *arity1 = findFnArity(arg1, 1);
 if(arity1 != (FnArity *)0 && !arity1->variadic) {
@@ -6156,7 +6156,7 @@ fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)arg1)->name);
 }
 Value *rslt8;
 if((var_560)->type != 3) {
-rslt8 = protoFnImpl_5(empty_list, var_560, rslt4);
+rslt8 = protoFnImpl_10(empty_list, var_560, rslt4);
 } else {
 FnArity *arity5 = findFnArity(var_560, 1);
 if(arity5 != (FnArity *)0 && !arity5->variadic) {
@@ -6197,7 +6197,7 @@ Function fn_625;
 Value *arityImpl_626(List *closures, Value *arg0, Value *arg1) {
 Value *rslt3;
 if((var_560)->type != 3) {
-rslt3 = protoFnImpl_5(empty_list, var_560, arg1);
+rslt3 = protoFnImpl_10(empty_list, var_560, arg1);
 } else {
 FnArity *arity0 = findFnArity(var_560, 1);
 if(arity0 != (FnArity *)0 && !arity0->variadic) {
@@ -6273,7 +6273,7 @@ decRef((Value *)varArgs3);
 my_free((Value *)varArgs3);
 Value *rslt8;
 if((var_560)->type != 3) {
-rslt8 = protoFnImpl_5(empty_list, var_560, rslt4);
+rslt8 = protoFnImpl_10(empty_list, var_560, rslt4);
 } else {
 FnArity *arity5 = findFnArity(var_560, 1);
 if(arity5 != (FnArity *)0 && !arity5->variadic) {
@@ -6351,7 +6351,7 @@ closures->tail->len = closures->len - 1;
 closures = closures->tail;
 Value *rslt4;
 if((arg1)->type != 3) {
-rslt4 = protoFnImpl_5(empty_list, arg1, val0);
+rslt4 = protoFnImpl_10(empty_list, arg1, val0);
 } else {
 FnArity *arity1 = findFnArity(arg1, 1);
 if(arity1 != (FnArity *)0 && !arity1->variadic) {
@@ -6552,7 +6552,7 @@ Function fn_652;
 Value *arityImpl_653(List *closures, Value *arg0, Value *arg1) {
 Value *rslt3;
 if((var_560)->type != 3) {
-rslt3 = protoFnImpl_5(empty_list, var_560, arg1);
+rslt3 = protoFnImpl_10(empty_list, var_560, arg1);
 } else {
 FnArity *arity0 = findFnArity(var_560, 1);
 if(arity0 != (FnArity *)0 && !arity0->variadic) {
@@ -6814,7 +6814,7 @@ my_free(rslt6);
 Value *rslt1 = arityImpl_92(empty_list, arg0, (Value *)&_num_10, (Value *)&_num_1);
 Value *rslt5;
 if(((Value *)&reified_668)->type != 3) {
-rslt5 = protoFnImpl_5(empty_list, (Value *)&reified_668, rslt1);
+rslt5 = protoFnImpl_10(empty_list, (Value *)&reified_668, rslt1);
 } else {
 FnArity *arity2 = findFnArity((Value *)&reified_668, 1);
 if(arity2 != (FnArity *)0 && !arity2->variadic) {
@@ -7155,7 +7155,7 @@ my_free(rslt6);
 Value *rslt1 = arityImpl_92(empty_list, arg0, (Value *)&_num_10, (Value *)&_num_1);
 Value *rslt5;
 if(((Value *)&reified_668)->type != 3) {
-rslt5 = protoFnImpl_5(empty_list, (Value *)&reified_668, rslt1);
+rslt5 = protoFnImpl_10(empty_list, (Value *)&reified_668, rslt1);
 } else {
 FnArity *arity2 = findFnArity((Value *)&reified_668, 1);
 if(arity2 != (FnArity *)0 && !arity2->variadic) {
@@ -7557,7 +7557,7 @@ return(cond0);
 Value *arityImpl_733(List *closures, Value *arg0, Value *arg1) {
 Value *rslt3;
 if(((Value *)&fn_731)->type != 3) {
-rslt3 = protoFnImpl_9(empty_list, (Value *)&fn_731, arg0, arg1, var_115);
+rslt3 = protoFnImpl_14(empty_list, (Value *)&fn_731, arg0, arg1, var_115);
 } else {
 FnArity *arity0 = findFnArity((Value *)&fn_731, 3);
 if(arity0 != (FnArity *)0 && !arity0->variadic) {
@@ -8311,7 +8311,7 @@ ProtoImpls *protoImpls_766;
 Value *protoFnImpl_769(List *closures, Value *arg0) {
   Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_766);
   if(implFn == (Function *)0) {
-   fprintf(stderr, "\n*** Could not find proto impl for '.a-list' %lld\n", arg0->type);
+   fprintf(stderr, "\n*** Could not find proto impl for '.a-list' %s\n", extractStr(protoFnImpl_3(empty_list, arg0)));
 abort();
 }
   FnArity *_arity = findFnArity((Value *)implFn, 1);
@@ -8679,7 +8679,7 @@ Function fn_808;
 Value *arityImpl_809(List *closures, Value *arg0) {
 Value *rslt3;
 if((var_771)->type != 3) {
-rslt3 = protoFnImpl_5(empty_list, var_771, var_115);
+rslt3 = protoFnImpl_10(empty_list, var_771, var_115);
 } else {
 FnArity *arity0 = findFnArity(var_771, 1);
 if(arity0 != (FnArity *)0 && !arity0->variadic) {
@@ -8807,7 +8807,7 @@ closures = closures->tail;
 Value *rslt1 = arityImpl_758(empty_list, val0, arg1, arg2);
 Value *rslt5;
 if((var_771)->type != 3) {
-rslt5 = protoFnImpl_5(empty_list, var_771, rslt1);
+rslt5 = protoFnImpl_10(empty_list, var_771, rslt1);
 } else {
 FnArity *arity2 = findFnArity(var_771, 1);
 if(arity2 != (FnArity *)0 && !arity2->variadic) {
@@ -9194,7 +9194,7 @@ Value *arg0 = (Value *)argsList;
 Value *rslt0 = arityImpl_742(empty_list, arg0, (Value *)&_num_2);
 Value *rslt4;
 if((var_771)->type != 3) {
-rslt4 = protoFnImpl_5(empty_list, var_771, rslt0);
+rslt4 = protoFnImpl_10(empty_list, var_771, rslt0);
 } else {
 FnArity *arity1 = findFnArity(var_771, 1);
 if(arity1 != (FnArity *)0 && !arity1->variadic) {
@@ -9279,7 +9279,7 @@ decRef(rslt11);
 my_free(rslt11);
 Value *rslt9;
 if((val5)->type != 3) {
-rslt9 = protoFnImpl_7(empty_list, val5, rslt3, rslt2);
+rslt9 = protoFnImpl_12(empty_list, val5, rslt3, rslt2);
 } else {
 FnArity *arity6 = findFnArity(val5, 2);
 if(arity6 != (FnArity *)0 && !arity6->variadic) {
@@ -9541,7 +9541,7 @@ decRef(rslt20);
 my_free(rslt20);
 Value *rslt18;
 if((arg2)->type != 3) {
-rslt18 = protoFnImpl_5(empty_list, arg2, rslt13);
+rslt18 = protoFnImpl_10(empty_list, arg2, rslt13);
 } else {
 FnArity *arity15 = findFnArity(arg2, 1);
 if(arity15 != (FnArity *)0 && !arity15->variadic) {
@@ -10500,38 +10500,6 @@ List *impl;
 protoInfo = empty_list;
 impls = empty_list;
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&protoFn_481"), impl);
-impl = listCons(numberValue(10), impl);
-impls = listCons((Value *)impl, impls);
-impl = empty_list;
-impl = listCons(stringValue("(Value *)&protoFn_650"), impl);
-impl = listCons(numberValue(13), impl);
-impls = listCons((Value *)impl, impls);
-impl = empty_list;
-impl = listCons(stringValue("(Value *)&protoFn_655"), impl);
-impl = listCons(numberValue(15), impl);
-impls = listCons((Value *)impl, impls);
-impl = empty_list;
-impl = listCons(stringValue("(Value *)&protoFn_845"), impl);
-impl = listCons(numberValue(16), impl);
-impls = listCons((Value *)impl, impls);
-impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_878"), impl);
-impl = listCons(numberValue(5), impl);
-impls = listCons((Value *)impl, impls);
-impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_888"), impl);
-impl = listCons(numberValue(7), impl);
-impls = listCons((Value *)impl, impls);
-protoInfo = listCons(symbolValue("invoke"), protoInfo);
-protoInfo = listCons((Value *)impls, protoInfo);
-protoInfo = listCons(stringValue("extern Function protoFn_1;"), protoInfo);
-protoInfo = listCons(stringValue("protoImpls_0"), protoInfo);
-protoInfo = listCons(symbolValue("Function/invoke"), protoInfo);
-protos = listCons((Value *)protoInfo, protos);
-protoInfo = empty_list;
-impls = empty_list;
-impl = empty_list;
 impl = listCons(stringValue("(Value *)&fn_24"), impl);
 impl = listCons(numberValue(1), impl);
 impls = listCons((Value *)impl, impls);
@@ -10581,9 +10549,41 @@ impl = listCons(numberValue(17), impl);
 impls = listCons((Value *)impl, impls);
 protoInfo = listCons(symbolValue("type-name"), protoInfo);
 protoInfo = listCons((Value *)impls, protoInfo);
-protoInfo = listCons(stringValue("extern Function protoFn_20;"), protoInfo);
-protoInfo = listCons(stringValue("protoImpls_19"), protoInfo);
+protoInfo = listCons(stringValue("extern Function protoFn_1;"), protoInfo);
+protoInfo = listCons(stringValue("protoImpls_0"), protoInfo);
 protoInfo = listCons(symbolValue("Getter/type-name"), protoInfo);
+protos = listCons((Value *)protoInfo, protos);
+protoInfo = empty_list;
+impls = empty_list;
+impl = empty_list;
+impl = listCons(stringValue("(Value *)&protoFn_481"), impl);
+impl = listCons(numberValue(10), impl);
+impls = listCons((Value *)impl, impls);
+impl = empty_list;
+impl = listCons(stringValue("(Value *)&protoFn_650"), impl);
+impl = listCons(numberValue(13), impl);
+impls = listCons((Value *)impl, impls);
+impl = empty_list;
+impl = listCons(stringValue("(Value *)&protoFn_655"), impl);
+impl = listCons(numberValue(15), impl);
+impls = listCons((Value *)impl, impls);
+impl = empty_list;
+impl = listCons(stringValue("(Value *)&protoFn_845"), impl);
+impl = listCons(numberValue(16), impl);
+impls = listCons((Value *)impl, impls);
+impl = empty_list;
+impl = listCons(stringValue("(Value *)&fn_878"), impl);
+impl = listCons(numberValue(5), impl);
+impls = listCons((Value *)impl, impls);
+impl = empty_list;
+impl = listCons(stringValue("(Value *)&fn_888"), impl);
+impl = listCons(numberValue(7), impl);
+impls = listCons((Value *)impl, impls);
+protoInfo = listCons(symbolValue("invoke"), protoInfo);
+protoInfo = listCons((Value *)impls, protoInfo);
+protoInfo = listCons(stringValue("extern Function protoFn_6;"), protoInfo);
+protoInfo = listCons(stringValue("protoImpls_5"), protoInfo);
+protoInfo = listCons(symbolValue("Function/invoke"), protoInfo);
 protos = listCons((Value *)protoInfo, protos);
 protoInfo = empty_list;
 impls = empty_list;
@@ -11304,36 +11304,36 @@ fnInfo = empty_list;
 arityInfo = listCons(stringValue("protoFnImpl_3"), empty_list);
 arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
-arityInfo = listCons(stringValue("protoFnImpl_5"), empty_list);
-arityInfo = listCons(numberValue(2), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-arityInfo = listCons(stringValue("protoFnImpl_7"), empty_list);
-arityInfo = listCons(numberValue(3), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-arityInfo = listCons(stringValue("protoFnImpl_9"), empty_list);
-arityInfo = listCons(numberValue(4), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-arityInfo = listCons(stringValue("protoFnImpl_11"), empty_list);
-arityInfo = listCons(numberValue(5), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-arityInfo = listCons(stringValue("protoFnImpl_13"), empty_list);
-arityInfo = listCons(numberValue(6), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-arityInfo = listCons(stringValue("protoFnImpl_15"), empty_list);
-arityInfo = listCons(numberValue(7), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-arityInfo = listCons(stringValue("protoFnImpl_17"), empty_list);
-arityInfo = listCons(numberValue(8), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&protoFn_1"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(stringValue("protoFnImpl_22"), empty_list);
+arityInfo = listCons(stringValue("protoFnImpl_8"), empty_list);
 arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
+arityInfo = listCons(stringValue("protoFnImpl_10"), empty_list);
+arityInfo = listCons(numberValue(2), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+arityInfo = listCons(stringValue("protoFnImpl_12"), empty_list);
+arityInfo = listCons(numberValue(3), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+arityInfo = listCons(stringValue("protoFnImpl_14"), empty_list);
+arityInfo = listCons(numberValue(4), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+arityInfo = listCons(stringValue("protoFnImpl_16"), empty_list);
+arityInfo = listCons(numberValue(5), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+arityInfo = listCons(stringValue("protoFnImpl_18"), empty_list);
+arityInfo = listCons(numberValue(6), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+arityInfo = listCons(stringValue("protoFnImpl_20"), empty_list);
+arityInfo = listCons(numberValue(7), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+arityInfo = listCons(stringValue("protoFnImpl_22"), empty_list);
+arityInfo = listCons(numberValue(8), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_20"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&protoFn_6"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(stringValue("arityImpl_25"), empty_list);
@@ -13041,12 +13041,12 @@ defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(stringValue("(Value *)&protoFn_1"), empty_list);
 symInfo = listCons(stringValue("Function protoFn_1"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
-symInfo = listCons(symbolValue("invoke"), symInfo);
-defSyms = listCons((Value *)symInfo, defSyms);
-symInfo = listCons(stringValue("(Value *)&protoFn_20"), empty_list);
-symInfo = listCons(stringValue("Function protoFn_20"), symInfo);
-symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("type-name"), symInfo);
+defSyms = listCons((Value *)symInfo, defSyms);
+symInfo = listCons(stringValue("(Value *)&protoFn_6"), empty_list);
+symInfo = listCons(stringValue("Function protoFn_6"), symInfo);
+symInfo = listCons((Value *)symInfo, empty_list);
+symInfo = listCons(symbolValue("invoke"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(stringValue("(Value *)&fn_836"), empty_list);
 symInfo = listCons(stringValue("Function fn_836"), symInfo);
