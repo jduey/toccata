@@ -286,6 +286,19 @@ void my_free(Value *v) {
     }  }
   // fprintf(stderr, "malloc_count: %lld free_count: %lld\r", malloc_count, free_count);
 };
+char *extractStr(Value *v) {
+String *newStr = (String *)my_malloc(sizeof(String) + ((String *)v)->len + 5);
+if (v->type == StringType)
+snprintf(newStr->buffer, ((String *)v)->len + 1, "%s", ((String *)v)->buffer);
+else if (v->type == SubStringType)
+snprintf(newStr->buffer, ((String *)v)->len + 1, "%s", ((SubString *)v)->buffer);
+else {
+fprintf(stderr, "\ninvalid type for 'extractStr'\n");
+abort();
+}
+return(newStr->buffer);
+}
+
 int isTrue(Value *boolVal) {
 if (boolVal->type != 2) {
 fprintf(outStream, "Invalid boolean value\n");

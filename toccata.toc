@@ -104,12 +104,15 @@
 
 ;; A symbol can be a local, from the context, from the dictionary or
 ;; from the core
-(defn lookup-sym [sym]
+(defn lookup-sym* [sym]
   (comp (local-sym sym)
         (closed-over-sym sym)
         (defined-sym sym)
         (apply-to (fn [ext-ref] (list (second ext-ref) empty-list))
-                  (core-def sym))
+                  (core-def sym))))
+
+(defn lookup-sym [sym]
+  (comp (lookup-sym* sym)
         (sm/new-sm (fn [s]
                      (print-err "Undefined symbol:" sym "at" (get s :file-name "") ":" (get s :line-num ""))
                      (abort)))))
@@ -1098,6 +1101,11 @@
         args (map (range num-args) (fn [idx] (str "arg" idx)))]
     (for [c-name (gensym "protoFnImpl_")
           arity-sym (gensym "protoFnArity_")
+          ;; type-name-fn (comp (for [type-name-sym (lookup-sym* 'type-name)
+          ;;                          type-name-arity-sym (lookup-static-fn (first type-name-sym) 1)]
+          ;;                      (str "%s\\n\", extractStr(" type-name-arity-sym "(arg0))"))
+          ;;                    (state-maybe "%lld\\n\", arg0->type"))
+          ;; :let [_ (print-err :type-name-arity-sym type-name-arity-sym)]
           _ (apply-to list
                       (write-strs (list "Value *" c-name "("))
                       (write-strs
@@ -1494,6 +1502,18 @@
                     "  }\n"
                     "  // fprintf(stderr, \"malloc_count: %lld free_count: %lld\\r\", malloc_count, free_count);\n"
                     "};\n"
+
+                    "char *extractStr(Value *v) {\n"
+                    "String *newStr = (String *)my_malloc(sizeof(String) + ((String *)v)->len + 5);\n"
+                    "if (v->type == StringType)\n"
+                    "snprintf(newStr->buffer, ((String *)v)->len + 1, \"%s\", ((String *)v)->buffer);\n"
+                    "else if (v->type == SubStringType)\n"
+                    "snprintf(newStr->buffer, ((String *)v)->len + 1, \"%s\", ((SubString *)v)->buffer);\n"
+                    "else {\n"
+                    "fprintf(stderr, \"\\ninvalid type for 'extractStr'\\n\");\n"
+                    "abort();\n"
+                    "}\n"
+                    "return(newStr->buffer);\n}\n\n"
 
                     "int isTrue(Value *boolVal) {\n"
                     "if (boolVal->type != " (get (types) 'Number 10000) ") {\n"
