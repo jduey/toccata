@@ -1,0 +1,102 @@
+
+(add-ns p (module "core/parser.toc"))
+(add-ns fr (module "core/free.toc"))
+
+;; Sample Grammar
+;; ------------------
+;; digit := “0” | “1” ...  | “9”;
+;; letter := “a” | “b” ... | “z”;
+;; number := [“-”], digit, {digit};
+;; symbol := letter, {digit | letter};
+;; expression := “(“, {symbol | number | expression}, “)”;
+
+(defn letter []
+  (p/rule "letter"
+          (p/one-of "abcdefghijklmnopqrstuvwxyz")))
+
+(defn digit []
+  (p/rule "digit"
+          (p/one-of "0123456789")))
+
+(defn number []
+  (p/rule "number"
+          (apply-to str
+                    (p/optional (p/term "-"))
+                    (p/one-or-more (digit)))))
+
+(defn symbol []
+  (p/rule "symbol"
+          (apply-to str
+                    (letter)
+                    (p/none-or-more (comp (digit) (letter))))))
+
+(defn sub-expression []
+  (p/rule "expression"
+          (p/term "")))
+
+(defn expression []
+  (p/rule "expression"
+          (apply-to str
+                    (p/term "( ")
+                    (p/none-or-more (comp (symbol) (number)
+                                          (sub-expression)))
+                    (p/term " )"))))
+
+(deftype EBNF [ebnf-str rules]
+  Applicative
+  (apply* [_ vs]
+    (EBNF (apply str (interpose (map vs .ebnf-str) ", "))
+          (apply comp (map vs .rules))))
+
+  Monoid
+  (comp* [v vs]
+    (let [vs (cons v vs)]
+      (EBNF (apply str (interpose (map vs .ebnf-str) " | "))
+            (apply comp (map vs .rules))))))
+
+(defprotocol Make-EBNF
+  (ebnf [grammar]))
+
+(extend-type Function
+  Make-EBNF
+  (ebnf [_]
+    (EBNF "" {})))
+
+(extend-type parser-terminal
+  Make-EBNF
+  (ebnf [terminal]
+    (EBNF (str "'" (.term-str terminal) "'") {})))
+
+(extend-type p/repeat-rule
+  Make-EBNF
+  (ebnf [r]
+    (let [rule-body (fr/evaluate (.rule r) ebnf)]
+      (EBNF (str (.ebnf-str rule-body) ", { " (.ebnf-str rule-body) " }")
+            (.rules rule-body)))))
+
+(extend-type p/optional-rule
+  Make-EBNF
+  (ebnf [r]
+    (let [rule-body (fr/evaluate (.rule r) ebnf)]
+      (EBNF (str "[ " (.ebnf-str rule-body) " ]")
+            (.rules rule-body)))))
+
+(extend-type p/none-or-more-rule
+  Make-EBNF
+  (ebnf [r]
+    (let [rule-body (fr/evaluate (.rule r) ebnf)]
+      (EBNF (str "{ " (.ebnf-str rule-body) " }")
+            (.rules rule-body)))))
+
+(extend-type p/parser-rule
+  Make-EBNF
+  (ebnf [r]
+    (let [rule-body (fr/evaluate (.grammar r) ebnf)]
+      (EBNF (.name r)
+            (assoc (.rules rule-body)
+              (.name r) (.ebnf-str rule-body))))))
+
+(main [_]
+      (map (seq (.rules (fr/evaluate (expression) ebnf)))
+           (fn [rule]
+             (println (first rule) "=" (second rule)))))
