@@ -31,7 +31,7 @@
   Stringable
   (string-list [mv]
     (comp (list "<maybe ")
-          (string-list (.v mv))
+          (string-list v)
           (list ">")))
 
   Eq

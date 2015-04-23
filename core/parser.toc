@@ -56,12 +56,23 @@
 (defn all [& rules]
   (apply* (fr/free comp) rules))
 
+(deftype optional-rule [rule]
+  Parser
+  (recursive-descent [_]
+    (comp (fr/evaluate rule recursive-descent)
+          (recursive-descent (parser-always "")))))
+
 (defn optional [rule]
-  (comp rule (always "")))
+  (fr/free (optional-rule rule)))
+
+(deftype none-or-more-rule [rule]
+  Parser
+  (recursive-descent [_]
+    (comp (recursive-descent (repeat-rule rule))
+          (recursive-descent (parser-always empty-list)))))
 
 (defn none-or-more [rule]
-  (comp (one-or-more rule)
-        (always empty-list)))
+  (fr/free (none-or-more-rule rule)))
 
 (deftype parser-rule [name grammar]
   Parser

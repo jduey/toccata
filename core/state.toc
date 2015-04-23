@@ -66,40 +66,40 @@
 (defn double [x]
   (* 2 x))
 
-(main [_]
-      ;; check the functor and applicative laws for state
-      (println :state)
-      (let [env :environment]
-        (println :functor-1 (= ((map (state 5) identity) env)
-                               ((state 5) env)))
-        (println :functor-2 (= ((map (map (state 2) inc) double) env)
-                               ((map (state 2) (comp inc double)) env)))
-        (println :apply-1 (= ((map (state 5) inc) env)
-                             ((apply-to inc (state 5)) env)))
-        (println :apply-2 (= ((state 5) env)
-                             ((apply-to identity (state 5)) env)))
-        (let [v1 (state "first ")
-              v2 (state "second ")
-              v3 (state "third")]
-          (println :apply-3 (= ((apply-to comp (apply-to comp v1 v2) v3) env)
-                               ((apply-to comp v1 (apply-to comp v2 v3)) env)
-                               ((apply-to comp v1 v2 v3) env)))))
-      (println)
+;; (main [_]
+;;       ;; check the functor and applicative laws for state
+;;       (println :state)
+;;       (let [env :environment]
+;;         (println :functor-1 (= ((map (state 5) identity) env)
+;;                                ((state 5) env)))
+;;         (println :functor-2 (= ((map (map (state 2) inc) double) env)
+;;                                ((map (state 2) (comp inc double)) env)))
+;;         (println :apply-1 (= ((map (state 5) inc) env)
+;;                              ((apply-to inc (state 5)) env)))
+;;         (println :apply-2 (= ((state 5) env)
+;;                              ((apply-to identity (state 5)) env)))
+;;         (let [v1 (state "first ")
+;;               v2 (state "second ")
+;;               v3 (state "third")]
+;;           (println :apply-3 (= ((apply-to comp (apply-to comp v1 v2) v3) env)
+;;                                ((apply-to comp v1 (apply-to comp v2 v3)) env)
+;;                                ((apply-to comp v1 v2 v3) env)))))
+;;       (println)
 
-      (let [rv1 (state 1)
-            rv5 (state 5)
-            env {:x 5 :y 1 :z 9}]
-        (println :rv1-invoked (rv1 env))
-        (println)
-        (println :map (map rv1 (fn [x]
-                                 (println :incrementing x)
-                                 (inc x))))
-        (println)
-        (println :mapped ((map rv1 (fn [x]
-                                     (println :incrementing x)
-                                     (inc x)))
-                          env))
-        (println)
-        (println :apply (apply-to + rv1 rv5))
-        (println)
-        (println :applied ((apply-to + rv1 rv5) env))))
+;;       (let [rv1 (state 1)
+;;             rv5 (state 5)
+;;             env {:x 5 :y 1 :z 9}]
+;;         (println :rv1-invoked (rv1 env))
+;;         (println)
+;;         (println :map (map rv1 (fn [x]
+;;                                  (println :incrementing x)
+;;                                  (inc x))))
+;;         (println)
+;;         (println :mapped ((map rv1 (fn [x]
+;;                                      (println :incrementing x)
+;;                                      (inc x)))
+;;                           env))
+;;         (println)
+;;         (println :apply (apply-to + rv1 rv5))
+;;         (println)
+;;         (println :applied ((apply-to + rv1 rv5) env))))

@@ -25,14 +25,14 @@
                (parser/none-or-more (symbol-char))))
 
 (defn read-symbol []
-  (parser/rule "read-symbol"
+  (parser/rule "symbol"
                (apply-to (fn [start the-rest]
                            (symbol (apply str (cons start the-rest))))
                          (symbol-start)
                          (rest-of-symbol))))
 
 (defn read-keyword []
-  (parser/rule "read-keyword"
+  (parser/rule "keyword"
                (apply-to (fn [start the-rest]
                            (keyword (apply str (cons start the-rest))))
                          (parser/ignore (parser/term ":"))
@@ -101,7 +101,7 @@
                (fr/free (parse-not-backslash))))
 
 (defn read-const-string []
-  (parser/rule "read-const-string"
+  (parser/rule "string"
                (parser/all (parser/ignore (parser/term (char 34)))
                            (to-string
                             (parser/none-or-more
@@ -136,7 +136,7 @@
 
 ;; only reads integers
 (defn read-number []
-  (parser/rule "read-number"
+  (parser/rule "number"
                (apply-to str-to-int
                          (parser/optional (parser/term "-"))
                          (parser/one-or-more (parser/digit)))))

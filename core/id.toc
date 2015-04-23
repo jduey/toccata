@@ -1,0 +1,24 @@
+
+(deftype id-m [x]
+  Stringable
+  (string-list [_]
+    (list "<Id: "
+          (str x)
+          ">"))
+
+  Eq
+  (=* [_ y]
+    (= x (.x y)))
+
+  Functor
+  (map [_ f]
+    (id-m (f x)))
+
+  Applicative
+  (wrap [_ v] (id-m v))
+  (apply* [_ args]
+    (id-m (apply x (map args .x))))
+
+  Monad
+  (flat-map [_ f]
+    (f x)))
