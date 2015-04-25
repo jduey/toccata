@@ -1,0 +1,160 @@
+
+(add-ns p (module "core/parser.toc"))
+(add-ns fr (module "core/free.toc"))
+(add-ns st (module "core/state.toc"))
+(add-ns gr (module "core/grammar.toc"))
+
+(defn letter []
+  (p/rule "letter"
+          (p/one-of "abcdefghijklmnopqrstuvwxyz")))
+
+(defn digit []
+  (p/rule "digit"
+          (p/one-of "0123456789")))
+
+(defn number []
+  (p/rule "number"
+          (apply-to str
+                    (p/optional (p/term "-"))
+                    (p/one-or-more (digit)))))
+
+(defn symbol []
+  (p/rule "symbol"
+          (apply-to str
+                    (letter)
+                    (p/none-or-more (comp (digit) (letter))))))
+
+(defn sub-expression []
+  (p/rule "expression"
+          (p/term "")))
+
+(defn expression []
+  (p/rule "expression"
+          (apply-to str
+                    (p/term "( ")
+                    (p/none-or-more (comp (symbol) (number)
+                                          (sub-expression)))
+                    (p/term " )"))))
+
+(deftype EBNF [s rules]
+  Stringable
+  (string-list [_]
+    (list "<EBNF: " s ">"))
+
+  Applicative
+  (apply* [_ vs]
+    (EBNF (apply str (interpose
+                      (remove (map vs .s)
+                              (fn [s] (= "" s)))
+                      ", "))
+          (apply comp (map vs .rules))))
+
+  Monoid
+  (comp* [v vs]
+    (let [vs (cons v vs)]
+      (EBNF (apply str (interpose
+                        (remove (map vs .s)
+                                (fn [s] (= "" s)))
+                        " | "))
+            (apply comp (map vs .rules))))))
+
+(defprotocol Make-EBNF
+  (ebnf [grammar]))
+
+(extend-type Function
+  Make-EBNF
+  (ebnf [_]
+    (EBNF "" {})))
+
+(extend-type parser-terminal
+  Make-EBNF
+  (ebnf [t]
+    (EBNF (str "'" (escape-chars (.term-str t)) "'")
+          {})))
+
+(extend-type p/repeat-rule
+  Make-EBNF
+  (ebnf [r]
+    (let [rule-body (fr/evaluate (.rule r) ebnf)]
+      (EBNF (str (.s rule-body) ", { " (.s rule-body) " }")
+            (.rules rule-body)))))
+
+(extend-type p/optional-rule
+  Make-EBNF
+  (ebnf [r]
+    (let [rule-body (fr/evaluate (.rule r) ebnf)]
+      (EBNF (str "[ " (.s rule-body) " ]")
+            (.rules rule-body)))))
+
+(extend-type p/none-or-more-rule
+  Make-EBNF
+  (ebnf [r]
+    (let [rule-body (fr/evaluate (.rule r) ebnf)]
+      (EBNF (str "{ " (.s rule-body) " }")
+            (.rules rule-body)))))
+
+(extend-type p/parser-rule
+  Make-EBNF
+  (ebnf [r]
+    (let [rule-body (fr/evaluate (.grammar r) ebnf)]
+      (EBNF (.name r)
+            (assoc (.rules rule-body)
+              (.name r) (.s rule-body))))))
+
+(extend-type p/recursive-parser-rule
+  Make-EBNF
+  (ebnf [r]
+    (let [rule-body (fr/evaluate (.grammar r) ebnf)]
+      (EBNF (.name r)
+            (assoc (.rules rule-body)
+              (.name r) (.s rule-body))))))
+
+(extend-type p/ignore-rule
+  Make-EBNF
+  (ebnf [rule]
+    (fr/evaluate (.rule rule) ebnf)))
+
+(extend-type p/parse-digit
+  Make-EBNF
+  (ebnf [_]
+    (EBNF "digit"
+          {"digit" (.s (fr/evaluate (p/one-of "0123456789") ebnf))})))
+
+(extend-type p/parse-lower-alphas
+  Make-EBNF
+  (ebnf [_]
+    (EBNF "lower-alpha"
+          {"lower-alpha" (.s (fr/evaluate (p/one-of "abcdefghijklmnopqrstuvwxyz") ebnf))})))
+
+(extend-type p/parse-upper-alphas
+  Make-EBNF
+  (ebnf [_]
+    (EBNF "upper-alpha"
+          {"upper-alpha" (.s (fr/evaluate (p/one-of "ABCDEFGHIJKLMNOPQRSTUVWXYZ") ebnf))})))
+
+(extend-type p/parser-always
+  Make-EBNF
+  (ebnf [_]
+    (EBNF "" {})))
+
+(extend-type gr/parse-sub-form
+  Make-EBNF
+  (ebnf [_]
+    (EBNF "form" {})))
+
+(extend-type gr/parse-not-backslash
+  Make-EBNF
+  (ebnf [_]
+    (EBNF "(* anything but \\ *)" {})))
+
+(extend-type gr/parse-not-eol
+  Make-EBNF
+  (ebnf [_]
+    (EBNF "(* anything but \\n *)" {})))
+
+(main [_]
+      (let [final-ebnf (fr/evaluate (gr/read-form) ebnf)]
+        (map (seq (.rules final-ebnf))
+             (fn [rule]
+               (println (first rule) "=" (second rule))))
+        (println (.s final-ebnf))))
