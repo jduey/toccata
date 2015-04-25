@@ -73,7 +73,7 @@
                            (parser/always (char 12)))))
 
 (defn read-string-doublequote []
-  (parser/rule "doubleqote"
+  (parser/rule "doublequote"
                (parser/all (parser/ignore (backslash))
                            (parser/ignore (parser/term (char 34)))
                            (parser/always (char 34)))))

@@ -1,0 +1,51 @@
+not-eol = (* anything but \n *)
+comment = ';', { not-eol }, '\n'
+whitespace = ' ' | ',' | '\t' | '\r' | '\n' | comment
+digit = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
+number = [ '-' ], digit, { digit }
+lower-alpha = 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' |
+              'j' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p' | 'q' | 'r' |
+              's' | 't' | 'u' | 'v' | 'w' | 'x' | 'y' | 'z'
+upper-alpha = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' |
+              'J' | 'K' | 'L' | 'M' | 'N' | 'O' | 'P' | 'Q' | 'R' |
+              'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z'
+symbol-start = lower-alpha | upper-alpha | '.' | '_' | '<' | '>' | '=' | '+' | '-' | '*' | '/'
+symbol-punct = '.' | '_' | '<' | '>' | '=' | '*' | '/' | '+' | '!' | '-' | '?'
+symbol-char = lower-alpha | upper-alpha | digit | symbol-punct
+rest-of-symbol = { symbol-char }
+keyword = ':', symbol-start, rest-of-symbol
+symbol = symbol-start, rest-of-symbol
+form = { whitespace }, number | keyword | symbol | quoted | string | let | main | defn | fn |
+       for | hash-map | vector | list, { whitespace }
+quoted = ''', form
+not-backslash = (* anything but \ *)
+backslash = '\\', '\\'
+doublequote = '\\', '\"'
+tab = '\\', 't'
+backspace = '\\', 'b'
+return = '\\', 'r'
+formfeed = '\\', 'f'
+newline = '\\', 'n'
+string = '\"', { not-backslash | backslash | doublequote | tab | backspace | return |
+         formfeed | newline }, '\"'
+let-binding = { whitespace }, symbol, { whitespace }, form
+let = '(', { whitespace }, 'let', whitespace, { whitespace }, '[', { let-binding }, ']',
+      form, { form }, { whitespace }, ')'
+arg = { whitespace }, symbol, { whitespace }
+var-arg = { whitespace }, '&', whitespace, { whitespace }, symbol
+args = { whitespace }, '[', { arg }, var-arg, ']'
+main = '(', { whitespace }, 'main', whitespace, { whitespace }, args, form, { form }, { whitespace }, ')'
+single-arity = args, { form }
+multi-arity = { whitespace }, '(', { whitespace }, args, { form }, { whitespace }, ')'
+arities = single-arity | multi-arity, { multi-arity }
+defn = '(', { whitespace }, 'defn', whitespace, { whitespace }, symbol, whitespace, { whitespace },
+       arities, { whitespace }, ')'
+fn = '(', { whitespace }, 'fn', whitespace, { whitespace }, symbol, { whitespace }, arities, { whitespace }, ')'
+for-let = { whitespace }, ':let', whitespace, { whitespace }, '[', { let-binding }, ']'
+for-when = { whitespace }, ':when', whitespace, { whitespace }, form
+for-binding = for-let | for-when | let-binding
+for = '(', { whitespace }, 'for', whitespace, { whitespace }, '[', { whitespace }, symbol, whitespace,
+      { whitespace }, form, { for-binding }, ']', form, { whitespace }, ')'
+hash-map = '{', { form }, '}'
+vector = '[', { form }, ']'
+list = '(', { form }, ')'

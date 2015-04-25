@@ -97,6 +97,6 @@
               (.name r) (.ebnf-str rule-body))))))
 
 (main [_]
-      (map (seq (.rules (fr/evaluate (expression) ebnf)))
-           (fn [rule]
-             (println (first rule) "=" (second rule)))))
+      (let [rules (seq (.rules (fr/evaluate (expression) ebnf)))]
+        (map rules (fn [rule]
+                     (println (first rule) "=" (second rule) ";")))))
