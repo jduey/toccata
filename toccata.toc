@@ -1756,7 +1756,7 @@
                                                 "protoInfo = listCons((Value *)impls, protoInfo);\n"
                                                 "protoInfo = listCons(stringValue(\"" extern-def "\"), protoInfo);\n"
                                                 "protoInfo = listCons(stringValue(\"" impls-sym "\"), protoInfo);\n"
-                                                "protoInfo = listCons(symbolValue(\"" (first proto-inf)
+                                                "protoInfo = listCons(stringValue(\"" (first proto-inf)
                                                 "\"), protoInfo);\n"
                                                 "protos = listCons((Value *)protoInfo, protos);\n"))))))
         _ (write "return((Value *)protos);\n")
