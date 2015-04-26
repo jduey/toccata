@@ -2,7 +2,6 @@
 ;; TODO:
 ;; quoted lists
 ;; implements?
-;; add .type-name to values
 ;; persistent data structures; maps, vectors
 ;; compact lists cdr coding
 ;; optimize calls to invoke fns
@@ -1179,7 +1178,7 @@
           file-name (sm/get-val :file-name "")
           :let [qualified-proto-name (str file-name "/" (.protocol-name ast) "/")]
           result (traverse (seq (.prototypes ast)) (partial emit-proto-fn qualified-proto-name))]
-      result)))
+      "")))
 
 (defn replace-type [types type-val-num name]
   (cond
@@ -1986,7 +1985,10 @@
             (fn [_]
               (sm/recur (for [expr parser
                               ast (an/analyze-expr expr)
-                              _ (fr/evaluate ast emit-c)]
+                              emitted (fr/evaluate ast emit-c)
+                              _ (cond (= "" emitted)
+                                      (sm/state-maybe "")
+                                      (write-strs (second emitted)))]
                           "")))))
 
 (defn compile-core [parser text]
