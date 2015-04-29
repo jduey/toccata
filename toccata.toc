@@ -1,14 +1,14 @@
 
 ;; TODO:
 ;; quoted lists
-;; implements?
+;; optimize calls to invoke fns
 ;; persistent data structures; maps, vectors
 ;; compact lists cdr coding
-;; optimize calls to invoke fns
+;; implements?
 ;; fn meta data; doc strings and ast
 ;; pattern matching
-;; macro system
 ;; REPL
+;; macro system
 ;; green threads
 ;; async
 ;; dependencies

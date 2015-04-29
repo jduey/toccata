@@ -679,7 +679,12 @@
     (pr* ":match*-two-args")))
 
 (defprotocol Type
-  (instance? [type val]))
+  (instance? [type val]
+    (cond
+     (number= Number (get-type type)) (number= type (get-type val))
+     (let [_ :x]
+       (pr* "*** call to 'instance?' with unknown type parameter.")
+       (abort)))))
 
 (defprotocol Monad
   (flat-map [mval func]
