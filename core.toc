@@ -782,10 +782,9 @@
   (empty? [coll])
   (empty [coll])
   (destruct [coll target])
-  (count [coll]
-    (print-err "'count' not implemented for " coll)
-    (abort))
-  (conj [coll value]))
+  (count [coll])
+  (conj [coll value])
+  (reduce [l result f]))
 
 (defn not-empty? [coll]
   (cond
@@ -866,16 +865,6 @@
 
 (defn list* [arg & args]
   (list** arg args))
-
-(defn reduce [l result f]
-  (cond
-   (empty? l) result
-   (let [head (first l)
-         tail (rest l)
-         mapped-val (f result head)]
-     (cond
-      (empty? tail) mapped-val
-      (reduce tail mapped-val f)))))
 
 (defn filter [l f]
   (inline-text
@@ -1103,6 +1092,16 @@
   (empty [coll] empty-list)
   (conj [l v] (cons v l))
   (count [l] (list-count l))
+  (reduce [l result f]
+    (cond
+     (empty? l) result
+     (let [head (first l)
+           tail (rest l)
+           mapped-val (f result head)]
+       (cond
+        (empty? tail) mapped-val
+        (reduce tail mapped-val f)))))
+
 
   Seqable
   (seq? [l]
@@ -1300,6 +1299,8 @@
     (str-count s))
   (conj [s value]
     (apply comp (flat-map (list s value) string-list)))
+  (reduce [s result f]
+    (reduce (seq s) result f))
 
   Seqable
   (seq [s]
@@ -1346,6 +1347,8 @@
     (str-count s))
   (conj [s value]
     (apply comp (flat-map (list s value) string-list)))
+  (reduce [s result f]
+    (reduce (seq s) result f))
 
   Seqable
   (seq [s]
@@ -1518,6 +1521,8 @@
     (empty? a-list))
   (count [_]
     (count a-list))
+  (reduce [_ result f]
+    (reduce a-list result f))
 
   Monoid
   (zero [_]
