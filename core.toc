@@ -26,6 +26,7 @@
 (defn output-to-file [file-path]
   (inline-text
    "String *arg0Str = (String *)my_malloc(sizeof(String) + ((String *)arg0)->len + 5);
+    arg0Str->type = StringType;
     if (arg0->type == StringType)
       snprintf(arg0Str->buffer, ((String *)arg0)->len + 1, \"%s\", ((String *)arg0)->buffer);
     else if (arg0->type == SubStringType)
@@ -383,7 +384,7 @@
 
 (defn str-malloc [len]
   (inline-text
-   "String *strVal = (String *)my_malloc(sizeof(String) + ((Number *)arg0)->numVal);
+   "String *strVal = (String *)my_malloc(sizeof(String) + ((Number *)arg0)->numVal + 5);
     strVal->type = StringType;
     strVal->len = 0;
     strVal->buffer[0] = 0;
@@ -424,6 +425,7 @@
 (defn slurp [fileName]
   (inline-text
    "String *arg0Str = (String *)my_malloc(sizeof(String) + ((String *)arg0)->len + 5);
+    arg0Str->type = StringType;
     if (arg0->type == StringType)
       snprintf(arg0Str->buffer, ((String *)arg0)->len + 1, \"%s\", ((String *)arg0)->buffer);
     else if (arg0->type == SubStringType)

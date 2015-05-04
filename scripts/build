@@ -1,8 +1,7 @@
 #!/bin/bash
 
-clang -g -c -o core.a core.c &&
-clang ~/boehm/lib/libgc.a core.a -g -o toccata toccata.c &&
-
+clang -fno-objc-arc -g -c -o core.a core.c &&
+clang core.a -fno-objc-arc -g -o toccata toccata.c &&
 ./toccata examples/hello.toc > hello.c &&
-clang ~/boehm/lib/libgc.a core.a -g -o hello hello.c &&
+clang core.a -fno-objc-arc -g -o hello hello.c &&
 ./hello Universe

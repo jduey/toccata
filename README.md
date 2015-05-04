@@ -13,10 +13,6 @@ Quick Start
 Make sure the Clang compiler is installed and runnable
   On OSX, it's part of the Xcode package. You can run 'clang -v' to check.
 
-Install the Boehm Garbage Collector v. 7.2 from [here](http://www.hboehm.info/gc/gc_source/gc-7.2f.tar.gz). You can build it by doing something like ./configure, make, sudo make install, mv gc-7.2 boehm, cd boehm, ln -s /usr/local/lib lib
-
-  Toccata's 'build' script expects to find it in ~/boehm
-
 Clone this repo
 
 cd to the repo directory

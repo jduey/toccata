@@ -4,6 +4,7 @@
 (defn fopen-read [file-path]
   (inline-text
    "String *arg0Str = (String *)my_malloc(sizeof(String) + ((String *)arg0)->len + 5);
+    arg0Str->type = StringType;
     if (arg0->type == StringType)
       snprintf(arg0Str->buffer, ((String *)arg0)->len + 1, \"%s\", ((String *)arg0)->buffer);
     else if (arg0->type == SubStringType)
