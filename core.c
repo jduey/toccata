@@ -60,9 +60,9 @@ const int64_t OpaqueType = 9;
 List *empty_list = &(List){4,-1,0,0,0};
 
 FILE *outStream;
-Number trueVal = {NumberType, -1, 1};
+Number trueVal = {2, -1, 1};
 Value* true = (Value *)&trueVal;
-Number falseVal = {NumberType, -1, 0};
+Number falseVal = {2, -1, 0};
 Value* false = (Value *)&falseVal;
 long long malloc_count = 0;
 long long free_count = 0;

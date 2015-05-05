@@ -1253,9 +1253,9 @@
 (defn base-fns []
   (write-strs (list "\n"
                     "FILE *outStream;\n"
-                    "Number trueVal = {NumberType, -1, 1};\n"
+                    "Number trueVal = {" (get (types) 'Number 10000) ", -1, 1};\n"
                     "Value* true = (Value *)&trueVal;\n"
-                    "Number falseVal = {NumberType, -1, 0};\n"
+                    "Number falseVal = {" (get (types) 'Number 10000) ", -1, 0};\n"
                     "Value* false = (Value *)&falseVal;\n"
                     "long long malloc_count = 0;\n"
                     "long long free_count = 0;\n"
