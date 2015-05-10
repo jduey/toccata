@@ -1,6 +1,7 @@
 
 (add-ns st (module "core/stream.toc"))
 
+;; This malloc's an Opaque pointer type that leaks
 (defn fopen-read [file-path]
   (inline-text
    "String *arg0Str = (String *)my_malloc(sizeof(String) + ((String *)arg0)->len + 5);
@@ -15,6 +16,7 @@
     }
 
     Opaque *ptrVal = (Opaque *)my_malloc(sizeof(Opaque));
+    malloc_count--;
     ptrVal->type = OpaqueType;
     ptrVal->ptr = (void *)fopen(arg0Str->buffer, \"r\");
     decRef((Value *)arg0Str);

@@ -3,6 +3,8 @@
 ;; quoted lists
 ;; optimize calls to invoke fns
 ;; persistent data structures; maps, vectors
+;; automatically derive =* for reified types
+;;     and uncomment code in BitmapIndexedNode/assoc*
 ;; compact lists cdr coding
 ;; implements?
 ;; fn meta data; doc strings and ast
@@ -14,6 +16,7 @@
 ;; dependencies
 ;; supercompilation
 ;; FFI
+;; free Opaque pointer types when they're decRef'd
 ;; Android/iOS
 ;; native arrays
 ;; linear algebra
@@ -45,7 +48,8 @@
    'Symbol 7
    'FnArity 8
    'Opaque 9
-   'ArrayNode 10
+   'BitmapIndexedNode 10
+   'ArrayNode 11
    })
 
 (defn write [str]
@@ -403,6 +407,7 @@
                  ProtoImpls
                  ReifiedVal
                  OpaqueVal
+                 BitmapIndexedVal
                  ArrayNodeVal
                  "List *listCons(Value *x, List *l);\n"
                  "Value *stringValue(char *s);\n"
@@ -414,6 +419,7 @@
                  "const int64_t ListType;\n"
                  "const int64_t FunctionType;\n"
                  "const int64_t OpaqueType;\n"
+                 "const int64_t BitmapIndexedType;\n"
                  "List *empty_list;\n"
                  "Value *number_literals();\n"
                  "Value *counts();\n"
@@ -1231,6 +1237,8 @@
                     "Value* false;\n"
                     "Number trueVal;\n"
                     "Number falseVal;\n"
+                    "int bitpos(int hash, int shift);\n"
+                    "int mask(int hash, int shift);\n"
                     "char *extractStr(Value *v);\n"
                     "Value *my_malloc(int64_t);\n"
                     "SubString *malloc_substring();\n"
@@ -1262,6 +1270,14 @@
                     "long long malloc_count = 0;\n"
                     "long long free_count = 0;\n"
                     "\n"
+
+                    "int mask(int hash, int shift) {\n"
+                    "  return (hash >> shift) & 0x1f;\n"
+                    "}\n\n"
+
+                    "int bitpos(int hash, int shift) {\n"
+                    "  return 1 << mask(hash, shift);\n"
+                    "}\n\n"
 
                     "void incRef(Value *v) {\n"
                     "  if (v == (Value *)0) {\n"
@@ -1303,9 +1319,11 @@
 
                     "DirectLL *freeSubStrings = (DirectLL *)0;\n"
                     "SubString *malloc_substring() {\n"
-                    "  if (freeSubStrings == (DirectLL *)0)\n"
+                    ;;"  return((SubString *)my_malloc(sizeof(SubString)));\n"
+                    "  if (freeSubStrings == (DirectLL *)0) {\n"
+                    "    malloc_count--;\n"
                     "    return((SubString *)my_malloc(sizeof(SubString)));\n"
-                    "  else {\n"
+                    "  } else {\n"
                     "    DirectLL *subStr = freeSubStrings;\n"
                     "    freeSubStrings = subStr->next;\n"
                     "    ((SubString *)subStr)->refs = 1;\n"
@@ -1316,9 +1334,11 @@
                     "int recycledReified = 0;\n"
                     "DirectLL *freeReified[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};\n"
                     "ReifiedVal *malloc_reified(int implCount) {\n"
-                    "  if (implCount > 19 || freeReified[implCount] == (DirectLL *)0)\n"
+                    ;; "  return((ReifiedVal *)my_malloc(sizeof(ReifiedVal) + sizeof(Function *) * implCount));\n"
+                    "  if (implCount > 19 || freeReified[implCount] == (DirectLL *)0) {\n"
+                    "    malloc_count--;\n"
                     "    return((ReifiedVal *)my_malloc(sizeof(ReifiedVal) + sizeof(Function *) * implCount));\n"
-                    "  else {\n"
+                    "  } else {\n"
                     "    recycledReified++;"
                     "    DirectLL *newReifiedVal = freeReified[implCount];\n"
                     "    freeReified[implCount] = newReifiedVal->next;\n"
@@ -1330,9 +1350,11 @@
                     "int recycledFunction = 0;\n"
                     "DirectLL *freeFunctions[10] = {0,0,0,0,0,0,0,0,0,0};\n"
                     "Function *malloc_function(int arityCount) {\n"
-                    "  if (arityCount > 9 || freeFunctions[arityCount] == (DirectLL *)0)\n"
+                    ;; "  return((Function *)my_malloc(sizeof(Function) + sizeof(FnArity *) * arityCount));\n"
+                    "  if (arityCount > 9 || freeFunctions[arityCount] == (DirectLL *)0) {\n"
+                    "    malloc_count--;\n"
                     "    return((Function *)my_malloc(sizeof(Function) + sizeof(FnArity *) * arityCount));\n"
-                    "  else {\n"
+                    "  } else {\n"
                     "    recycledFunction++;\n"
                     "    DirectLL *newFunction = freeFunctions[arityCount];\n"
                     "    freeFunctions[arityCount] = newFunction->next;\n"
@@ -1343,8 +1365,10 @@
 
                     "DirectLL *freeNumbers = (DirectLL *)0;\n"
                     "Number *malloc_number() {\n"
+                    ;; "  return((Number *)my_malloc(sizeof(Number)));\n"
                     "  if (freeNumbers == (DirectLL *)0) {\n"
                     "    Number *numberStructs = (Number *)my_malloc(sizeof(Number) * 100);\n"
+                    "    malloc_count--;"
                     "    for (int i = 99; i > 0; i--) {\n"
                     "      ((DirectLL *)&numberStructs[i])->next = freeNumbers;\n"
                     "      freeNumbers = (DirectLL *)&numberStructs[i];\n"
@@ -1360,8 +1384,10 @@
 
                     "DirectLL *freeLists = (DirectLL *)0;\n"
                     "List *malloc_list() {\n"
+                    ;; "    return((List *)my_malloc(sizeof(List)));\n"
                     "  if (freeLists == (DirectLL *)0) {\n"
                     "    List *listStructs = (List *)my_malloc(sizeof(List) * 500);\n"
+                    "    malloc_count--;\n"
                     "    for (int i = 499; i > 0; i--) {\n"
                     "      ((DirectLL *)&listStructs[i])->next = freeLists;\n"
                     "      freeLists = (DirectLL *)&listStructs[i];\n"
@@ -1377,9 +1403,11 @@
 
                     "DirectLL *freeFnAritys = (DirectLL *)0;\n"
                     "FnArity *malloc_fnArity() {\n"
-                    "  if (freeFnAritys == (DirectLL *)0)\n"
+                    ;; "  return((FnArity *)my_malloc(sizeof(FnArity)));\n"
+                    "  if (freeFnAritys == (DirectLL *)0) {\n"
+                    "    malloc_count--;\n"
                     "    return((FnArity *)my_malloc(sizeof(FnArity)));\n"
-                    "  else {\n"
+                    "  } else {\n"
                     "    DirectLL *newFnArity = freeFnAritys;\n"
                     "    freeFnAritys = newFnArity->next;\n"
                     "    ((FnArity *)newFnArity)->refs = 1;\n"
@@ -1399,7 +1427,6 @@
                     "  } else if (v->type == 0) {\n"
                     "    fprintf(stderr, \"freeing invalid type\\n\");\n"
                     "    abort();\n"
-
                     "  } else if (v->type == " (get (types) 'String 10000) ") {\n"
                     "    v->refs = -10;\n"
                     "    free_count++;\n"
@@ -1465,6 +1492,17 @@
                     ;; "    free(v);\n"
                     "  } else if (v->type == " (get (types) 'Opaque 10000) ") {\n"
                     "    v->refs = -10;\n"
+                    "  } else if (v->type == " (get (types) 'BitmapIndexedNode 10000) ") {\n"
+                    "    BitmapIndexedNode *node = (BitmapIndexedNode *)v;\n"
+                    "    for (int i = 1; i < (2 * __builtin_popcount(node->bitmap)); i++) {\n"
+                    "       if (node->array[i] != (Value *)0) {\n"
+                    "          decRef(node->array[i]);\n"
+                    "          my_free(node->array[i]);\n"
+                    "       }\n"
+                    "    }\n"
+                    "    v->refs = -10;\n"
+                    "    free_count++;\n"
+                    "    free(v);\n"
                     "  } else if (v->type == " (get (types) 'ArrayNode 10000) ") {\n"
                     "    ArrayNode *node = (ArrayNode *)v;\n"
                     "    for (int i = 1; i < 32; i++) {\n"
@@ -2007,6 +2045,7 @@
                           "const int64_t ListType = " (get types 'List 0) ";\n"
                           "const int64_t FunctionType = " (get types 'Function 0) ";\n"
                           "const int64_t OpaqueType = " (get types 'Opaque 0) ";\n"
+                          "const int64_t BitmapIndexedType = " (get types 'BitmapIndexedNode  0) ";\n"
                           "List *empty_list = &(List){4,-1,0,0,0};\n")))
                       (base-fns)
                       (emit-proto-fn "Getter/"
@@ -2040,6 +2079,34 @@
                             _ (sm/set-val :expr expr)]
                         ""))
             (compile-source parser)
+            (for [assoc-sym (lookup-sym* 'assoc*)
+                  assoc-fn-sym (lookup-static-fn (first assoc-sym) 5)
+                  _ (write-strs
+                     (list "Value *assoc(Value *node, Value *key, Value *val, Value *hash, Value *shift) {\n"
+                           "  return(" assoc-fn-sym "((List *)0, node, key, val, hash, shift));\n"
+                           "}\n"))]
+              "")
+            (for [equals-sym (lookup-sym* '=*)
+                  equals-fn-sym (lookup-static-fn (first equals-sym) 2)
+                  _ (write-strs
+                     (list "Value *valsEqual(List *x, Value *v1, Value *v2) {\n"
+                           "  return(" equals-fn-sym "(x, v1, v2));\n"
+                           "}\n"))]
+              "")
+            (for [sha1-sym (lookup-sym* 'sha1)
+                  sha1-fn-sym (lookup-static-fn (first sha1-sym) 1)
+                  _ (write-strs
+                     (list "Value *sha1(Value *v) {\n"
+                           "  return(" sha1-fn-sym "((List *)0, v));\n"
+                           "}\n"))]
+              "")
+            (for [hash-seq-sym (lookup-sym* 'hash-seq)
+                  hash-seq-fn-sym (lookup-static-fn (first hash-seq-sym) 2)
+                  _ (write-strs
+                     (list "Value *hashSeq(Value *n, Value *s) {\n"
+                           "  return(" hash-seq-fn-sym "((List *)0, n, s));\n"
+                           "}\n"))]
+              "")
             (serialize-symbol-literals)
             (serialize-number-literals)
             (serialize-string-literals)

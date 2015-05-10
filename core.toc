@@ -19,7 +19,8 @@
 (def ProtoImpls "typedef struct {int64_t implCount; Value *defaultImpl; ProtoImpl impls[];} ProtoImpls;\n")
 (def ReifiedVal "typedef struct {int64_t type; int32_t refs; int implCount; Value* impls[];} ReifiedVal;\n")
 (def OpaqueVal "typedef struct {int64_t type; int32_t refs; void *ptr;} Opaque;\n")
-(def ArrayNodeVal "typedef struct {int64_t type; int32_t refs; Value *array[32];} ArrayNode;\n")
+(def BitmapIndexedVal "typedef struct {int64_t type; int32_t refs; int bitmap; Value *array[];} BitmapIndexedNode;\n")
+(def ArrayNodeVal "typedef struct {int64_t type; int32_t refs; Value *array[];} ArrayNode;\n")
 
 (def true (inline-text "(Value *)&trueVal;"))
 (def false (inline-text "(Value *)&falseVal;"))
@@ -38,7 +39,7 @@ typedef struct
     uint8_t         Buffer[64];
 } Sha1Context;
 
-#define SHA1_HASH_SIZE           ( 160 / 8 )
+#define SHA1_HASH_SIZE           ( 64 / 8 )
 
 typedef struct
 {
@@ -174,6 +175,26 @@ void Sha1Finalise (Sha1Context* Context, SHA1_HASH* Digest) {
 }
 ")
 
+(inline-text "
+Value *valsEqual(List *, Value *, Value *);
+
+int equal(Value *v1, Value *v2) {
+  return (isTrue(valsEqual((List *)0, v1, v2)));
+}
+")
+
+(inline-text "
+Value *assoc(Value *, Value *, Value *, Value *, Value *);
+")
+
+(inline-text "
+Value *sha1(Value *);
+")
+
+(inline-text "
+Value *hashSeq(Value* n, Value *s);
+")
+
 (defn output-to-file [file-path]
   (inline-text
    "String *arg0Str = (String *)my_malloc(sizeof(String) + ((String *)arg0)->len + 5);
@@ -188,6 +209,8 @@ void Sha1Finalise (Sha1Context* Context, SHA1_HASH* Digest) {
     }
 
     outStream = fopen(arg0Str->buffer, \"w\");
+    decRef((Value *)arg0Str);
+    my_free((Value *)arg0Str);
     return((Value *)&trueVal);\n"))
 
 (defn standard-output []
@@ -968,6 +991,10 @@ void Sha1Finalise (Sha1Context* Context, SHA1_HASH* Digest) {
    (empty? colls) coll
    (comp* coll colls)))
 
+(defprotocol HashMapNode
+  (hash-seq [n s])
+  (assoc* [n k v hash shift]))
+
 (defprotocol Associative
   (assoc [m k v])
   (get [m k not-found]
@@ -975,6 +1002,9 @@ void Sha1Finalise (Sha1Context* Context, SHA1_HASH* Digest) {
     (abort))
   (keys [m])
   (vals [m]))
+
+(defprotocol Hash
+  (sha1 [_]))
 
 (defn not [b-val]
   (cond
@@ -1482,7 +1512,20 @@ void Sha1Finalise (Sha1Context* Context, SHA1_HASH* Digest) {
        (map ss-list (fn [s]
                       (str-append new-str s)
                       0))
-       new-str))))
+       new-str)))
+
+  Hash
+  (sha1 [_]
+    (inline-text "
+int64_t shaVal;
+Sha1Context context;
+String *strVal = (String *)arg0;
+
+Sha1Initialise(&context);
+Sha1Update(&context, (void *)strVal->buffer, strVal->len);
+Sha1Finalise(&context, (SHA1_HASH *)&shaVal);
+return((Value *)numberValue(shaVal));
+")))
 
 (extend-type SubStr
   Stringable
@@ -1527,7 +1570,20 @@ void Sha1Finalise (Sha1Context* Context, SHA1_HASH* Digest) {
        (map ss-list (fn [s]
                       (str-append new-str s)
                       0))
-       new-str))))
+       new-str)))
+
+  Hash
+  (sha1 [_]
+    (inline-text "
+int64_t shaVal;
+Sha1Context context;
+SubString *subStrVal = (SubString *)arg0;
+
+Sha1Initialise(&context);
+Sha1Update(&context, (void *)subStrVal->buffer, subStrVal->len);
+Sha1Finalise(&context, (SHA1_HASH *)&shaVal);
+return((Value *)numberValue(shaVal));
+")))
 
 (defn str [& vs]
   (cond
@@ -1641,6 +1697,226 @@ void Sha1Finalise (Sha1Context* Context, SHA1_HASH* Digest) {
       (not (= v (get m k :hm-nf))) 0
       (hash-map= (rest a-list) m)))))
 
+(inline-text "
+BitmapIndexedNode emptyBMI = {BitmapIndexedType, -1, 0, 0};
+
+BitmapIndexedNode *clone_BitmapIndexedNode(BitmapIndexedNode *node)
+{
+  int itemCount = __builtin_popcount(node->bitmap);
+  int nodeSize = sizeof(BitmapIndexedNode) + sizeof(Value *) *
+                 (itemCount * 2);
+  BitmapIndexedNode *newNode = (BitmapIndexedNode *)my_malloc(nodeSize);
+  newNode->type = BitmapIndexedType;
+  newNode->refs = 1;
+  newNode->bitmap = node->bitmap;
+  for (int i = 0; i < itemCount * 2; i++) {
+    if (node->array[i] != (Value *)0)
+      incRef(node->array[i]);
+    newNode->array[i] = node->array[i];
+  }
+  return(newNode);
+}
+
+Value *createNode(int shift,
+                  int64_t key1hash, Value *key1, Value *val1,
+                  int64_t key2hash, Value *key2, Value *val2)
+{
+  if (shift > 60) {
+    fprintf(stderr, \"Ran out of shift!!!!!!\");
+    abort();
+  }
+  int nodeSize = sizeof(BitmapIndexedNode) + sizeof(Value *) * 4;
+  BitmapIndexedNode *newNode = (BitmapIndexedNode *)my_malloc(nodeSize);
+  newNode->type = BitmapIndexedType;
+  newNode->refs = 1;
+  int key1bit = bitpos(key1hash, shift);
+  int key2bit = bitpos(key2hash, shift);
+  newNode->bitmap = key1bit || key2bit;
+  if (key1bit < key2bit) {
+    incRef(key1);
+    incRef(val1);
+    incRef(key2);
+    incRef(val2);
+    newNode->array[0] = key1;
+    newNode->array[1] = val1;
+    newNode->array[2] = key2;
+    newNode->array[3] = val2;
+  } else if (key1bit > key2bit) {
+    incRef(key1);
+    incRef(val1);
+    incRef(key2);
+    incRef(val2);
+    newNode->array[0] = key2;
+    newNode->array[1] = val2;
+    newNode->array[2] = key1;
+    newNode->array[3] = val1;
+  } else {
+    newNode->array[0] = (Value *)0;
+    newNode->array [1] = createNode(shift + 5, key1hash, key1, val1,
+                                               key2hash, key2, val2);
+  }
+  return((Value *)newNode);
+}
+")
+
+(def emptyBMI
+  (inline-text "(Value *)&emptyBMI"))
+
+(extend-type BitmapIndexedNode
+  Collection
+  (empty? [m]
+    (= 0 (count (seq m))))
+
+  Seqable
+  (seq [n]
+    (hash-seq n empty-list))
+
+  Stringable
+  (string-list [n]
+    (let [a-list (seq n)]
+      (cond
+       (list-empty? a-list) (list "{}")
+       (let [kv-strs (map a-list
+                          (fn [kv]
+                            (apply comp (interpose (map kv string-list)
+                                                   (list " ")))))
+             body-list (apply comp (interpose kv-strs (list ", ")))]
+         (comp (list "{")
+               body-list
+               (list "}"))))))
+
+  HashMapNode
+  (hash-seq [n s]
+    (inline-text "
+BitmapIndexedNode *node = (BitmapIndexedNode *)arg0;
+int cnt = __builtin_popcount(node->bitmap);
+List *seq = (List *)arg1;
+for (int i = 0; i < cnt; i++) {
+   if (node->array[2 * i] == (Value *)0) {
+     seq = (List *)hashSeq(node->array[2 * i + 1], (Value *)seq);
+   } else {
+     List *pair = listCons(node->array[2 * i], listCons(node->array[2 * i + 1], empty_list));
+     incRef((Value *)pair);
+     incRef(node->array[2 * i]);
+     incRef(node->array[2 * i + 1]);
+     seq = listCons((Value *)pair, seq);
+   }
+}
+return((Value *)seq);
+"))
+  (assoc* [node k v hash shift]
+    (inline-text "
+BitmapIndexedNode *node = (BitmapIndexedNode *)arg0;
+Value *key = arg1;
+Value *val = arg2;
+int64_t hash = ((Number *)arg3)->numVal;
+int64_t shift = ((Number *)arg4)->numVal;
+
+int bit = bitpos(hash, shift);
+int idx = __builtin_popcount(node->bitmap & (bit - 1));
+if (node->bitmap & bit) {
+  // if the hash position is already filled
+  Value *keyOrNull = node->array[2 * idx];
+  Value *valOrNode = node->array[2 * idx + 1];
+  if (keyOrNull == (Value *)0) {
+    // There is no key in the position, so valOrNode is
+    // pointer to a node.
+    Value *n = assoc(valOrNode, key, val, arg3, arg4);
+    if (n == valOrNode) {
+      // the key was already associated with the value
+      // so do nothing
+      decRef(n);
+      my_free(n);
+      incRef(arg0);
+      return(arg0);
+    } else {
+      // clone node and add n to it
+      BitmapIndexedNode *newNode = clone_BitmapIndexedNode(node);
+      newNode->array[2 * idx + 1] = n;
+      return((Value *)newNode);
+    }
+  } else if (equal(key, keyOrNull)) {
+    // if the keyOrNull points to a value that is equal to key
+/*
+    if (equal(val, valOrNode)) {
+      // if the valOrNode points to a value that is equal to val
+      incRef(arg0);
+      return(arg0);
+    } else {
+*/
+      // create new hash-map with valOrNode replaced by val
+      // clone node and add val to it
+      BitmapIndexedNode *newNode = clone_BitmapIndexedNode(node);
+      incRef((Value *)val);
+      newNode->array[2 * idx + 1] = val;
+      return((Value *)newNode);
+/*
+    }
+*/
+  } else {
+    // there is already a key/val pair at the position where key
+    // would be placed. Extend tree a level
+    int64_t existingKeyHash = ((Number *)sha1(keyOrNull))->numVal;
+    if (existingKeyHash == hash) {
+      // make & return HashCollisionNode
+      fprintf(stderr, \"Need to implement HashCollisionNode!\\n\");
+      abort();
+    } else {
+      Value *newLeaf = createNode(shift + 5,
+                                  existingKeyHash, keyOrNull, valOrNode,
+                                  hash, key, val);
+      BitmapIndexedNode *newNode = clone_BitmapIndexedNode(node);
+      newNode->array[2 * idx] = (Value *)0;
+      newNode->array[2 * idx + 1] = newLeaf;
+      return((Value *)newNode);
+    }
+  }
+} else {
+  // the position in the node is empty
+  int n = __builtin_popcount(node->bitmap);
+  if (n > 16) {
+    fprintf(stderr, \"Implement ArrayNode!!!!\\n\");
+    abort();
+    return((Value *)0);
+  } else {
+    int itemCount = n + 1;
+    int nodeSize = sizeof(BitmapIndexedNode) + sizeof(Value *) *
+                   (itemCount * 2);
+    BitmapIndexedNode *newNode = (BitmapIndexedNode *)my_malloc(nodeSize);
+    newNode->type = BitmapIndexedType;
+    newNode->refs = 1;
+    newNode->bitmap = node->bitmap | bit;
+    incRef(key);
+    incRef(val);
+    for (int i = 0; i < idx * 2; i++) {
+      if (node->array[i] != (Value *)0)
+        incRef(node->array[i]);
+      newNode->array[i] = node->array[i];
+    }
+    newNode->array[2 * idx] = key;
+    newNode->array[2 * idx + 1] = val;
+    for (int i = idx * 2; i < n * 2; i++) {
+      if (node->array[i] != (Value *)0)
+        incRef(node->array[i]);
+      newNode->array[i + 2] = node->array[i];
+    }
+    return((Value *)newNode);
+  }
+}
+"))
+
+  Associative
+  (get [m k not-found]
+    (map-get (seq m) k not-found))
+  (keys [m]
+    (map (seq m) first))
+  (vals [m]
+    (map (seq m) second))
+  (assoc [_ k v]
+    (inline-text "
+return(assoc(arg0, arg1, arg2, sha1(arg1), numberValue(0)));
+")))
+
 (deftype HashMap [a-list]
   Seqable
   (seq [_]
@@ -1703,7 +1979,12 @@ void Sha1Finalise (Sha1Context* Context, SHA1_HASH* Digest) {
     (map a-list second)))
 
 (defn hash-map [& kv-pairs]
-  (HashMap (partition kv-pairs 2)))
+  ;; (reduce (partition kv-pairs 2)
+  ;;         emptyBMI
+  ;;         (fn [bmi pair]
+  ;;           (apply assoc bmi pair)))
+  (HashMap (partition kv-pairs 2))
+  )
 
 (defn merge-with [merge-fn hm & ms]
   (cond
@@ -1779,6 +2060,21 @@ void Sha1Finalise (Sha1Context* Context, SHA1_HASH* Digest) {
        (= not-found v) (let [_ (print-err "Could not look up " kw)]
                          (abort))
        v)))
+
+  Hash
+  (sha1 [_]
+    (inline-text "
+int64_t shaVal;
+Sha1Context context;
+SubString *subStrVal = (SubString *)arg0;
+
+Sha1Initialise(&context);
+Sha1Update(&context, (void *)&subStrVal->type, 8);
+Sha1Update(&context, (void *)subStrVal->buffer, subStrVal->len);
+Sha1Finalise(&context, (SHA1_HASH *)&shaVal);
+return((Value *)numberValue(shaVal));
+"))
+
   ;; (invoke [kw hm not-found]
   ;;   (get hm kw not-found))
   )
@@ -1803,7 +2099,21 @@ void Sha1Finalise (Sha1Context* Context, SHA1_HASH* Digest) {
                          (abort))
        v)))
   (invoke [sym-lit hm not-found]
-    (get hm sym-lit not-found)))
+    (get hm sym-lit not-found))
+
+  Hash
+  (sha1 [_]
+    (inline-text "
+int64_t shaVal;
+Sha1Context context;
+SubString *subStrVal = (SubString *)arg0;
+
+Sha1Initialise(&context);
+Sha1Update(&context, (void *)&subStrVal->type, 8);
+Sha1Update(&context, (void *)subStrVal->buffer, subStrVal->len);
+Sha1Finalise(&context, (SHA1_HASH *)&shaVal);
+return((Value *)numberValue(shaVal));
+")))
 
 (defn symbol? [sym]
   (= Symbol (get-type sym)))
