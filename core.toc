@@ -19,6 +19,7 @@
 (def ProtoImpls "typedef struct {int64_t implCount; Value *defaultImpl; ProtoImpl impls[];} ProtoImpls;\n")
 (def ReifiedVal "typedef struct {int64_t type; int32_t refs; int implCount; Value* impls[];} ReifiedVal;\n")
 (def OpaqueVal "typedef struct {int64_t type; int32_t refs; void *ptr;} Opaque;\n")
+(def ArrayNodeVal "typedef struct {int64_t type; int32_t refs; Value *array[32];} ArrayNode;\n")
 
 (def true (inline-text "(Value *)&trueVal;"))
 (def false (inline-text "(Value *)&falseVal;"))

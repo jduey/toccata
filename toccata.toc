@@ -45,6 +45,7 @@
    'Symbol 7
    'FnArity 8
    'Opaque 9
+   'ArrayNode 10
    })
 
 (defn write [str]
@@ -402,6 +403,7 @@
                  ProtoImpls
                  ReifiedVal
                  OpaqueVal
+                 ArrayNodeVal
                  "List *listCons(Value *x, List *l);\n"
                  "Value *stringValue(char *s);\n"
                  "const int64_t NumberType;\n"
@@ -1463,8 +1465,17 @@
                     ;; "    free(v);\n"
                     "  } else if (v->type == " (get (types) 'Opaque 10000) ") {\n"
                     "    v->refs = -10;\n"
-                    ;; "    free_count++;\n"
-                    ;; "    free(v);\n"
+                    "  } else if (v->type == " (get (types) 'ArrayNode 10000) ") {\n"
+                    "    ArrayNode *node = (ArrayNode *)v;\n"
+                    "    for (int i = 1; i < 32; i++) {\n"
+                    "       if (node->array[i] != (Value *)0) {\n"
+                    "          decRef(node->array[i]);\n"
+                    "          my_free(node->array[i]);\n"
+                    "       }\n"
+                    "    }\n"
+                    "    v->refs = -10;\n"
+                    "    free_count++;\n"
+                    "    free(v);\n"
                     "  } else {\n"
                     "    ReifiedVal *rv = (ReifiedVal *)v;\n"
                     "    for (int i = 0; i < rv->implCount; i++) {\n"
