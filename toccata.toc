@@ -3,6 +3,7 @@
 ;; quoted lists
 ;; optimize calls to invoke fns
 ;; persistent data structures; maps, vectors
+;;     Implement HashCollisionNode and re-hashing
 ;; automatically derive =* for reified types
 ;;     and uncomment code in BitmapIndexedNode/assoc*
 ;; compact lists cdr coding
@@ -802,10 +803,11 @@
       (for [_ (static-values)
             curr-fn-sym (sm/get-val :curr-fn-sym "")
             fn-sym (gensym "fn_")
+            :let [fn-sym-str (str "(Value *)" fn-sym)]
             _ (sm/set-val :curr-fn-sym fn-sym)
             _ (write-strs (list "\n// --------- " (.args ast) " --------------\n"
                                 "Function " fn-sym ";\n"))
-            _ (remember-local (str "(Value *)" fn-sym))
+            _ (remember-local fn-sym-str)
             ;; TODO: check for anon fn, save previous value of
             ;; :defined-sym and restore at end
             _ (sm/assoc-in-val (list :defined-syms (.args ast)) (list (str "Function " fn-sym)
@@ -824,7 +826,7 @@
                                            (get (types) 'Function :no-fn-type) ", -1, \""
                                            (.args ast) "\", " arity-count ", "
                                            "{" (apply str (interpose arity-syms ", ")) "}};\n\n"))
-                         (sm/assoc-in-val (list :scope-locals (str "(Value *)" fn-sym)) false)
+                         (sm/assoc-in-val (list :scope-locals fn-sym-str) false)
                          (sm/assoc-in-val (list :static-fns (str "(Value *)&" fn-sym)) static-arities))
 
                (sm/state-maybe ""))
@@ -1231,6 +1233,7 @@
                     "FILE *outStream;\n"
                     "long long malloc_count;\n"
                     "long long free_count;\n"
+                    "long long bmiCount;\n"
                     "int recycledFunction;\n"
                     "int recycledReified;\n"
                     "Value* true;\n"
@@ -1268,6 +1271,7 @@
                     "Number falseVal = {" (get (types) 'Number 10000) ", -1, 0};\n"
                     "Value* false = (Value *)&falseVal;\n"
                     "long long malloc_count = 0;\n"
+                    "long long bmiCount = 0;\n"
                     "long long free_count = 0;\n"
                     "\n"
 
@@ -1415,6 +1419,14 @@
                     "  }\n"
                     "}\n\n"
 
+                    "BitmapIndexedNode *malloc_bmiNode(int sz) {\n"
+                    "  BitmapIndexedNode *bmiNode = (BitmapIndexedNode *)my_malloc(sz);\n"
+                    "  memset(bmiNode, 0, sz);\n"
+                    "  // fprintf(stderr, \"%p malloc bmi\\n\", bmiNode);\n"
+                    "  bmiCount++;\n"
+                    "  return(bmiNode);\n"
+                    "}\n\n"
+
                     "void my_free(Value *v) {\n"
                     "  if (v == (Value *)0) {\n"
                     "    fprintf(stderr, \"why are you freeing 'null'\\n\");\n "
@@ -1427,17 +1439,17 @@
                     "  } else if (v->type == 0) {\n"
                     "    fprintf(stderr, \"freeing invalid type\\n\");\n"
                     "    abort();\n"
-                    "  } else if (v->type == " (get (types) 'String 10000) ") {\n"
+                    "  } else if (v->type == StringType) {\n"
                     "    v->refs = -10;\n"
                     "    free_count++;\n"
                     "    free(v);\n"
-                    "  } else if (v->type == " (get (types) 'Number 10000) ") {\n"
+                    "  } else if (v->type == NumberType) {\n"
                     "    v->refs = -10;\n"
                     "    ((DirectLL *)v)->next = freeNumbers;\n"
                     "    freeNumbers = (DirectLL *)v;\n"
                     ;; "    free_count++;\n"
                     ;; "    free(v);\n"
-                    "  } else if (v->type == " (get (types) 'Function 10000) ") {\n"
+                    "  } else if (v->type == FunctionType) {\n"
                     "    Function *f = (Function *)v;\n"
                     "    for (int i = 0; i < f->arityCount; i++) {\n"
                     "      decRef((Value *)f->arities[i]);\n"
@@ -1452,7 +1464,7 @@
                     "      free_count++;\n"
                     "      free(v);\n"
                     "    }"
-                    "  } else if (v->type == " (get (types) 'List 10000) ") {\n"
+                    "  } else if (v->type == ListType) {\n"
                     "    Value *head = ((List *)v)->head;\n"
                     "    List *tail = ((List *)v)->tail;\n"
                     "    v->refs = -10;\n"
@@ -1468,9 +1480,9 @@
                     "    freeLists = (DirectLL *)v;\n"
                     ;; "    free_count++;\n"
                     ;; "    free(v);\n"
-                    "  } else if (v->type == " (get (types) 'Keyword 10000) " ||\n"
-                    "             v->type == " (get (types) 'SubStr 10000) " ||\n"
-                    "             v->type == " (get (types) 'Symbol 10000) ") {\n"
+                    "  } else if (v->type == KeywordType ||\n"
+                    "             v->type == SubStringType ||\n"
+                    "             v->type == SymbolType) {\n"
                     "    Value *src = ((SubString *)v)->source;\n"
                     "    v->refs = -10;\n"
                     "    if (src != (Value *)0) {\n"
@@ -1490,22 +1502,24 @@
                     "    freeFnAritys = (DirectLL *)v;\n"
                     ;; "    free_count++;\n"
                     ;; "    free(v);\n"
-                    "  } else if (v->type == " (get (types) 'Opaque 10000) ") {\n"
+                    "  } else if (v->type == OpaqueType) {\n"
                     "    v->refs = -10;\n"
-                    "  } else if (v->type == " (get (types) 'BitmapIndexedNode 10000) ") {\n"
+                    "  } else if (v->type == BitmapIndexedType) {\n"
+                    "    // fprintf(stderr, \"%p free bmi node\\n\", v);\n"
                     "    BitmapIndexedNode *node = (BitmapIndexedNode *)v;\n"
-                    "    for (int i = 1; i < (2 * __builtin_popcount(node->bitmap)); i++) {\n"
+                    "    for (int i = 0; i < (2 * __builtin_popcount(node->bitmap)); i++) {\n"
                     "       if (node->array[i] != (Value *)0) {\n"
                     "          decRef(node->array[i]);\n"
                     "          my_free(node->array[i]);\n"
                     "       }\n"
                     "    }\n"
+                    "    bmiCount--;\n"
                     "    v->refs = -10;\n"
                     "    free_count++;\n"
                     "    free(v);\n"
-                    "  } else if (v->type == " (get (types) 'ArrayNode 10000) ") {\n"
+                    "  } else if (v->type == ArrayNodeType) {\n"
                     "    ArrayNode *node = (ArrayNode *)v;\n"
-                    "    for (int i = 1; i < 32; i++) {\n"
+                    "    for (int i = 0; i < 32; i++) {\n"
                     "       if (node->array[i] != (Value *)0) {\n"
                     "          decRef(node->array[i]);\n"
                     "          my_free(node->array[i]);\n"
@@ -1710,8 +1724,7 @@
                             "  my_free((Value *)argList);\n"
                             "  fprintf(stderr, \"malloc count: %lld  free count: %lld  diff: %lld\\n\""
                             ", malloc_count, free_count, malloc_count - free_count);\n"
-                            ;; "  fprintf(stderr, \"recycled fns: %d\\n\", recycledFunction);\n"
-                            ;; "  fprintf(stderr, \"recycled reifieds: %d\\n\", recycledReified);\n"
+                            "  fprintf(stderr, \"bmiCount: %lld\\n\", bmiCount);\n"
                             "  return(the_final_answer);\n};\n"))]
     ""))
 
@@ -2046,6 +2059,7 @@
                           "const int64_t FunctionType = " (get types 'Function 0) ";\n"
                           "const int64_t OpaqueType = " (get types 'Opaque 0) ";\n"
                           "const int64_t BitmapIndexedType = " (get types 'BitmapIndexedNode  0) ";\n"
+                          "const int64_t ArrayNodeType = " (get types 'ArrayNode  0) ";\n"
                           "List *empty_list = &(List){4,-1,0,0,0};\n")))
                       (base-fns)
                       (emit-proto-fn "Getter/"
@@ -2239,7 +2253,7 @@
                    :symbols {}
                    :keywords {}
                    :numbers {}
-                   :strings {}
+                   :strings emptyBMI
                    :new-externs empty-list
                    :new-static-fns empty-list
                    :defined-protos {}
