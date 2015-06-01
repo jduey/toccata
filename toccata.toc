@@ -1,9 +1,9 @@
 
 ;; TODO:
-;; quoted lists
-;; optimize calls to invoke fns
 ;; persistent data structures; maps, vectors
 ;;     Implement HashCollisionNode and re-hashing
+;; quoted lists
+;; optimize calls to invoke fns
 ;; automatically derive =* for reified types
 ;;     and uncomment code in BitmapIndexedNode/assoc*
 ;; compact lists cdr coding
@@ -1225,7 +1225,10 @@
 
           _ (sm/update-in-val (list :types)
                               (fn [types]
-                                (HashMap (replace-type (seq types) type-val-num (.name ast)))))]
+                                (reduce (replace-type (seq types) type-val-num (.name ast))
+                                        {}
+                                        (fn [m kv]
+                                          (apply assoc m kv)))))]
       result)))
 
 (defn core-base-fns []
@@ -1233,7 +1236,6 @@
                     "FILE *outStream;\n"
                     "long long malloc_count;\n"
                     "long long free_count;\n"
-                    "long long bmiCount;\n"
                     "int recycledFunction;\n"
                     "int recycledReified;\n"
                     "Value* true;\n"
@@ -1271,7 +1273,6 @@
                     "Number falseVal = {" (get (types) 'Number 10000) ", -1, 0};\n"
                     "Value* false = (Value *)&falseVal;\n"
                     "long long malloc_count = 0;\n"
-                    "long long bmiCount = 0;\n"
                     "long long free_count = 0;\n"
                     "\n"
 
@@ -1419,12 +1420,37 @@
                     "  }\n"
                     "}\n\n"
 
-                    "BitmapIndexedNode *malloc_bmiNode(int sz) {\n"
-                    "  BitmapIndexedNode *bmiNode = (BitmapIndexedNode *)my_malloc(sz);\n"
-                    "  memset(bmiNode, 0, sz);\n"
-                    "  // fprintf(stderr, \"%p malloc bmi\\n\", bmiNode);\n"
-                    "  bmiCount++;\n"
+                    "DirectLL *freeBMINodes[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};\n"
+                    "BitmapIndexedNode *malloc_bmiNode(int itemCount) {\n"
+                    "  int nodeSize = sizeof(BitmapIndexedNode) + sizeof(Value *) * (itemCount * 2);\n"
+                    "  BitmapIndexedNode *bmiNode;\n"
+                    "  if (freeBMINodes[itemCount] == (DirectLL *)0) {\n"
+                    "    malloc_count--;\n"
+                    "    bmiNode = (BitmapIndexedNode *)my_malloc(nodeSize);\n"
+                    "  } else {\n"
+                    "    bmiNode = (BitmapIndexedNode *)freeBMINodes[itemCount];\n"
+                    "    freeBMINodes[itemCount] = ((DirectLL *)bmiNode)->next;\n"
+                    "  }\n"
+                    "  memset(bmiNode, 0, nodeSize);\n"
+                    "  bmiNode->type = BitmapIndexedType;\n"
+                    "  bmiNode->refs = 1;\n"
                     "  return(bmiNode);\n"
+                    "}\n\n"
+
+                    "DirectLL *freeArrayNodes = (DirectLL *)0;\n"
+                    "ArrayNode *malloc_arrayNode() {\n"
+                    "  ArrayNode *arrayNode;\n"
+                    "  if (freeArrayNodes == (DirectLL *)0) {\n"
+                    "    malloc_count--;\n"
+                    "    arrayNode = (ArrayNode *)my_malloc(sizeof(ArrayNode));\n"
+                    "  } else {\n"
+                    "    arrayNode = (ArrayNode *)freeArrayNodes;\n"
+                    "    freeArrayNodes = ((DirectLL *)arrayNode)->next;\n"
+                    "  }\n"
+                    "  memset(arrayNode, 0, sizeof(ArrayNode));\n"
+                    "  arrayNode->type = ArrayNodeType;\n"
+                    "  arrayNode->refs = 1;\n"
+                    "  return(arrayNode);"
                     "}\n\n"
 
                     "void my_free(Value *v) {\n"
@@ -1507,16 +1533,18 @@
                     "  } else if (v->type == BitmapIndexedType) {\n"
                     "    // fprintf(stderr, \"%p free bmi node\\n\", v);\n"
                     "    BitmapIndexedNode *node = (BitmapIndexedNode *)v;\n"
-                    "    for (int i = 0; i < (2 * __builtin_popcount(node->bitmap)); i++) {\n"
+                    "    int cnt = __builtin_popcount(node->bitmap);\n"
+                    "    for (int i = 0; i < (2 * cnt); i++) {\n"
                     "       if (node->array[i] != (Value *)0) {\n"
                     "          decRef(node->array[i]);\n"
                     "          my_free(node->array[i]);\n"
                     "       }\n"
                     "    }\n"
-                    "    bmiCount--;\n"
                     "    v->refs = -10;\n"
-                    "    free_count++;\n"
-                    "    free(v);\n"
+                    "    ((DirectLL *)v)->next = freeBMINodes[cnt];\n"
+                    "    freeBMINodes[cnt] = (DirectLL *)v;\n"
+                    ;; "    free_count++;\n"
+                    ;; "    free(v);\n"
                     "  } else if (v->type == ArrayNodeType) {\n"
                     "    ArrayNode *node = (ArrayNode *)v;\n"
                     "    for (int i = 0; i < 32; i++) {\n"
@@ -1526,8 +1554,10 @@
                     "       }\n"
                     "    }\n"
                     "    v->refs = -10;\n"
-                    "    free_count++;\n"
-                    "    free(v);\n"
+                    "    ((DirectLL *)v)->next = freeArrayNodes;\n"
+                    "    freeArrayNodes = (DirectLL *)v;\n"
+                    ;; "    free_count++;\n"
+                    ;; "    free(v);\n"
                     "  } else {\n"
                     "    ReifiedVal *rv = (ReifiedVal *)v;\n"
                     "    for (int i = 0; i < rv->implCount; i++) {\n"
@@ -1611,6 +1641,7 @@
                     "SubString *sym = malloc_substring();\n"
                     "sym->type = SymbolType;\n"
                     "sym->buffer = s;\n"
+                    "sym->len = strlen(s);\n"
                     "sym->source = (Value *)0;\n"
                     "return((Value *)sym);\n"
                     "};\n"
@@ -1620,6 +1651,7 @@
                     "SubString *kw = malloc_substring();\n"
                     "kw->type = KeywordType;\n"
                     "kw->buffer = s;\n"
+                    "kw->len = strlen(s);\n"
                     "kw->source = (Value *)0;\n"
                     "return((Value *)kw);\n"
                     "};\n"
@@ -1724,7 +1756,6 @@
                             "  my_free((Value *)argList);\n"
                             "  fprintf(stderr, \"malloc count: %lld  free count: %lld  diff: %lld\\n\""
                             ", malloc_count, free_count, malloc_count - free_count);\n"
-                            "  fprintf(stderr, \"bmiCount: %lld\\n\", bmiCount);\n"
                             "  return(the_final_answer);\n};\n"))]
     ""))
 
@@ -1738,19 +1769,28 @@
                       (let [proto-name (nth proto-info 0)
                             impls-sym (nth proto-info 1)
                             extern-def (nth proto-info 2)
-                            impls (HashMap (nth proto-info 3))
+                            impls (reduce (nth proto-info 3)
+                                          {}
+                                          (fn [m kv]
+                                            (apply assoc m kv)))
                             name (nth proto-info 4)]
                         (list proto-name {:impls-sym impls-sym
                                           :name name
                                           :extern-def extern-def
                                           :impls impls}))))
-        proto-map (HashMap (map protos
-                                (fn [proto]
-                                  (let [qualified-name (first proto)
-                                        name (:name (second proto))]
-                                    (list name qualified-name)))))]
+        proto-map (reduce (map protos
+                               (fn [proto]
+                                 (let [qualified-name (first proto)
+                                       name (:name (second proto))]
+                                   (list name qualified-name))))
+                          {}
+                          (fn [m kv]
+                            (apply assoc m kv)))]
     (apply-to list
-              (sm/set-val :protocols (HashMap protos))
+              (sm/set-val :protocols (reduce protos
+                                             {}
+                                             (fn [m kv]
+                                               (apply assoc m kv))))
               (sm/assoc-in-val (list :modules "core" :protos) proto-map)
               (sm/set-val :defined-protos proto-map)
               (traverse protos
@@ -1814,8 +1854,14 @@
                     (fn [fn-info]
                       (let [fn-name (first fn-info)
                             arities (second fn-info)]
-                        (list fn-name (HashMap arities)))))]
-    (sm/set-val :core-static-fns (HashMap s-funs))))
+                        (list fn-name (reduce arities
+                                              {}
+                                              (fn [arities arity]
+                                                (apply assoc arities arity)))))))]
+    (sm/set-val :core-static-fns (reduce s-funs
+                                              {}
+                                              (fn [s-funs s-fun]
+                                                (apply assoc s-funs s-fun))))))
 
 (defn serialize-static-fns []
   (for [s-fns (sm/get-val :static-fns {})
@@ -1855,7 +1901,10 @@
   (inline-text "return(defined_syms());"))
 
 (defn load-defined-syms []
-  (let [defined (HashMap (defined-syms))]
+  (let [defined (reduce (defined-syms)
+                        {}
+                        (fn [m kv]
+                          (apply assoc m kv)))]
     (sm/set-val :core-defined-syms defined)))
 
 (defn serialize-defined-syms []
@@ -1883,7 +1932,10 @@
   (inline-text "return(number_literals());"))
 
 (defn load-number-literals []
-  (let [nums (HashMap (number-literals))]
+  (let [nums (reduce (number-literals)
+                     {}
+                     (fn [m kv]
+                       (apply assoc m kv)))]
     (apply-to list
               (sm/set-val :num-count (inc (count nums)))
               (sm/set-val :core-numbers nums))))
@@ -1908,7 +1960,10 @@
   (inline-text "return(string_literals());\n"))
 
 (defn load-string-literals []
-  (let [strs (HashMap (string-literals))]
+  (let [strs (reduce (string-literals)
+                     {}
+                     (fn [m kv]
+                       (apply assoc m kv)))]
     (apply-to list
               (sm/set-val :str-count (count strs))
               (sm/set-val :core-strings strs))))
@@ -1934,7 +1989,10 @@
   (inline-text "return(keyword_literals());\n"))
 
 (defn load-keyword-literals []
-  (let [kws (HashMap (keyword-literals))]
+  (let [kws (reduce (keyword-literals)
+                     {}
+                     (fn [m kv]
+                       (apply assoc m kv)))]
     (apply-to list
               (sm/set-val :kw-count (count kws))
               (sm/set-val :core-keywords kws))))
@@ -1960,7 +2018,10 @@
   (inline-text "return(symbol_literals());\n"))
 
 (defn load-symbol-literals []
-  (let [syms (HashMap (symbol-literals))]
+  (let [syms (reduce (symbol-literals)
+                     {}
+                     (fn [m kv]
+                       (apply assoc m kv)))]
     (apply-to list
               (sm/set-val :sym-count (count syms))
               (sm/set-val :core-symbols syms))))
@@ -2003,7 +2064,10 @@
   (inline-text "return(types());\n"))
 
 (defn load-types []
-  (let [types (HashMap (types*))]
+  (let [types (reduce (types*)
+                     {}
+                     (fn [m kv]
+                       (apply assoc m kv)))]
     (sm/set-val :types types)))
 
 (defn serialize-types []
@@ -2093,6 +2157,13 @@
                             _ (sm/set-val :expr expr)]
                         ""))
             (compile-source parser)
+            (for [get-sym (lookup-sym* 'get*)
+                  get-fn-sym (lookup-static-fn (first get-sym) 5)
+                  _ (write-strs
+                     (list "Value *get(Value *node, Value *key, Value *val, Value *hash, Value *shift) {\n"
+                           "  return(" get-fn-sym "((List *)0, node, key, val, hash, shift));\n"
+                           "}\n"))]
+              "")
             (for [assoc-sym (lookup-sym* 'assoc*)
                   assoc-fn-sym (lookup-static-fn (first assoc-sym) 5)
                   _ (write-strs
@@ -2119,6 +2190,13 @@
                   _ (write-strs
                      (list "Value *hashSeq(Value *n, Value *s) {\n"
                            "  return(" hash-seq-fn-sym "((List *)0, n, s));\n"
+                           "}\n"))]
+              "")
+            (for [count-sym (lookup-sym* 'count)
+                  count-fn-sym (lookup-static-fn (first count-sym) 1)
+                  _ (write-strs
+                     (list "Value *count(Value *n) {\n"
+                           "  return(" count-fn-sym "((List *)0, n));\n"
                            "}\n"))]
               "")
             (serialize-symbol-literals)
@@ -2253,7 +2331,7 @@
                    :symbols {}
                    :keywords {}
                    :numbers {}
-                   :strings emptyBMI
+                   :strings {}
                    :new-externs empty-list
                    :new-static-fns empty-list
                    :defined-protos {}
