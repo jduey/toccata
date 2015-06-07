@@ -63,11 +63,6 @@
    (sm/new-sm (fn [s]
                 (list (map str-list print) s)))))
 
-(defn gensym [pre]
-  (for [sym-count (sm/get-val :gensym-count 0)
-        _ (sm/set-val :gensym-count (inc sym-count))]
-    (symbol (str pre sym-count))))
-
 (defn genlocal [pre]
   (for [sym-count (sm/get-val :local-sym-count 0)
         _ (sm/set-val :local-sym-count (inc sym-count))]
@@ -635,9 +630,9 @@
   Emitter
   (emit-c [ast]
     (let [c-args (list "closures" "varArgs")
-          arg-count (count (.args ast))]
-      (for [arity-fn-sym (gensym "arityImpl_")
-            arity-sym (genlocal "arity_")
+          arg-count (count (.args ast))
+          arity-fn-sym (gensym "arityImpl_")]
+      (for [arity-sym (genlocal "arity_")
             fn-context (reset-fn-context arity-fn-sym arg-count)
             arg-syms (gen-arg-syms (.args ast))
             scope-info (begin-scope)
@@ -678,73 +673,73 @@
 (extend-type ast/fn-arity-ast
   Emitter
   (emit-c [ast]
-    (for [arity-sym (genlocal "arity_")
-          arity-fn-sym (gensym "arityImpl_")
-          fn-context (reset-fn-context arity-fn-sym (count (.args ast)))
-          arg-syms (gen-arg-syms (.args ast))
-          scope-info (begin-scope)
-          body-exprs (eval-exprs (.body ast))
-          _ (emit-externs)
+    (let [arity-fn-sym (gensym "arityImpl_")]
+      (for [arity-sym (genlocal "arity_")
+            fn-context (reset-fn-context arity-fn-sym (count (.args ast)))
+            arg-syms (gen-arg-syms (.args ast))
+            scope-info (begin-scope)
+            body-exprs (eval-exprs (.body ast))
+            _ (emit-externs)
 
-          :let [result-sym (first body-exprs)]
-          _ (apply-to list
-                      (write-strs (list "Value *" arity-fn-sym "("))
-                      (write-strs (interpose (cons "List *closures"
-                                                   (map arg-syms (fn [arg] (str "Value *" arg))))
-                                             ", "))
-                      (write ") {\n")
-                      (emit-closures)
-                      (write-strs (second body-exprs))
-                      (write-strs (cond
-                                   (= result-sym "") empty-list
-                                   (list "incRef(" result-sym ");\n")))
-                      (for [scope-suffix (for [scope-locals (sm/get-val :scope-locals)]
-                                           (map (seq scope-locals)
-                                                (fn [local]
-                                                  (cond
-                                                   (not (second local)) ""
-                                                   (str "decRef(" (first local) ");\n"
-                                                        "my_free(" (first local) ");\n")))))
-                            _ (write-strs scope-suffix)]
-                        "")
-                      (end-scope scope-info)
-                      (cond
-                       (= result-sym "") (sm/state-maybe "")
-                       (write-strs (list "return(" result-sym ");\n")))
-                      (write "};\n\n"))
-          closures (sm/get-val :closed-over empty-list)
-          _ (restore-fn-context fn-context)
-          result (cond
-                  (< 0 (count closures)) (arity-closes-over arity-sym arity-fn-sym
-                                                            arg-syms closures 0)
-                  (static-arity arity-fn-sym arg-syms 0))]
-      result)))
+            :let [result-sym (first body-exprs)]
+            _ (apply-to list
+                        (write-strs (list "Value *" arity-fn-sym "("))
+                        (write-strs (interpose (cons "List *closures"
+                                                     (map arg-syms (fn [arg] (str "Value *" arg))))
+                                               ", "))
+                        (write ") {\n")
+                        (emit-closures)
+                        (write-strs (second body-exprs))
+                        (write-strs (cond
+                                     (= result-sym "") empty-list
+                                     (list "incRef(" result-sym ");\n")))
+                        (for [scope-suffix (for [scope-locals (sm/get-val :scope-locals)]
+                                             (map (seq scope-locals)
+                                                  (fn [local]
+                                                    (cond
+                                                     (not (second local)) ""
+                                                     (str "decRef(" (first local) ");\n"
+                                                          "my_free(" (first local) ");\n")))))
+                              _ (write-strs scope-suffix)]
+                          "")
+                        (end-scope scope-info)
+                        (cond
+                         (= result-sym "") (sm/state-maybe "")
+                         (write-strs (list "return(" result-sym ");\n")))
+                        (write "};\n\n"))
+            closures (sm/get-val :closed-over empty-list)
+            _ (restore-fn-context fn-context)
+            result (cond
+                    (< 0 (count closures)) (arity-closes-over arity-sym arity-fn-sym
+                                                              arg-syms closures 0)
+                    (static-arity arity-fn-sym arg-syms 0))]
+        result))))
 
 (extend-type ast/main-ast
   Emitter
   (emit-c [ast]
-    (for [_ (static-values)
-          main-sym (gensym "main_")
-          _ (sm/set-val :main-sym main-sym)
-          arg-syms (gen-arg-syms (.args ast))
-          _ (sm/set-val :local-sym-count 0)
-          scope-info (begin-scope)
-          body (eval-exprs (.body ast))
-          _ (emit-externs)
-          _ (write-strs (list "\nint " main-sym " ("))
-          _ (write-strs (interpose (map arg-syms (fn [arg] (str "Value *" arg)))
-                                   ", "))
-          _ (write ") {\n")
-          _ (write-strs (nth body 1 empty-list))
-          scope-locals (sm/get-val :scope-locals)
-          _ (write-strs (map (seq scope-locals)
-                             (fn [local]
-                               (cond
-                                (not (second local)) ""
-                                (str "decRef(" (first local) ");\n"
-                                     "my_free(" (first local) ");\n")))))
-          _ (write "\nreturn(0);\n}\n\n")]
-      "")))
+    (let [main-sym (gensym "main_")]
+      (for [_ (static-values)
+            _ (sm/set-val :main-sym main-sym)
+            arg-syms (gen-arg-syms (.args ast))
+            _ (sm/set-val :local-sym-count 0)
+            scope-info (begin-scope)
+            body (eval-exprs (.body ast))
+            _ (emit-externs)
+            _ (write-strs (list "\nint " main-sym " ("))
+            _ (write-strs (interpose (map arg-syms (fn [arg] (str "Value *" arg)))
+                                     ", "))
+            _ (write ") {\n")
+            _ (write-strs (nth body 1 empty-list))
+            scope-locals (sm/get-val :scope-locals)
+            _ (write-strs (map (seq scope-locals)
+                               (fn [local]
+                                 (cond
+                                  (not (second local)) ""
+                                  (str "decRef(" (first local) ");\n"
+                                       "my_free(" (first local) ");\n")))))
+            _ (write "\nreturn(0);\n}\n\n")]
+        ""))))
 
 (defn eval-args [args]
   (cond
@@ -799,10 +794,10 @@
 (extend-type ast/fn-ast
   Emitter
   (emit-c [ast]
-    (let [arity-count (count (.arities ast))]
+    (let [arity-count (count (.arities ast))
+          fn-sym (gensym "fn_")]
       (for [_ (static-values)
             curr-fn-sym (sm/get-val :curr-fn-sym "")
-            fn-sym (gensym "fn_")
             :let [fn-sym-str (str "(Value *)" fn-sym)]
             _ (sm/set-val :curr-fn-sym fn-sym)
             _ (write-strs (list "\n// --------- " (.args ast) " --------------\n"
@@ -853,13 +848,13 @@
     (emit-static-sym (.sym ast))))
 
 (defn forward-decl [name]
-  (for [c-name (gensym "var_")
-        _ (write-strs (list (str "// forward declaration for '" name "'\n")
-                            (str Value* c-name ";\n\n")))
-        file-name (sm/get-val :file-name)
-        _ (sm/assoc-in-val (list :modules file-name :syms name) (list (str "Value *" c-name) c-name))
-        _ (sm/assoc-in-val (list :defined-syms name) (list (str "Value *" c-name) c-name))]
-    ""))
+  (let [c-name (gensym "var_")]
+    (for [_ (write-strs (list (str "// forward declaration for '" name "'\n")
+                              (str Value* c-name ";\n\n")))
+          file-name (sm/get-val :file-name)
+          _ (sm/assoc-in-val (list :modules file-name :syms name) (list (str "Value *" c-name) c-name))
+          _ (sm/assoc-in-val (list :defined-syms name) (list (str "Value *" c-name) c-name))]
+      "")))
 
 (defn define-fwd-decl [name value]
   (for [c-name (sm/get-in-val (list :defined-syms name))
@@ -880,21 +875,21 @@
     ""))
 
 (defn inline-text-definition [name initialization]
-  (for [c-name (gensym "var_")
-        _ (write-strs (list Value* c-name " = " (first initialization) ";\n"))
-        _ (sm/assoc-in-val (list :defined-syms name) (list (str "Value *" c-name ";")
-                                                           c-name))]
-    c-name))
+  (let [c-name (gensym "var_")]
+    (for [_ (write-strs (list Value* c-name " = " (first initialization) ";\n"))
+          _ (sm/assoc-in-val (list :defined-syms name) (list (str "Value *" c-name ";")
+                                                             c-name))]
+      c-name)))
 
 (defn expression-definition [name result-sym initialization extern-def]
-  (for [c-name (gensym "var_")
-        _ (cond
-           (< 0 (count initialization)) (write (first initialization))
-           (sm/state-maybe ""))
-        file-name (sm/get-val :file-name)
-        _ (sm/assoc-in-val (list :modules file-name :syms name) (list extern-def result-sym))
-        _ (sm/assoc-in-val (list :defined-syms name) (list extern-def result-sym))]
-    c-name))
+  (let [c-name (gensym "var_")]
+    (for [_ (cond
+             (< 0 (count initialization)) (write (first initialization))
+             (sm/state-maybe ""))
+          file-name (sm/get-val :file-name)
+          _ (sm/assoc-in-val (list :modules file-name :syms name) (list extern-def result-sym))
+          _ (sm/assoc-in-val (list :defined-syms name) (list extern-def result-sym))]
+      c-name)))
 
 (defn define-value [name value]
   (for [evalled-expr (fr/evaluate value emit-c)
@@ -1014,10 +1009,10 @@
 (defn emit-reified-fn [protocol-name type-num name-ast]
   (let [name (first name-ast)
         ast (second name-ast)
-        num-args (count (.args (.v (first (.arities (.v ast))))))]
-    (for [evalled (fr/evaluate ast emit-c)
+        num-args (count (.args (.v (first (.arities (.v ast))))))
           impl-sym (gensym "protoImpl_")
-          fn-sym (gensym "protoFn_")
+          fn-sym (gensym "protoFn_")]
+    (for [evalled (fr/evaluate ast emit-c)
           :let [_ (cond
                    (= 0 num-args) (let [_ (print-err "invalid protocol fn spec for" name)]
                                     (abort))
@@ -1061,12 +1056,12 @@
       (list reified-sym (comp inits reify-init)))))
 
 (defn static-reified [type-num impl-fns]
-  (for [reified-sym (gensym "reified_")
-        _ (write-strs (list "ReifiedVal " reified-sym " = {"
-                            type-num ", -1, " (count impl-fns) ", {"
-                            (apply str (interpose (map impl-fns first) ", "))
-                            "}};\n"))]
-    (list (str "(Value *)&" reified-sym) empty-list (str "ReifiedVal " reified-sym))))
+  (let [reified-sym (gensym "reified_")]
+    (for [_ (write-strs (list "ReifiedVal " reified-sym " = {"
+                              type-num ", -1, " (count impl-fns) ", {"
+                              (apply str (interpose (map impl-fns first) ", "))
+                              "}};\n"))]
+      (list (str "(Value *)&" reified-sym) empty-list (str "ReifiedVal " reified-sym)))))
 
 (extend-type ast/reify-ast
   Emitter
@@ -1102,10 +1097,10 @@
 
 (defn emit-proto-arity [name fn-sym impls-sym arity]
   (let [num-args (nth arity 0 1)
-        args (map (range num-args) (fn [idx] (str "arg" idx)))]
-    (for [c-name (gensym "protoFnImpl_")
-          arity-sym (gensym "protoFnArity_")
-          type-name-fn (comp (for [type-name-sym (lookup-sym* 'type-name)
+        args (map (range num-args) (fn [idx] (str "arg" idx)))
+        c-name (gensym "protoFnImpl_")
+        arity-sym (gensym "protoFnArity_")]
+    (for [type-name-fn (comp (for [type-name-sym (lookup-sym* 'type-name)
                                    type-name-arity-sym (lookup-static-fn (first type-name-sym) 1)]
                                (str "%s\\n\", extractStr(" type-name-arity-sym "(empty_list, arg0))"))
                              (sm/state-maybe "%lld\\n\", arg0->type"))
@@ -1140,11 +1135,11 @@
 (defn emit-proto-fn [protocol-name proto]
   (let [name (first proto)
         arities (seq (second proto))
-        qualified-name (str protocol-name name)]
-    (for [impls-sym (gensym "protoImpls_")
-          fn-sym (gensym "protoFn_")
-          default-fn-sym (gensym "defaultFn_")
-          _ (write-strs (list "ProtoImpls *" impls-sym ";\n"))
+        qualified-name (str protocol-name name)
+        impls-sym (gensym "protoImpls_")
+        fn-sym (gensym "protoFn_")
+        default-fn-sym (gensym "defaultFn_")]
+    (for [_ (write-strs (list "ProtoImpls *" impls-sym ";\n"))
           default-syms (crush arities emit-proto-default)
           arity-syms (traverse arities (partial emit-proto-arity name fn-sym impls-sym))
           file-name (sm/get-val :file-name)
@@ -1715,9 +1710,9 @@
                                                     (cond
                                                      (= type :default) false
                                                      (= type :no-type) false
-                                                     true))))]
-                              (for [local-sym (gensym "localImpls_")
-                                    _ (write-strs (list "extern ProtoImpls *" impls-sym ";\n"))
+                                                     true))))
+                                  local-sym (gensym "localImpls_")]
+                              (for [_ (write-strs (list "extern ProtoImpls *" impls-sym ";\n"))
                                     _ (write-strs (list "ProtoImpls " local-sym " = "))
                                     _ (emit-impl default impls)]
                                 (list impls-sym local-sym))))))]
@@ -2047,14 +2042,14 @@
   (inline-text "return(counts());\n"))
 
 (defn load-counts []
-  (let [cnts (counts)]
-    (apply-to list
-              (sm/set-val :gensym-count (nth cnts 0 0)))))
+  (sm/new-sm
+   (fn [s]
+     (list (set-sym-count (nth (counts) 0 0)) s))))
 
 (defn serialize-counts []
-  (for [gensym-count (sm/get-val :gensym-count 0)
-        _ (write "\nValue *counts() {\n")
+  (for [_ (write "\nValue *counts() {\n")
         _ (write "List *cnts = empty_list;\n")
+        :let [gensym-count (get-sym-count)]
         _ (write-strs (list "cnts = listCons(numberValue(" gensym-count "), cnts);\n"))
         _ (write "return((Value *)cnts);\n")
         _ (write "}\n\n")]

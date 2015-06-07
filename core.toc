@@ -31,6 +31,7 @@
 (inline-text "
 #include <stdint.h>
 #include <memory.h>
+#include <pthread.h>
 
 typedef struct
 {
@@ -2443,3 +2444,37 @@ return((Value *)numberValue(shaVal));
   (cond
    (< n 1) empty-list
    (map (range* (dec n)) (fn [_] v))))
+
+(inline-text "
+ int64_t sym_counter = 0;
+")
+
+(defn get-sym-count []
+  (inline-text "
+  return numberValue(sym_counter);
+"))
+
+(defn set-sym-count [new-count]
+  (inline-text "
+  sym_counter = ((Number *)arg0)->numVal;
+  return true;
+"))
+
+(defn new-sym-count []
+  (inline-text "
+ static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
+ pthread_mutex_lock (&mutex);
+
+ // store value before any other threads increment it further
+ int64_t result = sym_counter;
+ // only allow one thread to increment at a time
+ ++sym_counter;
+
+ pthread_mutex_unlock (&mutex);
+
+ return numberValue(result);
+"))
+
+(defn gensym [prefix]
+  (symbol (str prefix (new-sym-count))))
