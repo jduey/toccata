@@ -27,17 +27,18 @@
     (zero [ev] ev)
     (comp* [_ mvs] mvs)))
 
-(deftype free-plus [alts]
+(deftype free-comp [alts]
   Stringable
   (string-list [_]
-    (comp (list "<FreePlus: ")
+    (comp (list "<FreeComp: ")
           (string-list alts)
           (list ">")))
 
   FreeEval
   (evaluate [free-val eval-free]
-    (crush alts (fn [alt]
-                  (evaluate alt eval-free))))
+    (comp* (evaluate (first alts) eval-free)
+           (map (rest alts) (fn [alt]
+                              (evaluate alt eval-free)))))
 
   Applicative
   (wrap [_ v] (free v))
@@ -54,7 +55,7 @@
   Monoid
   (zero [ev] free-zero)
   (comp* [mv mvs]
-    (free-plus (cons mv mvs))))
+    (free-comp (cons mv mvs))))
 
 (deftype free-app [fv args]
   Stringable
@@ -95,7 +96,7 @@
   (zero [ev]
     free-zero)
   (comp* [mv mvs]
-    (free-plus (cons mv mvs))))
+    (free-comp (cons mv mvs))))
 
 (deftype free-monad [fv ff]
   Stringable
@@ -125,7 +126,7 @@
   (zero [ev]
     free-zero)
   (comp* [mv mvs]
-    (free-plus (cons mv mvs))))
+    (free-comp (cons mv mvs))))
 
 (deftype free [v]
   Stringable
@@ -164,7 +165,7 @@
   (zero [_]
     free-zero)
   (comp* [mv mvs]
-    (free-plus (cons mv mvs))))
+    (free-comp (cons mv mvs))))
 
 ;; (add-ns id (module "core/id.toc"))
 ;; (main [_]

@@ -6,6 +6,14 @@
 ;; optimize calls to invoke fns
 ;; automatically derive =* for reified types
 ;;     and uncomment code in BitmapIndexedNode/assoc*
+;; importing modules with no defs blows up
+
+;; gives non-sense error message
+;;        (deftype Bogus
+;;            extend-type Number
+;;            Stringable
+;;            (string-list [_] (list "")))
+
 ;; compact lists cdr coding
 ;; implements?
 ;; fn meta data; doc strings and ast

@@ -2474,17 +2474,17 @@ abort();
 FnArity protoFnArity_1200 = {8, -1, 1, (List *)0, 0, protoFnImpl_1199};
 Function protoFn_1197 = {3, -1, ".alts", 1, {&protoFnArity_1200}};
 
-// forward declaration for 'free-plus'
+// forward declaration for 'free-comp'
 Value *var_1201;
 
 struct {int64_t type;
  int32_t refs;
    int64_t len;
-   char buffer[10];} _str_65 = {1, -1, 9,"free-plus"};
+   char buffer[12];} _str_64 = {1, -1, 11,"<FreeComp: "};
 struct {int64_t type;
  int32_t refs;
    int64_t len;
-   char buffer[12];} _str_64 = {1, -1, 11,"<FreePlus: "};
+   char buffer[10];} _str_65 = {1, -1, 9,"free-comp"};
 Number _num_17 = {2, -1, 25};
 
 // --------- instance?_impl --------------
@@ -2584,7 +2584,12 @@ Function fn_1215;
 
 // --------- anon --------------
 Function fn_1242;
-extern Function protoFn_368;
+extern Function protoFn_339;
+extern Function protoFn_248;
+extern Function protoFn_345;
+extern Function protoFn_373;
+Value *protoFnImpl_350(List *, Value *);
+Value *protoFnImpl_354(List *, Value *);
 Value *arityImpl_1243(List *closures, Value *arg0) {
 Value *val0 = closures->head;
 if (closures->tail)
@@ -2597,32 +2602,45 @@ my_free(rslt1);
 return(rslt1);
 };
 
-Value *protoFnImpl_370(List *, Value *, Value *);
+Value *protoFnImpl_378(List *, Value *, Value *);
+Value *protoFnImpl_253(List *, Value *, Value *);
 Value *arityImpl_1241(List *closures, Value *arg0, Value *arg1) {
 Value *val0 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-FnArity *arity_1 = malloc_fnArity();
-arity_1->type = 8;
-arity_1->count = 1;
-arity_1->closures = empty_list;
-arity_1->variadic = 0;
-arity_1->fn = arityImpl_1243;
+Value *rslt1 = protoFnImpl_354(empty_list, val0);
+Value *rslt2 = protoFnImpl_1161(empty_list, rslt1, arg1);
+Value *rslt3 = protoFnImpl_350(empty_list, val0);
+FnArity *arity_4 = malloc_fnArity();
+arity_4->type = 8;
+arity_4->count = 1;
+arity_4->closures = empty_list;
+arity_4->variadic = 0;
+arity_4->fn = arityImpl_1243;
 incRef((Value *)arg1);
-arity_1->closures = listCons((Value *)arg1, (List *)arity_1->closures);
+arity_4->closures = listCons((Value *)arg1, (List *)arity_4->closures);
 Function *fn_1242 = malloc_function(1);
 fn_1242->type = 3;
 fn_1242->name = "anon";
 fn_1242->arityCount = 1;
-fn_1242->arities[0] = arity_1;
-Value *rslt2 = protoFnImpl_370(empty_list, val0, (Value *)fn_1242);
-incRef(rslt2);
+fn_1242->arities[0] = arity_4;
+Value *rslt5 = protoFnImpl_253(empty_list, rslt3, (Value *)fn_1242);
+Value *rslt6 = protoFnImpl_378(empty_list, rslt2, rslt5);
+incRef(rslt6);
+decRef(rslt6);
+my_free(rslt6);
+decRef(rslt1);
+my_free(rslt1);
+decRef(rslt5);
+my_free(rslt5);
 decRef((Value *)fn_1242);
 my_free((Value *)fn_1242);
+decRef(rslt3);
+my_free(rslt3);
 decRef(rslt2);
 my_free(rslt2);
-return(rslt2);
+return(rslt6);
 };
 
 Value *protoImpl_1213(List *closures, Value *arg0, Value *arg1) {
@@ -3163,7 +3181,6 @@ Function fn_1277;
 
 // --------- anon --------------
 Function fn_1310;
-extern Function protoFn_248;
 Value *arityImpl_1311(List *closures, Value *arg0) {
 Value *val0 = closures->head;
 if (closures->tail)
