@@ -1,0 +1,201 @@
+
+(add-ns f (module "core/free.toc"))
+(add-ns s (module "core/state.toc"))
+
+(deftype Unify [x y])
+
+(defn == [x y]
+  (f/free (Unify x y)))
+
+
+(deftype Fail [])
+
+(defn fail []
+  (f/free (Fail)))
+
+
+(defn all [& clauses]
+  (apply* (f/free list) clauses))
+
+(defn conde [clause & clauses]
+  (comp* clause clauses))
+
+
+(deftype LVar [sym]
+  Eq
+  (=* [x y]
+    (number= x y))
+
+  Stringable
+  (string-list [v] (list (str sym)))
+
+  Hash
+  (sha1 [_]
+    (sha1 sym)))
+
+(defn lvar []
+  (LVar (gensym "lvar_")))
+
+
+(deftype EagerGoal [prog-fn]
+  Function
+  (invoke [_ s]
+    (prog-fn s))
+
+  Monoid
+  (comp* [p ps]
+    (let [ps (cons p ps)]
+      (EagerGoal (fn [s]
+                    (apply comp (map ps (fn [p]
+                                          (p s))))))))
+
+  Applicative
+  (apply* [_ ps]
+    (EagerGoal (fn [s]
+                  (reduce ps (list s)
+                          (fn [ss p]
+                            (apply comp (map ss p))))))))
+
+(deftype LazyGoal [prog-fn]
+  Function
+  (invoke [_ s]
+    (prog-fn s))
+
+  Monoid
+  (comp* [p ps]
+    (LazyGoal (fn [s]
+                :bogus)))
+
+  Applicative
+  (apply* [_ ps]
+    (LazyGoal (fn [s]
+                :bogus))))
+
+(deftype CPSGoal [f]
+  Stringable
+  (string-list [_]
+    (list "<CPSGoal " (str f) ">"))
+
+  Function
+  (invoke [_ s]
+    (f s))
+
+  Monoid
+  (comp* [p ps]
+    (let [ps (cons p ps)]
+      (CPSGoal (fn comp*-s [s]
+                 (fn comp*-c [c]
+                   (fn comp*-l
+                     ([l]
+                        (cond
+                         (= :fail s) ((c s) l)
+                         (let [mapped (map ps (fn [p]
+                                                ((p s) c)))]
+                           (reduce mapped l
+                                   (fn [l m]
+                                     (m l))))))
+                     ([n l]
+                        (cond
+                         (= :fail s) ((c s) l)
+                         (let [mapped (map ps (fn [p]
+                                                ((p s) c)))]
+                           (reduce mapped l
+                                   (fn [l m]
+                                     (cond
+                                      (< (count l) n) (m n l)
+                                      l))))))))))))
+
+  Applicative
+  (apply* [_ ps]
+    (CPSGoal (fn apply*-s [s]
+               (fn apply*-c [c]
+                 (cond
+                  (= :fail s) (c s)
+                  ((reduce (reverse ps) c
+                            (fn [c p]
+                              (fn [s]
+                                ((p s) c))))
+                   s)))))))
+
+(defprotocol LogicProgram
+  (eager-goal [_])
+  (lazy-goal [_])
+  (cps-goal [_])
+  (parallel-goal [_]))
+
+(extend-type Function
+  LogicProgram
+  (eager-goal [f]
+    (EagerGoal f))
+
+  (cps-goal [f]
+    (CPSGoal f)))
+
+(extend-type Unify
+  Stringable
+  (string-list [u]
+    (list "(== " (str (.x u))
+          " " (str (.y u)) ")"))
+
+  LogicProgram
+  (eager-goal [u]
+    (EagerGoal (fn [s]
+                 (cond
+                  (instance? LVar (.x u)) (list (assoc s (.x u) (.y u)))
+                  (instance? LVar (.y u)) (list (assoc s (.y u) (.x u)))
+                  (= (.x u) (.y u)) (list s)
+                  empty-list))))
+  (cps-goal [u]
+    (CPSGoal (fn unify-s [s]
+               (let [new-s (cond
+                            (= :fail s) s
+                            (instance? LVar (.x u)) (assoc s (.x u) (.y u))
+                            (instance? LVar (.y u)) (assoc s (.y u) (.x u))
+                            (= (.x u) (.y u)) s
+                            :fail)]
+                 (fn unify-c [c]
+                   (c new-s)))))))
+
+
+(extend-type Fail
+  LogicProgram
+  (eager-goal [_]
+    (EagerGoal (fn [s] empty-list)))
+  (cps-goal [_]
+    (CPSGoal (fn fail-s [s]
+               (fn fail-c [c]
+                 (c :fail))))))
+
+
+(defn walk [s lv]
+  (cond
+   (seq? lv) (map lv (partial walk s))
+   (instance? LVar lv) (let [v (get s lv '_)]
+                         (cond
+                          (instance? LVar v) (walk s v)
+                          (seq? v) (map v (partial walk s))
+                          v))
+   lv))
+
+(defn run
+  ([q p]
+     (let [goal (apply* (CPSGoal :ignore)
+                        (list (f/evaluate p cps-goal)
+                              (CPSGoal (fn tail-s [s]
+                                         (fn tail-c [c]
+                                           (fn tail-l [l]
+                                             (cond
+                                              (= :fail s) l
+                                              (cons (walk s q) l))))))))]
+       (((goal {}) identity) empty-list)))
+  ([n q p]
+     (let [goal (apply* (CPSGoal :ignore)
+                        (list (f/evaluate p cps-goal)
+                              (CPSGoal (fn tail-s [s]
+                                         (fn tail-c [c]
+                                           (fn tail-l [n l]
+                                             (cond
+                                              (= :fail s) l
+                                              (< (count l) n) (cons (walk s q) l)
+                                              l)))))))]
+       (((goal {}) identity) n empty-list))))
