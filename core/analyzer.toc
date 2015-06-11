@@ -20,7 +20,9 @@
                          (not (seq? x)) false
                          (empty? x) false
                          (= (first x) 'inline-text))))]
-    (fr/free (ast/inline-ast (nth expr 1 "")))))
+    (cond
+     (= 3 (count expr)) (fr/free (ast/inline-ast (nth expr 2 "") (nth expr 1 :no-type)))
+     (fr/free (ast/inline-ast (nth expr 1 "") :no-type)))))
 
 (defn analyze-symbol []
   (for [sym (is-expr symbol?)]

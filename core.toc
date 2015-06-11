@@ -202,7 +202,7 @@ Value *count(Value* n);
 ")
 
 (defn output-to-file [file-path]
-  (inline-text
+  (inline-text Number
    "String *arg0Str = (String *)my_malloc(sizeof(String) + ((String *)arg0)->len + 5);
     arg0Str->type = StringType;
     if (arg0->type == StringType)
@@ -220,69 +220,72 @@ Value *count(Value* n);
     return((Value *)&trueVal);\n"))
 
 (defn standard-output []
-  (inline-text
+  (inline-text Number
    "outStream = stdout;
     return((Value *)&trueVal);\n"))
 
 (defn symkey-name [v]
-  (inline-text
+  (inline-text String
    "return(stringValue(((SubString *)arg0)->buffer));\n"))
 
 (defn char-code [c]
-  (inline-text "if (arg0->type == StringType) {
-                  String *s = (String *)arg0;
-                  return(numberValue((int)s->buffer[0]));
-                } else if (arg0->type == SubStringType) {
-                  SubString *s = (SubString *)arg0;
-                  return(numberValue((int)s->buffer[0]));
-                } else
-                  abort();\n "))
+  (inline-text Number
+   "if (arg0->type == StringType) {
+        String *s = (String *)arg0;
+        return(numberValue((int)s->buffer[0]));
+      } else if (arg0->type == SubStringType) {
+        SubString *s = (SubString *)arg0;
+        return(numberValue((int)s->buffer[0]));
+      } else
+        abort();\n "))
 
 (defn symbol [sym-str]
-  (inline-text "if (arg0->type == StringType) {
-                     String *s = (String *)arg0;
-                     SubString *subStr = malloc_substring();
-                     subStr->type = SymbolType;
-                     subStr->len = s->len;
-                     subStr->source = arg0;
-                     incRef(arg0);
-                     subStr->buffer = s->buffer;
-                     return((Value *)subStr);
-                   } else if (arg0->type == SubStringType) {
-                     SubString *s = (SubString *)arg0;
-                     SubString *subStr = malloc_substring();
-                     subStr->type = SymbolType;
-                     subStr->len = s->len;
-                     subStr->source = arg0;
-                     incRef(arg0);
-                     subStr->buffer = s->buffer;
-                     return((Value *)subStr);
-                   } else if (arg0->type == SymbolType) {
-                     return(arg0);
-                   }
-                     abort();\n"))
+  (inline-text Symbol
+   "if (arg0->type == StringType) {
+        String *s = (String *)arg0;
+        SubString *subStr = malloc_substring();
+        subStr->type = SymbolType;
+        subStr->len = s->len;
+        subStr->source = arg0;
+        incRef(arg0);
+        subStr->buffer = s->buffer;
+        return((Value *)subStr);
+      } else if (arg0->type == SubStringType) {
+        SubString *s = (SubString *)arg0;
+        SubString *subStr = malloc_substring();
+        subStr->type = SymbolType;
+        subStr->len = s->len;
+        subStr->source = arg0;
+        incRef(arg0);
+        subStr->buffer = s->buffer;
+        return((Value *)subStr);
+      } else if (arg0->type == SymbolType) {
+        return(arg0);
+      }
+        abort();\n"))
 
 (defn new-keyword [kw-str]
-  (inline-text "if (arg0->type == StringType) {
-                     String *s = (String *)arg0;
-                     SubString *subStr = malloc_substring();
-                     subStr->type = KeywordType;
-                     subStr->len = s->len;
-                     subStr->source = arg0;
-                     incRef(arg0);
-                     subStr->buffer = s->buffer;
-                     return((Value *)subStr);
-                   } else if (arg0->type == SubStringType) {
-                     SubString *s = (SubString *)arg0;
-                     SubString *subStr = malloc_substring();
-                     subStr->type = KeywordType;
-                     subStr->len = s->len;
-                     subStr->source = arg0;
-                     incRef(arg0);
-                     subStr->buffer = s->buffer;
-                     return((Value *)subStr);
-                   } else
-                     abort();\n"))
+  (inline-text Keyword
+   "if (arg0->type == StringType) {
+        String *s = (String *)arg0;
+        SubString *subStr = malloc_substring();
+        subStr->type = KeywordType;
+        subStr->len = s->len;
+        subStr->source = arg0;
+        incRef(arg0);
+        subStr->buffer = s->buffer;
+        return((Value *)subStr);
+      } else if (arg0->type == SubStringType) {
+        SubString *s = (SubString *)arg0;
+        SubString *subStr = malloc_substring();
+        subStr->type = KeywordType;
+        subStr->len = s->len;
+        subStr->source = arg0;
+        incRef(arg0);
+        subStr->buffer = s->buffer;
+        return((Value *)subStr);
+      } else
+        abort();\n"))
 
 (defn abort []
   (inline-text
@@ -290,93 +293,96 @@ Value *count(Value* n);
     return(true);\n"))
 
 (defn get-type [value]
-  (inline-text
+  (inline-text Number
    "return(numberValue(arg0->type));"))
 
 (defn type= [x y]
-  (inline-text "if (arg0->type == arg1->type)
-                   return(true);
-                else
-                   return(false);\n"))
+  (inline-text Number
+   "if (arg0->type == arg1->type)
+      return(true);
+    else
+      return(false);\n"))
 
 (defn subs
   ([src index]
-     (inline-text "int64_t idx = ((Number *)arg1)->numVal;
-                   if (arg0->type == StringType) {
-                     String *s = (String *)arg0;
-                     SubString *subStr = malloc_substring();
-                     subStr->type = SubStringType;
-                     if (idx < s->len) {
-                       subStr->len = s->len - idx;
-                       subStr->source = arg0;
-                       incRef(arg0);
-                       subStr->buffer = s->buffer + idx;
-                     }
-                     else {
-                       subStr->len = 0;
-                       subStr->source = (Value *)0;
-                       subStr->buffer = (char *)0;
-                     }
-                     return((Value *)subStr);
-                   } else if (arg0->type == SubStringType) {
-                     SubString *s = (SubString *)arg0;
-                     SubString *subStr = malloc_substring();
-                     subStr->type = SubStringType;
-                     if (idx < s->len) {
-                       subStr->len = s->len - idx;
-                       subStr->source = arg0;
-                       incRef(arg0);
-                       subStr->buffer = s->buffer + idx;
-                     }
-                     else {
-                       subStr->len = 0;
-                       subStr->source = (Value *)0;
-                       subStr->buffer = (char *)0;
-                     }
-                     return((Value *)subStr);
-                   } else
-                     abort();\n"))
+     (inline-text SubString
+      "int64_t idx = ((Number *)arg1)->numVal;
+        if (arg0->type == StringType) {
+          String *s = (String *)arg0;
+          SubString *subStr = malloc_substring();
+          subStr->type = SubStringType;
+          if (idx < s->len) {
+            subStr->len = s->len - idx;
+            subStr->source = arg0;
+            incRef(arg0);
+            subStr->buffer = s->buffer + idx;
+          }
+          else {
+            subStr->len = 0;
+            subStr->source = (Value *)0;
+            subStr->buffer = (char *)0;
+          }
+          return((Value *)subStr);
+        } else if (arg0->type == SubStringType) {
+          SubString *s = (SubString *)arg0;
+          SubString *subStr = malloc_substring();
+          subStr->type = SubStringType;
+          if (idx < s->len) {
+            subStr->len = s->len - idx;
+            subStr->source = arg0;
+            incRef(arg0);
+            subStr->buffer = s->buffer + idx;
+          }
+          else {
+            subStr->len = 0;
+            subStr->source = (Value *)0;
+            subStr->buffer = (char *)0;
+          }
+          return((Value *)subStr);
+        } else
+          abort();\n"))
   ([src index length]
-     (inline-text "int64_t idx = ((Number *)arg1)->numVal;
-                   int64_t len = ((Number *)arg2)->numVal;
-                   if (arg0->type == StringType) {
-                     String *s = (String *)arg0;
-                     SubString *subStr = malloc_substring();
-                     subStr->type = SubStringType;
-                     if (idx + len <= s->len) {
-                       subStr->len = len;
-                       subStr->source = arg0;
-                       incRef(arg0);
-                       subStr->buffer = s->buffer + idx;
-                     }
-                     else {
-                       subStr->len = 0;
-                       subStr->source = (Value *)0;
-                       subStr->buffer = (char *)0;
-                     }
-                     return((Value *)subStr);
-                   } else if (arg0->type == SubStringType) {
-                     SubString *s = (SubString *)arg0;
-                     SubString *subStr = malloc_substring();
-                     subStr->type = SubStringType;
-                     if (idx + len <= s->len) {
-                       subStr->len = len;
-                       subStr->source = arg0;
-                       incRef(arg0);
-                       subStr->buffer = s->buffer + idx;
-                     }
-                     else {
-                       subStr->len = 0;
-                       subStr->source = (Value *)0;
-                       subStr->buffer = (char *)0;
-                     }
-                     return((Value *)subStr);
-                   } else
-                     abort();\n")))
+     (inline-text SubString
+      "int64_t idx = ((Number *)arg1)->numVal;
+        int64_t len = ((Number *)arg2)->numVal;
+        if (arg0->type == StringType) {
+          String *s = (String *)arg0;
+          SubString *subStr = malloc_substring();
+          subStr->type = SubStringType;
+          if (idx + len <= s->len) {
+            subStr->len = len;
+            subStr->source = arg0;
+            incRef(arg0);
+            subStr->buffer = s->buffer + idx;
+          }
+          else {
+            subStr->len = 0;
+            subStr->source = (Value *)0;
+            subStr->buffer = (char *)0;
+          }
+          return((Value *)subStr);
+        } else if (arg0->type == SubStringType) {
+          SubString *s = (SubString *)arg0;
+          SubString *subStr = malloc_substring();
+          subStr->type = SubStringType;
+          if (idx + len <= s->len) {
+            subStr->len = len;
+            subStr->source = arg0;
+            incRef(arg0);
+            subStr->buffer = s->buffer + idx;
+          }
+          else {
+            subStr->len = 0;
+            subStr->source = (Value *)0;
+            subStr->buffer = (char *)0;
+          }
+          return((Value *)subStr);
+        } else
+          abort();\n")))
 
 ;; this function assumes the type of 'n' has already been checked
 (defn number-str [n]
-  (inline-text
+  (inline-text String
    "String *numStr = (String *)my_malloc(sizeof(String) + 10);
     snprintf(numStr->buffer, 9, \"%lld\", ((Number *)arg0)->numVal);
     numStr->type = StringType;
@@ -384,7 +390,7 @@ Value *count(Value* n);
     return((Value *)numStr);\n"))
 
 (defn number= [x y]
-  (inline-text
+  (inline-text Number
    "if (arg0->type != arg1->type) {
       return(false);
    } else if (((Number *)arg0)->numVal != ((Number *)arg1)->numVal)
@@ -394,7 +400,7 @@ Value *count(Value* n);
 
 ;; this function assumes the type of 'x' has already been checked
 (defn number-less-than [x y]
-  (inline-text
+  (inline-text Number
    "if (arg0->type != arg1->type) {
       fprintf(stderr, \"\\ninvalid types for 'number-less-than'\\n\");
       abort();
@@ -405,7 +411,7 @@ Value *count(Value* n);
 
 ;; this function assumes the type of 'x' has already been checked
 (defn add-numbers [x y]
-  (inline-text
+  (inline-text Number
    "if (arg0->type != arg1->type) {
       fprintf(stderr, \"\\ninvalid types for 'add-numbers'\\n\");
       abort();
@@ -414,7 +420,7 @@ Value *count(Value* n);
 
 ;; this function assumes the type of 'x' has already been checked
 (defn subtract-numbers [x y]
-  (inline-text
+  (inline-text Number
    "if (arg0->type != arg1->type) {
       fprintf(stderr, \"\\ninvalid types for 'subtract-numbers'\\n\");
       abort();
@@ -423,7 +429,7 @@ Value *count(Value* n);
 
 ;; this function assumes the type of 'x' has already been checked
 (defn mult-numbers [x y]
-  (inline-text
+  (inline-text Number
    "if (arg0->type != arg1->type) {
       fprintf(stderr, \"\\n*** invalid types for 'mult-numbers'\\n\");
       abort();
@@ -431,7 +437,7 @@ Value *count(Value* n);
       return(numberValue(((Number *)arg0)->numVal * ((Number *)arg1)->numVal));\n"))
 
 (defn rem [x y]
-  (inline-text
+  (inline-text Number
    "if (arg0->type != NumberType ||
         arg1->type != NumberType) {
       fprintf(stderr, \"\\ninvalid types for 'rem'\\n\");
@@ -445,12 +451,14 @@ Value *count(Value* n);
 
 (defn cons
   ([x]
-     (inline-text "incRef(arg0);\nreturn((Value *)listCons(arg0, empty_list));\n"))
+     (inline-text List
+      "incRef(arg0);\nreturn((Value *)listCons(arg0, empty_list));\n"))
   ([x l]
-     (inline-text "incRef(arg0);\nincRef(arg1);\nreturn((Value *)listCons(arg0, (List *)arg1));\n")))
+     (inline-text List
+      "incRef(arg0);\nincRef(arg1);\nreturn((Value *)listCons(arg0, (List *)arg1));\n")))
 
 (defn list-count [l]
-  (inline-text
+  (inline-text Number
    "if (arg0->type != ListType)
       abort();
     else
@@ -471,7 +479,7 @@ Value *count(Value* n);
     }\n"))
 
 (defn cdr [l]
-  (inline-text
+  (inline-text List
    "List *lst = (List *)arg0;
     if (arg0->type != ListType) {
       fprintf(stderr, \"\\n*** 'cdr' requires a list\\n\");
@@ -486,7 +494,7 @@ Value *count(Value* n);
     }\n"))
 
 (defn fn-name [f]
-  (inline-text
+  (inline-text String
    "if (arg0->type != FunctionType) {
       fprintf(stderr, \"\\n*** invalid type for 'fn-name'\\n\");
       abort();
@@ -494,7 +502,7 @@ Value *count(Value* n);
       return(stringValue(((Function *)arg0)->name));\n"))
 
 (defn char [n]
-  (inline-text
+  (inline-text String
    "if (arg0->type != NumberType) {
       fprintf(stderr, \"\\ninvalid type for 'char'\\n\");
       abort();
@@ -507,7 +515,7 @@ Value *count(Value* n);
     return((Value *)strVal);\n"))
 
 (defn str-count [str]
-  (inline-text
+  (inline-text Number
    "if (arg0->type != StringType && arg0->type != SubStringType ) {
       fprintf(stderr, \"\\ninvalid type for 'str-count'\\n\");
       abort();
@@ -515,7 +523,7 @@ Value *count(Value* n);
    return(numberValue(((String *)arg0)->len));\n"))
 
 (defn str= [str1 str2]
-  (inline-text
+  (inline-text Number
    "if (arg0->type == StringType && arg1->type == StringType) {
       String *s1 = (String *)arg0;
       String *s2 = (String *)arg1;
@@ -550,7 +558,7 @@ Value *count(Value* n);
        return(false);\n"))
 
 (defn symkey= [v1 v2]
-  (inline-text
+  (inline-text Number
    "if (arg0->type != arg1->type)
       return(false);
     else {
@@ -563,7 +571,7 @@ Value *count(Value* n);
     }\n"))
 
 (defn str-malloc [len]
-  (inline-text
+  (inline-text String
    "String *strVal = (String *)my_malloc(sizeof(String) + ((Number *)arg0)->numVal + 5);
     strVal->type = StringType;
     strVal->len = 0;
@@ -571,7 +579,7 @@ Value *count(Value* n);
     return((Value *)strVal);\n"))
 
 (defn str-append [dest src]
-  (inline-text
+  (inline-text String
    " if (arg0->type != StringType) {
       fprintf(stderr, \"\\ninvalid type for 'str-append'\\n\");
       abort();
@@ -591,7 +599,7 @@ Value *count(Value* n);
     return(arg0);\n"))
 
 (defn pr-err* [str]
-  (inline-text
+  (inline-text Number
    "if (arg0->type == StringType)
       fprintf(stderr, \"%-.*s\", (int)((String *)arg0)->len, ((String *)arg0)->buffer);
     else if (arg0->type == SubStringType)
@@ -603,7 +611,7 @@ Value *count(Value* n);
     return(true);\n"))
 
 (defn slurp [fileName]
-  (inline-text
+  (inline-text String
    "String *arg0Str = (String *)my_malloc(sizeof(String) + ((String *)arg0)->len + 5);
     arg0Str->type = StringType;
     if (arg0->type == StringType)
@@ -769,79 +777,80 @@ Value *count(Value* n);
 
 (defn escape-chars [c]
   ;; does not allocate a Value
-  (inline-text "if (arg0->type == StringType) {
-                  String *s = (String *)arg0;
-                  String *result = (String *)my_malloc(sizeof(String) + s->len * 2 + 5);
-                  char *resultBuffer = result->buffer;
-                  int resultIndex = 0;
-                  for(int i = 0; i < s->len; i++) {
-                    if (s->buffer[i] == 10) {
-                      resultBuffer[resultIndex++] = 92;
-                      resultBuffer[resultIndex++] = 110;
-                    } else if (s->buffer[i] == 34) {
-                      resultBuffer[resultIndex++] = 92;
-                      resultBuffer[resultIndex++] = 34;
-                    } else if (s->buffer[i] == 13) {
-                      resultBuffer[resultIndex++] = 92;
-                      resultBuffer[resultIndex++] = 114;
-                    } else if (s->buffer[i] == 12) {
-                      resultBuffer[resultIndex++] = 92;
-                      resultBuffer[resultIndex++] = 102;
-                    } else if (s->buffer[i] == 8) {
-                      resultBuffer[resultIndex++] = 92;
-                      resultBuffer[resultIndex++] = 98;
-                    } else if (s->buffer[i] == 9) {
-                      resultBuffer[resultIndex++] = 92;
-                      resultBuffer[resultIndex++] = 116;
-                    } else if (s->buffer[i] == 92) {
-                      resultBuffer[resultIndex++] = 92;
-                      resultBuffer[resultIndex++] = 92;
-                    } else
-                      resultBuffer[resultIndex++] = s->buffer[i];
-                  }
-                  resultBuffer[resultIndex] = 0;
-                  result->type = StringType;
-                  result->len = resultIndex;
-                  return((Value *)result);
-                } else if (arg0->type == SubStringType) {
-                  SubString *s = (SubString *)arg0;
-                  String *result = (String *)my_malloc(sizeof(String) + s->len * 2 + 5);
-                  char *resultBuffer = result->buffer;
-                  int resultIndex = 0;
-                  for(int i = 0; i < s->len; i++) {
-                    if (s->buffer[i] == 10) {
-                      resultBuffer[resultIndex++] = 92;
-                      resultBuffer[resultIndex++] = 110;
-                    } else if (s->buffer[i] == 34) {
-                      resultBuffer[resultIndex++] = 92;
-                      resultBuffer[resultIndex++] = 34;
-                    } else if (s->buffer[i] == 13) {
-                      resultBuffer[resultIndex++] = 92;
-                      resultBuffer[resultIndex++] = 114;
-                    } else if (s->buffer[i] == 12) {
-                      resultBuffer[resultIndex++] = 92;
-                      resultBuffer[resultIndex++] = 102;
-                    } else if (s->buffer[i] == 8) {
-                      resultBuffer[resultIndex++] = 92;
-                      resultBuffer[resultIndex++] = 98;
-                    } else if (s->buffer[i] == 9) {
-                      resultBuffer[resultIndex++] = 92;
-                      resultBuffer[resultIndex++] = 116;
-                    } else if (s->buffer[i] == 92) {
-                      resultBuffer[resultIndex++] = 92;
-                      resultBuffer[resultIndex++] = 92;
-                    } else
-                      resultBuffer[resultIndex++] = s->buffer[i];
-                  }
-                  resultBuffer[resultIndex] = 0;
-                  result->type = StringType;
-                  result->len = resultIndex;
-                  return((Value *)result);
-                } else
-                  abort();\n "))
+  (inline-text String
+   "if (arg0->type == StringType) {
+        String *s = (String *)arg0;
+        String *result = (String *)my_malloc(sizeof(String) + s->len * 2 + 5);
+        char *resultBuffer = result->buffer;
+        int resultIndex = 0;
+        for(int i = 0; i < s->len; i++) {
+          if (s->buffer[i] == 10) {
+            resultBuffer[resultIndex++] = 92;
+            resultBuffer[resultIndex++] = 110;
+          } else if (s->buffer[i] == 34) {
+            resultBuffer[resultIndex++] = 92;
+            resultBuffer[resultIndex++] = 34;
+          } else if (s->buffer[i] == 13) {
+            resultBuffer[resultIndex++] = 92;
+            resultBuffer[resultIndex++] = 114;
+          } else if (s->buffer[i] == 12) {
+            resultBuffer[resultIndex++] = 92;
+            resultBuffer[resultIndex++] = 102;
+          } else if (s->buffer[i] == 8) {
+            resultBuffer[resultIndex++] = 92;
+            resultBuffer[resultIndex++] = 98;
+          } else if (s->buffer[i] == 9) {
+            resultBuffer[resultIndex++] = 92;
+            resultBuffer[resultIndex++] = 116;
+          } else if (s->buffer[i] == 92) {
+            resultBuffer[resultIndex++] = 92;
+            resultBuffer[resultIndex++] = 92;
+          } else
+            resultBuffer[resultIndex++] = s->buffer[i];
+        }
+        resultBuffer[resultIndex] = 0;
+        result->type = StringType;
+        result->len = resultIndex;
+        return((Value *)result);
+      } else if (arg0->type == SubStringType) {
+        SubString *s = (SubString *)arg0;
+        String *result = (String *)my_malloc(sizeof(String) + s->len * 2 + 5);
+        char *resultBuffer = result->buffer;
+        int resultIndex = 0;
+        for(int i = 0; i < s->len; i++) {
+          if (s->buffer[i] == 10) {
+            resultBuffer[resultIndex++] = 92;
+            resultBuffer[resultIndex++] = 110;
+          } else if (s->buffer[i] == 34) {
+            resultBuffer[resultIndex++] = 92;
+            resultBuffer[resultIndex++] = 34;
+          } else if (s->buffer[i] == 13) {
+            resultBuffer[resultIndex++] = 92;
+            resultBuffer[resultIndex++] = 114;
+          } else if (s->buffer[i] == 12) {
+            resultBuffer[resultIndex++] = 92;
+            resultBuffer[resultIndex++] = 102;
+          } else if (s->buffer[i] == 8) {
+            resultBuffer[resultIndex++] = 92;
+            resultBuffer[resultIndex++] = 98;
+          } else if (s->buffer[i] == 9) {
+            resultBuffer[resultIndex++] = 92;
+            resultBuffer[resultIndex++] = 116;
+          } else if (s->buffer[i] == 92) {
+            resultBuffer[resultIndex++] = 92;
+            resultBuffer[resultIndex++] = 92;
+          } else
+            resultBuffer[resultIndex++] = s->buffer[i];
+        }
+        resultBuffer[resultIndex] = 0;
+        result->type = StringType;
+        result->len = resultIndex;
+        return((Value *)result);
+      } else
+        abort();\n "))
 
 (defn pr* [str]
-  (inline-text
+  (inline-text Number
    "if (arg0->type == StringType)
       fprintf(outStream, \"%-.*s\", (int)((String *)arg0)->len, ((String *)arg0)->buffer);
     else if (arg0->type == SubStringType)
@@ -859,6 +868,12 @@ Value *count(Value* n);
     (pr* ":match*-one-arg"))
   (match* [_ match-targets]
     (pr* ":match*-two-args")))
+
+(defn alert [flag msg]
+  (cond
+   flag true
+   (let [_ (print-err msg)]
+     (abort))))
 
 (defprotocol Type
   (instance? [type val]
@@ -923,32 +938,6 @@ Value *count(Value* n);
 (defn list-empty? [coll]
   (number= 0 (list-count coll)))
 
-(defn interpose [coll sep]
-  (cond
-   (list-empty? coll) coll
-   (cons (car coll)
-         (flat-map (cdr coll)
-                   (fn [x]
-                     (list sep x))))))
-
-(defn prn [& vs]
-  (map (interpose (flat-map vs serialize) " ")
-       pr*)
-  (pr* "\n"))
-
-(defn print [& vs]
-  (map (flat-map (interpose vs " ") string-list)
-       pr*))
-
-(defn println [& vs]
-  (map (flat-map (interpose vs " ") string-list) pr*)
-  (pr* "\n"))
-
-(defn print-err [& vs]
-  (pr-err* "\n*** ")
-  (map (flat-map (interpose vs " ") string-list) pr-err*)
-  (pr-err* "\n"))
-
 (defprotocol Eq
   (=* [x y]
     (print-err "'=*' not implemented:" x)
@@ -993,7 +982,7 @@ Value *count(Value* n);
 
 (defn comp [coll & colls]
   (cond
-   (empty? colls) coll
+   (list-empty? colls) coll
    (comp* coll colls)))
 
 (defprotocol HashMapNode
@@ -1019,32 +1008,32 @@ Value *count(Value* n);
 
 (defn and [& b-vals]
   (cond
-   (empty? b-vals) 1
-   (first b-vals) (apply and (rest b-vals))
+   (list-empty? b-vals) 1
+   (car b-vals) (apply and (cdr b-vals))
    0))
 
 (defn or [& b-vals]
   (cond
-   (empty? b-vals) 0
-   (first b-vals) 1
-   (apply or (rest b-vals))))
+   (list-empty? b-vals) 0
+   (car b-vals) 1
+   (apply or (cdr b-vals))))
 
 (defn =
   ([x y] (=* x y))
   ([v & vs]
      (cond
-      (empty? vs) 1
-      (not (=* v (first vs))) 0
-      (number= 1 (count vs)) 1
+      (list-empty? vs) 1
+      (not (=* v (car vs))) 0
+      (number= 1 (list-count vs)) 1
       (apply = vs))))
 
 (defn <
   ([x y] (<* x y))
   ([v & vs]
      (cond
-      (empty? vs) 1
-      (not (<* v (first vs))) 0
-      (number= 1 (count vs)) 1
+      (list-empty? vs) 1
+      (not (<* v (car vs))) 0
+      (number= 1 (list-count vs)) 1
       (apply < vs))))
 
 (defn list** [arg args]
@@ -1056,7 +1045,7 @@ Value *count(Value* n);
   (list** arg args))
 
 (defn filter [l f]
-  (inline-text
+  (inline-text List
      "List *l = (List *)arg0;
       if (arg0->type != ListType) {
          fprintf(stderr, \"'filter' is only defined for 'List' values\\n\");
@@ -1165,7 +1154,8 @@ Value *count(Value* n);
 
   Hash
   (sha1 [_]
-    (inline-text "
+    (inline-text Number
+     "
 int64_t shaVal;
 Sha1Context context;
 Number *numVal = (Number *)arg0;
@@ -1215,7 +1205,7 @@ return((Value *)numberValue(shaVal));
       (flat-map mv (partial rest-steps empty-list))))))
 
 (defn list-concat [l1]
-  (inline-text
+  (inline-text List
    " List *ls = (List *)arg0;
 
   if (ls->len == 0) {
@@ -1261,12 +1251,34 @@ return((Value *)numberValue(shaVal));
 
 (defn list=* [ls]
   (cond
-   (empty? ls) 1
-   (empty? (first ls)) 1
-   (not (apply = (map ls (fn [l] (first l))))) 0
+   (list-empty? ls) 1
+   (list-empty? (car ls)) 1
+   (not (apply = (map ls (fn [l] (car l))))) 0
    (list=* (map ls rest))))
 
 (extend-type List
+  Seqable
+  (seq? [l]
+    true)
+  (seq [l] l)
+  (first [l] (car l))
+  (rest [l] (cdr l))
+
+  Collection
+  (empty? [coll] (number= 0 (list-count coll)))
+  (empty [coll] empty-list)
+  (conj [l v] (cons v l))
+  (count [l] (list-count l))
+  (reduce [l result f]
+    (cond
+     (empty? l) result
+     (let [head (first l)
+           tail (rest l)
+           mapped-val (f result head)]
+       (cond
+        (empty? tail) mapped-val
+        (reduce tail mapped-val f)))))
+
   Crushable
   (crush [l f]
     (reduce (cdr l) (f (car l))
@@ -1284,43 +1296,14 @@ return((Value *)numberValue(shaVal));
      (not (number= (count x) (count y))) 0
      (list=* (list x y))))
 
-  Stringable
-  (string-list [l]
-    (comp (list "(")
-          (flat-map (interpose l ", ") string-list)
-          (list ")")))
-
-  Collection
-  (empty? [coll] (number= 0 (list-count coll)))
-  (empty [coll] empty-list)
-  (conj [l v] (cons v l))
-  (count [l] (list-count l))
-  (reduce [l result f]
-    (cond
-     (empty? l) result
-     (let [head (first l)
-           tail (rest l)
-           mapped-val (f result head)]
-       (cond
-        (empty? tail) mapped-val
-        (reduce tail mapped-val f)))))
-
-
-  Seqable
-  (seq? [l]
-    true)
-  (seq [l] l)
-  (first [l] (car l))
-  (rest [l] (cdr l))
-
   Monoid
   (zero [_] empty-list)
   (comp* [l ls]
-     (list-concat (cons l ls)))
+    (list-concat (cons l ls)))
 
   Functor
   (map [l f]
-    (inline-text
+    (inline-text List
      "List *l = (List *)arg0;
       if (l->len == 0)
         return((Value *)empty_list);
@@ -1383,6 +1366,39 @@ return((Value *)numberValue(shaVal));
       (cond
        (empty? l) empty-list
        (comp* (car l) (cdr l))))))
+
+(defn interpose [coll sep]
+  (cond
+   (list-empty? coll) coll
+   (cons (car coll)
+         (flat-map (cdr coll)
+                   (fn [x]
+                     (list sep x))))))
+
+(extend-type List
+  Stringable
+  (string-list [l]
+    (list-concat (list "(")
+                 (flat-map (interpose l ", ") string-list)
+                 (list ")"))))
+
+(defn prn [& vs]
+  (map (interpose (flat-map vs serialize) " ")
+       pr*)
+  (pr* "\n"))
+
+(defn print [& vs]
+  (map (flat-map (interpose vs " ") string-list)
+       pr*))
+
+(defn println [& vs]
+  (map (flat-map (interpose vs " ") string-list) pr*)
+  (pr* "\n"))
+
+(defn print-err [& vs]
+  (pr-err* "\n*** ")
+  (map (flat-map (interpose vs " ") string-list) pr-err*)
+  (pr-err* "\n"))
 
 (defn some [coll f]
   (cond
@@ -1536,7 +1552,8 @@ return((Value *)numberValue(shaVal));
 
   Hash
   (sha1 [_]
-    (inline-text "
+    (inline-text Number
+     "
 int64_t shaVal;
 Sha1Context context;
 String *strVal = (String *)arg0;
@@ -1594,7 +1611,8 @@ return((Value *)numberValue(shaVal));
 
   Hash
   (sha1 [_]
-    (inline-text "
+    (inline-text Number
+     "
 int64_t shaVal;
 Sha1Context context;
 SubString *subStrVal = (SubString *)arg0;
@@ -1784,7 +1802,8 @@ Value *createNode(int shift,
 (extend-type BitmapIndexedNode
   Collection
   (count [x]
-    (inline-text "
+    (inline-text Number
+     "
 int cnt = __builtin_popcount(((BitmapIndexedNode *)arg0)->bitmap);
 int accum = 0;
 for(int i = 0; i < cnt; i++) {
@@ -1800,7 +1819,8 @@ for(int i = 0; i < cnt; i++) {
 return(numberValue(accum));
 "))
   (empty? [m]
-    (inline-text "
+    (inline-text Number
+     "
 if (((BitmapIndexedNode *)arg0)->bitmap == 0)
    return(true);
 else
@@ -1838,7 +1858,8 @@ else
 
   HashMapNode
   (hash-seq [n s]
-    (inline-text "
+    (inline-text List
+     "
 BitmapIndexedNode *node = (BitmapIndexedNode *)arg0;
 int cnt = __builtin_popcount(node->bitmap);
 List *seq = (List *)arg1;
@@ -2098,7 +2119,7 @@ return(numberValue(accum));
 
   HashMapNode
   (hash-seq [n s]
-    (inline-text "
+    (inline-text List "
 ArrayNode *node = (ArrayNode *)arg0;
 List *seq = (List *)arg1;
 for (int i = 0; i < 32; i++) {
@@ -2364,7 +2385,7 @@ return(newNode);
 
   Hash
   (sha1 [_]
-    (inline-text "
+    (inline-text Number "
 int64_t shaVal;
 Sha1Context context;
 SubString *subStrVal = (SubString *)arg0;
@@ -2404,7 +2425,7 @@ return((Value *)numberValue(shaVal));
 
   Hash
   (sha1 [_]
-    (inline-text "
+    (inline-text Number "
 int64_t shaVal;
 Sha1Context context;
 SubString *subStrVal = (SubString *)arg0;
@@ -2450,18 +2471,18 @@ return((Value *)numberValue(shaVal));
 ")
 
 (defn get-sym-count []
-  (inline-text "
+  (inline-text Number "
   return numberValue(sym_counter);
 "))
 
 (defn set-sym-count [new-count]
-  (inline-text "
+  (inline-text Number "
   sym_counter = ((Number *)arg0)->numVal;
   return true;
 "))
 
 (defn new-sym-count []
-  (inline-text "
+  (inline-text Number "
  static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
  pthread_mutex_lock (&mutex);

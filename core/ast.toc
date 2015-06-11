@@ -1,5 +1,5 @@
 
-(deftype inline-ast [txt])
+(deftype inline-ast [txt result-type])
 
 (deftype symbol-ast [sym]
   Stringable
