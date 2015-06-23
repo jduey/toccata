@@ -38,7 +38,7 @@
 (add-ns grmr (module "core/grammar.toc"))
 (add-ns ast (module "core/ast.toc"))
 (add-ns an (module "core/analyzer.toc"))
-(add-ns fio (module "core/file-io.toc"))
+;; (add-ns fio (module "core/file-io.toc"))
 
 (defn debug [& args]
   (comp (for [debugging (sm/get-val :debug-on false)
@@ -594,6 +594,48 @@
                  "Value *defined_syms();\n"
                  "Value *static_fns();\n"
                  "Value *protocols();\n"
+                 "\n"))))
+
+(defn extern-base-types []
+  (let [types (types)]
+    (write-strs (list
+                 "#include <sys/types.h>\n"
+                 "#include <stdio.h>\n"
+                 "#include <string.h>\n\n"
+                 Value
+                 NumberVal
+                 StringVal
+                 SubStringVal
+                 ListVal
+                 FnArityVal
+                 FunctionVal
+                 ProtoImpl
+                 ProtoImpls
+                 ReifiedVal
+                 OpaqueVal
+                 BitmapIndexedVal
+                 ArrayNodeVal
+                 "extern List *listCons(Value *x, List *l);\n"
+                 "extern Value *stringValue(char *s);\n"
+                 "extern const int64_t NumberType;\n"
+                 "extern const int64_t KeywordType;\n"
+                 "extern const int64_t SymbolType;\n"
+                 "extern const int64_t StringType;\n"
+                 "extern const int64_t SubStringType;\n"
+                 "extern const int64_t ListType;\n"
+                 "extern const int64_t FunctionType;\n"
+                 "extern const int64_t OpaqueType;\n"
+                 "extern const int64_t BitmapIndexedType;\n"
+                 "extern List *empty_list;\n"
+                 "extern Value *number_literals();\n"
+                 "extern Value *counts();\n"
+                 "extern Value *types();\n"
+                 "extern Value *symbol_literals();\n"
+                 "extern Value *keyword_literals();\n"
+                 "extern Value *string_literals();\n"
+                 "extern Value *defined_syms();\n"
+                 "extern Value *static_fns();\n"
+                 "extern Value *protocols();\n"
                  "\n"))))
 
 (defn extern-fn [name variadic return-type & arg-types]
@@ -1438,37 +1480,37 @@
 
 (defn core-base-fns []
   (write-strs (list "\n"
-                    "FILE *outStream;\n"
-                    "long long malloc_count;\n"
-                    "long long free_count;\n"
-                    "int recycledFunction;\n"
-                    "int recycledReified;\n"
-                    "Value* true;\n"
-                    "Value* false;\n"
-                    "Number trueVal;\n"
-                    "Number falseVal;\n"
-                    "int bitpos(int hash, int shift);\n"
-                    "int mask(int hash, int shift);\n"
-                    "char *extractStr(Value *v);\n"
-                    "Value *my_malloc(int64_t);\n"
-                    "SubString *malloc_substring();\n"
-                    "FnArity *malloc_fnArity();\n"
-                    "List *malloc_list();\n"
-                    "Number *malloc_number();\n"
-                    "Function *malloc_function(int arityCount);\n"
-                    "ReifiedVal *malloc_reified(int implCount);\n"
-                    "void incRef(Value *);\n"
-                    "void decRef(Value *);\n"
-                    "void my_free(Value *);\n"
-                    "int isTrue(Value *boolVal);\n"
-                    "Value *findProtoImpl(int64_t type, ProtoImpls *impls);\n"
-                    "FnArity *findFnArity(Value *fnVal, int argCount);\n"
-                    "Value *stringValue(char *s);\n"
-                    "Value *keywordValue(char *s);\n"
-                    "Value *symbolValue(char *s);\n"
-                    "Value *makeSubstr(int64_t len, Value *str, char *subsStart);\n"
-                    "Value *numberValue(int64_t n);\n"
-                    "List *listCons(Value *x, List *l);\n")))
+                    "extern FILE *outStream;\n"
+                    "extern long long malloc_count;\n"
+                    "extern long long free_count;\n"
+                    "extern int recycledFunction;\n"
+                    "extern int recycledReified;\n"
+                    "extern Value* true;\n"
+                    "extern Value* false;\n"
+                    "extern Number trueVal;\n"
+                    "extern Number falseVal;\n"
+                    "extern int bitpos(int64_t hash, int shift);\n"
+                    "extern int mask(int64_t hash, int shift);\n"
+                    "extern char *extractStr(Value *v);\n"
+                    "extern Value *my_malloc(int64_t);\n"
+                    "extern SubString *malloc_substring();\n"
+                    "extern FnArity *malloc_fnArity();\n"
+                    "extern List *malloc_list();\n"
+                    "extern Number *malloc_number();\n"
+                    "extern Function *malloc_function(int arityCount);\n"
+                    "extern ReifiedVal *malloc_reified(int implCount);\n"
+                    "extern void incRef(Value *);\n"
+                    "extern void decRef(Value *);\n"
+                    "extern void my_free(Value *);\n"
+                    "extern int64_t isTrue(Value *boolVal);\n"
+                    "extern Value *findProtoImpl(int64_t type, ProtoImpls *impls);\n"
+                    "extern FnArity *findFnArity(Value *fnVal, int64_t argCount);\n"
+                    "extern Value *stringValue(char *s);\n"
+                    "extern Value *keywordValue(char *s);\n"
+                    "extern Value *symbolValue(char *s);\n"
+                    "extern Value *makeSubstr(int64_t len, Value *str, char *subsStart);\n"
+                    "extern Value *numberValue(int64_t n);\n"
+                    "extern List *listCons(Value *x, List *l);\n")))
 
 (defn base-fns []
   (write-strs (list "\n"
@@ -1481,11 +1523,11 @@
                     "long long free_count = 0;\n"
                     "\n"
 
-                    "int mask(int hash, int shift) {\n"
+                    "int mask(int64_t hash, int shift) {\n"
                     "  return (hash >> shift) & 0x1f;\n"
                     "}\n\n"
 
-                    "int bitpos(int hash, int shift) {\n"
+                    "int bitpos(int64_t hash, int shift) {\n"
                     "  return 1 << mask(hash, shift);\n"
                     "}\n\n"
 
@@ -1796,7 +1838,7 @@
                     "}\n"
                     "return(newStr->buffer);\n}\n\n"
 
-                    "int isTrue(Value *boolVal) {\n"
+                    "int64_t isTrue(Value *boolVal) {\n"
                     "if (boolVal->type != " (get (types) 'Number 10000) ") {\n"
                     "fprintf(outStream, \"Invalid boolean value\\n"
                     "\");\nabort();\n}\nelse\nreturn(((Number *)boolVal)->numVal);\n}\n"
@@ -1813,7 +1855,7 @@
                     "return(impls->defaultImpl);\n"
                     "};\n\n"
 
-                    "FnArity *findFnArity(Value *fnVal, int argCount) {\n"
+                    "FnArity *findFnArity(Value *fnVal, int64_t argCount) {\n"
                     "Function *fn = (Function *)fnVal;\n"
                     "int arityIndex = 0;\n"
                     "FnArity *arity = (FnArity *)fn->arities[arityIndex];\n"
@@ -2261,7 +2303,9 @@
   (for [syms (sm/get-val :symbols {})
         _ (write "Value *symbol_literals() {\n")
         _ (write "List *syms = empty_list;\n")
-        _ (write "List *symInfo;\n")
+        _ (cond
+           (empty? (seq syms)) (sm/state-maybe "")
+           (write "List *symInfo;\n"))
         _ (write-strs (flat-map (seq syms)
                                 (fn [sym-lit]
                                   (let [sym (first sym-lit)
@@ -2453,9 +2497,11 @@
                        _ (sm/set-val :file-name "core")
                        :let [out-file (str (subs (second expr) 0 (- (count (second expr)) 3)) "c")
                              _ (output-to-file out-file)
-                             core (fio/file-stream (fio/fopen-read (second expr)))]
+                             ;; core (fio/file-stream (fio/fopen-read (second expr)))
+                             core (slurp (second expr))
+                             ]
                        _ (compile-core parser core)
-                       :let [_ (fio/close-stream core)
+                       :let [;; _ (fio/close-stream core)
                              _ (standard-output)]
 
                        syms (sm/get-val :symbols {})
@@ -2482,7 +2528,7 @@
                        _ (sm/set-val :core-static-fns s-funs)
                        _ (sm/set-val :static-fns {})
 
-                       _ (base-types)
+                       _ (extern-base-types)
 
                        protos (sm/get-val :protocols)
                        _ (traverse (seq protos)
@@ -2525,7 +2571,7 @@
 (defn compile-main [parser text]
   (apply-to list
             (sm/set-val :text text)
-            (base-types)
+            (extern-base-types)
             (extern-functions)
             (core-base-fns)
             (fixed-fn-types)
@@ -2551,7 +2597,8 @@
                              (cond
                               (empty? v) empty-list
                               (sm/state-maybe (first v)))))
-        text (fio/file-stream (fio/fopen-read (first src-files)))
+        ;; text (fio/file-stream (fio/fopen-read (first src-files)))
+        text (slurp (first src-files))
         compiling-fn (comp (compile-compiler parser text)
                            (compile-main parser text))
         number-type (get (types) 'Number :no-type)]
@@ -2574,7 +2621,8 @@
                                                    (c-code (str "(Value *)&_num_" (second type))
                                                            empty-list "" number-type)))))
                    :num-count (inc (count (seq (types))))})
-    (fio/close-stream text)))
+    ;; (fio/close-stream text)
+    ))
 
 (main [argList]
       (compile-module (rest argList)))

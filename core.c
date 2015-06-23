@@ -72,11 +72,11 @@ Value* false = (Value *)&falseVal;
 long long malloc_count = 0;
 long long free_count = 0;
 
-int mask(int hash, int shift) {
+int mask(int64_t hash, int shift) {
   return (hash >> shift) & 0x1f;
 }
 
-int bitpos(int hash, int shift) {
+int bitpos(int64_t hash, int shift) {
   return 1 << mask(hash, shift);
 }
 
@@ -362,7 +362,7 @@ abort();
 return(newStr->buffer);
 }
 
-int isTrue(Value *boolVal) {
+int64_t isTrue(Value *boolVal) {
 if (boolVal->type != 2) {
 fprintf(outStream, "Invalid boolean value\n");
 abort();
@@ -382,7 +382,7 @@ return(impls->impls[implIndex].implFn);
 return(impls->defaultImpl);
 };
 
-FnArity *findFnArity(Value *fnVal, int argCount) {
+FnArity *findFnArity(Value *fnVal, int64_t argCount) {
 Function *fn = (Function *)fnVal;
 int arityIndex = 0;
 FnArity *arity = (FnArity *)fn->arities[arityIndex];
@@ -967,7 +967,7 @@ void Sha1Initialise (Sha1Context* Context) {
     Context->Count[1] = 0;
 }
 
-void Sha1Update (Sha1Context* Context, void* Buffer, uint32_t BufferSize) {
+void Sha1Update (Sha1Context* Context, void* Buffer, int64_t BufferSize) {
     uint32_t    i;
     uint32_t    j;
 
@@ -1021,7 +1021,7 @@ void Sha1Finalise (Sha1Context* Context, SHA1_HASH* Digest) {
 
 Value *valsEqual(List *, Value *, Value *);
 
-int equal(Value *v1, Value *v2) {
+int64_t equal(Value *v1, Value *v2) {
   return (isTrue(valsEqual((List *)0, v1, v2)));
 }
 
@@ -3920,7 +3920,7 @@ List *l = (List *)arg0;
         return((Value *)empty_list);
       else {
         List *head = empty_list;
-        List *tail;
+        List *tail = empty_list;
         for(Value *x = l->head; x != (Value *)0; l = l->tail, x = l->head) {
           Value *y;
           if(arg1->type != 3) {
@@ -5037,7 +5037,7 @@ Value *arityImpl_518(List *closures, Value *arg0) {
   }
   else {
     List *head = empty_list;
-    List *tail;
+    List *tail = empty_list;
     for (; ls != (List *)0; ls = ls->tail) {
       List *l = (List *)ls->head;
       Value *x;
@@ -5604,7 +5604,7 @@ List *l = (List *)arg0;
         return((Value *)empty_list);
       else {
         List *head = empty_list;
-        List *tail;
+        List *tail = empty_list;
         for(Value *x = l->head; x != (Value *)0; l = l->tail, x = l->head) {
           Value *y;
           if(arg1->type != 3) {
@@ -9206,7 +9206,7 @@ BitmapIndexedNode *node = (BitmapIndexedNode *)arg0;
 Value *key = arg1;
 Value *val = arg2;
 int64_t hash = ((Number *)arg3)->numVal;
-int64_t shift = ((Number *)arg4)->numVal;
+int shift = (int)((Number *)arg4)->numVal;
 
 int bit = bitpos(hash, shift);
 int idx = __builtin_popcount(node->bitmap & (bit - 1));
@@ -9333,15 +9333,15 @@ BitmapIndexedNode *node = (BitmapIndexedNode *)arg0;
 Value *key = arg1;
 Value *val = arg2;
 int64_t hash = ((Number *)arg3)->numVal;
-int64_t shift = ((Number *)arg4)->numVal;
+int shift = (int)((Number *)arg4)->numVal;
 
 int bit = bitpos(hash, shift);
 int idx = __builtin_popcount(node->bitmap & (bit - 1));
 if (node->bitmap & bit) {
-  int cnt = __builtin_popcount(node->bitmap);
+  // int cnt = __builtin_popcount(node->bitmap);
   // fprintf(stderr, "Looking for: %s   %lld %d   %lld\n", ((SubString *)key)->buffer, hash, idx, shift);
   // for (int i = 0; i < cnt; i++) {
-    // fprintf(stderr, "%d: %s\n", i, ((SubString *)node->array[2 * i])->buffer);
+  //   fprintf(stderr, "%d: %s\n", i, ((SubString *)node->array[2 * i])->buffer);
   // }
 
   // if the hash position is already filled
@@ -9724,7 +9724,7 @@ ArrayNode *node = (ArrayNode *)arg0;
 Value *key = arg1;
 Value *val = arg2;
 int64_t hash = ((Number *)arg3)->numVal;
-int64_t shift = ((Number *)arg4)->numVal;
+int shift = (int)((Number *)arg4)->numVal;
 int idx = mask(hash, shift);
 Value *newShift = (Value *)numberValue(shift + 5);
 ArrayNode *newNode;
@@ -9791,7 +9791,7 @@ ArrayNode *node = (ArrayNode *)arg0;
 Value *key = arg1;
 Value *val = arg2;
 int64_t hash = ((Number *)arg3)->numVal;
-int64_t shift = ((Number *)arg4)->numVal;
+int shift = (int)((Number *)arg4)->numVal;
 int idx = mask(hash, shift);
 Value *newShift = (Value *)numberValue(shift + 5);
 Value* found;
@@ -11936,7 +11936,6 @@ Value *count(Value *n) {
 }
 Value *symbol_literals() {
 List *syms = empty_list;
-List *symInfo;
 return((Value *)syms);
 }
 

@@ -123,7 +123,7 @@ void Sha1Initialise (Sha1Context* Context) {
     Context->Count[1] = 0;
 }
 
-void Sha1Update (Sha1Context* Context, void* Buffer, uint32_t BufferSize) {
+void Sha1Update (Sha1Context* Context, void* Buffer, int64_t BufferSize) {
     uint32_t    i;
     uint32_t    j;
 
@@ -179,7 +179,7 @@ void Sha1Finalise (Sha1Context* Context, SHA1_HASH* Digest) {
 (inline-text "
 Value *valsEqual(List *, Value *, Value *);
 
-int equal(Value *v1, Value *v2) {
+int64_t equal(Value *v1, Value *v2) {
   return (isTrue(valsEqual((List *)0, v1, v2)));
 }
 ")
@@ -1056,7 +1056,7 @@ Value *count(Value* n);
         return((Value *)empty_list);
       else {
         List *head = empty_list;
-        List *tail;
+        List *tail = empty_list;
         for(Value *x = l->head; x != (Value *)0; l = l->tail, x = l->head) {
           Value *y;
           if(arg1->type != 3) {
@@ -1217,7 +1217,7 @@ return((Value *)numberValue(shaVal));
   }
   else {
     List *head = empty_list;
-    List *tail;
+    List *tail = empty_list;
     for (; ls != (List *)0; ls = ls->tail) {
       List *l = (List *)ls->head;
       Value *x;
@@ -1309,7 +1309,7 @@ return((Value *)numberValue(shaVal));
         return((Value *)empty_list);
       else {
         List *head = empty_list;
-        List *tail;
+        List *tail = empty_list;
         for(Value *x = l->head; x != (Value *)0; l = l->tail, x = l->head) {
           Value *y;
           if(arg1->type != 3) {
@@ -1881,7 +1881,7 @@ BitmapIndexedNode *node = (BitmapIndexedNode *)arg0;
 Value *key = arg1;
 Value *val = arg2;
 int64_t hash = ((Number *)arg3)->numVal;
-int64_t shift = ((Number *)arg4)->numVal;
+int shift = (int)((Number *)arg4)->numVal;
 
 int bit = bitpos(hash, shift);
 int idx = __builtin_popcount(node->bitmap & (bit - 1));
@@ -2000,15 +2000,15 @@ BitmapIndexedNode *node = (BitmapIndexedNode *)arg0;
 Value *key = arg1;
 Value *val = arg2;
 int64_t hash = ((Number *)arg3)->numVal;
-int64_t shift = ((Number *)arg4)->numVal;
+int shift = (int)((Number *)arg4)->numVal;
 
 int bit = bitpos(hash, shift);
 int idx = __builtin_popcount(node->bitmap & (bit - 1));
 if (node->bitmap & bit) {
-  int cnt = __builtin_popcount(node->bitmap);
+  // int cnt = __builtin_popcount(node->bitmap);
   // fprintf(stderr, \"Looking for: %s   %lld %d   %lld\\n\", ((SubString *)key)->buffer, hash, idx, shift);
   // for (int i = 0; i < cnt; i++) {
-    // fprintf(stderr, \"%d: %s\\n\", i, ((SubString *)node->array[2 * i])->buffer);
+  //   fprintf(stderr, \"%d: %s\\n\", i, ((SubString *)node->array[2 * i])->buffer);
   // }
 
   // if the hash position is already filled
@@ -2134,7 +2134,7 @@ ArrayNode *node = (ArrayNode *)arg0;
 Value *key = arg1;
 Value *val = arg2;
 int64_t hash = ((Number *)arg3)->numVal;
-int64_t shift = ((Number *)arg4)->numVal;
+int shift = (int)((Number *)arg4)->numVal;
 int idx = mask(hash, shift);
 Value *newShift = (Value *)numberValue(shift + 5);
 ArrayNode *newNode;
@@ -2193,7 +2193,7 @@ ArrayNode *node = (ArrayNode *)arg0;
 Value *key = arg1;
 Value *val = arg2;
 int64_t hash = ((Number *)arg3)->numVal;
-int64_t shift = ((Number *)arg4)->numVal;
+int shift = (int)((Number *)arg4)->numVal;
 int idx = mask(hash, shift);
 Value *newShift = (Value *)numberValue(shift + 5);
 Value* found;
