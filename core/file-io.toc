@@ -19,8 +19,7 @@
     malloc_count--;
     ptrVal->type = OpaqueType;
     ptrVal->ptr = (void *)fopen(arg0Str->buffer, \"r\");
-    decRef((Value *)arg0Str);
-    my_free((Value *)arg0Str);
+    dec_and_free((Value *)arg0Str);
     return((Value *)ptrVal);\n"))
 
 (defn fclose [fptr]

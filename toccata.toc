@@ -14,6 +14,7 @@
 ;;            Stringable
 ;;            (string-list [_] (list "")))
 
+;; can't apply type constructors
 ;; compact lists cdr coding
 ;; implements?
 ;; fn meta data; doc strings and ast
@@ -276,8 +277,7 @@
                                    variadic-sym " = (List *)listCons("
                                    arg-sym ", " variadic-sym ");\n")))
                        (list result-sym " = " fn-sym "(" (first arg-syms) ", (Value *)" variadic-sym ");\n"
-                             "decRef((Value *)" variadic-sym ");\n"
-                             "my_free((Value *)" variadic-sym ");\n"
+                             "dec_and_free((Value *)" variadic-sym ");\n"
                              "} else {\nfprintf(stderr, \"\\n*** no arity found for '%s'.\\n\", "
                              "((Function *)" (.c-val target) ")->name"
                              ");\n  abort();\n}\n"))
@@ -322,8 +322,7 @@
                                    variadic-sym " = (List *)listCons("
                                    arg-sym ", " variadic-sym ");\n")))
                        (list result-sym " = " fn-sym "(" (first arg-syms) ", (Value *)" variadic-sym ");\n"
-                             "decRef((Value *)" variadic-sym ");\n"
-                             "my_free((Value *)" variadic-sym ");\n"
+                             "dec_and_free((Value *)" variadic-sym ");\n"
                              "} else {\nfprintf(stderr, \"\\n*** no arity found for '%s'.\\n\", "
                              "((Function *)" (.c-val target) ")->name"
                              ");\n  abort();\n}\n}\n"))
@@ -446,8 +445,7 @@
                                   ", " variadic-sym ");\n")))
                       (list Value* result-sym " = " arity-sym "(" (first arg-syms) ", (Value *)"
                             variadic-sym ");\n"
-                            "decRef((Value *)" variadic-sym ");\n"
-                            "my_free((Value *)" variadic-sym ");\n"))
+                            "dec_and_free((Value *)" variadic-sym ");\n"))
                 "" result-type)))))
 
 (defprotocol Emitter
@@ -469,18 +467,18 @@
   Emitter
   (emit-c [ast]
     (sm/new-sm (fn [s]
-                 (let [vs (let [v (get-in s (list :keywords (.kw ast)) not-found)]
-                            (cond
-                             (= not-found v) empty-list
-                             (list v s)))]
+                 (let [v (get-in s (list :keywords (.kw ast)) not-found)
+                       vs (cond
+                           (= not-found v) empty-list
+                           (list v s))]
                    (cond
                     (empty? vs) vs
                     (let [static-kw (first vs)
-                          vs (let [s (second vs)
-                                   v (get-in s (list :types 'Keyword) not-found)]
-                               (cond
-                                (= not-found v) empty-list
-                                (list v s)))]
+                          s (second vs)
+                          v (get-in s (list :types 'Keyword) not-found)
+                          vs (cond
+                              (= not-found v) empty-list
+                              (list v s))]
                       (cond
                        (empty? vs) vs
                        (let [type-num (first vs)]
@@ -864,8 +862,7 @@
                                                  (fn [local]
                                                    (cond
                                                     (not (second local)) ""
-                                                    (str "decRef(" (first local) ");\n"
-                                                         "my_free(" (first local) ");\n")))))]
+                                                    (str "dec_and_free(" (first local) ");\n")))))]
                           "")
                         (end-scope scope-info)
                         (cond
@@ -909,8 +906,7 @@
                                                   (fn [local]
                                                     (cond
                                                      (not (second local)) ""
-                                                     (str "decRef(" (first local) ");\n"
-                                                          "my_free(" (first local) ");\n")))))
+                                                     (str "dec_and_free(" (first local) ");\n")))))
                               _ (write-strs scope-suffix)]
                           "")
                         (end-scope scope-info)
@@ -948,8 +944,7 @@
                                (fn [local]
                                  (cond
                                   (not (second local)) ""
-                                  (str "decRef(" (first local) ");\n"
-                                       "my_free(" (first local) ");\n")))))
+                                  (str "dec_and_free(" (first local) ");\n")))))
             _ (write "\nreturn(0);\n}\n\n")]
         (c-code "" empty-list "" :no-type)))))
 
@@ -1156,8 +1151,7 @@
                              (fn [local]
                                (cond
                                 (not (second local)) ""
-                                (str "decRef(" (first local) ");\n"
-                                     "my_free(" (first local) ");\n")))))
+                                (str "dec_and_free(" (first local) ");\n")))))
           _ (begin-scope)
           clause-result (fr/evaluate (second clause) emit-c)
           :let [clause-sym (.c-val clause-result)
@@ -1167,8 +1161,7 @@
                                (fn [local]
                                  (cond
                                   (not (second local)) ""
-                                  (str "decRef(" (first local) ");\n"
-                                       "my_free(" (first local) ");\n")))))
+                                  (str "dec_and_free(" (first local) ");\n")))))
           cond-rest (cond
                      (empty? (rest clauses))
                      (sm/state-maybe (c-code cond-result (nth default 1 empty-list)
@@ -1182,15 +1175,13 @@
                 (comp test-stmts
                       test-suffix
                       (list "\nif (isTrue(" test-sym ")) {\n"
-                            "decRef(" test-sym ");\n"
-                            "my_free(" test-sym ");\n")
+                            "dec_and_free(" test-sym ");\n")
                       clause-stmts
                       (list "incRef(" clause-sym ");\n")
                       (list (str cond-result " = " clause-sym ";\n"))
                       clause-suffix
                       (list "} else {\n"
-                            "decRef(" test-sym ");\n"
-                            "my_free(" test-sym ");\n")
+                            "dec_and_free(" test-sym ");\n")
                       (.init cond-rest)
                       (list "}\n"))
                 ""
@@ -1210,8 +1201,7 @@
                                 (fn [local]
                                   (cond
                                    (not (second local)) ""
-                                   (str "decRef(" (first local) ");\n"
-                                        "my_free(" (first local) ");\n")))))
+                                   (str "dec_and_free(" (first local) ");\n")))))
           :let [default-stmts (comp (.init default)
                                     (list "incRef(" default-result ");\n")
                                     (list cond-result " = " default-result ";\n")
@@ -1501,7 +1491,7 @@
                     "extern ReifiedVal *malloc_reified(int implCount);\n"
                     "extern void incRef(Value *);\n"
                     "extern void decRef(Value *);\n"
-                    "extern void my_free(Value *);\n"
+                    "extern void dec_and_free(Value *);\n"
                     "extern int64_t isTrue(Value *boolVal);\n"
                     "extern Value *findProtoImpl(int64_t type, ProtoImpls *impls);\n"
                     "extern FnArity *findFnArity(Value *fnVal, int64_t argCount);\n"
@@ -1700,14 +1690,17 @@
                     "  return(arrayNode);"
                     "}\n\n"
 
-                    "void my_free(Value *v) {\n"
+                    "void dec_and_free(Value *v) {\n"
                     "  if (v == (Value *)0) {\n"
                     "    fprintf(stderr, \"why are you freeing 'null'\\n\");\n "
                     "    abort();\n"
                     "  } else if (v->refs == -10) {\n"
                     "    fprintf(stderr, \"freeing already freed struct\\n\");\n"
                     "    abort();\n"
-                    "  } else if (v->refs > 0 || v->refs == -1) {\n"
+                    "  } else if (v->refs == -1) {\n"
+                    "    return;\n"
+                    "  } else if (v->refs > 1) {\n"
+                    "    v->refs--;\n"
                     "    return;\n"
                     "  } else if (v->type == 0) {\n"
                     "    fprintf(stderr, \"freeing invalid type\\n\");\n"
@@ -1725,8 +1718,7 @@
                     "  } else if (v->type == FunctionType) {\n"
                     "    Function *f = (Function *)v;\n"
                     "    for (int i = 0; i < f->arityCount; i++) {\n"
-                    "      decRef((Value *)f->arities[i]);\n"
-                    "      my_free((Value *)f->arities[i]);\n"
+                    "      dec_and_free((Value *)f->arities[i]);\n"
                     "    }\n"
                     "    v->refs = -10;\n"
                     "    if (f->arityCount < 10) {\n"
@@ -1742,12 +1734,10 @@
                     "    List *tail = ((List *)v)->tail;\n"
                     "    v->refs = -10;\n"
                     "    if (head != (Value *)0) {\n"
-                    "      decRef(head);\n"
-                    "      my_free(head);\n"
+                    "      dec_and_free(head);\n"
                     "    }\n"
                     "    if (tail != (List *)0) {\n"
-                    "      decRef((Value *)tail);\n"
-                    "      my_free((Value *)tail);\n"
+                    "      dec_and_free((Value *)tail);\n"
                     "    }\n"
                     "    ((DirectLL *)v)->next = freeLists;\n"
                     "    freeLists = (DirectLL *)v;\n"
@@ -1759,8 +1749,7 @@
                     "    Value *src = ((SubString *)v)->source;\n"
                     "    v->refs = -10;\n"
                     "    if (src != (Value *)0) {\n"
-                    "      decRef(src);\n"
-                    "      my_free(src);\n"
+                    "      dec_and_free(src);\n"
                     "    }\n"
                     "    ((DirectLL *)v)->next = freeSubStrings;\n"
                     "    freeSubStrings = (DirectLL *)v;\n"
@@ -1768,8 +1757,7 @@
                     ;; "    free(v);\n"
                     "  } else if (v->type == " (get (types) 'FnArity 10000) ") {\n"
                     "    FnArity *arity = (FnArity *)v;\n"
-                    "    decRef((Value *)arity->closures);\n"
-                    "    my_free((Value *)arity->closures);\n"
+                    "    dec_and_free((Value *)arity->closures);\n"
                     "    v->refs = -10;\n"
                     "    ((DirectLL *)v)->next = freeFnAritys;\n"
                     "    freeFnAritys = (DirectLL *)v;\n"
@@ -1783,8 +1771,7 @@
                     "    int cnt = __builtin_popcount(node->bitmap);\n"
                     "    for (int i = 0; i < (2 * cnt); i++) {\n"
                     "       if (node->array[i] != (Value *)0) {\n"
-                    "          decRef(node->array[i]);\n"
-                    "          my_free(node->array[i]);\n"
+                    "          dec_and_free(node->array[i]);\n"
                     "       }\n"
                     "    }\n"
                     "    v->refs = -10;\n"
@@ -1796,8 +1783,7 @@
                     "    ArrayNode *node = (ArrayNode *)v;\n"
                     "    for (int i = 0; i < 32; i++) {\n"
                     "       if (node->array[i] != (Value *)0) {\n"
-                    "          decRef(node->array[i]);\n"
-                    "          my_free(node->array[i]);\n"
+                    "          dec_and_free(node->array[i]);\n"
                     "       }\n"
                     "    }\n"
                     "    v->refs = -10;\n"
@@ -1808,8 +1794,7 @@
                     "  } else {\n"
                     "    ReifiedVal *rv = (ReifiedVal *)v;\n"
                     "    for (int i = 0; i < rv->implCount; i++) {\n"
-                    "      decRef(rv->impls[i]);\n"
-                    "      my_free(rv->impls[i]);\n"
+                    "      dec_and_free(rv->impls[i]);\n"
                     "    }\n"
                     "    v->refs = -10;\n"
                     "    if (rv->implCount < 20) {\n"
@@ -2002,7 +1987,7 @@
                             "         argList->len++;\n}\n"))
         _ (write-strs (list "  int the_final_answer = " main-sym "((Value *)argList);\n"
                             "  decRef((Value *)argList);\n"
-                            "  my_free((Value *)argList);\n"
+                            "  dec_and_free((Value *)argList);\n"
                             "  fprintf(stderr, \"malloc count: %lld  free count: %lld  diff: %lld\\n\""
                             ", malloc_count, free_count, malloc_count - free_count);\n"
                             "  return(the_final_answer);\n};\n"))]

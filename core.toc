@@ -215,8 +215,7 @@ Value *count(Value* n);
     }
 
     outStream = fopen(arg0Str->buffer, \"w\");
-    decRef((Value *)arg0Str);
-    my_free((Value *)arg0Str);
+    dec_and_free((Value *)arg0Str);
     return((Value *)&trueVal);\n"))
 
 (defn standard-output []
@@ -632,8 +631,7 @@ Value *count(Value* n);
     strVal->len = buffSize;
     fread(strVal->buffer, 1, buffSize, file);
     fclose(file);
-    decRef((Value *)arg0Str);
-    my_free((Value *)arg0Str);
+    dec_and_free((Value *)arg0Str);
     return((Value *)strVal);\n"))
 
 (defn fn-apply [x args]
@@ -922,17 +920,17 @@ Value *count(Value* n);
 
 (defprotocol Named
   (name [value]
-    (print-err "'name' not implemented for type " (get-type value))
+    (print-err "'name' not implemented for type " (type-name value))
     (abort)))
 
 (defprotocol Stringable
   (string-list [value]
-    (print-err "'string-list' not implemented for type" (get-type value))
+    (print-err "'string-list' not implemented for type" (type-name value))
     (abort)))
 
 (defprotocol Serializable
   (serialize [value]
-    (print-err "'serialize' not implemented for type" (get-type value))
+    (print-err "'serialize' not implemented for type" (type-name value))
     (abort)))
 
 (defn list-empty? [coll]
@@ -1073,8 +1071,7 @@ Value *count(Value* n);
               varArgs3 = (List *)listCons(x, varArgs3);
               y = fn4(arity2->closures, (Value *)varArgs3);
               incRef(y);
-              decRef((Value *)varArgs3);
-              my_free((Value *)varArgs3);
+              dec_and_free((Value *)varArgs3);
               decRef(y);
             } else {
               fprintf(stderr, \"\\n*** no arity found for '%s'.\\n\", ((Function *)arg1)->name);
@@ -1324,8 +1321,7 @@ return((Value *)numberValue(shaVal));
               incRef(x);
               List *varArgs3 = (List *)listCons(x, empty_list);
               y = fn4(arity2->closures, (Value *)varArgs3);
-              decRef((Value *)varArgs3);
-              my_free((Value *)varArgs3);
+              dec_and_free((Value *)varArgs3);
             } else {
               fprintf(stderr, \"\\n*** no arity found for '%s'.\\n\", ((Function *)arg1)->name);
               abort();
@@ -1378,9 +1374,9 @@ return((Value *)numberValue(shaVal));
 (extend-type List
   Stringable
   (string-list [l]
-    (list-concat (list "(")
-                 (flat-map (interpose l ", ") string-list)
-                 (list ")"))))
+    (list-concat (list (list "(")
+                       (flat-map (interpose l ", ") string-list)
+                       (list ")")))))
 
 (defn prn [& vs]
   (map (interpose (flat-map vs serialize) " ")
@@ -1810,8 +1806,7 @@ for(int i = 0; i < cnt; i++) {
   if (((BitmapIndexedNode *)arg0)->array[i * 2] == (Value *)0) {
     Number *subCnt = (Number *)count(((BitmapIndexedNode *)arg0)->array[i * 2 + 1]);
     accum += subCnt->numVal;
-    decRef((Value *)subCnt);
-    my_free((Value *)subCnt);
+    dec_and_free((Value *)subCnt);
   } else {
     accum++;
   }
@@ -1894,13 +1889,11 @@ if (node->bitmap & bit) {
     // pointer to a node.
     Value *newShift = (Value *)numberValue(shift + 5);
     Value *n = assoc(valOrNode, key, val, arg3, newShift);
-    decRef(newShift);
-    my_free(newShift);
+    dec_and_free(newShift);
     if (n == valOrNode) {
       // the key was already associated with the value
       // so do nothing
-      decRef(n);
-      my_free(n);
+      dec_and_free(n);
       incRef(arg0);
       return(arg0);
     } else {
@@ -1940,8 +1933,7 @@ if (node->bitmap & bit) {
                                   existingKeyHash, keyOrNull, valOrNode,
                                   hash, key, val);
       BitmapIndexedNode *newNode = clone_BitmapIndexedNode(node, idx, (Value *)0, newLeaf);
-      decRef(hashValue);
-      my_free(hashValue);
+      dec_and_free(hashValue);
       return((Value *)newNode);
     }
   }
@@ -1961,14 +1953,12 @@ if (node->bitmap & bit) {
         } else {
           Value *hash = sha1(node->array[j]);
           newNode->array[i] = assoc((Value *)&emptyBMI, node->array[j], node->array[j + 1], hash, newShift);
-          decRef(hash);
-          my_free(hash);
+          dec_and_free(hash);
         }
         j += 2;
       }
     }
-    decRef(newShift);
-    my_free(newShift);
+    dec_and_free(newShift);
     return((Value *)newNode);
   } else {
     int itemCount = n + 1;
@@ -2019,8 +2009,7 @@ if (node->bitmap & bit) {
     // pointer to a node.
     Value *newShift = (Value *)numberValue(shift + 5);
     Value *v = get(valOrNode, key, val, arg3, newShift);
-    decRef(newShift);
-    my_free(newShift);
+    dec_and_free(newShift);
     return(v);
   } else {
     if (equal(key, keyOrNull)) {
@@ -2048,10 +2037,8 @@ if (node->bitmap & bit) {
 Value *hash = sha1(arg1);
 Value *shift = numberValue(0);
 Value *found = get(arg0, arg1, arg2, hash, shift);
-decRef(shift);
-my_free(shift);
-decRef(hash);
-my_free(hash);
+dec_and_free(shift);
+dec_and_free(hash);
 return(found);
 "))
   (keys [m]
@@ -2063,10 +2050,8 @@ return(found);
 Value *hash = sha1(arg1);
 Value *shift = numberValue(0);
 Value *newNode = assoc(arg0, arg1, arg2, hash, shift);
-decRef(shift);
-my_free(shift);
-decRef(hash);
-my_free(hash);
+dec_and_free(shift);
+dec_and_free(hash);
 return(newNode);
 ")))
 
@@ -2079,8 +2064,7 @@ for(int i = 0; i < 32; i++){
   if (((ArrayNode *)arg0)->array[i] != (Value *)0) {
     Number *subCnt = (Number *)count(((ArrayNode *)arg0)->array[i]);
     accum += subCnt->numVal;
-    decRef((Value *)subCnt);
-    my_free((Value *)subCnt);
+    dec_and_free((Value *)subCnt);
   }
 }
 return(numberValue(accum));
@@ -2152,8 +2136,7 @@ if (subNode == (Value *)0) {
   if (newNode->array[idx] != (Value *)0)
     decRef(newNode->array[idx]);
   newNode->array[idx] = assoc((Value *)&emptyBMI, key, val, hash, newShift);
-  decRef(hash);
-  my_free(hash);
+  dec_and_free(hash);
 } else {
     Value *hash = sha1(key);
     Value *n = assoc(subNode, key, val, hash, newShift);
@@ -2161,8 +2144,7 @@ if (subNode == (Value *)0) {
     if (n == subNode) {
       // the key was already associated with the value
       // so do nothing
-      decRef(n);
-      my_free(n);
+      dec_and_free(n);
       incRef(arg0);
       newNode = (ArrayNode *)arg0;
     } else {
@@ -2177,14 +2159,12 @@ if (subNode == (Value *)0) {
       if (newNode->array[idx] != (Value *)0)
         decRef(newNode->array[idx]);
       newNode->array[idx] = n;
-      decRef(hash);
-      my_free(hash);
+      dec_and_free(hash);
 /*
     }
 */
 }
-decRef(newShift);
-my_free(newShift);
+dec_and_free(newShift);
 return((Value *)newNode);
 "))
   (get* [node k v hash shift]
@@ -2204,8 +2184,7 @@ if (subNode == (Value *)0) {
 } else {
   found = get(subNode, key, val, arg3, newShift);
 }
-decRef(newShift);
-my_free(newShift);
+dec_and_free(newShift);
 return((Value *)found);
 "))
 
@@ -2217,10 +2196,8 @@ return((Value *)found);
 Value *hash = sha1(arg1);
 Value *shift = numberValue(0);
 Value *found = get(arg0, arg1, arg2, hash, shift);
-decRef(shift);
-my_free(shift);
-decRef(hash);
-my_free(hash);
+dec_and_free(shift);
+dec_and_free(hash);
 return(found);
 "))
   (keys [m]
@@ -2232,10 +2209,8 @@ return(found);
 Value *hash = sha1(arg1);
 Value *shift = numberValue(0);
 Value *newNode = assoc(arg0, arg1, arg2, hash, shift);
-decRef(shift);
-my_free(shift);
-decRef(hash);
-my_free(hash);
+dec_and_free(shift);
+dec_and_free(hash);
 return(newNode);
 ")))
 
