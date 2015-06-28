@@ -118,7 +118,9 @@
 (defn analyze-call []
   (for [expr (is-expr (fn [s] (not-empty? s)))
         asts (traverse expr analyze-expr)]
-    (fr/free (ast/call-ast (first asts) (rest asts)))))
+    (fr/free (ast/call-ast (first asts)
+                           (apply* (fr/free list)
+                                   (rest asts))))))
 
 (defn analyze-let-binding [binding-pair]
   (cond
@@ -130,7 +132,7 @@
            binding (is-expr symbol?)
            ast (analyze-expr expr)
            _ (sm/set-val :expr curr-expr)]
-       (fr/free (ast/binding-ast binding ast))))))
+       (fr/free (ast/binding-ast (fr/free (ast/symbol-ast binding)) ast))))))
 
 (defn analyze-let []
   (for [expr (is-expr (fn [x]
@@ -167,7 +169,10 @@
                          (not (variadic? x)))))
         file-name (sm/get-val :file-name "")
         body (traverse (nth expr 2 empty-list) analyze-expr)]
-    (fr/free (ast/fn-arity-ast (nth expr 1 empty-list)
+    (fr/free (ast/fn-arity-ast (apply* (fr/free list)
+                                       (map (nth expr 1 empty-list)
+                                            (fn [sym]
+                                              (fr/free (ast/symbol-ast sym)))))
                                (apply* (fr/free list) body)))))
 
 ;; TODO: let anonymous function closures reference themselves by name
@@ -178,7 +183,8 @@
                          (not (< 1 (count x))) false
                          (= (first x) 'fn))))
         arities (traverse (nth expr 2 empty-list) analyze-expr)]
-    (fr/free (ast/fn-ast (nth expr 1 "no-name") arities))))
+    (fr/free (ast/fn-ast (fr/free (ast/symbol-ast (nth expr 1 'no-name)))
+                         (apply* (fr/free list) arities)))))
 
 (defn analyze-proto-arity [args]
   (cond
@@ -276,9 +282,14 @@
                           (< 2 (count x)))))
         body (traverse (drop expr 2) analyze-expr)]
     (list (nth expr 0 'no-name)
-          (fr/free (ast/fn-ast (str (nth expr 0 'no-name) "_impl")
-                               (list (fr/free (ast/fn-arity-ast (rest (nth expr 1 empty-list))
-                                                                (apply* (fr/free list) body)))))))))
+          (fr/free (ast/fn-ast (fr/free (ast/symbol-ast (symbol (str (nth expr 0 'no-name) "_impl"))))
+                               (apply-to list
+                                         (fr/free (ast/fn-arity-ast
+                                                   (apply* (fr/free list)
+                                                           (map (rest (nth expr 1 empty-list))
+                                                                (fn [sym]
+                                                                  (fr/free (ast/symbol-ast sym)))))
+                                                   (apply* (fr/free list) body)))))))))
 
 (defn analyze-proto-impl []
   (for [name (is-form? symbol?)

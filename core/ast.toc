@@ -3,7 +3,7 @@
 
 (deftype symbol-ast [sym]
   Stringable
-  (string-list [f] (list (str sym))))
+  (string-list [f] (list "<SymbolAST '"(str sym) "'>")))
 
 (deftype keyword-ast [kw])
 
@@ -11,7 +11,9 @@
   Stringable
   (string-list [_] (list (str num))))
 
-(deftype const-string-ast [const-str])
+(deftype const-string-ast [const-str]
+  Stringable
+  (string-list [_] (list "<StringAST \"" const-str "\"")))
 
 (deftype add-ns-ast [ns-sym asts])
 
@@ -37,7 +39,7 @@
 
 (deftype fn-arity-ast [args body])
 
-(deftype fn-ast [args arities])
+(deftype fn-ast [fn-name arities])
 
 (deftype definition-ast [name value])
 

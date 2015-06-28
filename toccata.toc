@@ -883,8 +883,9 @@
   (emit-c [ast]
     (let [arity-fn-sym (gensym "arityImpl_")]
       (for [arity-sym (genlocal "arity_")
-            fn-context (reset-fn-context arity-fn-sym (count (.args ast)))
-            arg-syms (gen-arg-syms (.args ast))
+            :let [args (map (.args (.args ast)) (fn [arg-ast] (.sym (.v arg-ast))))]
+            fn-context (reset-fn-context arity-fn-sym (count args))
+            arg-syms (gen-arg-syms args)
             scope-info (begin-scope)
             body-exprs (eval-exprs (.body ast))
             _ (emit-externs)
@@ -964,7 +965,7 @@
   Emitter
   (emit-c [ast]
     (for [target (fr/evaluate (.callee ast) emit-c)
-          args (eval-args (.params ast))
+          args (eval-args (.args (.params ast)))
           result (comp (call-proto-impl (.callee ast) args)
                        (call-static-fixed target args)
                        (call-static-variadic target args)
@@ -984,7 +985,7 @@
   Emitter
   (emit-c [ast]
     (for [evalled (fr/evaluate (.val ast) emit-c)
-          _ (sm/assoc-in-val (list :local-syms (.binding ast))
+          _ (sm/assoc-in-val (list :local-syms (.sym (.v (.binding ast))))
                              (c-code (.c-val evalled) empty-list "" (.type-num evalled)))]
       (c-code "" (.init evalled) "" :no-type))))
 
@@ -1004,33 +1005,33 @@
 (extend-type ast/fn-ast
   Emitter
   (emit-c [ast]
-    (let [arity-count (count (.arities ast))
-          fn-sym (gensym "fn_")
-          fn-type (get (types) 'Function :no-type)]
+    (let [fn-sym (gensym "fn_")
+          fn-type (get (types) 'Function :no-type)
+          fn-name (.sym (.v (.fn-name ast)))]
       (for [_ (static-values)
             curr-fn-sym (sm/get-val :curr-fn-sym "")
             :let [fn-sym-str (str "(Value *)" fn-sym)]
             _ (sm/set-val :curr-fn-sym fn-sym)
-            _ (write-strs (list "\n// --------- " (.args ast) " --------------\n"
+            _ (write-strs (list "\n// --------- " fn-name " --------------\n"
                                 "Function " fn-sym ";\n"))
             _ (remember-local fn-sym-str)
             ;; TODO: check for anon fn, save previous value of
             ;; :defined-sym and restore at end
-            _ (sm/assoc-in-val (list :defined-syms (.args ast))
+            _ (sm/assoc-in-val (list :defined-syms fn-name)
                                (list (str "Function " fn-sym)
                                      (c-code (str "(Value *)&" fn-sym) empty-list "" fn-type)))
-            arity-vals (traverse (.arities ast) (fn [arity]
-                                                  (fr/evaluate arity emit-c)))
-            :let [arity-syms (map arity-vals .c-val)
+            arity-vals (fr/evaluate (.arities ast) emit-c)
+            :let [arity-count (count arity-vals)
+                  arity-syms (map arity-vals .c-val)
                   arity-init (crush arity-vals .init)
                   static-arities (crush arity-vals .decl)]
             _ (cond
                (= 0 (count arity-init))
                (apply-to list
-                         (write-strs (list "\n// --------- " (.args ast) " main body --------------\n"
+                         (write-strs (list "\n// --------- " fn-name " main body --------------\n"
                                            "Function " fn-sym " = {"
                                            fn-type ", -1, \""
-                                           (.args ast) "\", " arity-count ", "
+                                           fn-name "\", " arity-count ", "
                                            "{" (apply str (interpose arity-syms ", ")) "}};\n\n"))
                          (sm/assoc-in-val (list :scope-locals fn-sym-str) false)
                          (sm/assoc-in-val (list :static-fns (str "(Value *)&" fn-sym)) static-arities))
@@ -1045,7 +1046,7 @@
                  (comp arity-init
                        (list (str "Function *" fn-sym " = malloc_function(" arity-count ");\n")
                              (str fn-sym "->type = " fn-type ";\n")
-                             (str fn-sym "->name = \"" (.args ast) "\";\n")
+                             (str fn-sym "->name = \"" fn-name "\";\n")
                              (str fn-sym "->arityCount = " arity-count ";\n"))
                        (map (range arity-count)
                             (fn [index]
@@ -1221,15 +1222,13 @@
 (defn emit-extension [type-num proto]
   (for [_ (traverse (nth proto 1 empty-list)
                     (fn [impl]
-                      (let [impl-fn (nth impl 1 "")
-                            num-args (count (.args (.v (first (.arities (.v impl-fn))))))]
-                        (for [ext-fn (fr/evaluate impl-fn emit-c)
-                              _ (write-strs (.init ext-fn))
-                              proto-fn-name (sm/get-in-val (list :defined-protos (first impl)))
-                              _ (sm/assoc-in-val (list :protocols proto-fn-name :impls
-                                                       type-num :fn-sym)
-                                                 (.c-val ext-fn))]
-                          ""))))]
+                      (for [ext-fn (fr/evaluate (nth impl 1 "") emit-c)
+                            _ (write-strs (.init ext-fn))
+                            proto-fn-name (sm/get-in-val (list :defined-protos (first impl)))
+                            _ (sm/assoc-in-val (list :protocols proto-fn-name :impls
+                                                     type-num :fn-sym)
+                                               (.c-val ext-fn))]
+                        "")))]
     (c-code "" empty-list "" :no-type)))
 
 (extend-type ast/extend-ast
@@ -1243,7 +1242,9 @@
 (defn emit-reified-fn [protocol-name type-num name-ast]
   (let [name (first name-ast)
         ast (second name-ast)
-        num-args (count (.args (.v (first (.arities (.v ast))))))
+        args (map (.args (.args (.v (first (.args (.arities (.v ast)))))))
+                  (fn [arg-ast] (.sym (.v arg-ast))))
+        num-args (count args)
         impl-sym (gensym "protoImpl_")
         fn-sym (gensym "protoFn_")]
     (alert (< 0 num-args)
@@ -2398,14 +2399,15 @@
                                                 type-num (second type)
                                                 impl-ast (fr/free
                                                           (ast/fn-ast
-                                                           "type-name_impl"
-                                                           (list
-                                                            (fr/free
-                                                             (ast/fn-arity-ast
-                                                              (list '_)
-                                                              (apply* (fr/free list)
-                                                                      (list (fr/free
-                                                                             (ast/const-string-ast type-name)))))))))]
+                                                           (fr/free (ast/symbol-ast 'type-name_impl))
+                                                           (apply-to list
+                                                                     (fr/free
+                                                                      (ast/fn-arity-ast
+                                                                       (apply* (fr/free list)
+                                                                               (list (fr/free (ast/symbol-ast '_))))
+                                                                       (apply* (fr/free list)
+                                                                               (list (fr/free
+                                                                                      (ast/const-string-ast type-name)))))))))]
                                             (for [_ (sm/set-val :expr type-name)
                                                   _ (an/analyze-string)
                                                   _ (emit-extension type-num (list 'Getter (list (list 'type-name

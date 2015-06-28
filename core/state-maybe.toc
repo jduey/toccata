@@ -15,6 +15,9 @@
 
 ;; TODO: deftypes don't get added to the importing ns correctly
 (deftype new-sm [invoke-fn]
+  Stringable
+  (string-list [_] (list "<new-sm >"))
+
   Function
   (invoke [ev s]
     (invoke-fn s))
