@@ -1,51 +1,113 @@
 
+(add-ns fr (module "core/free.toc"))
+
 (deftype inline-ast [txt result-type])
+
+(defn inline-text [text return-type]
+   (fr/free (inline-ast text return-type)))
 
 (deftype symbol-ast [sym]
   Stringable
   (string-list [f] (list "<SymbolAST '"(str sym) "'>")))
 
+(defn sym [s]
+  (fr/free (symbol-ast s)))
+
 (deftype keyword-ast [kw])
+
+(defn kw [k]
+  (fr/free (keyword-ast k)))
 
 (deftype const-number-ast [num]
   Stringable
   (string-list [_] (list (str num))))
 
+(defn number [n]
+  (fr/free (const-number-ast n)))
+
 (deftype const-string-ast [const-str]
   Stringable
   (string-list [_] (list "<StringAST \"" const-str "\"")))
 
+(defn strng [s]
+  (fr/free (const-string-ast s)))
+
 (deftype add-ns-ast [ns-sym asts])
+
+(defn ns-add [ns mod]
+  (fr/free (add-ns-ast ns mod)))
 
 (deftype extend-ast [type impls])
 
+(defn type-extension [type impls]
+  (fr/free (extend-ast type impls)))
+
 (deftype cond-ast [clauses default])
+
+(defn cond-expr [clauses default]
+  (fr/free (cond-ast clauses default)))
 
 (deftype reify-ast [impls])
 
+(defn reified [impls]
+  (fr/free (reify-ast impls)))
+
 (deftype protocol-ast [protocol-name prototypes])
+
+(defn proto [name proto-fns]
+  (fr/free (protocol-ast name proto-fns)))
 
 (deftype call-ast [callee params])
 
+(defn call-expr [target params]
+  (fr/free (call-ast target
+                     (apply* (fr/free list) params))))
+
 (deftype binding-ast [binding val])
+
+(defn binding [sym val]
+  (fr/free (binding-ast sym val)))
 
 (deftype let-ast [bindings body])
 
+(defn let-expr [bindings body]
+  (fr/free (let-ast (apply* (fr/free list) bindings)
+                    (apply* (fr/free list) body))))
+
 (deftype quoted-ast [sym])
+
+(defn quoted [sym]
+  (fr/free (quoted-ast sym)))
 
 (deftype main-ast [args body])
 
+(defn main-fn [args body]
+  (fr/free (main-ast args (apply* (fr/free list) body))))
+
 (deftype variadic-arity-ast [args body])
+
+(defn variadic-arity [args body]
+  (fr/free (variadic-arity-ast args (apply* (fr/free list) body))))
 
 (deftype fn-arity-ast [args body])
 
+(defn fixed-arity [args body]
+  (fr/free (fn-arity-ast (apply* (fr/free list) args)
+                         (apply* (fr/free list) body))))
+
 (deftype fn-ast [fn-name arities])
+
+(defn fn-expr [name arities]
+  (fr/free (fn-ast name (apply* (fr/free list) arities))))
 
 (deftype definition-ast [name value])
 
-(deftype type-ast-val [name fields impls])
+(defn def-expr [name value]
+  (fr/free (definition-ast name value)))
 
-(defn type-ast [name fields impls]
+(deftype type-ast [name fields impls])
+
+(defn type-expr [name fields impls]
   (let [fields (rest fields)
         impls (comp
                (cons 'reify impls)
@@ -55,4 +117,4 @@
                                 (fn [field]
                                   (list (symbol (str "." field)) (list 'vector '_)
                                         field))))))]
-    (type-ast-val name fields impls)))
+    (fr/free (type-ast name fields impls))))

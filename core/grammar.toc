@@ -88,13 +88,12 @@
   Parser
   (parser/recursive-descent [_]
     (sm/new-sm (fn [s]
-                 (.v (comp (for [c (first (:text s))
-                                 :when (cond
-                                        (= c (char 92)) false
-                                        (= c (char 34)) false
-                                        true)]
-                             (list (list c) (update-in s (list :text) rest)))
-                           (maybe empty-list)))))))
+                 (let [c (first (:text s))]
+                   (cond
+                    (= nothing c) empty-list
+                    (= (.v c) (char 92)) empty-list
+                    (= (.v c) (char 34)) empty-list
+                    (list (list (.v c)) (update-in s (list :text) rest))))))))
 
 (defn not-backslash []
   (parser/rule "not-backslash"
@@ -178,10 +177,11 @@
   Parser
   (parser/recursive-descent [_]
     (sm/new-sm (fn [s]
-                 (.v (comp (for [c (first (:text s))
-                                 :when (not (= c (char 10)))]
-                             (list (list c) (update-in s (list :text) rest)))
-                           (maybe empty-list)))))))
+                 (let [c (first (:text s))]
+                   (cond
+                    (= nothing c) empty-list
+                    (= (.v c) (char 10)) empty-list
+                    (list (list (.v c)) (update-in s (list :text) rest))))))))
 
 (defn not-eol []
   (parser/rule "not-eol"
@@ -344,15 +344,16 @@
 (defn read-for []
   (parser/rule "for"
                (apply-to (fn [bound val bindings body]
-                           (let [bindings (cons (list bound 'some-unique-var) bindings)]
-                             (list 'let (list (list 'some-unique-var val))
-                                   (reduce (reverse bindings) (list 'wrap 'some-unique-var body)
+                           (let [wrap-sym (gensym "wrapper_")
+                                 bindings (cons (list bound wrap-sym) bindings)]
+                             (list 'let (list (list wrap-sym val))
+                                   (reduce (reverse bindings) (list 'wrap wrap-sym body)
                                            (fn [expr sym-val]
                                              (let [sym (first sym-val)
                                                    val (first (rest sym-val))]
                                                (cond
                                                 (= sym :let) (list 'let val expr)
-                                                (= sym :when) (list 'cond val expr (list 'zero 'some-unique-var))
+                                                (= sym :when) (list 'cond val expr (list 'zero wrap-sym))
                                                 (list 'flat-map val
                                                       (list 'fn 'anon
                                                             (list (list 'fn-arity (list sym) (list expr))))))))))))
@@ -368,6 +369,57 @@
                          (parser/none-or-more (read-for-binding))
                          (parser/ignore (parser/term "]"))
                          (read-sub-form)
+                         (parser/ignore (parser/none-or-more (whitespace)))
+                         (parser/ignore (parser/term ")")))))
+
+(defn read-apply []
+  (parser/rule "apply"
+               (apply-to (fn [f args]
+                           (list 'apply* f (cons 'list args)))
+                         (parser/ignore (parser/term "("))
+                         (parser/ignore (parser/none-or-more (whitespace)))
+                         (parser/ignore (parser/term "apply"))
+                         (parser/ignore (parser/one-or-more (whitespace)))
+                         (read-sub-form)
+                         (parser/one-or-more (read-sub-form))
+                         (parser/ignore (parser/none-or-more (whitespace)))
+                         (parser/ignore (parser/term ")")))))
+
+(defn read-apply-to []
+  (parser/rule "apply-to"
+               (apply-to (fn [f arg args]
+                           (let [wrap-sym (gensym "wrapper_")
+                                 msg (str (list 'apply-to f arg args))
+                                 r (list 'let (list (list wrap-sym arg))
+                                         (list 'print-err msg)
+                                         (list
+                                          (list 'apply* (list 'wrap wrap-sym f)
+                                                (cons 'list (cons wrap-sym args)))))]
+                             (list 'let (list (list wrap-sym arg))
+                                   (list 'apply* (list 'wrap wrap-sym f)
+                                         (cons 'list (cons wrap-sym args))))))
+                         (parser/ignore (parser/term "("))
+                         (parser/ignore (parser/none-or-more (whitespace)))
+                         (parser/ignore (parser/term "apply-to"))
+                         (parser/ignore (parser/one-or-more (whitespace)))
+                         (read-sub-form)
+                         (read-sub-form)
+                         (parser/none-or-more (read-sub-form))
+                         (parser/ignore (parser/none-or-more (whitespace)))
+                         (parser/ignore (parser/term ")")))))
+
+(defn read-comp []
+  (parser/rule "comp"
+               (apply-to (fn [arg args]
+                           (cond
+                            (list-empty? args) arg
+                            (list 'comp* arg (cons 'list args))))
+                         (parser/ignore (parser/term "("))
+                         (parser/ignore (parser/none-or-more (whitespace)))
+                         (parser/ignore (parser/term "comp"))
+                         (parser/ignore (parser/one-or-more (whitespace)))
+                         (read-sub-form)
+                         (parser/none-or-more (read-sub-form))
                          (parser/ignore (parser/none-or-more (whitespace)))
                          (parser/ignore (parser/term ")")))))
 
@@ -391,7 +443,11 @@
                    (read-defn)
                    (read-fn)
                    (read-for)
+                   (read-comp)
+                   (read-apply)
+                   (read-apply-to)
                    (read-hash-map)
                    (read-vector)
                    (read-list))
              (parser/ignore (parser/none-or-more (whitespace))))))
+

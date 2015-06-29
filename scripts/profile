@@ -1,0 +1,10 @@
+#!/bin/bash
+
+clang -fprofile-instr-generate -c -o core.a core.c &&
+clang core.a -fprofile-instr-generate -fno-objc-arc -g -o toccata toccata.c &&
+./toccata toccata.toc > /dev/null
+llvm-profdata merge -output=toccata.profdata default.profraw &&
+llvm-profdata show -all-functions default.profraw | grep -v Hash | grep -v Counters | sed 'N;s/:\n/:/' \
+    | grep -v "count: 0" | grep "Function count:" | sort --key=4 -n | tail -n 100
+# clang -fprofile-instr-use -g -o toccata toccata.c &&
+echo "done"

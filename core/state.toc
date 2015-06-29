@@ -37,7 +37,7 @@
   Monad
   (flat-map [ev f]
     (state-val (fn [s]
-                 (let [v-ss (ev s)
+                 (let [v-ss (invoke-fn s)
                        v (nth v-ss 0)
                        ss (nth v-ss 1)]
                    ((f v) ss))))))

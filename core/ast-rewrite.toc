@@ -1,0 +1,717 @@
+
+(add-ns sm (module "core/state-maybe.toc"))
+(add-ns fr (module "core/free.toc"))
+(add-ns parser (module "core/parser.toc"))
+(add-ns grmr (module "core/grammar.toc"))
+(add-ns ast (module "core/ast.toc"))
+(add-ns an (module "core/analyzer.toc"))
+(add-ns id (module "core/id.toc"))
+
+(defprotocol ASTRewrite
+  (apply-rewrite [ast rule]))
+
+(defn rewrite [free-ast rule]
+  (fr/evaluate free-ast rule))
+
+(defprotocol PrettyPrinter
+  (pprint [ast]
+    ast))
+
+(extend-type ast/quoted-ast
+  ASTRewrite
+  (apply-rewrite [ast rule]
+    (sm/state-maybe (fr/free ast)))
+
+  PrettyPrinter
+  (pprint [q]
+    (str "'" (.sym q)))
+
+  Stringable
+  (string-list [q] (list "<quoted-ast " (str (.sym q)) ">")))
+
+(extend-type ast/const-string-ast
+  ASTRewrite
+  (apply-rewrite [ast rule]
+    (sm/state-maybe (fr/free ast)))
+
+  PrettyPrinter
+  (pprint [s]
+    (cond
+     (empty? (.const-str s)) "\"\""
+     (str "\"" (escape-chars (.const-str s)) "\""))))
+
+(extend-type ast/const-number-ast
+  ASTRewrite
+  (apply-rewrite [ast rule]
+    (sm/state-maybe (fr/free ast)))
+
+  PrettyPrinter
+  (pprint [k]
+    (str (.num k)))
+
+  Stringable
+  (string-list [k] (list "<const-number-ast " (str (.num k)) ">")))
+
+(extend-type ast/keyword-ast
+  ASTRewrite
+  (apply-rewrite [ast rule]
+    (sm/state-maybe (fr/free ast)))
+
+  PrettyPrinter
+  (pprint [k]
+    (str (.kw k)))
+
+  Stringable
+  (string-list [k] (list "<keyword-ast " (str (.kw k)) ">")))
+
+(extend-type ast/symbol-ast
+  ASTRewrite
+  (apply-rewrite [ast rule]
+    (sm/state-maybe (fr/free ast)))
+
+  PrettyPrinter
+  (pprint [s]
+    (str (.sym s)))
+
+  Stringable
+  (string-list [k] (list "<symbol-ast " (str (.sym k)) ">")))
+
+(extend-type ast/call-ast
+  ASTRewrite
+  (apply-rewrite [c rule]
+    (apply-to (fn [callee params]
+                (fr/free (ast/call-ast callee (apply* (fr/free list) params))))
+     (rewrite (.callee c) rule)
+     (rewrite (.params c) rule)))
+
+  PrettyPrinter
+  (pprint [c]
+    (str "("
+         (fr/evaluate (.callee c) pprint)
+         " "
+         (fr/evaluate (.params c) pprint)
+         ")"))
+
+  Stringable
+  (string-list [c]
+    (comp (list "<call-ast ")
+          (string-list (.callee c))
+          (list " ")
+          (list (str (.params c)))
+          (list ">"))))
+
+(extend-type ast/reify-ast
+  Stringable
+  (string-list [r]
+    (list "<reify-ast >"))
+
+  ASTRewrite
+  (apply-rewrite [c rule]
+    (apply-to (fn [impls]
+                (fr/free (ast/reify-ast (reduce impls
+                                                {}
+                                                (fn [acc k-v]
+                                                  (assoc acc (first k-v) (second k-v)))))))
+              (traverse (seq (.impls c))
+                        (fn [impl]
+                          (apply-to (fn [impl-fns]
+                                      (list (first impl) impl-fns))
+                                    (traverse (second impl)
+                                              (fn [impl-fn]
+                                                (apply-to (fn [impl-arity]
+                                                            (list (first impl-fn)
+                                                                  impl-arity))
+                                                          (rewrite (second impl-fn) rule)))))))))
+
+  ;; PrettyPrinter
+  ;; (pprint [c]
+  ;;   (str "(reify"
+  ;;        (fr/evaluate (.impls c) pprint)
+  ;;        ")"))
+
+  ;; Stringable
+  ;; (string-list [c]
+  ;;   (comp (list "<reify-ast ")
+  ;;         (string-list (.impls c))
+  ;;         (list ">")))
+  )
+
+(extend-type ast/cond-ast
+  PrettyPrinter
+  (pprint [c]
+    (apply str (comp (list "(cond\n")
+                     (interpose (map (.clauses c)
+                                     (fn [clause]
+                                       (str (fr/evaluate (first clause) pprint)
+                                            " "
+                                            (fr/evaluate (second clause) pprint))))
+                                "\n")
+                     (list "\n")
+                     (list (fr/evaluate (.default c) pprint))
+                     (list ")"))))
+
+  ASTRewrite
+  (apply-rewrite [c rule]
+    (apply-to (fn [clauses default]
+                (fr/free (ast/cond-ast clauses default)))
+              (traverse (.clauses c)
+                        (fn [clause]
+                          (traverse clause (fn [part]
+                                             (rewrite part rule)))))
+              (rewrite (.default c) rule)))
+
+  Stringable
+  (string-list [c]
+    (comp (list "<cond-ast\n")
+          (interpose (map (.clauses c) str) "\n")
+          (list "\n")
+          (list (str (.default c)))
+          (list ">"))))
+
+(extend-type ast/let-ast
+  ASTRewrite
+  (apply-rewrite [lt rule]
+    (apply-to (fn [bindings body]
+                (fr/free (ast/let-ast
+                          (apply* (fr/free list) bindings)
+                          (apply* (fr/free list) body))))
+              (rewrite (.bindings lt) rule)
+              (rewrite (.body lt) rule)))
+
+  PrettyPrinter
+  (pprint [l]
+    (str "(let ["
+         (apply str (interpose (map (.args (.bindings l)) (fn [binding] (fr/evaluate binding pprint))) "\n"))
+         "]\n"
+         (fr/evaluate (.body l) pprint)
+         ")"))
+
+  Stringable
+  (string-list [l]
+    (comp (list "<let-ast ")
+          (string-list (.bindings l))
+          (string-list (.body l))
+          (list ">"))))
+
+(extend-type ast/binding-ast
+  ASTRewrite
+  (apply-rewrite [lt rule]
+    (apply-to (fn [binding val]
+                (fr/free (ast/binding-ast binding val)))
+              (rewrite (.binding lt) rule)
+              (rewrite (.val lt) rule)))
+
+  PrettyPrinter
+  (pprint [b]
+    (str (fr/evaluate (.binding b) pprint)
+         " "
+         (fr/evaluate (.val b) pprint)))
+
+  Stringable
+  (string-list [l]
+    (comp (list "<binding-ast ")
+          (string-list (.binding l))
+          (string-list (.val l))
+          (list ">"))))
+
+(extend-type ast/fn-ast
+  ASTRewrite
+  (apply-rewrite [lt rule]
+    (apply-to (fn [fn-name arities]
+                (fr/free (ast/fn-ast fn-name (apply* (fr/free list) arities))))
+              (rewrite (.fn-name lt) rule)
+              (rewrite (.arities lt) rule)))
+
+  PrettyPrinter
+  (pprint [f]
+    (let [arities (.args (.arities f))]
+      (cond
+       (= 1 (count arities))
+       (str "(fn " (fr/evaluate (.fn-name f) pprint) " "
+            (subs (fr/evaluate (.arities f) pprint) 1))
+       (str "(fn "
+            (fr/evaluate (.fn-name f) pprint) "\n"
+            (fr/evaluate (.arities f) pprint) ")"))))
+
+  Stringable
+  (string-list [f]
+    (comp (list "<fn-ast ")
+          (string-list (.fn-name f))
+          (list " ")
+          (string-list (.arities f))
+          (list ">"))))
+
+(extend-type ast/fn-arity-ast
+  ASTRewrite
+  (apply-rewrite [fn-arity rule]
+    (apply-to (fn [args body]
+                (fr/free (ast/fn-arity-ast (apply* (fr/free list) args)
+                                           (apply* (fr/free list) body))))
+              (rewrite (.args fn-arity) rule)
+              (rewrite (.body fn-arity) rule)))
+
+  PrettyPrinter
+  (pprint [a]
+    (str "([" (fr/evaluate (.args a) pprint)
+          "]\n"
+          (fr/evaluate (.body a) pprint)
+          ")"))
+
+  Stringable
+  (string-list [a]
+    (comp (list "<fn-arity-ast ")
+          (string-list (.args a))
+          (string-list (.body a))
+          (list ">"))))
+
+(extend-type ast/variadic-arity-ast
+  ASTRewrite
+  (apply-rewrite [fn-arity rule]
+    (apply-to (fn [args body]
+                (fr/free (ast/variadic-arity-ast (apply* (fr/free list) args)
+                                                 (apply* (fr/free list) body))))
+              (rewrite (.args fn-arity) rule)
+              (rewrite (.body fn-arity) rule)))
+
+  PrettyPrinter
+  (pprint [a]
+    (str "([" (fr/evaluate (.args a) pprint)
+          "]\n"
+          (fr/evaluate (.body a) pprint)
+          ")"))
+
+  Stringable
+  (string-list [a]
+    (comp (list "<variadic-arity-ast ")
+          (string-list (.args a))
+          (string-list (.body a))
+          (list ">"))))
+
+(defn compile-source [parser]
+  (for [expr parser
+        ast (an/analyze-expr (first expr))]
+    ast))
+
+(defprotocol ReplaceCallee
+  (replace-callee [ast old-callee new-callee]
+    (apply-rewrite ast (fn [ast]
+                         (replace-callee ast old-callee new-callee)))))
+
+(defprotocol InlineFM
+  (inline-flat-map [ast]
+    (apply-rewrite ast inline-flat-map)))
+
+(defprotocol FnToLet
+  (convert-fn-to-let [ast]
+    (apply-rewrite ast convert-fn-to-let)))
+
+(extend-type ast/call-ast
+  ReplaceCallee
+  (replace-callee [ast old-callee new-callee]
+    (for [new-ast (cond
+                   (not (instance? fr/free (.callee ast)))
+                   (apply-rewrite ast (fn [ast]
+                                        (replace-callee ast old-callee new-callee)))
+
+                   (not (instance? ast/symbol-ast (.v (.callee ast))))
+                   (apply-rewrite ast (fn [ast]
+                                        (replace-callee ast old-callee new-callee)))
+
+                   (not (= old-callee (.sym (.v (.callee ast)))))
+                   (apply-rewrite ast (fn [ast]
+                                        (replace-callee ast old-callee new-callee)))
+
+                   (for [params (fr/evaluate (.params ast) inline-flat-map)
+                         ;; ast (fr/evaluate ast convert-fn-to-let)
+                         ]
+                     (fr/free
+                      (ast/call-ast new-callee
+                                    (apply* (fr/free list) params)))))]
+      new-ast)))
+
+(extend-type ast/call-ast
+  FnToLet
+  (convert-fn-to-let [ast]
+    (cond
+     (not (instance? fr/free (.callee ast))) (apply-rewrite ast inline-flat-map)
+     (not (instance? ast/fn-ast (.v (.callee ast)))) (apply-rewrite ast inline-flat-map)
+     (for [ast (apply-rewrite ast inline-flat-map)
+           :let [ast (.v ast)
+                 params (.x (fr/evaluate (.params ast) id/id-m))
+                 args (.x (fr/evaluate (.args (.v (first (.args (.arities (.v (.callee ast)))))))
+                                       id/id-m))
+                 body (.body (.v (first (.args (.arities (.v (.callee ast)))))))
+                 bindings (apply-to list (fr/free (ast/binding-ast (fr/free (first args))
+                                                                   (fr/free (first params)))))]
+           body-ast (cond
+                     (= (count args) 2) (fr/evaluate body (fn [ast]
+                                                            (replace-callee ast
+                                                                            (.sym (second args))
+                                                                            (fr/free (second params)))))
+                     (sm/state-maybe (fr/free (.x (fr/evaluate body id/id-m)))))
+           body-ast (fr/evaluate (apply* (fr/free list) body-ast) convert-fn-to-let)
+           ]
+       (fr/free (ast/let-ast bindings (apply* (fr/free list) body-ast)))))
+    ))
+
+(extend-type ast/call-ast
+  InlineFM
+  (inline-flat-map [ast]
+    (cond
+     (not (instance? ast/symbol-ast (.v (.callee ast)))) (apply-rewrite ast inline-flat-map)
+     (not (= 'flat-map (.sym (.v (.callee ast))))) (apply-rewrite ast inline-flat-map)
+     (for [flat-map-ast (sm/get-val :flat-map-ast (fr/free (ast/symbol-ast 'mapcat)))
+           ast (map (fr/evaluate (.params ast) inline-flat-map)
+                    (fn [params]
+                      (fr/free (ast/call-ast flat-map-ast
+                                             (apply* (fr/free list) params)))))
+           :when false
+           ;; ast (fr/evaluate ast convert-fn-to-let)
+           ]
+       ast))
+    ;; (for [flat-map-ast (sm/get-val :flat-map-ast (fr/free (ast/symbol-ast 'mapcat)))
+    ;;       new-ast (cond
+    ;;                (not (instance? ast/symbol-ast (.v (.callee ast)))) (apply-rewrite ast inline-flat-map)
+    ;;                (not (= 'flat-map (.sym (.v (.callee ast))))) (apply-rewrite ast inline-flat-map)
+    ;;                (for [ast (map (fr/evaluate (.params ast) inline-flat-map)
+    ;;                               (fn [params]
+    ;;                                 (fr/free (ast/call-ast flat-map-ast
+    ;;                                                        (apply* (fr/free list) params)))))
+    ;;                      :when false
+    ;;                      ;; ast (fr/evaluate ast convert-fn-to-let)
+    ;;                      ]
+    ;;                  ast))]
+    ;;   new-ast)
+    ))
+
+(defprotocol InlineWrap
+  (inline-wrap [ast]
+    (apply-rewrite ast inline-wrap)))
+
+(extend-type ast/call-ast
+  InlineWrap
+  (inline-wrap [ast]
+    (for [wrap-ast (sm/get-val :wrap-ast)
+          new-ast (cond
+                   (not (instance? fr/free (.callee ast))) (apply-rewrite ast inline-wrap)
+                   (not (instance? ast/symbol-ast (.v (.callee ast)))) (apply-rewrite ast inline-wrap)
+                   (not (= 'wrap (.sym (.v (.callee ast))))) (apply-rewrite ast inline-wrap)
+                   (for [ast (map (fr/evaluate (.params ast) inline-wrap)
+                                  (fn [params]
+                                    (fr/free (ast/call-ast wrap-ast
+                                                           (apply* (fr/free list) params)))))
+                         ast (rewrite ast convert-fn-to-let)
+                         ]
+                     ast))]
+      new-ast)))
+
+(extend-type Function
+  PrettyPrinter
+  (pprint [f]
+    (reify
+      Applicative
+      (apply* [_ args]
+        (apply str (interpose args " ")))))
+
+  ASTRewrite
+  (apply-rewrite [f rule]
+    (sm/state-maybe f)))
+
+(extend-type sm/new-sm
+  Stringable
+  (string-list [_] (list "<new-sm >")))
+
+;; (main [_]
+;;       (let [p (fr/evaluate (grmr/read-form) parser/recursive-descent)
+;;             flat-map-ast (first ((compile-source p) {:text "(fn [ev f]
+;;                                                               (fn [s]
+;;                                                                  (let [v-ss (ev s)
+;;                                                                        v (nth v-ss 0)
+;;                                                                        ss (nth v-ss 1)]
+;;                                                                    ((f v) ss))))"}))
+;;             wrap-ast (first ((compile-source p) {:text "(fn [_ v]
+;;                                                            (fn [s]
+;;                                                               (list v s)))"}))
+;;             cond-ast (first ((compile-source p) {:text "(cond
+;;                                                            true (inc x)
+;;                                                            :bogus (dec x)
+;;                                                            0)"}))
+;;             ast (first ((compile-source p) {:text "(for [x (get-val :x)
+;;                                                          y (set-val :x x)]
+;;                                                      y)"}))
+;;             ;; new-ast (first ((rewrite ast inline-wrap) {:flat-map-ast flat-map-ast
+;;             ;;                                            :wrap-ast wrap-ast}))
+;;             ;; new-ast (first ((rewrite new-ast inline-flat-map) {:flat-map-ast flat-map-ast
+;;             ;;                                                    :wrap-ast wrap-ast}))
+;;             ;; new-ast (first ((rewrite new-ast convert-fn-to-let) {}))
+
+;;             ;; new-ast (first ((for [ast (rewrite ast inline-wrap)
+;;             ;;                       ast (comp (rewrite ast inline-flat-map)
+;;             ;;                                 (sm/state-maybe ast))]
+;;             ;;                   ast) {:flat-map-ast flat-map-ast
+;;             ;;                         :wrap-ast wrap-ast}))
+;;             ]
+;;         ;; (println :ast ast)
+;;         ;; (println :concrete (first new-ast))
+;;         ;; (println)
+;;         ;; (println :result1 (fr/evaluate ast pprint))
+;;         ;; (println cond-ast)
+;;         (println (fr/evaluate cond-ast pprint))
+;;         ))
+
+;; (defn emit-callsite [ast]
+;;   (for [target (fr/evaluate (.callee ast) emit-c)
+;;         args (eval-args (.args (.params ast)))
+;;         result (comp (call-proto-impl (.callee ast) args)
+;;                      (call-invoke target args (.callee ast))
+;;                      (call-static-fixed target args)
+;;                      (call-static-variadic target args)
+;;                      (call-recursive target args)
+;;                      (call-dyn-fn-value target args)
+;;                      (call-dyn-unknown-type target args)
+;;                      (call-dyn-known-type target args)
+;;                      (sm/new-sm (fn [s]
+;;                                   (print-err (str "could not emit callsite for '"
+;;                                                   (first (fr/evaluate (.callee ast) string-list))
+;;                                                   "'"))
+;;                                   (print-err :target (.c-val target))
+;;                                   (abort))))]
+;;     result))
+
+;; (defprotocol Rename-new-sm
+;;   (rename-new-sm [ast]
+;;     (rwr/apply-rewrite ast rename-new-sm)))
+
+;; (defprotocol InlineFunction
+;;   (inline-fn [ast]
+;;     (rwr/apply-rewrite ast inline-fn)))
+
+;; (defprotocol MergeLets
+;;   (merge-lets [ast]
+;;     (rwr/apply-rewrite ast merge-lets)))
+
+;; (defprotocol CallingLet
+;;   (calling-let [ast]
+;;     (rwr/apply-rewrite ast calling-let)))
+
+;; (extend-type ast/let-ast
+;;   MergeLets
+;;   (merge-lets [ast]
+;;     ;; TODO: currently assumes .body has one element
+;;     (cond
+;;      (not (instance? ast/let-ast (.v (first (.args (.body ast))))))
+;;      (sm/state-maybe (fr/free ast))
+
+;;      (let [outer-bindings (.args (.bindings ast))
+;;            inner-bindings (.args (.bindings (.v (first (.args (.body ast))))))
+;;            inner-body (.body (.v (first (.args (.body ast)))))]
+;;        (sm/state-maybe (fr/free (ast/let-ast (apply* (fr/free list)
+;;                                                      (comp outer-bindings inner-bindings))
+;;                                              inner-body)))))))
+
+;; (extend-type ast/symbol-ast
+;;   Rename-new-sm
+;;   (rename-new-sm [ast]
+;;     (cond
+;;      (= 'new-sm (.sym ast)) (comp
+;;                              (for [_ (sm/get-in-val (list :defined-syms 'new-sm))]
+;;                                (sm/state-maybe (fr/free ast)))
+;;                              (sm/state-maybe (fr/free (ast/symbol-ast 'sm/new-sm))))
+;;      (sm/state-maybe (fr/free ast)))))
+
+;; (defn lookup-proto-fn-ast [fn-sym type-num num-args]
+;;   (for [qualified-name (sm/get-in-val (list :defined-protos fn-sym))
+;;         proto-fn (sm/get-in-val (list :protocols qualified-name :impls
+;;                                       type-num :fn-sym))
+;;         invoke-fn-sym (lookup-static-fn proto-fn num-args)
+;;         ast (comp (sm/get-in-val (list :static-fns proto-fn num-args :ast))
+;;                   (sm/get-in-val (list :core-static-fns proto-fn num-args :ast)))]
+;;     ast))
+
+;; (deftype ast-rewriter [data rewrite-fn]
+;;   Function
+;;   (invoke [ar ast]
+;;     (rewrite-fn ast ar)))
+
+
+;; ;; inline-fn
+;; ;; fn-to-let
+;; ;; call-let all the way down
+;; ;;   call-new-sm
+;; ;;     fn-to-let
+;; ;; merge-lets
+
+;; (defn fn-to-let [fn-ast args]
+;;   (cond
+;;    (not (instance? ast/fn-ast (.v fn-ast)))
+;;    (sm/state-maybe fn-ast)
+
+;;    (let [arg-count (count args)
+;;          arity (filter (.args (.arities (.v fn-ast)))
+;;                        (fn [arity]
+;;                          (= arg-count (count (.args (.args (.v arity)))))))]
+;;      (cond
+;;       (empty? arity)
+;;       (sm/state-maybe fn-ast)
+
+;;       (let [arity (.v (first arity))
+;;             params (.args (.args arity))
+;;             body (.body arity)
+;;             zipped (zip-lists params args)
+;;             binding-pairs (remove zipped (fn [pair]
+;;                                            (instance? ast/fn-ast (.v (second pair)))))
+;;             sym-ast-map (reduce zipped
+;;                                 {}
+;;                                 (fn [m pair]
+;;                                   (cond
+;;                                    (instance? ast/fn-ast (.v (second pair)))
+;;                                    (assoc m
+;;                                      (.sym (.v (first pair))) (second pair))
+
+;;                                    m)))
+;;             bindings (apply* (fr/free list)
+;;                              (map binding-pairs
+;;                                   (fn [pair]
+;;                                     (ast/binding (first pair) (second pair)))))]
+;;         (cond
+;;          (empty? sym-ast-map)
+;;          (sm/state-maybe (fr/free (ast/let-ast bindings (.body arity))))
+
+;;          (for [inlined-asts (sm/get-val :inlined-asts {})
+;;                _ (sm/update-in-val (list :inlined-asts) (fn [m] (comp m sym-ast-map)))
+;;                body-asts (fr/evaluate body inline-fn)
+;;                body-asts (traverse body-asts (fn [ast]
+;;                                                (for [new-ast (fr/evaluate ast calling-let)
+;;                                                      new-ast (fr/evaluate new-ast merge-lets)]
+;;                                                  new-ast)))
+;;                _ (sm/set-val :inlined-asts inlined-asts)]
+;;            (fr/free (ast/let-ast bindings (apply* (fr/free list) body-asts))))))))))
+
+;; (extend-type ast/call-ast
+;;   Emitter
+;;   (emit-c [ast]
+;;     (cond
+;;      (not (instance? ast/symbol-ast (.v (.callee ast))))
+;;      (emit-callsite ast)
+
+;;      (= 'flat-map (.sym (.v (.callee ast))))
+;;      (for [target (fr/evaluate (.callee ast) emit-c)
+;;            arg1 (fr/evaluate (first (.args (.params ast))) emit-c)
+;;            :let [type-num (.type-num arg1)]
+;;            inline-map (comp (sm/get-in-val (list :inliners type-num))
+;;                             (for [wrap-ast (lookup-proto-fn-ast 'wrap type-num 2)
+;;                                   ;; TODO: Total hack
+;;                                   wrap-ast (fr/evaluate wrap-ast rename-new-sm)
+;;                                   _ (sm/assoc-in-val (list :inlined-asts 'wrap) wrap-ast)
+;;                                   flat-map-ast (lookup-proto-fn-ast 'flat-map type-num 2)
+;;                                   ;; TODO: Total hack
+;;                                   flat-map-ast (fr/evaluate flat-map-ast rename-new-sm)
+;;                                   _ (sm/assoc-in-val (list :inlined-asts 'flat-map) flat-map-ast)
+;;                                   :let [inline-map {'wrap wrap-ast
+;;                                                     'flat-map flat-map-ast}]
+;;                                   _ (sm/assoc-in-val (list :inliners type-num) inline-map)]
+;;                               inline-map)
+;;                             (sm/state-maybe :no-inliner))
+;;            result (cond
+;;                    (= :no-inliner inline-map)
+;;                    (for [;; _ (debug :ast (fr/evaluate (.params ast) rwr/pprint))
+;;                          arg2 (fr/evaluate (second (.args (.params ast))) emit-c)
+;;                          :let [args (list (list arg1 arg2)
+;;                                           (comp (.init arg1) (.init arg2)))]
+;;                          result (call-static-fixed target args)]
+;;                      (c-code (.c-val result)
+;;                              (.init result)
+;;                              (.decl result)
+;;                              type-num))
+
+;;                    (for [;; _ (debug :old (fr/evaluate (second (.args (.params ast))) rwr/pprint))
+;;                          new-ast (fr/evaluate (second (.args (.params ast))) inline-fn)
+;;                          ;; _ (debug :type-num type-num :new (fr/evaluate new-ast rwr/pprint))
+
+;;                          arg2 (fr/evaluate new-ast emit-c)
+;;                          :let [args (list (list arg1 arg2)
+;;                                           (comp (.init arg1) (.init arg2)))]
+;;                          result (call-static-fixed target args)]
+;;                      (c-code (.c-val result)
+;;                              (.init result)
+;;                              (.decl result)
+;;                              type-num)))]
+;;        result)
+
+;;      (emit-callsite ast)))
+
+;;   CallingLet
+;;   (calling-let [ast]
+;;     (cond
+;;      (instance? ast/let-ast (.v (.callee ast)))
+;;      (let [bindings (.bindings (.v (.callee ast)))
+;;            ;; TODO: currently assumes .body has one element
+;;            body-expr (first (.args (.body (.v (.callee ast)))))]
+;;        ;; (print-err :calling-let (fr/evaluate (fr/free ast) rwr/pprint))
+;;        (for [call-ast (cond
+;;                        (instance? ast/cond-ast (.v body-expr))
+;;                        (let [cond-ast (.v body-expr)]
+;;                          (for [default (fr/evaluate (fr/free (ast/call-ast (.default cond-ast)
+;;                                                                            (.params ast)))
+;;                                                     calling-let)
+;;                                default (fr/evaluate default merge-lets)
+;;                                clauses (traverse (.clauses cond-ast)
+;;                                                  (fn [clause]
+;;                                                    (let [test (car clause)
+;;                                                          action (car (cdr clause))]
+;;                                                      (for [new-action (fr/evaluate (fr/free
+;;                                                                                     (ast/call-ast action
+;;                                                                                                   (.params ast)))
+;;                                                                                    calling-let)
+;;                                                            new-action (fr/evaluate new-action merge-lets)]
+;;                                                        (list test new-action)))))]
+;;                            (fr/free (ast/cond-ast clauses default))))
+
+;;                        (not (instance? ast/call-ast (.v body-expr)))
+;;                        (fr/evaluate (fr/free (ast/call-ast body-expr (.params ast)))
+;;                                     calling-let)
+
+;;                        (not (instance? ast/symbol-ast (.v (.callee (.v body-expr)))))
+;;                        (sm/state-maybe (fr/free ast))
+
+;;                        (not (= 'sm/new-sm (.sym (.v (.callee (.v body-expr))))))
+;;                        (sm/state-maybe (fr/free ast))
+
+;;                        (fn-to-let (first (.args (.params (.v body-expr))))
+;;                                   (.args (.params ast))))]
+;;          (cond
+;;           (not (instance? fr/free call-ast))
+;;           (fr/free (ast/let-ast bindings (apply-to list call-ast)))
+
+;;           (not (instance? ast/let-ast (.v call-ast)))
+;;           (fr/free (ast/let-ast bindings (apply-to list call-ast)))
+
+;;           (fr/free (ast/let-ast (apply* (fr/free list)
+;;                                         (comp (.args bindings)
+;;                                               (.args (.bindings (.v call-ast)))))
+;;                                 (.body (.v call-ast)))))))
+
+;;      (rwr/apply-rewrite ast calling-let)))
+
+;;   InlineFunction
+;;   (inline-fn [ast]
+;;     (cond
+;;      (not (instance? ast/symbol-ast (.v (.callee ast))))
+;;      (rwr/apply-rewrite ast inline-fn)
+
+;;      (for [inlined-ast (sm/get-in-val (list :inlined-asts (.sym (.v (.callee ast)))) :not-found)
+;;            new-ast (cond
+;;                     (= :not-found inlined-ast)
+;;                     (rwr/apply-rewrite ast inline-fn)
+
+;;                     (= 'flat-map (.sym (.v (.callee ast))))
+;;                     (for [new-ast (fr/evaluate (second (.args (.params ast))) inline-fn)
+;;                           new-ast (fn-to-let inlined-ast (list (first (.args (.params ast))) new-ast))]
+;;                       new-ast)
+
+;;                     (for [args (fr/evaluate (.params ast) inline-fn)
+;;                           new-ast (fn-to-let inlined-ast args)]
+;;                       new-ast))]
+;;        new-ast)))
+
+;;   )

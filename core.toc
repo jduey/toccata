@@ -11,7 +11,7 @@
 (def Value* "Value *")
 (def NumberVal "typedef struct {int64_t type; int32_t refs; int64_t numVal;} Number;\n")
 (def StringVal "typedef struct {int64_t type; int32_t refs; int64_t len; char buffer[0];} String;\n")
-(def SubStringVal "typedef struct {int64_t type; int32_t refs; int64_t len; Value *source; char *buffer;} SubString;\n")
+(def SubStringVal "typedef struct {int64_t type; int32_t refs; int64_t len; Number *hash; Value *source; char *buffer;} SubString;\n")
 (def ListVal "typedef struct List {int64_t type; int32_t refs; int64_t len; Value* head; struct List *tail;} List;\n")
 (def FnArityVal "typedef struct {int64_t type; int32_t refs; int count; List *closures; int variadic; void *fn;} FnArity;\n")
 (def FunctionVal "typedef struct {int64_t type; int32_t refs; char *name; int64_t arityCount; FnArity *arities[];} Function;\n")
@@ -246,6 +246,7 @@ Value *count(Value* n);
         subStr->type = SymbolType;
         subStr->len = s->len;
         subStr->source = arg0;
+        subStr->hash = (Number *)0;
         incRef(arg0);
         subStr->buffer = s->buffer;
         return((Value *)subStr);
@@ -255,6 +256,7 @@ Value *count(Value* n);
         subStr->type = SymbolType;
         subStr->len = s->len;
         subStr->source = arg0;
+        subStr->hash = (Number *)0;
         incRef(arg0);
         subStr->buffer = s->buffer;
         return((Value *)subStr);
@@ -271,6 +273,7 @@ Value *count(Value* n);
         subStr->type = KeywordType;
         subStr->len = s->len;
         subStr->source = arg0;
+        subStr->hash = (Number *)0;
         incRef(arg0);
         subStr->buffer = s->buffer;
         return((Value *)subStr);
@@ -280,6 +283,7 @@ Value *count(Value* n);
         subStr->type = KeywordType;
         subStr->len = s->len;
         subStr->source = arg0;
+        subStr->hash = (Number *)0;
         incRef(arg0);
         subStr->buffer = s->buffer;
         return((Value *)subStr);
@@ -287,7 +291,7 @@ Value *count(Value* n);
         abort();\n"))
 
 (defn abort []
-  (inline-text
+  (inline-text Number
    "abort();
     return(true);\n"))
 
@@ -446,7 +450,7 @@ Value *count(Value* n);
                          ((Number *)arg1)->numVal));\n"))
 
 (def empty-list
-  (inline-text "(Value *)&(List){4,-1,0,0,0};"))
+  (inline-text List "(Value *)&(List){4,-1,0,0,0};"))
 
 (defn cons
   ([x]
@@ -903,14 +907,6 @@ Value *count(Value* n);
      (number= 0 (list-count args)) (flat-map fv (fn [f] (wrap fv (f))))
      (flat-map fv (fn [f] (comprehend f args))))))
 
-(defn apply [fv & args]
-  (apply* fv args))
-
-(defn apply-to [f & args]
-  (cond
-   (number= 0 (list-count args)) (f)
-   (apply* (wrap (car args) f) args)))
-
 (defn list [& l]
   l)
 
@@ -934,7 +930,19 @@ Value *count(Value* n);
     (abort)))
 
 (defn list-empty? [coll]
-  (number= 0 (list-count coll)))
+(inline-text Number
+             "
+if (arg0->type != ListType)
+{
+  fprintf(stderr, \"*** 'list-empty?' given wrong type of value\\n\");
+  abort();
+}
+else if (((List *)arg0)->len == 0)
+  return((Value *)&trueVal);
+else
+  return((Value *)&falseVal);
+")
+)
 
 (defprotocol Eq
   (=* [x y]
@@ -977,6 +985,14 @@ Value *count(Value* n);
 (defprotocol Monoid
   (zero [_])
   (comp* [mval mvals]))
+
+(defn apply [fv & args]
+  (apply* fv args))
+
+(defn apply-to [f & args]
+  (cond
+   (number= 0 (list-count args)) (f)
+   (apply* (wrap (car args) f) args)))
 
 (defn comp [coll & colls]
   (cond
@@ -1036,7 +1052,7 @@ Value *count(Value* n);
 
 (defn list** [arg args]
   (cond
-   (empty? args) arg
+   (list-empty? args) arg
    (cons arg (list** (first args) (rest args)))))
 
 (defn list* [arg & args]
@@ -1132,7 +1148,7 @@ Value *count(Value* n);
   Applicative
   (apply* [f args]
     (cond
-     (empty? args) (f)
+     (list-empty? args) (f)
      (let [new-args (list** (first args) (rest args))]
        ;; Remember, the last element of 'args' must be a list
        ;; everything up to that must be prepended to it
@@ -1170,17 +1186,17 @@ return((Value *)numberValue(shaVal));
    (pred (first coll)) 1
    (any? pred (rest coll))))
 
-(deftype ZipList [v]
-  Applicative
-  (apply* [zv arg-lists]
-    (cond
-     (any? empty? arg-lists) empty-list
-     (let [cars (map arg-lists (fn [l] (cond
-                                        (empty? l) :nil
-                                        (first l))))
-           cdrs (map arg-lists rest)]
-       (cons (apply v cars)
-             (apply* zv cdrs))))))
+;; (deftype ZipList [v]
+;;   Applicative
+;;   (apply* [zv arg-lists]
+;;     (cond
+;;      (any? empty? arg-lists) empty-list
+;;      (let [cars (map arg-lists (fn [l] (cond
+;;                                         (empty? l) :nil
+;;                                         (first l))))
+;;            cdrs (map arg-lists rest)]
+;;        (cons (apply v cars)
+;;              (apply* zv cdrs))))))
 
 (defn partial [f & args]
   (fn [& more-args]
@@ -1188,17 +1204,17 @@ return((Value *)numberValue(shaVal));
 
 (defn comprehend [f mvs]
   (cond
-   (empty? mvs) (f)
-   (let [mv (first mvs)
-         rest-steps (reduce (reverse (rest mvs))
+   (list-empty? mvs) (f)
+   (let [mv (car mvs)
+         rest-steps (reduce (reverse (cdr mvs))
                             (fn [acc x]
                               (wrap mv (apply f (reverse (cons x acc)))))
                             (fn [steps new-mv]
                               (fn [acc x]
                                 (flat-map new-mv (partial steps (cons x acc))))))]
      (cond
-      (number= 1 (count mvs)) (flat-map (first mvs) (fn [x]
-                                                      (wrap mv (f x))))
+      (number= 1 (list-count mvs)) (flat-map mv (fn [x]
+                                                  (wrap mv (f x))))
       (flat-map mv (partial rest-steps empty-list))))))
 
 (defn list-concat [l1]
@@ -1262,18 +1278,19 @@ return((Value *)numberValue(shaVal));
   (rest [l] (cdr l))
 
   Collection
-  (empty? [coll] (number= 0 (list-count coll)))
+  (empty? [coll]
+    (list-empty? coll))
   (empty [coll] empty-list)
   (conj [l v] (cons v l))
   (count [l] (list-count l))
   (reduce [l result f]
     (cond
-     (empty? l) result
-     (let [head (first l)
-           tail (rest l)
+     (list-empty? l) result
+     (let [head (car l)
+           tail (cdr l)
            mapped-val (f result head)]
        (cond
-        (empty? tail) mapped-val
+        (list-empty? tail) mapped-val
         (reduce tail mapped-val f)))))
 
   Crushable
@@ -1360,12 +1377,12 @@ return((Value *)numberValue(shaVal));
   (flat-map [mv mf]
     (let [l (map mv mf)]
       (cond
-       (empty? l) empty-list
+       (list-empty? l) empty-list
        (comp* (car l) (cdr l))))))
 
 (defn interpose [coll sep]
   (cond
-   (list-empty? coll) coll
+   (list-empty? coll) empty-list
    (cons (car coll)
          (flat-map (cdr coll)
                    (fn [x]
@@ -1407,12 +1424,12 @@ return((Value *)numberValue(shaVal));
 
 (defn + [& xs]
   (cond
-   (empty? xs) 0
+   (list-empty? xs) 0
    (reduce xs 0 add-numbers)))
 
 (defn * [& xs]
   (cond
-   (empty? xs) 1
+   (list-empty? xs) 1
    (reduce xs 1 mult-numbers)))
 
 (defn dec [x]
@@ -1420,11 +1437,11 @@ return((Value *)numberValue(shaVal));
 
 (defn - [& xs]
   (cond
-   (empty? xs) 0
+   (list-empty? xs) 0
    (let [h (first xs)
          t (rest xs)]
      (cond
-      (empty? t) h
+      (list-empty? t) h
       (reduce t h subtract-numbers)))))
 
 (def maybe-val)
@@ -1441,7 +1458,7 @@ return((Value *)numberValue(shaVal));
     (zero [nv] nv)
     (comp* [nv mvs]
       (cond
-       (empty? mvs) nv
+       (list-empty? mvs) nv
        (comp* (first mvs) (rest mvs))))
 
     Functor
@@ -1513,7 +1530,8 @@ return((Value *)numberValue(shaVal));
   (count [s]
     (str-count s))
   (conj [s value]
-    (apply comp (flat-map (list s value) string-list)))
+    (let [strs (flat-map (list s value) string-list)]
+      (comp* (car strs) (cdr strs))))
   (reduce [s result f]
     (reduce (seq s) result f))
 
@@ -1575,7 +1593,8 @@ return((Value *)numberValue(shaVal));
   (count [s]
     (str-count s))
   (conj [s value]
-    (apply comp (flat-map (list s value) string-list)))
+    (let [strs (flat-map (list s value) string-list)]
+      (comp* (car strs) (cdr strs))))
   (reduce [s result f]
     (reduce (seq s) result f))
 
@@ -1621,7 +1640,7 @@ return((Value *)numberValue(shaVal));
 
 (defn str [& vs]
   (cond
-   (empty? vs) ""
+   (list-empty? vs) ""
    (let [ss-list (flat-map vs string-list)
          new-len (reduce ss-list 0
                          (fn [len s]
@@ -1702,34 +1721,6 @@ return((Value *)numberValue(shaVal));
    (empty? coll) coll
    (= 1 (count coll)) empty-list
    (cons (first coll) (butlast (rest coll)))))
-
-(defn map-assoc [m k v]
-  (cond
-   (list-empty? m) (list (list k v))
-   (= (car (car m)) k) (cons (list k v) (cdr m))
-   (cons (car m) (map-assoc (cdr m) k v))))
-
-(defn map-get [m k not-found]
-  (cond
-   (list-empty? m)
-   not-found
-
-   (= (car (car m)) k)
-   (car (cdr (car m)))
-
-   (map-get (cdr m) k not-found)))
-
-(defn hash-map= [a-list m]
-  (cond
-   (empty? a-list) 1
-   (let [kv-pair (first a-list)
-         k (first kv-pair)
-         v (first (rest kv-pair))]
-     (cond
-      (= :hm-nf k) 0
-      (= :hm-nf v) 0
-      (not (= v (get m k :hm-nf))) 0
-      (hash-map= (rest a-list) m)))))
 
 (inline-text "
 BitmapIndexedNode emptyBMI = {BitmapIndexedType, -1, 0, 0};
@@ -1844,9 +1835,11 @@ else
        (list-empty? a-list) (list "{}")
        (let [kv-strs (map a-list
                           (fn [kv]
-                            (apply comp (interpose (map kv string-list)
-                                                   (list " ")))))
-             body-list (apply comp (interpose kv-strs (list ", ")))]
+                            (let [strs (interpose (map kv string-list)
+                                                  (list " "))]
+                              (comp* (car strs) (cdr strs)))))
+             body-list (let [strs (interpose kv-strs (list ", "))]
+                         (comp* (car strs) (cdr strs)))]
          (comp (list "{")
                body-list
                (list "}"))))))
@@ -2030,8 +2023,6 @@ if (node->bitmap & bit) {
 "))
 
   Associative
-  ;; (get [m k not-found]
-  ;;   (map-get (seq m) k not-found))
   (get [m k not-found]
     (inline-text "
 Value *hash = sha1(arg1);
@@ -2094,9 +2085,11 @@ return(numberValue(accum));
        (list-empty? a-list) (list "{}")
        (let [kv-strs (map a-list
                           (fn [kv]
-                            (apply comp (interpose (map kv string-list)
-                                                   (list " ")))))
-             body-list (apply comp (interpose kv-strs (list ", ")))]
+                            (let [strs (interpose (map kv string-list)
+                                                   (list " "))]
+                              (comp* (car strs) (cdr strs)))))
+             body-list (let [strs (interpose kv-strs (list ", "))]
+                         (comp* (car strs) (cdr strs)))]
          (comp (list "{")
                body-list
                (list "}"))))))
@@ -2189,8 +2182,6 @@ return((Value *)found);
 "))
 
   Associative
-  ;; (get [m k not-found]
-  ;;   (map-get (seq m) k not-found))
   (get [m k not-found]
     (inline-text "
 Value *hash = sha1(arg1);
@@ -2214,78 +2205,15 @@ dec_and_free(hash);
 return(newNode);
 ")))
 
-(deftype HashMap [a-list]
-  Seqable
-  (seq [_]
-    a-list)
-  (first [_]
-    (car a-list))
-  (rest [_]
-    (cdr a-list))
-
-  Eq
-  (=* [x y]
-    (cond
-     (not (= (count a-list) (count (seq y)))) 0
-     (hash-map= a-list y)))
-
-  Stringable
-  (string-list [m]
-    (cond
-     (list-empty? a-list) (list "{}")
-     (let [kv-strs (map a-list
-                        (fn [kv]
-                          (apply comp (interpose (map kv string-list)
-                                                 (list " ")))))
-           body-list (apply comp (interpose kv-strs (list ", ")))]
-       (comp (list "{")
-             body-list
-             (list "}")))))
-
-  Collection
-  (empty? [_]
-    (empty? a-list))
-  (count [_]
-    (count a-list))
-  (reduce [_ result f]
-    (reduce a-list result f))
-
-  Monoid
-  (zero [_]
-    (HashMap empty-list))
-  (comp* [hm ms]
-    (cond
-     (empty? ms) hm
-     (reduce ms hm
-             (fn [hm m]
-               (reduce (seq m) hm
-                       (fn [hm kv]
-                         (assoc hm (nth kv 0) (nth kv 1))))))))
-
-  Associative
-  (assoc [_ k v]
-    (HashMap (map-assoc a-list k v)))
-
-  (get [_ k not-found]
-    (map-get a-list k not-found))
-
-  (keys [m]
-    (map a-list first))
-
-  (vals [m]
-    (map a-list second)))
-
 (defn hash-map [& kv-pairs]
   (reduce (partition kv-pairs 2)
           emptyBMI
           (fn [bmi pair]
-            (apply assoc bmi pair)))
-  ;; (HashMap (partition kv-pairs 2))
-  )
+            (apply assoc bmi pair))))
 
 (defn merge-with [merge-fn hm & ms]
   (cond
-   (empty? ms) hm
+   (list-empty? ms) hm
    (reduce ms hm
            (fn [hm m]
              (reduce (seq m) hm
@@ -2365,11 +2293,20 @@ int64_t shaVal;
 Sha1Context context;
 SubString *subStrVal = (SubString *)arg0;
 
-Sha1Initialise(&context);
-Sha1Update(&context, (void *)&subStrVal->type, 8);
-Sha1Update(&context, (void *)subStrVal->buffer, subStrVal->len);
-Sha1Finalise(&context, (SHA1_HASH *)&shaVal);
-return((Value *)numberValue(shaVal));
+if (subStrVal->hash != (Number *)0) {
+  incRef((Value *)subStrVal->hash);
+  return((Value *)subStrVal->hash);
+}
+else {
+  Sha1Initialise(&context);
+  Sha1Update(&context, (void *)&subStrVal->type, 8);
+  Sha1Update(&context, (void *)subStrVal->buffer, subStrVal->len);
+  Sha1Finalise(&context, (SHA1_HASH *)&shaVal);
+  Number *hashVal = (Number *)numberValue(shaVal);
+  subStrVal->hash = (Number *)hashVal;
+  incRef((Value *)hashVal);
+  return((Value *)hashVal);
+}
 "))
 
   ;; (invoke [kw hm not-found]
@@ -2399,17 +2336,26 @@ return((Value *)numberValue(shaVal));
     (get hm sym-lit not-found))
 
   Hash
-  (sha1 [_]
+(sha1 [_]
     (inline-text Number "
 int64_t shaVal;
 Sha1Context context;
 SubString *subStrVal = (SubString *)arg0;
 
-Sha1Initialise(&context);
-Sha1Update(&context, (void *)&subStrVal->type, 8);
-Sha1Update(&context, (void *)subStrVal->buffer, subStrVal->len);
-Sha1Finalise(&context, (SHA1_HASH *)&shaVal);
-return((Value *)numberValue(shaVal));
+if (subStrVal->hash != (Number *)0) {
+  incRef((Value *)subStrVal->hash);
+  return((Value *)subStrVal->hash);
+}
+else {
+  Sha1Initialise(&context);
+  Sha1Update(&context, (void *)&subStrVal->type, 8);
+  Sha1Update(&context, (void *)subStrVal->buffer, subStrVal->len);
+  Sha1Finalise(&context, (SHA1_HASH *)&shaVal);
+  Number *hashVal = (Number *)numberValue(shaVal);
+  subStrVal->hash = (Number *)hashVal;
+  incRef((Value *)hashVal);
+  return((Value *)hashVal);
+}
 ")))
 
 (defn symbol? [sym]

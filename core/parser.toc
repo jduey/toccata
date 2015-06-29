@@ -15,10 +15,11 @@
     (for [_ (traverse (seq term-str)
                       (fn [term-c]
                         (sm/new-sm (fn [s]
-                                     (.v (comp (for [c (first (:text s))
-                                                     :when (= term-c c)]
-                                                 (list (list c) (update-in s (list :text) rest)))
-                                               (maybe empty-list)))))))]
+                                     (let [c (first (:text s))]
+                                       (cond
+                                        (= nothing c) empty-list
+                                        (= term-c (.v c)) (list (list (.v c)) (update-in s (list :text) rest))
+                                        empty-list))))))]
       (list term-str))))
 
 (defn term [term-str]
@@ -30,7 +31,7 @@
     (let [rule (fr/evaluate rule recursive-descent)]
       (flat-map (sm/recur rule)
                 (fn [v]
-                  (sm/state-maybe (list (apply comp v))))))))
+                  (sm/state-maybe (list (comp* (car v) (cdr v)))))))))
 
 (defn one-or-more [rule]
   (fr/free (repeat-rule rule)))
@@ -96,10 +97,11 @@
 
 (defn char-test [pred]
   (sm/new-sm (fn [s]
-               (.v (comp (for [c (first (:text s))
-                               :when (pred c)]
-                           (list (list c) (update-in s (list :text) rest)))
-                         (maybe empty-list))))))
+               (let [c (first (:text s))]
+                 (cond
+                  (= nothing c) empty-list
+                  (pred (.v c)) (list (list (.v c)) (update-in s (list :text) rest))
+                  empty-list)))))
 
 (deftype parse-lower-alphas []
   Parser

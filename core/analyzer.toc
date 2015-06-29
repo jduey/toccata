@@ -1,8 +1,7 @@
 
 (add-ns ast (module "core/ast.toc"))
 (add-ns sm (module "core/state-maybe.toc"))
-(add-ns fr (module "core/free.toc"))
-(add-ns fio (module "core/file-io.toc"))
+;; (add-ns fio (module "core/file-io.toc"))
 
 (defn set-expr [expr]
   (sm/set-val :expr expr))
@@ -21,12 +20,12 @@
                          (empty? x) false
                          (= (first x) 'inline-text))))]
     (cond
-     (= 3 (count expr)) (fr/free (ast/inline-ast (nth expr 2 "") (nth expr 1 :no-type)))
-     (fr/free (ast/inline-ast (nth expr 1 "") :no-type)))))
+     (= 3 (count expr)) (ast/inline-text (nth expr 2 "") (nth expr 1 :no-type))
+     (ast/inline-text (nth expr 1 "") :no-type))))
 
 (defn analyze-symbol []
   (for [sym (is-expr symbol?)]
-    (fr/free (ast/symbol-ast sym))))
+    (ast/sym sym)))
 
 (defn keyword-already-defined? [kw]
   (sm/get-in-val (list :keywords kw)))
@@ -55,7 +54,7 @@
                 (keyword-recently-defined? kw)
                 (keyword-defined-in-core kw)
                 (make-static-keyword kw))]
-    (fr/free (ast/keyword-ast kw))))
+    (ast/kw kw)))
 
 (defn number-already-defined? [num]
   (sm/get-in-val (list :numbers num)))
@@ -84,7 +83,7 @@
                 (number-recently-defined? num)
                 (number-defined-in-core num)
                 (make-static-number num))]
-    (fr/free (ast/const-number-ast num))))
+    (ast/number num)))
 
 (defn string-already-defined? [str-val]
   (sm/get-in-val (list :strings str-val)))
@@ -113,14 +112,12 @@
                 (string-recently-defined? str-val)
                 (string-defined-in-core str-val)
                 (make-static-string str-val))]
-    (fr/free (ast/const-string-ast str-val))))
+    (ast/strng str-val)))
 
 (defn analyze-call []
   (for [expr (is-expr (fn [s] (not-empty? s)))
         asts (traverse expr analyze-expr)]
-    (fr/free (ast/call-ast (first asts)
-                           (apply* (fr/free list)
-                                   (rest asts))))))
+    (ast/call-expr (first asts) (rest asts))))
 
 (defn analyze-let-binding [binding-pair]
   (cond
@@ -132,7 +129,7 @@
            binding (is-expr symbol?)
            ast (analyze-expr expr)
            _ (sm/set-val :expr curr-expr)]
-       (fr/free (ast/binding-ast (fr/free (ast/symbol-ast binding)) ast))))))
+       (ast/binding (ast/sym binding) ast)))))
 
 (defn analyze-let []
   (for [expr (is-expr (fn [x]
@@ -143,8 +140,7 @@
         bindings (traverse (nth expr 1 empty-list)
                            analyze-let-binding)
         body (traverse (drop expr 2) analyze-expr)]
-    (fr/free (ast/let-ast (apply* (fr/free list) bindings)
-                          (apply* (fr/free list) body)))))
+    (ast/let-expr bindings body)))
 
 (defn variadic? [expr]
   (let [args (nth expr 1 empty-list)]
@@ -157,9 +153,9 @@
                          (not (= (first x) 'fn-arity)) false
                          (variadic? x))))
         body (traverse (nth expr 2 empty-list) analyze-expr)]
-    (fr/free (ast/variadic-arity-ast (remove (nth expr 1 empty-list) (fn [arg]
-                                                                       (= "&" arg)))
-                                     (apply* (fr/free list) body)))))
+    (ast/variadic-arity (remove (nth expr 1 empty-list) (fn [arg]
+                                                          (= "&" arg)))
+                        body)))
 
 (defn analyze-fn-arity []
   (for [expr (is-expr (fn [x]
@@ -169,11 +165,10 @@
                          (not (variadic? x)))))
         file-name (sm/get-val :file-name "")
         body (traverse (nth expr 2 empty-list) analyze-expr)]
-    (fr/free (ast/fn-arity-ast (apply* (fr/free list)
-                                       (map (nth expr 1 empty-list)
-                                            (fn [sym]
-                                              (fr/free (ast/symbol-ast sym)))))
-                               (apply* (fr/free list) body)))))
+    (ast/fixed-arity (map (nth expr 1 empty-list)
+                          (fn [sym]
+                            (ast/sym sym)))
+                     body)))
 
 ;; TODO: let anonymous function closures reference themselves by name
 (defn analyze-fn []
@@ -183,8 +178,8 @@
                          (not (< 1 (count x))) false
                          (= (first x) 'fn))))
         arities (traverse (nth expr 2 empty-list) analyze-expr)]
-    (fr/free (ast/fn-ast (fr/free (ast/symbol-ast (nth expr 1 'no-name)))
-                         (apply* (fr/free list) arities)))))
+    (ast/fn-expr (ast/sym (nth expr 1 'no-name))
+                 arities)))
 
 (defn analyze-proto-arity [args]
   (cond
@@ -194,8 +189,13 @@
          body (drop args 2)
          default-fn-expr (list 'fn-arity params body)]
      (cond
-      (< 0 (count body)) (for [default (analyze-expr default-fn-expr)]
-                           {fn-name {(count params) {:default default}}})
+      (< 0 (count body)) (sm/new-sm
+                          (fn [s]
+                            (let [v-ss ((analyze-expr default-fn-expr) s)]
+                              (cond
+                               (list-empty? v-ss) v-ss
+                               (cons {fn-name {(count params) {:default (car v-ss)}}}
+                                     (cdr v-ss))))))
       (sm/state-maybe {fn-name {(count params) {}}})))))
 
 (defn sym-already-defined? [sym]
@@ -234,7 +234,7 @@
                          (not (= 2 (count x))) false
                          (= (first x) 'quote))))
         _ (make-symbols (second expr))]
-    (fr/free (ast/quoted-ast (second expr)))))
+    (ast/quoted (second expr))))
 
 (defn analyze-def []
   (for [curr-expr (sm/get-val :expr :no-expr)
@@ -249,7 +249,7 @@
         val-ast (cond
                  (= value :no-value) (sm/state-maybe :no-value)
                  (analyze-expr value))]
-    (fr/free (ast/definition-ast name val-ast))))
+    (ast/def-expr name val-ast)))
 
 (defn analyze-cond []
   (for [expr (is-expr seq?)
@@ -260,8 +260,8 @@
     (let [clauses (partition-all clause-pairs 2)
           default (last clauses empty-list)]
       (cond
-       (= 1 (count default)) (fr/free (ast/cond-ast (butlast clauses)
-                                                    (first default)))
+       (= 1 (count default)) (ast/cond-expr (butlast clauses)
+                                            (first default))
        (print-err "cond must have a default clause")))))
 
 (defn next-form []
@@ -282,14 +282,11 @@
                           (< 2 (count x)))))
         body (traverse (drop expr 2) analyze-expr)]
     (list (nth expr 0 'no-name)
-          (fr/free (ast/fn-ast (fr/free (ast/symbol-ast (symbol (str (nth expr 0 'no-name) "_impl"))))
-                               (apply-to list
-                                         (fr/free (ast/fn-arity-ast
-                                                   (apply* (fr/free list)
-                                                           (map (rest (nth expr 1 empty-list))
-                                                                (fn [sym]
-                                                                  (fr/free (ast/symbol-ast sym)))))
-                                                   (apply* (fr/free list) body)))))))))
+          (ast/fn-expr (ast/sym (symbol (str (nth expr 0 'no-name) "_impl")))
+                       (list (ast/fixed-arity (map (rest (nth expr 1 empty-list))
+                                                   (fn [sym]
+                                                     (ast/sym sym)))
+                                              body))))))
 
 (defn analyze-proto-impl []
   (for [name (is-form? symbol?)
@@ -301,7 +298,7 @@
         _ (sm/set-val :expr exts)
         proto-impls (sm/recur (analyze-proto-impl))
         _ (sm/set-val :expr curr-expr)]
-    (HashMap proto-impls)))
+    (reduce proto-impls {} (fn [m kv] (apply assoc m kv)))))
 
 (defn analyze-extend-type []
   (for [expr (is-expr (fn [x]
@@ -310,7 +307,7 @@
                          (not (< 1 (count x))) false
                          (= 'extend-type (first x)))))
         proto-specs (analyze-extensions (drop expr 2))]
-    (fr/free (ast/extend-ast (nth expr 1 :no-type) proto-specs))))
+    (ast/type-extension (nth expr 1 :no-type) proto-specs)))
 
 (defn analyze-module []
   (for [expr (is-expr (fn [x]
@@ -320,14 +317,14 @@
                          (= 'module (first x)))))
         module-ast (comp
                     (for [_ (sm/get-in-val (list :modules (second expr) :syms))]
-                      (list (fr/free (ast/const-string-ast (second expr)))))
+                      (list (ast/strng (second expr))))
                     (for [expr (is-expr (fn [x]
                                           (cond
                                            (not (seq? x)) false
                                            (not (= 2 (count x))) false
                                            (= 'module (first x)))))
                           text (sm/get-val :text)
-                          :let [module-stream (fio/file-stream (fio/fopen-read (second expr)))]
+                          :let [module-stream (slurp (second expr))]
                           _ (sm/set-val :text module-stream)
                           file-name (sm/get-val :file-name)
                           _ (sm/set-val :file-name (second expr))
@@ -335,10 +332,10 @@
                           asts (sm/recur (for [expr parser
                                                ast (analyze-expr expr)]
                                            ast))
-                          :let [_ (fio/close-stream module-stream)]
+                          ;; :let [_ (fio/close-stream module-stream)]
                           _ (sm/set-val :file-name file-name)
                           _ (sm/set-val :text text)]
-                      (cons (fr/free (ast/const-string-ast (second expr)))
+                      (cons (ast/strng (second expr))
                             asts)))]
     module-ast))
 
@@ -350,7 +347,7 @@
                          (and (= 'add-ns (first x))
                               (symbol? (second x))))))
         asts (analyze-expr (nth expr 2))]
-    (fr/free (ast/add-ns-ast (second expr) asts))))
+    (ast/ns-add (second expr) asts)))
 
 ;; TODO: handle multi-arity reified fns
 (defn analyze-reify []
@@ -359,7 +356,7 @@
                          (not (seq? x)) false
                          (= 'reify (nth x 0 :not-reify)))))
         proto-specs (analyze-extensions (rest expr))]
-    (fr/free (ast/reify-ast proto-specs))))
+    (ast/reified proto-specs)))
 
 (defn analyze-protocol []
   (for [expr (is-expr (fn [x]
@@ -369,7 +366,7 @@
                          (= 'defprotocol (first x)))))
         ;; TODO: make this only accept fixed arities
         arities (traverse (drop expr 2) analyze-proto-arity)]
-    (fr/free (ast/protocol-ast (second expr) (apply merge-with comp arities)))))
+    (ast/proto (second expr) (apply merge-with comp arities))))
 
 (defn analyze-deftype []
   (for [expr (is-expr (fn [x]
@@ -377,9 +374,9 @@
                          (not (seq? x)) false
                          (< (count x) 3) false
                          (= 'deftype (first x)))))]
-    (fr/free (ast/type-ast (second expr) ;; name
-                           (nth expr 2) ;; fields
-                           (drop expr 3)))))
+    (ast/type-expr (second expr) ;; name
+                   (nth expr 2) ;; fields
+                   (drop expr 3))))
 
 (defn analyze-main []
   (for [expr (is-expr (fn [x]
@@ -388,8 +385,7 @@
                          (not (< 2 (count x))) false
                          (= 'main (first x)))))
         body (traverse (drop expr 2) analyze-expr)]
-    (fr/free (ast/main-ast (nth expr 1 empty-list)
-                           (apply* (fr/free list) body)))))
+    (ast/main-fn (nth expr 1 empty-list) body)))
 
 (defn expr-to-ast []
   (comp (analyze-symbol)
