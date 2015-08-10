@@ -13,6 +13,13 @@
          (list (cons (first result-s) (first results-s))
                (second results-s))))))))
 
+(defn -comp* [mv mvs s]
+  (let [x (mv s)]
+    (cond
+     (list-empty? mvs) x
+     (list-empty? x) (-comp* (car mvs) (cdr mvs) s)
+     x)))
+
 ;; TODO: deftypes don't get added to the importing ns correctly
 (deftype new-sm [invoke-fn]
   Stringable
@@ -51,12 +58,7 @@
     (new-sm (fn [s]
                 empty-list)))
   (comp* [mv mvs]
-    (new-sm (fn [s]
-                (let [x (mv s)]
-                  (cond
-                   (list-empty? mvs) x
-                   (list-empty? x) ((comp* (first mvs) (rest mvs)) s)
-                   x))))))
+    (new-sm (partial -comp* mv mvs))))
 
 (defn state-maybe [v]
   (new-sm (fn [s]

@@ -463,7 +463,7 @@
 ;;   (for [target (fr/evaluate (.callee ast) emit-c)
 ;;         args (eval-args (.args (.params ast)))
 ;;         result (comp (call-proto-impl (.callee ast) args)
-;;                      (call-invoke target args (.callee ast))
+;;                      (call-invoke target args)
 ;;                      (call-static-fixed target args)
 ;;                      (call-static-variadic target args)
 ;;                      (call-recursive target args)

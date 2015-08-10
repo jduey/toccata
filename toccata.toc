@@ -1136,7 +1136,7 @@
                            (c-code c-name empty-list "" type-num))]
            _ (sm/assoc-in-val (list :modules file-name :syms name) def)
            _ (sm/assoc-in-val (list :defined-syms name) def)]
-       (c-code "" empty-list "" :no-type)))
+       (c-code c-name empty-list "" type-num)))
   ([name type-num]
      (let [c-name (gensym "var_")]
        (for [_ (write-strs (list (str "// forward declaration for '" name "'\n")
@@ -1320,19 +1320,26 @@
         args (map (.args (.args (.v (first (.args (.arities (.v ast)))))))
                   (fn [arg-ast] (.sym (.v arg-ast))))
         num-args (count args)
-        impl-sym (gensym "protoImpl_")
         fn-sym (gensym "protoFn_")]
     (alert (< 0 num-args)
            (str "invalid protocol fn spec for" name))
-    (for [;; bogus (lookup-sym* (car args))
-          ;; _ (debug :first-arg bogus)
-          evalled (fr/evaluate ast emit-c)
+    (for [evalled (fr/evaluate ast emit-c)
           :let [args (map (range num-args) (fn [idx] (str "arg" idx)))
                 arg-decls (apply str (interpose (cons (str "List *closures")
                                                       (map args (fn [arg] (str "Value *" arg))))
                                                 ", "))
                 args (apply str (interpose (cons "closures" args) ", "))]
           reify-fn-index (sm/get-val :reify-fn-index 0)
+
+          proto-fn-name (sm/get-in-val (list :protocols (str protocol-name "/" name) :impls type-num :fn-sym)
+                                       :not-defined)
+          impl-sym (sm/get-in-val (list :static-fns proto-fn-name num-args :fn-sym) :not-defined)
+          impl-sym (cond
+                    (= :not-defined impl-sym)
+                    (sm/state-maybe (gensym "protoImpl_"))
+
+                    (sm/state-maybe impl-sym))
+
           _ (sm/set-val :reify-fn-index (inc reify-fn-index))
           _ (write-strs (list "Value *" impl-sym "(" arg-decls ") {\n"
                               "FnArity *arityPtr = ((Function *)((ReifiedVal *)arg0)->impls["
@@ -1524,17 +1531,31 @@
                            (comp (sm/get-in-val (list :protocols (str "Getter/" getter-name)))
                                  (emit-proto-fn "Getter/"
                                                 (list getter-name (list (list 1 {})))))))))
-          _ (comp (for [def (sm/get-in-val (list :defined-syms new-type-name))
-                        _ (forward-decl new-type-name (subs (first def) 7) (dec type-val-num))]
-                    "")
-                  (forward-decl new-type-name (dec type-val-num)))
+          proto-fn-info (comp (for [def (sm/get-in-val (list :defined-syms new-type-name))
+                                    info (forward-decl new-type-name (subs (first def) 7) (dec type-val-num))]
+                                info)
+                              (forward-decl new-type-name (dec type-val-num)))
+
+
+          :let [num-args (count (.fields ast))
+                invoke-sym (gensym "protoFnImpl_")
+                proto-fn-sym (.c-val proto-fn-info)]
+          _ (sm/assoc-in-val (list :protocols "Function/invoke" :impls (dec type-val-num) :fn-sym)
+                             (str proto-fn-sym))
+          _ (write-strs (list "Value *" invoke-sym))
+          _ (write-strs (interpose (cons "(List *, Value *" (map (.fields ast) (fn [_] "Value *"))) ", "))
+          _ (write ");\n")
+          _ (sm/assoc-in-val (list :static-fns (str proto-fn-sym) (inc num-args))
+                             {:fn-sym invoke-sym
+                              :return-type type-val-num})
+
           type-ast (an/analyze-expr (list 'reify
-                                       'Type
-                                       (list 'instance? (list 'vector '_ 'v)
-                                             (list '= type-val-num (list 'get-type 'v)))
-                                       'Function
-                                       (list 'invoke (cons 'vector (cons '_ (.fields ast)))
-                                             (.impls ast))))
+                                          'Type
+                                          (list 'instance? (list 'vector '_ 'v)
+                                                (list '= type-val-num (list 'get-type 'v)))
+                                          'Function
+                                          (list 'invoke (cons 'vector (cons '_ (.fields ast)))
+                                                (.impls ast))))
           _ (static-values)
           result (define-fwd-decl new-type-name type-ast)
 
