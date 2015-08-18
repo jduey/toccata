@@ -1567,7 +1567,9 @@ if (arg0->type != arg1->type)
     else {
       SubString *s1 = (SubString *)arg0;
       SubString *s2 = (SubString *)arg1;
-      if (s1->type == s2->type && strcmp(s1->buffer, s2->buffer) == 0) {
+      if (s1->type == s2->type &&
+          s1->len == s2->len &&
+          strncmp(s1->buffer, s2->buffer, s1->len) == 0) {
         return(true);
       } else
         return(false);
@@ -8031,8 +8033,6 @@ if (node->bitmap & bit) {
       incRef(valOrNode);
       return(valOrNode);
     } else {
-      // fprintf(stderr, "BRAAATTTT!!!!\n");
-      // abort();
       incRef(arg2);
       return(arg2);
     }

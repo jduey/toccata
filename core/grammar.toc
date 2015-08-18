@@ -425,9 +425,10 @@
 
 (defn read-quoted []
   (parser/rule "quoted"
-               (apply-to list
+               (apply-to (fn [arg]
+                           ;; (print-err :arg arg)
+                           (list 'quote arg))
                          (parser/ignore (parser/term "'"))
-                         (parser/always 'quote)
                          (read-sub-form))))
 
 (defn read-form []

@@ -74,10 +74,10 @@
   (fr/free (let-ast (apply* (fr/free list) bindings)
                     (apply* (fr/free list) body))))
 
-(deftype quoted-ast [sym])
+(deftype quoted-ast [q-val])
 
-(defn quoted [sym]
-  (fr/free (quoted-ast sym)))
+(defn quoted [q-val]
+  (fr/free (quoted-ast q-val)))
 
 (deftype main-ast [args body])
 

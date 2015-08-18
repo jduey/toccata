@@ -217,15 +217,38 @@
         _ (sm/set-val :sym-count (inc sym-idx))
         _ (sm/assoc-in-val (list :new-symbols sym)
                            (str "_sym_" sym-idx))]
-    ""))
+    sym))
 
-(defn make-symbols [quoted-form]
+(defn make-quoted [quoted-form]
   (cond
-   (symbol? quoted-form) (comp (sym-already-defined? quoted-form)
-                               (sym-recently-defined? quoted-form)
-                               (sym-defined-in-core quoted-form)
-                               (make-static-symbol quoted-form))
-   (seq? quoted-form) (traverse quoted-form make-symbols)
+   (symbol? quoted-form)
+   (for [_ (comp (sym-already-defined? quoted-form)
+                 (sym-recently-defined? quoted-form)
+                 (sym-defined-in-core quoted-form)
+                 (make-static-symbol quoted-form))]
+     (ast/quoted quoted-form))
+
+   (or (number? quoted-form)
+       (keyword? quoted-form)
+       (string? quoted-form))
+   (analyze-expr quoted-form)
+
+   (seq? quoted-form)
+   (cond
+    (= 'quote (car quoted-form))
+    (make-quoted (car (cdr quoted-form)))
+
+    (= 'hash-map (car quoted-form))
+    (for [contents (traverse (cdr quoted-form) make-quoted)]
+      (ast/call-expr (ast/sym 'hash-map) contents))
+
+    (= 'vector (car quoted-form))
+    (for [contents (traverse (cdr quoted-form) make-quoted)]
+      (ast/call-expr (ast/sym 'vector) contents))
+
+    (for [qs (traverse quoted-form make-quoted)]
+      (ast/call-expr (ast/sym 'list) qs)))
+
    (sm/state-maybe "")))
 
 (defn analyze-quoted []
@@ -233,8 +256,8 @@
                         (cond
                          (not (= 2 (count x))) false
                          (= (first x) 'quote))))
-        _ (make-symbols (second expr))]
-    (ast/quoted (second expr))))
+        result (make-quoted (second expr))]
+    result))
 
 (defn analyze-def []
   (for [curr-expr (sm/get-val :expr :no-expr)

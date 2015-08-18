@@ -567,7 +567,9 @@ Value *count(Value* n);
     else {
       SubString *s1 = (SubString *)arg0;
       SubString *s2 = (SubString *)arg1;
-      if (s1->type == s2->type && strcmp(s1->buffer, s2->buffer) == 0) {
+      if (s1->type == s2->type &&
+          s1->len == s2->len &&
+          strncmp(s1->buffer, s2->buffer, s1->len) == 0) {
         return(true);
       } else
         return(false);
@@ -1041,6 +1043,99 @@ else
       (number= 1 (list-count vs)) 1
       (apply = vs))))
 
+(def maybe-val)
+
+(def nothing
+  (reify
+    Stringable
+    (string-list [_] (list "<nothing>"))
+
+    Eq
+    (=* [nv x] (type= nv x))
+
+    Monoid
+    (zero [nv] nv)
+    (comp* [nv mvs]
+      (cond
+       (list-empty? mvs) nv
+       (comp* (first mvs) (rest mvs))))
+
+    Functor
+    (map [nv f] nv)
+
+    Applicative
+    (wrap [_ x] (maybe-val x))
+    (apply* [nv _] nv)
+
+    Monad
+    (flatten [nv] nv)
+    (flat-map [nv _] nv)))
+
+(defn some [coll f]
+  (cond
+   (empty? coll) 0
+   (f (first coll)) (first coll)
+   (some (rest coll) f)))
+
+(deftype maybe-val [v]
+  Stringable
+  (string-list [mv]
+    (comp (list "<maybe ")
+          (string-list (.v mv))
+          (list ">")))
+
+  Eq
+  (=* [x y]
+    (cond
+     (not (type= x y)) false
+     (= v (.v y))))
+
+  Monoid
+  (zero [_] nothing)
+  (comp* [mv _] mv)
+
+  Functor
+  (map [_ f]
+    (maybe-val (f v)))
+
+  Applicative
+  (wrap [_ v] (maybe-val v))
+  (apply* [fv args]
+    (cond
+     (some args (fn [x]
+                  (= nothing x))) nothing
+     (maybe-val (apply (.v fv) (map args .v)))))
+
+  Monad
+  (flatten [_] v)
+  (flat-map [_ f]
+    (f v)))
+
+(def maybe
+  (reify
+    Function
+    (invoke [_ v] (maybe-val v))
+
+    Type
+    (instance? [_ mv] (instance? maybe-val mv))
+
+    Monoid
+    (zero [_] nothing)
+    (comp* [_ _] :nothing-here)
+    ))
+
+(defn m=
+  ([x y]
+     (cond
+      (=* x y) (maybe x)
+      nothing))
+  ([v & vs]
+     (cond
+      (list-empty? vs) (maybe v)
+      (not (=* v (car vs))) nothing
+      (number= 1 (list-count vs)) (maybe v)
+      (apply = vs))))
+
 (defn <
   ([x y] (<* x y))
   ([v & vs]
@@ -1306,7 +1401,7 @@ return((Value *)numberValue(shaVal));
   Eq
   (=* [x y]
     (cond
-     (not (= (get-type x) (get-type y))) 0
+     (not (number= (get-type x) (get-type y))) 0
      (not (number= (count x) (count y))) 0
      (list=* (list x y))))
 
@@ -1413,12 +1508,6 @@ return((Value *)numberValue(shaVal));
   (map (flat-map (interpose vs " ") string-list) pr-err*)
   (pr-err* "\n"))
 
-(defn some [coll f]
-  (cond
-   (empty? coll) 0
-   (f (first coll)) 1
-   (some (rest coll) f)))
-
 (defn inc [x]
   (add-numbers x 1))
 
@@ -1443,80 +1532,6 @@ return((Value *)numberValue(shaVal));
      (cond
       (list-empty? t) h
       (reduce t h subtract-numbers)))))
-
-(def maybe-val)
-
-(def nothing
-  (reify
-    Stringable
-    (string-list [_] (list "<nothing>"))
-
-    Eq
-    (=* [nv x] (type= nv x))
-
-    Monoid
-    (zero [nv] nv)
-    (comp* [nv mvs]
-      (cond
-       (list-empty? mvs) nv
-       (comp* (first mvs) (rest mvs))))
-
-    Functor
-    (map [nv f] nv)
-
-    Applicative
-    (wrap [_ x] (maybe-val x))
-    (apply* [nv _] nv)
-
-    Monad
-    (flatten [nv] nv)
-    (flat-map [nv _] nv)))
-
-(deftype maybe-val [v]
-  Stringable
-  (string-list [mv]
-    (comp (list "<maybe ")
-          (string-list (.v mv))
-          (list ">")))
-
-  Eq
-  (=* [x y]
-    (cond
-     (not (type= x y)) false
-     (= v (.v y))))
-
-  Monoid
-  (zero [_] nothing)
-  (comp* [mv _] mv)
-
-  Functor
-  (map [_ f]
-    (maybe-val (f v)))
-
-  Applicative
-  (wrap [_ v] (maybe-val v))
-  (apply* [fv args]
-    (cond
-     (some args (partial = nothing)) nothing
-     (maybe-val (apply (.v fv) (map args .v)))))
-
-  Monad
-  (flatten [_] v)
-  (flat-map [_ f]
-    (f v)))
-
-(def maybe
-  (reify
-    Function
-    (invoke [_ v] (maybe-val v))
-
-    Type
-    (instance? [_ mv] (instance? maybe-val mv))
-
-    Monoid
-    (zero [_] nothing)
-    (comp* [_ _] :nothing-here)
-    ))
 
 (extend-type String
   Eq
@@ -2010,8 +2025,6 @@ if (node->bitmap & bit) {
       incRef(valOrNode);
       return(valOrNode);
     } else {
-      // fprintf(stderr, \"BRAAATTTT!!!!\\n\");
-      // abort();
       incRef(arg2);
       return(arg2);
     }

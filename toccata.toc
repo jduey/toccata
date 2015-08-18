@@ -2,8 +2,7 @@
 ;; TODO:
 ;; persistent data structures; maps, vectors
 ;;     Implement HashCollisionNode and re-hashing
-;; quoted lists
-;; optimize calls to invoke fns
+;; free Opaque pointer types when they're decRef'd
 ;; automatically derive =* for reified types
 ;;     and uncomment code in BitmapIndexedNode/assoc*
 ;; importing modules with no defs blows up
@@ -26,7 +25,6 @@
 ;; dependencies
 ;; supercompilation
 ;; FFI
-;; free Opaque pointer types when they're decRef'd
 ;; Android/iOS
 ;; native arrays
 ;; linear algebra
@@ -1119,7 +1117,7 @@
 (extend-type ast/quoted-ast
   Emitter
   (emit-c [ast]
-    (let [sym (.sym ast)]
+    (let [sym (.q-val ast)]
       (for [sym-val (sm/get-in-val (list :symbols sym) :no-static-sym)
             symbol-type (sm/get-in-val (list :types 'Symbol) :no-type)]
         (let [_ (cond
