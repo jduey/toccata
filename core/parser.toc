@@ -97,11 +97,13 @@
 
 (defn char-test [pred]
   (sm/new-sm (fn [s]
-               (let [c (first (:text s))]
+               (let [text (:text s)]
                  (cond
-                  (= nothing c) empty-list
-                  (pred (.v c)) (list (list (.v c)) (update-in s (list :text) rest))
-                  empty-list)))))
+                  (number= 0 (str-count text)) empty-list
+                  (let [c (subs text 0 1)]
+                    (cond
+                     (pred c) (list (list c) (assoc s :text (subs text 1)))
+                     empty-list)))))))
 
 (deftype parse-lower-alphas []
   Parser

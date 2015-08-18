@@ -79,10 +79,8 @@
                (list (print str) s))))
 
 (defn write-strs [str-list]
-  (cond
-   (= 0 (count str-list)) (sm/state-maybe "")
-   (sm/new-sm (fn [s]
-                (list (map str-list print) s)))))
+  (sm/new-sm (fn [s]
+               (list (map str-list print) s))))
 
 (defn genlocal [pre]
   (for [sym-count (sm/get-val :local-sym-count 0)
