@@ -21,6 +21,7 @@
 (def OpaqueVal "typedef struct {int64_t type; int32_t refs; void *ptr;} Opaque;\n")
 (def BitmapIndexedVal "typedef struct {int64_t type; int32_t refs; int32_t bitmap; Value *array[];} BitmapIndexedNode;\n")
 (def ArrayNodeVal "typedef struct {int64_t type; int32_t refs; Value *array[32];} ArrayNode;\n")
+(def HashCollisionVal "typedef struct {int64_t type; int32_t refs; int16_t count; Value *array[];} HashCollisionNode;\n")
 
 (def true (inline-text "(Value *)&trueVal;"))
 (def false (inline-text "(Value *)&falseVal;"))
@@ -1009,10 +1010,11 @@ else
 (defprotocol Associative
   (assoc [m k v])
   (get [m k not-found]
-    (print-err "'get' not implemented: " :m m :k k)
+    (print-err "'get' not implemented for" (type-name m) ": " :m m :k k)
     (abort))
   (keys [m])
-  (vals [m]))
+  (vals [m])
+  (dissoc [m k]))
 
 (defprotocol Hash
   (sha1 [_]))
@@ -1934,8 +1936,19 @@ if (node->bitmap & bit) {
     int64_t existingKeyHash = ((Number *)hashValue)->numVal;
     if (existingKeyHash == hash) {
       // make & return HashCollisionNode
-      fprintf(stderr, \"Need to implement HashCollisionNode!\\n\");
-      abort();
+      HashCollisionNode *newLeaf = malloc_hashCollisionNode(2);
+      newLeaf->array[0] = keyOrNull;
+      newLeaf->array[1] = valOrNode;
+      newLeaf->array[2] = key;
+      newLeaf->array[3] = val;
+      incRef((Value *)keyOrNull);
+      incRef((Value *)valOrNode);
+      incRef((Value *)key);
+      incRef((Value *)val);
+
+      BitmapIndexedNode *newNode = clone_BitmapIndexedNode(node, idx, (Value *)0, (Value *)newLeaf);
+      dec_and_free(hashValue);
+      return((Value *)newNode);
     } else {
       Value *newLeaf = createNode(shift + 5,
                                   existingKeyHash, keyOrNull, valOrNode,
@@ -1971,8 +1984,6 @@ if (node->bitmap & bit) {
   } else {
     int itemCount = n + 1;
     BitmapIndexedNode *newNode = malloc_bmiNode(itemCount);
-    newNode->type = BitmapIndexedType;
-    newNode->refs = 1;
     newNode->bitmap = node->bitmap | bit;
     incRef(key);
     incRef(val);
@@ -1996,7 +2007,6 @@ if (node->bitmap & bit) {
     (inline-text "
 BitmapIndexedNode *node = (BitmapIndexedNode *)arg0;
 Value *key = arg1;
-Value *val = arg2;
 int64_t hash = ((Number *)arg3)->numVal;
 int shift = (int)((Number *)arg4)->numVal;
 
@@ -2016,7 +2026,7 @@ if (node->bitmap & bit) {
     // There is no key in the position, so valOrNode is
     // pointer to a node.
     Value *newShift = (Value *)numberValue(shift + 5);
-    Value *v = get(valOrNode, key, val, arg3, newShift);
+    Value *v = get(valOrNode, key, arg2, arg3, newShift);
     dec_and_free(newShift);
     return(v);
   } else {
@@ -2062,7 +2072,7 @@ return(newNode);
 (extend-type ArrayNode
   Collection
   (count [x]
-    (inline-text "
+    (inline-text Number "
 int accum = 0;
 for(int i = 0; i < 32; i++){
   if (((ArrayNode *)arg0)->array[i] != (Value *)0) {
@@ -2074,6 +2084,7 @@ for(int i = 0; i < 32; i++){
 return(numberValue(accum));
 "))
   (empty? [m]
+    ;; TODO: make sure this holds when 'dissoc' is implemented
     false)
 
   Monoid
@@ -2118,6 +2129,7 @@ for (int i = 0; i < 32; i++) {
 }
 return((Value *)seq);
 "))
+
   (assoc* [node k v hash shift]
     (inline-text "
 ArrayNode *node = (ArrayNode *)arg0;
@@ -2217,6 +2229,153 @@ dec_and_free(shift);
 dec_and_free(hash);
 return(newNode);
 ")))
+
+(extend-type HashCollisionNode
+  Collection
+  (count [x]
+    (inline-text Number "
+return(numberValue(((HashCollisionNode *) arg0)->count / 2));
+"))
+  (empty? [m]
+    ;; TODO: make sure this holds when 'dissoc' is implemented
+    false)
+
+  Monoid
+  (zero [_] emptyBMI)
+  (comp* [mval mvals]
+    (reduce mvals
+            mval
+            (fn [acc mval]
+              (reduce (seq mval)
+                      acc
+                      (fn [acc pair]
+                        (apply assoc acc pair))))))
+
+  Seqable
+  (seq [n]
+    (hash-seq n empty-list))
+
+  Stringable
+  (string-list [n]
+    (let [a-list (seq n)]
+      (cond
+       (list-empty? a-list) (list "{}")
+       (let [kv-strs (map a-list
+                          (fn [kv]
+                            (let [strs (interpose (map kv string-list)
+                                                   (list " "))]
+                              (comp* (car strs) (cdr strs)))))
+             body-list (let [strs (interpose kv-strs (list ", "))]
+                         (comp* (car strs) (cdr strs)))]
+         (comp (list "{")
+               body-list
+               (list "}"))))))
+
+  HashMapNode
+  (hash-seq [n s]
+    (inline-text List "
+HashCollisionNode *node = (HashCollisionNode *)arg0;
+List *seq = (List *)arg1;
+for (int i = 0; i < node->count / 2; i++) {
+   if (node->array[2 * i] != (Value *)0 && node->array[2 * i + 1] != (Value *)0) {
+     List *pair = listCons(node->array[2 * i], listCons(node->array[2 * i + 1], empty_list));
+     incRef(node->array[2 * i]);
+     incRef(node->array[2 * i + 1]);
+     seq = listCons((Value *)pair, seq);
+   }
+}
+return((Value *)seq);
+"))
+
+  (assoc* [node k v hash shift]
+    (inline-text "
+HashCollisionNode *node = (HashCollisionNode *)arg0;
+Value *key = arg1;
+Value *val = arg2;
+int64_t hash = ((Number *)arg3)->numVal;
+int shift = (int)((Number *)arg4)->numVal;
+HashCollisionNode *newNode;
+int itemCount = node->count / 2;
+
+if(equal(sha1(node->array[0]), arg3)) {
+   newNode = malloc_hashCollisionNode(itemCount + 1);
+   for (int i = 0; i < itemCount; i++) {
+      if (equal(node->array[2 * i], key)) {
+         newNode->array[2 * i] = key;
+         incRef(key);
+         newNode->array[2 * i + 1] = val;
+         incRef(val);
+         newNode->count--;
+      } else {
+         newNode->array[2 * i] = node->array[2 * i];
+         incRef(node->array[2 * i]);
+         newNode->array[2 * i + 1] = node->array[2 * i + 1];
+         incRef(node->array[2 * i + 1]);
+      }
+   }
+   if (newNode->count != itemCount) {
+      newNode->array[2 * itemCount] = key;
+      incRef(key);
+      newNode->array[2 * itemCount + 1] = val;
+      incRef(val);
+   }
+   return((Value *)newNode);
+} else {
+   BitmapIndexedNode *bmi = &emptyBMI;
+   Number newShift = {NumberType, -1, 0};
+
+   bmi = (BitmapIndexedNode *)assoc((Value *)bmi, key, val, arg3, (Value *)&newShift);
+   for (int i = 0; i < itemCount; i++) {
+      bmi = (BitmapIndexedNode *)assoc((Value *)bmi, node->array[2 * i], node->array[2 * i + 1],
+                                       sha1(node->array[i]), (Value *)&newShift);
+   }
+   return((Value *)bmi);
+}
+"))
+
+  (get* [node k v hash shift]
+    (inline-text List "
+HashCollisionNode *node = (HashCollisionNode *)arg0;
+List *seq = (List *)arg1;
+for (int i = 0; i < node->count / 2; i++) {
+   if (node->array[2 * i] != (Value *)0 && equal(arg1, node->array[2 * i])) {
+      if (node->array[2 * i + 1] != (Value *)0) {
+        incRef(node->array[2 * i + 1]);
+        return(node->array[2 * i + 1]);
+      } else {
+        incRef(arg2);
+        return(arg2);
+      }
+   }
+}
+incRef(arg2);
+return(arg2);
+"))
+
+  Associative
+  (get [m k not-found]
+    (inline-text "
+Value *hash = sha1(arg1);
+Value *shift = numberValue(0);
+Value *found = get(arg0, arg1, arg2, hash, shift);
+dec_and_free(shift);
+dec_and_free(hash);
+return(found);
+"))
+  (keys [m]
+    (map (seq m) first))
+  (vals [m]
+    (map (seq m) second))
+  (assoc [_ k v]
+    (inline-text "
+Value *hash = sha1(arg1);
+Value *shift = numberValue(0);
+Value *newNode = assoc(arg0, arg1, arg2, hash, shift);
+dec_and_free(shift);
+dec_and_free(hash);
+return(newNode);
+"))
+  )
 
 (defn hash-map [& kv-pairs]
   (reduce (partition kv-pairs 2)

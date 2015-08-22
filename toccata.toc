@@ -1,11 +1,13 @@
 
 ;; TODO:
-;; persistent data structures; maps, vectors
-;;     Implement HashCollisionNode and re-hashing
 ;; free Opaque pointer types when they're decRef'd
 ;; automatically derive =* for reified types
 ;;     and uncomment code in BitmapIndexedNode/assoc*
 ;; importing modules with no defs blows up
+;; implement to-be-freed lists
+;; test memory exhaustion handling
+
+;; trying to redef an existing type-name chokes
 
 ;; gives non-sense error message
 ;;        (deftype Bogus
@@ -23,6 +25,7 @@
 ;; green threads
 ;; async
 ;; dependencies
+;; persistent data structures; vectors, hash-sets
 ;; supercompilation
 ;; FFI
 ;; Android/iOS
@@ -62,6 +65,7 @@
    'Opaque 9
    'BitmapIndexedNode 10
    'ArrayNode 11
+   'HashCollisionNode 12
    })
 
 (defn type-num-to-name [type-num]
@@ -589,6 +593,7 @@
                             OpaqueVal
                             BitmapIndexedVal
                             ArrayNodeVal
+                            HashCollisionVal
                             "List *listCons(Value *x, List *l);\n"
                             "Value *stringValue(char *s);\n"
                             "#define NumberType " (str (get types 'Number :no-type)) "\n"
@@ -602,6 +607,7 @@
                             "#define OpaqueType " (str (get types 'Opaque :no-type)) "\n"
                             "#define BitmapIndexedType " (str (get types 'BitmapIndexedNode :no-type)) "\n"
                             "#define ArrayNodeType " (str (get types 'ArrayNode :no-type)) "\n"
+                            "#define HashCollisionNodeType " (str (get types 'HashCollisionNode :no-type)) "\n"
                             "List *empty_list;\n"
                             "Value *number_literals();\n"
                             "Value *counts();\n"
@@ -634,6 +640,7 @@
                             OpaqueVal
                             BitmapIndexedVal
                             ArrayNodeVal
+                            HashCollisionVal
                             "extern List *listCons(Value *x, List *l);\n"
                             "extern Value *stringValue(char *s);\n"
                             "#define NumberType " (str (get types 'Number :no-type)) "\n"
@@ -645,8 +652,9 @@
                             "#define FunctionType " (str (get types 'Function :no-type)) "\n"
                             "#define FnArityType " (str (get types 'FnArity :no-type)) "\n"
                             "#define OpaqueType " (str (get types 'Opaque :no-type)) "\n"
-                            "#define BitmapIndexedType " (str (get types 'BitMapIndexedNode :no-type)) "\n"
+                            "#define BitmapIndexedType " (str (get types 'BitmapIndexedNode :no-type)) "\n"
                             "#define ArrayNodeType " (str (get types 'ArrayNode :no-type)) "\n"
+                            "#define HashCollisionNodeType " (str (get types 'HashCollisionNode :no-type)) "\n"
                             "extern List *empty_list;\n"
                             "extern Value *number_literals();\n"
                             "extern Value *counts();\n"
@@ -1774,6 +1782,21 @@
                     "  return(bmiNode);\n"
                     "}\n\n"
 
+                    "HashCollisionNode *malloc_hashCollisionNode(int itemCount) {\n"
+                    "  if (itemCount > 30000) {\n"
+                    "     fprintf(stderr, \"Catastrophic failure: Too many hash collisions\\n\");"
+                    "     abort();\n"
+                    "  }\n"
+                    "  int nodeSize = sizeof(HashCollisionNode) + sizeof(Value *) * (itemCount * 2);\n"
+                    "  HashCollisionNode *collisionNode;\n"
+                    "  collisionNode = (HashCollisionNode *)my_malloc(nodeSize);\n"
+                    "  memset(collisionNode, 0, nodeSize);\n"
+                    "  collisionNode->type = HashCollisionNodeType;\n"
+                    "  collisionNode->count = itemCount * 2;\n"
+                    "  collisionNode->refs = 1;\n"
+                    "  return(collisionNode);\n"
+                    "}\n\n"
+
                     "DirectLL *freeArrayNodes = (DirectLL *)0;\n"
                     "ArrayNode *malloc_arrayNode() {\n"
                     "  ArrayNode *arrayNode;\n"
@@ -1895,6 +1918,16 @@
                     "    freeArrayNodes = (DirectLL *)v;\n"
                     ;; "    free_count++;\n"
                     ;; "    free(v);\n"
+                    "  } else if (v->type == HashCollisionNodeType) {\n"
+                    "    HashCollisionNode *node = (HashCollisionNode *)v;\n"
+                    "    for (int i = 0; i < node->count; i++) {\n"
+                    "       if (node->array[i] != (Value *)0) {\n"
+                    "          dec_and_free(node->array[i]);\n"
+                    "       }\n"
+                    "    }\n"
+                    "    v->refs = -10;\n"
+                    "    free_count++;\n"
+                    "    free(v);\n"
                     "  } else {\n"
                     "    ReifiedVal *rv = (ReifiedVal *)v;\n"
                     "    for (int i = 0; i < rv->implCount; i++) {\n"
