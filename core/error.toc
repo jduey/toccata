@@ -6,12 +6,6 @@
           (string-list v)
           (list ">")))
 
-  Eq
-  (=* [mv x]
-    (cond
-     (type= mv x) (= v (.v x))
-     false))
-
   Functor
   (map [mv _] mv)
 
@@ -43,12 +37,6 @@
     (comp (list "<valid ")
           (string-list v)
           (list ">")))
-
-  Eq
-  (=* [mv x]
-    (cond
-     (type= mv x) (= v (.v x))
-     false))
 
   Functor
   (map [mv f]

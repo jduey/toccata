@@ -123,11 +123,11 @@
                                                                   impl-arity))
                                                           (rewrite (second impl-fn) rule)))))))))
 
-  ;; PrettyPrinter
-  ;; (pprint [c]
-  ;;   (str "(reify"
-  ;;        (fr/evaluate (.impls c) pprint)
-  ;;        ")"))
+  PrettyPrinter
+  (pprint [c]
+    (str "(reify\n"
+         (.impls c)
+         ")"))
 
   ;; Stringable
   ;; (string-list [c]

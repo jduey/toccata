@@ -1,8 +1,8 @@
 
 ;; TODO:
-;; free Opaque pointer types when they're decRef'd
 ;; automatically derive =* for reified types
 ;;     and uncomment code in BitmapIndexedNode/assoc*
+;; free Opaque pointer types when they're decRef'd
 ;; importing modules with no defs blows up
 ;; implement to-be-freed lists
 ;; test memory exhaustion handling
@@ -16,7 +16,6 @@
 ;;            (string-list [_] (list "")))
 
 ;; can't apply type constructors
-;; compact lists cdr coding
 ;; implements?
 ;; fn meta data; doc strings and ast
 ;; pattern matching
@@ -31,6 +30,7 @@
 ;; Android/iOS
 ;; native arrays
 ;; linear algebra
+;; compact lists cdr coding
 
 ;; Optimization hints:
 ;; eliminate closed-over syms from flat-map, wrap impls
@@ -1325,8 +1325,6 @@
                   (fn [arg-ast] (.sym (.v arg-ast))))
         num-args (count args)
         fn-sym (gensym "protoFn_")]
-    (alert (< 0 num-args)
-           (str "invalid protocol fn spec for" name))
     (for [evalled (fr/evaluate ast emit-c)
           :let [args (map (range num-args) (fn [idx] (str "arg" idx)))
                 arg-decls (apply str (interpose (cons (str "List *closures")
@@ -1559,7 +1557,12 @@
                                                 (list '= type-val-num (list 'get-type 'v)))
                                           'Function
                                           (list 'invoke (cons 'vector (cons '_ (.fields ast)))
-                                                (.impls ast))))
+                                                (list*
+                                                 'reify
+                                                 'Getter
+                                                 (list 'type-args (list 'vector '_)
+                                                       (list* 'list (.fields ast)))
+                                                 (cdr (.impls ast))))))
           _ (static-values)
           result (define-fwd-decl new-type-name type-ast)
 
@@ -2512,12 +2515,14 @@
                                    (fixed-fn-types)
                                    (write "List *empty_list = &(List){4,-1,0,0,0};\n")
                                    (base-fns)
-                                   (emit-proto-fn "Getter/"
-                                                  (list 'type-name (list (list 1 {}))))
                                    (emit-proto-fn "Function/"
                                                   (list 'invoke (map (range 8)
                                                                      (fn [num-args]
                                                                        (list (inc num-args) {})))))
+                                   (emit-proto-fn "Getter/"
+                                                  (list 'type-name (list (list 1 {}))))
+                                   (emit-proto-fn "Getter/"
+                                                  (list 'type-args (list (list 1 {}))))
                                    (for [expr (sm/get-val :expr)
                                          type-names (traverse
                                                      (seq types)

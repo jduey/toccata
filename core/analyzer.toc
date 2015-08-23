@@ -321,7 +321,12 @@
         _ (sm/set-val :expr exts)
         proto-impls (sm/recur (analyze-proto-impl))
         _ (sm/set-val :expr curr-expr)]
-    (reduce proto-impls {} (fn [m kv] (apply assoc m kv)))))
+    (reduce proto-impls {} (fn [m kv]
+                             (let [k (first kv)
+                                   old-v (get m k empty-list)
+                                   new-v (comp old-v (second kv))]
+                               (assoc m k new-v))))))
+
 
 (defn analyze-extend-type []
   (for [expr (is-expr (fn [x]

@@ -73,12 +73,6 @@
           f (evaluate fv eval-free)]
       (apply* f args)))
 
-  Eq
-  (=* [x y]
-    (and (type= x y)
-         (= (list fv args)
-            (extract y))))
-
   Applicative
   (wrap [_ v] (free v))
   (apply* [fv args]
@@ -138,11 +132,6 @@
   FreeEval
   (evaluate [free-val eval-free]
     (eval-free v))
-
-  Eq
-  (=* [x y]
-    (and (type= x y)
-         (= v (extract y))))
 
   Functor
   (map [_ f]

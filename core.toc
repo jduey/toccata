@@ -949,8 +949,11 @@ else
 
 (defprotocol Eq
   (=* [x y]
-    (print-err "'=*' not implemented:" x)
-    (abort)))
+    (cond
+     (type= x y)
+     (=* (type-args x) (type-args y))
+
+     0)))
 
 (defprotocol Ord
   (<* [value values]
@@ -1086,12 +1089,6 @@ else
           (string-list (.v mv))
           (list ">")))
 
-  Eq
-  (=* [x y]
-    (cond
-     (not (type= x y)) false
-     (= v (.v y))))
-
   Monoid
   (zero [_] nothing)
   (comp* [mv _] mv)
@@ -1171,7 +1168,7 @@ else
         for(Value *x = l->head; x != (Value *)0; l = l->tail, x = l->head) {
           Value *y;
           if(arg1->type != 3) {
-            y = protoFnImpl_10(empty_list, arg1, x);
+            y = protoFnImpl_11(empty_list, arg1, x);
           } else {
             FnArity *arity2 = findFnArity(arg1, 1);
             if(arity2 != (FnArity *)0 && !arity2->variadic) {
@@ -1424,7 +1421,7 @@ return((Value *)numberValue(shaVal));
         for(Value *x = l->head; x != (Value *)0; l = l->tail, x = l->head) {
           Value *y;
           if(arg1->type != 3) {
-            y = protoFnImpl_10(empty_list, arg1, x);
+            y = protoFnImpl_11(empty_list, arg1, x);
           } else {
             FnArity *arity2 = findFnArity(arg1, 1);
             if(arity2 != (FnArity *)0 && !arity2->variadic) {
@@ -1913,22 +1910,12 @@ if (node->bitmap & bit) {
     }
   } else if (equal(key, keyOrNull)) {
     // if the keyOrNull points to a value that is equal to key
-/*
-    if (equal(val, valOrNode)) {
-      // if the valOrNode points to a value that is equal to val
-      incRef(arg0);
-      return(arg0);
-    } else {
-*/
-      // create new hash-map with valOrNode replaced by val
-      // clone node and add val to it
-      BitmapIndexedNode *newNode = clone_BitmapIndexedNode(node, idx, key, val);
-      incRef((Value *)key);
-      incRef((Value *)val);
-      return((Value *)newNode);
-/*
-    }
-*/
+    // create new hash-map with valOrNode replaced by val
+    // clone node and add val to it
+    BitmapIndexedNode *newNode = clone_BitmapIndexedNode(node, idx, key, val);
+    incRef((Value *)key);
+    incRef((Value *)val);
+    return((Value *)newNode);
   } else {
     // there is already a key/val pair at the position where key
     // would be placed. Extend tree a level
@@ -2013,12 +2000,6 @@ int shift = (int)((Number *)arg4)->numVal;
 int bit = bitpos(hash, shift);
 int idx = __builtin_popcount(node->bitmap & (bit - 1));
 if (node->bitmap & bit) {
-  // int cnt = __builtin_popcount(node->bitmap);
-  // fprintf(stderr, \"Looking for: %s   %lld %d   %lld\\n\", ((SubString *)key)->buffer, hash, idx, shift);
-  // for (int i = 0; i < cnt; i++) {
-  //   fprintf(stderr, \"%d: %s\\n\", i, ((SubString *)node->array[2 * i])->buffer);
-  // }
-
   // if the hash position is already filled
   Value *keyOrNull = node->array[2 * idx];
   Value *valOrNode = node->array[2 * idx + 1];
@@ -2158,29 +2139,17 @@ if (subNode == (Value *)0) {
 } else {
     Value *hash = sha1(key);
     Value *n = assoc(subNode, key, val, hash, newShift);
-/*
-    if (n == subNode) {
-      // the key was already associated with the value
-      // so do nothing
-      dec_and_free(n);
-      incRef(arg0);
-      newNode = (ArrayNode *)arg0;
-    } else {
-*/
-      newNode = (ArrayNode *)malloc_arrayNode();
-      for (int i = 0; i < 32; i++) {
-        if (i != idx && node->array[i] != (Value *)0) {
-          newNode->array[i] = node->array[i];
-          incRef(newNode->array[i]);
-        }
+    newNode = (ArrayNode *)malloc_arrayNode();
+    for (int i = 0; i < 32; i++) {
+      if (i != idx && node->array[i] != (Value *)0) {
+        newNode->array[i] = node->array[i];
+        incRef(newNode->array[i]);
       }
-      if (newNode->array[idx] != (Value *)0)
-        decRef(newNode->array[idx]);
-      newNode->array[idx] = n;
-      dec_and_free(hash);
-/*
     }
-*/
+    if (newNode->array[idx] != (Value *)0)
+      decRef(newNode->array[idx]);
+    newNode->array[idx] = n;
+    dec_and_free(hash);
 }
 dec_and_free(newShift);
 return((Value *)newNode);
