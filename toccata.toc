@@ -1,7 +1,5 @@
 
 ;; TODO:
-;; importing modules with no defs blows up
-
 ;; trying to redef an existing type-name chokes
 
 ;; gives non-sense error message
@@ -1516,64 +1514,70 @@
 (extend-type ast/type-ast
   Emitter
   (emit-c [ast]
-    (for [types (sm/get-val :types {})
-          :let [new-type-name (.name ast)
-                type-val-num (+ 2 (count (seq types)))]
+    (comp
+     (for [file-name (sm/get-val :file-name)
+           _ (sm/get-in-val (list :modules file-name :types (.name ast)))]
+       (let [_ (print-err (str "Trying to re-define type name: '" (.name ast) "' in module '"
+                               file-name "'"))]
+         (abort)))
+     (for [types (sm/get-val :types {})
+           :let [new-type-name (.name ast)
+                 type-val-num (+ 2 (count (seq types)))]
 
-          _ (sm/assoc-in-val (list :type-names (dec type-val-num)) new-type-name)
-          _ (an/analyze-expr type-val-num)
-          _ (cond
-             (empty? (.fields ast)) (sm/state-maybe "")
-             (traverse (.fields ast)
-                       (fn [field]
-                         (let [getter-name (symbol (str "." field))]
-                           (comp (sm/get-in-val (list :protocols (str "Getter/" getter-name)))
-                                 (emit-proto-fn "Getter/"
-                                                (list getter-name (list (list 1 {})))))))))
-          proto-fn-info (comp (for [def (sm/get-in-val (list :defined-syms new-type-name))
-                                    info (forward-decl new-type-name (subs (first def) 7) (dec type-val-num))]
-                                info)
-                              (forward-decl new-type-name (dec type-val-num)))
+           _ (sm/assoc-in-val (list :type-names (dec type-val-num)) new-type-name)
+           _ (an/analyze-expr type-val-num)
+           _ (cond
+              (empty? (.fields ast)) (sm/state-maybe "")
+              (traverse (.fields ast)
+                        (fn [field]
+                          (let [getter-name (symbol (str "." field))]
+                            (comp (sm/get-in-val (list :protocols (str "Getter/" getter-name)))
+                                  (emit-proto-fn "Getter/"
+                                                 (list getter-name (list (list 1 {})))))))))
+           proto-fn-info (comp (for [def (sm/get-in-val (list :defined-syms new-type-name))
+                                     info (forward-decl new-type-name (subs (first def) 7) (dec type-val-num))]
+                                 info)
+                               (forward-decl new-type-name (dec type-val-num)))
 
 
-          :let [num-args (count (.fields ast))
-                invoke-sym (gensym "protoFnImpl_")
-                proto-fn-sym (.c-val proto-fn-info)]
-          _ (sm/assoc-in-val (list :protocols "Function/invoke" :impls (dec type-val-num) :fn-sym)
-                             (str proto-fn-sym))
-          _ (write-strs (list "Value *" invoke-sym))
-          _ (write-strs (interpose (cons "(List *, Value *" (map (.fields ast) (fn [_] "Value *"))) ", "))
-          _ (write ");\n")
-          _ (sm/assoc-in-val (list :static-fns (str proto-fn-sym) (inc num-args))
-                             {:fn-sym invoke-sym
-                              :return-type type-val-num})
+           :let [num-args (count (.fields ast))
+                 invoke-sym (gensym "protoFnImpl_")
+                 proto-fn-sym (.c-val proto-fn-info)]
+           _ (sm/assoc-in-val (list :protocols "Function/invoke" :impls (dec type-val-num) :fn-sym)
+                              (str proto-fn-sym))
+           _ (write-strs (list "Value *" invoke-sym))
+           _ (write-strs (interpose (cons "(List *, Value *" (map (.fields ast) (fn [_] "Value *"))) ", "))
+           _ (write ");\n")
+           _ (sm/assoc-in-val (list :static-fns (str proto-fn-sym) (inc num-args))
+                              {:fn-sym invoke-sym
+                               :return-type type-val-num})
 
-          type-ast (an/analyze-expr (list 'reify
-                                          'Type
-                                          (list 'instance? (list 'vector '_ 'v)
-                                                (list '= type-val-num (list 'get-type 'v)))
-                                          'Function
-                                          (list 'invoke (cons 'vector (cons '_ (.fields ast)))
-                                                (list*
-                                                 'reify
-                                                 'Getter
-                                                 (list 'type-args (list 'vector '_)
-                                                       (list* 'list (.fields ast)))
-                                                 (cdr (.impls ast))))))
-          _ (static-values)
-          result (define-fwd-decl new-type-name type-ast)
+           type-ast (an/analyze-expr (list 'reify
+                                           'Type
+                                           (list 'instance? (list 'vector '_ 'v)
+                                                 (list '= type-val-num (list 'get-type 'v)))
+                                           'Function
+                                           (list 'invoke (cons 'vector (cons '_ (.fields ast)))
+                                                 (list*
+                                                  'reify
+                                                  'Getter
+                                                  (list 'type-args (list 'vector '_)
+                                                        (list* 'list (.fields ast)))
+                                                  (cdr (.impls ast))))))
+           _ (static-values)
+           result (define-fwd-decl new-type-name type-ast)
 
-          file-name (sm/get-val :file-name)
-          _ (sm/assoc-in-val (list :modules file-name :types new-type-name) type-val-num)
-          _ (sm/assoc-in-val (list :defined-types new-type-name) type-val-num)
+           file-name (sm/get-val :file-name)
+           _ (sm/assoc-in-val (list :modules file-name :types new-type-name) type-val-num)
+           _ (sm/assoc-in-val (list :defined-types new-type-name) type-val-num)
 
-          _ (sm/update-in-val (list :types)
-                              (fn [types]
-                                (reduce (replace-type (seq types) type-val-num new-type-name)
-                                        {}
-                                        (fn [m kv]
-                                          (apply assoc m kv)))))]
-      result)))
+           _ (sm/update-in-val (list :types)
+                               (fn [types]
+                                 (reduce (replace-type (seq types) type-val-num new-type-name)
+                                         {}
+                                         (fn [m kv]
+                                           (apply assoc m kv)))))]
+       result))))
 
 (defn core-base-fns []
   (write-strs (list "\n"
