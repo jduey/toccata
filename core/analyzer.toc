@@ -364,7 +364,8 @@
                           _ (sm/set-val :file-name file-name)
                           _ (sm/set-val :text text)]
                       (cons (ast/strng (second expr))
-                            asts)))]
+                            asts))
+                    (sm/state-maybe (list (ast/strng (second expr)))))]
     module-ast))
 
 (defn analyze-add-ns []

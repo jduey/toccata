@@ -1,11 +1,6 @@
 
 ;; TODO:
-;; automatically derive =* for reified types
-;;     and uncomment code in BitmapIndexedNode/assoc*
-;; free Opaque pointer types when they're decRef'd
 ;; importing modules with no defs blows up
-;; implement to-be-freed lists
-;; test memory exhaustion handling
 
 ;; trying to redef an existing type-name chokes
 
@@ -19,6 +14,8 @@
 ;; implements?
 ;; fn meta data; doc strings and ast
 ;; pattern matching
+;; implement to-be-freed lists
+;; test memory exhaustion handling
 ;; REPL
 ;; macro system
 ;; green threads
@@ -789,17 +786,15 @@
 
 (defn add-module-info [ns-sym module-name]
   (for [new-mod-syms (sm/get-in-val (list :modules module-name :syms))
-        _ (cond
-           (empty? new-mod-syms) (sm/state-maybe "")
-           (traverse (seq new-mod-syms)
-                     (fn [sym-def]
-                       (cond
-                        (= "." (subs (str (first sym-def)) 0 1))
-                        (sm/assoc-in-val (list :defined-syms (first sym-def))
-                                         (second sym-def))
+        _ (traverse (seq new-mod-syms)
+                    (fn [sym-def]
+                      (cond
+                       (= "." (subs (str (first sym-def)) 0 1))
+                       (sm/assoc-in-val (list :defined-syms (first sym-def))
+                                        (second sym-def))
 
-                        (sm/assoc-in-val (list :defined-syms (symbol (str ns-sym "/" (first sym-def))))
-                                         (second sym-def))))))
+                       (sm/assoc-in-val (list :defined-syms (symbol (str ns-sym "/" (first sym-def))))
+                                        (second sym-def)))))
 
         new-mod-protos (sm/get-in-val (list :modules module-name :protos) {})
         _ (cond
@@ -831,8 +826,7 @@
     (let [module-name (.const-str (.v (first (.asts ast))))]
       (comp
        (add-module-info (.ns-sym ast) module-name)
-       (for [;; _ (debug :module module-name)
-             syms (sm/get-val :defined-syms {})
+       (for [syms (sm/get-val :defined-syms {})
              _ (sm/set-val :defined-syms {})
 
              types (sm/get-val :defined-types {})
@@ -849,7 +843,9 @@
 
              file-name (sm/get-val :file-name)
              _ (sm/set-val :file-name module-name)
-             _ (traverse (.asts ast) (fn [ast] (fr/evaluate ast emit-c)))
+             _ (cond
+                (= 1 (count (.asts ast))) (sm/state-maybe "")
+                (traverse (.asts ast) (fn [ast] (fr/evaluate ast emit-c))))
 
              _ (sm/set-val :file-name file-name)
              _ (sm/set-val :defined-syms syms)
@@ -857,7 +853,8 @@
              _ (sm/set-val :defined-types types)
 
              _ (add-module-info (.ns-sym ast) module-name)]
-         (c-code "" empty-list "" :no-type))))))
+         (c-code "" empty-list "" :no-type))
+       (sm/state-maybe (c-code "" empty-list "" :no-type))))))
 
 (defn unpack-closures [arg-syms]
   (cond
