@@ -1,14 +1,5 @@
 
 ;; TODO:
-;; trying to redef an existing type-name chokes
-
-;; gives non-sense error message
-;;        (deftype Bogus
-;;            extend-type Number
-;;            Stringable
-;;            (string-list [_] (list "")))
-
-;; can't apply type constructors
 ;; implements?
 ;; fn meta data; doc strings and ast
 ;; pattern matching
@@ -1556,6 +1547,9 @@
                                            'Type
                                            (list 'instance? (list 'vector '_ 'v)
                                                  (list '= type-val-num (list 'get-type 'v)))
+                                           'Applicative
+                                           (list 'apply* (list 'vector '_ 'args)
+                                                 (list 'apply 'invoke '_ 'args))
                                            'Function
                                            (list 'invoke (cons 'vector (cons '_ (.fields ast)))
                                                  (list*
