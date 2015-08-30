@@ -92,8 +92,7 @@
 (deftype fn-arity-ast [args body])
 
 (defn fixed-arity [args body]
-  (fr/free (fn-arity-ast (apply* (fr/free list) args)
-                         (apply* (fr/free list) body))))
+  (fr/free (fn-arity-ast args (apply* (fr/free list) body))))
 
 (deftype fn-ast [fn-name arities])
 

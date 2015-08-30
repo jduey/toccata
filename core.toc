@@ -995,10 +995,11 @@ else
 (defn apply [fv & args]
   (apply* fv args))
 
-(defn apply-to [f & args]
-  (cond
-   (number= 0 (list-count args)) (f)
-   (apply* (wrap (car args) f) args)))
+(defn apply-to
+  ([f]
+     (f))
+  ([f & args]
+     (apply* (wrap (car args) f) args)))
 
 (defn comp [coll & colls]
   (cond
@@ -1147,7 +1148,7 @@ else
 (defn list** [arg args]
   (cond
    (list-empty? args) arg
-   (cons arg (list** (first args) (rest args)))))
+   (cons arg (list** (car args) (cdr args)))))
 
 (defn list* [arg & args]
   (list** arg args))
@@ -1296,20 +1297,20 @@ return((Value *)numberValue(shaVal));
   (fn [& more-args]
     (apply f (comp args more-args))))
 
-(defn comprehend [f mvs]
-  (cond
-   (list-empty? mvs) (f)
-   (let [mv (car mvs)
-         rest-steps (reduce (reverse (cdr mvs))
-                            (fn [acc x]
-                              (wrap mv (apply f (reverse (cons x acc)))))
-                            (fn [steps new-mv]
+(defn comprehend
+  ([f]
+     (f))
+  ([f [mv & mvs]]
+     (let [rest-steps (reduce (reverse mvs)
                               (fn [acc x]
-                                (flat-map new-mv (partial steps (cons x acc))))))]
-     (cond
-      (number= 1 (list-count mvs)) (flat-map mv (fn [x]
-                                                  (wrap mv (f x))))
-      (flat-map mv (partial rest-steps empty-list))))))
+                                (wrap mv (apply f (reverse (cons x acc)))))
+                              (fn [steps new-mv]
+                                (fn [acc x]
+                                  (flat-map new-mv (partial steps (cons x acc))))))]
+       (cond
+        (number= 1 (list-count mvs)) (flat-map mv (fn [x]
+                                                    (wrap mv (f x))))
+        (flat-map mv (partial rest-steps empty-list))))))
 
 (defn list-concat [l1]
   (inline-text List
@@ -1395,7 +1396,7 @@ return((Value *)numberValue(shaVal));
   Traversable
   (traverse [l f]
     (let [vs (map l f)]
-      (apply* (wrap (first vs) list) vs)))
+      (apply* (wrap (car vs) list) vs)))
 
   Eq
   (=* [x y]
@@ -1523,14 +1524,13 @@ return((Value *)numberValue(shaVal));
 (defn dec [x]
   (subtract-numbers x 1))
 
-(defn - [& xs]
-  (cond
-   (list-empty? xs) 0
-   (let [h (first xs)
-         t (rest xs)]
+(defn -
+  ([]
+     0)
+  ([x & xs]
      (cond
-      (list-empty? t) h
-      (reduce t h subtract-numbers)))))
+      (list-empty? xs) x
+      (reduce xs x subtract-numbers))))
 
 (extend-type String
   Eq
@@ -2358,15 +2358,12 @@ return(newNode);
    (reduce ms hm
            (fn [hm m]
              (reduce (seq m) hm
-                     (fn [hm kv]
-                       (cond
-                        (not (= 2 (count kv))) hm
-                        (let [k (nth kv 0)
-                              v (nth kv 1)
-                              old-v (get hm k :not-found)]
-                          (cond
-                           (= :not-found old-v) (assoc hm k v)
-                           (assoc hm k (merge-fn old-v v)))))))))))
+                     (fn [hm [k v]]
+                       ;; TODO: replace :not-found with 'not-found' value
+                       (let [old-v (get hm k :not-found)]
+                         (cond
+                          (= :not-found old-v) (assoc hm k v)
+                          (assoc hm k (merge-fn old-v v))))))))))
 
 (defn get-in [m path nf]
   (cond

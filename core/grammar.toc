@@ -143,7 +143,7 @@
 (deftype parse-sub-form []
   Parser
   (parser/recursive-descent [_]
-    (for [parser-fn (sm/get-in-val (list :parser-fns "form") :blah)
+    (for [parser-fn (sm/get-in-val (list :parser-fns "form"))
           result (sm/new-sm parser-fn)]
       result)))
 
@@ -201,13 +201,16 @@
                      (parser/term (char 10))
                      (read-comment))))
 
-(defn read-var-arg []
-  (parser/rule "var-arg"
-               (apply-to list
-                         (parser/ignore (parser/none-or-more (whitespace)))
-                         (parser/term "&")
-                         (parser/ignore (parser/one-or-more (whitespace)))
-                         (read-symbol))))
+(deftype parse-destructure []
+  Parser
+  (parser/recursive-descent [_]
+    (for [parser-fn (sm/get-in-val (list :parser-fns "destructure"))
+          result (sm/new-sm parser-fn)]
+      result)))
+
+(defn read-sub-dest []
+  (parser/rule "destructure"
+               (fr/free (parse-destructure))))
 
 (defn read-arg []
   (parser/rule "arg"
@@ -215,12 +218,38 @@
                            (read-symbol)
                            (parser/ignore (parser/none-or-more (whitespace))))))
 
+(defn read-var-arg []
+  (parser/rule "var-arg"
+               (apply-to list
+                         (parser/ignore (parser/none-or-more (whitespace)))
+                         (parser/term "&")
+                         (read-arg))))
+
+(defn read-list-destructure []
+  (parser/rule "list-destructure"
+               (apply-to (fn [args tail]
+                           (cond
+                            (= "&" (car tail)) (comp args (cdr tail))
+                            (comp args tail)))
+                         (parser/ignore (parser/none-or-more (whitespace)))
+                         (parser/ignore (parser/term "["))
+                         (parser/none-or-more (read-arg))
+                         (comp (read-var-arg)
+                               (parser/always (list :no-tail)))
+                         (parser/ignore (parser/term "]")))))
+
+(defn read-destructure []
+  (parser/recursive-rule "destructure"
+                         (comp
+                          (read-list-destructure)
+                          (read-arg))))
+
 (defn read-args []
   (parser/rule "args"
                (apply-to comp
                          (parser/ignore (parser/none-or-more (whitespace)))
                          (parser/ignore (parser/term "["))
-                         (parser/none-or-more (read-arg))
+                         (parser/none-or-more (read-destructure))
                          (comp (read-var-arg)
                                (parser/always empty-list))
                          (parser/ignore (parser/term "]")))))
@@ -433,7 +462,7 @@
 
 (defn read-form []
   (parser/recursive-rule "form"
-        (parser/all (parser/ignore (parser/none-or-more (whitespace)))
+       (parser/all (parser/ignore (parser/none-or-more (whitespace)))
              (comp (read-number)
                    (read-keyword)
                    (read-symbol)

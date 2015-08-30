@@ -2172,9 +2172,9 @@ fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_53)->name);
 }
 Value *rslt5 = arityImpl_96(empty_list);
 incRef(rslt5);
-dec_and_free(rslt0);
-dec_and_free(rslt5);
 dec_and_free(rslt4);
+dec_and_free(rslt5);
+dec_and_free(rslt0);
 return(rslt5);
 };
 
@@ -2285,8 +2285,8 @@ fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_53)->name);
 }
 }
 incRef(rslt4);
-dec_and_free(rslt0);
 dec_and_free(rslt4);
+dec_and_free(rslt0);
 return(rslt4);
 };
 
@@ -2444,8 +2444,8 @@ fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)arg0)->name);
 }
 Value *rslt5 = protoFnImpl_240(empty_list, val0, rslt4);
 incRef(rslt5);
-dec_and_free(rslt5);
 dec_and_free(rslt4);
+dec_and_free(rslt5);
 return(rslt5);
 };
 
@@ -2523,7 +2523,7 @@ Function protoFn_237 = {FunctionType, -1, "apply*", 1, {&protoFnArity_248}};
 Function fn_249;
 Value *arityImpl_250(List *closures, Value *varArgs) {
 List *argsList = (List *)varArgs;
-Value *arg0 = (Value *)argsList;
+Value *arg0 = (Value *) argsList;
 incRef(arg0);
 return(arg0);
 };
@@ -2567,8 +2567,8 @@ fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)val1)->name);
 }
 Value *rslt6 = protoFnImpl_240(empty_list, val0, rslt5);
 incRef(rslt6);
-dec_and_free(rslt6);
 dec_and_free(rslt5);
+dec_and_free(rslt6);
 return(rslt6);
 };
 
@@ -2590,8 +2590,8 @@ fn_256->arityCount = 1;
 fn_256->arities[0] = arity_0;
 Value *rslt1 = protoFnImpl_209(empty_list, arg0, (Value *)fn_256);
 incRef(rslt1);
-dec_and_free((Value *)fn_256);
 dec_and_free(rslt1);
+dec_and_free((Value *)fn_256);
 return(rslt1);
 };
 
@@ -2646,9 +2646,9 @@ fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_53)->name);
 }
 Value *rslt5 = arityImpl_96(empty_list);
 incRef(rslt5);
-dec_and_free(rslt0);
-dec_and_free(rslt5);
 dec_and_free(rslt4);
+dec_and_free(rslt5);
+dec_and_free(rslt0);
 return(rslt5);
 };
 
@@ -2703,9 +2703,9 @@ fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_53)->name);
 }
 Value *rslt5 = arityImpl_96(empty_list);
 incRef(rslt5);
-dec_and_free(rslt0);
-dec_and_free(rslt5);
 dec_and_free(rslt4);
+dec_and_free(rslt5);
+dec_and_free(rslt0);
 return(rslt5);
 };
 
@@ -2760,9 +2760,9 @@ fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_53)->name);
 }
 Value *rslt5 = arityImpl_96(empty_list);
 incRef(rslt5);
-dec_and_free(rslt0);
-dec_and_free(rslt5);
 dec_and_free(rslt4);
+dec_and_free(rslt5);
+dec_and_free(rslt0);
 return(rslt5);
 };
 
@@ -2896,8 +2896,8 @@ fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_53)->name);
 }
 Value *rslt4 = arityImpl_96(empty_list);
 incRef(rslt4);
-dec_and_free(rslt4);
 dec_and_free(rslt3);
+dec_and_free(rslt4);
 return(rslt4);
 };
 
@@ -3147,8 +3147,8 @@ Value *arityImpl_348(List *closures, Value *arg0) {
 Value *rslt0 = protoFnImpl_338(empty_list, arg0);
 Value *rslt1 = protoFnImpl_342(empty_list, rslt0);
 incRef(rslt1);
-dec_and_free(rslt1);
 dec_and_free(rslt0);
+dec_and_free(rslt1);
 return(rslt1);
 };
 
@@ -3240,7 +3240,7 @@ List *argsList = (List *)varArgs;
 Value *arg0 = argsList->head;
 if (argsList->tail) argsList->tail->len = argsList->len - 1;
 argsList = argsList->tail;
-Value *arg1 = (Value *)argsList;
+Value *arg1 = (Value *) argsList;
 Value *rslt0 = protoFnImpl_247(empty_list, arg0, arg1);
 return(rslt0);
 };
@@ -3251,66 +3251,56 @@ Function fn_370 = {FunctionType, -1, "apply", 1, {&(FnArity){FnArityType, -1, 2,
 
 // --------- apply-to --------------
 Function fn_373;
-Value *arityImpl_374(List *closures, Value *varArgs) {
-List *argsList = (List *)varArgs;
-Value *arg0 = argsList->head;
-if (argsList->tail) argsList->tail->len = argsList->len - 1;
-argsList = argsList->tail;
-Value *arg1 = (Value *)argsList;
-Value *cond0;
-Value *rslt4 = arityImpl_135(empty_list, arg1);
-Value *rslt5 = arityImpl_112(empty_list, (Value *)&_num_13, rslt4);
-dec_and_free(rslt4);
-
-if (isTrue(rslt5)) {
-dec_and_free(rslt5);
-Value *rslt9;
+Value *arityImpl_374(List *closures, Value *arg0) {
+Value *rslt3;
 if((arg0)->type != FunctionType) {
-rslt9 = protoFnImpl_9(empty_list, arg0);
+rslt3 = protoFnImpl_9(empty_list, arg0);
 } else {
-FnArity *arity6 = findFnArity(arg0, 0);
-if(arity6 != (FnArity *)0 && !arity6->variadic) {
-FnType0 *fn8 = (FnType0 *)arity6->fn;
-rslt9 = fn8(arity6->closures);
-} else if(arity6 != (FnArity *)0 && arity6->variadic) {
-FnType1 *fn8 = (FnType1 *)arity6->fn;
-List *varArgs7 = empty_list;
-rslt9 = fn8(arity6->closures, (Value *)varArgs7);
-dec_and_free((Value *)varArgs7);
+FnArity *arity0 = findFnArity(arg0, 0);
+if(arity0 != (FnArity *)0 && !arity0->variadic) {
+FnType0 *fn2 = (FnType0 *)arity0->fn;
+rslt3 = fn2(arity0->closures);
+} else if(arity0 != (FnArity *)0 && arity0->variadic) {
+FnType1 *fn2 = (FnType1 *)arity0->fn;
+List *varArgs1 = empty_list;
+rslt3 = fn2(arity0->closures, (Value *)varArgs1);
+dec_and_free((Value *)varArgs1);
 } else {
 fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)arg0)->name);
   abort();
 }
 }
-incRef(rslt9);
-cond0 = rslt9;
-dec_and_free(rslt9);
-} else {
-dec_and_free(rslt5);
-Value *rslt1 = arityImpl_138(empty_list, arg1);
-Value *rslt2 = protoFnImpl_240(empty_list, rslt1, arg0);
-Value *rslt3 = protoFnImpl_247(empty_list, rslt2, arg1);
-incRef(rslt3);
-cond0 = rslt3;
-dec_and_free(rslt1);
-dec_and_free(rslt3);
-dec_and_free(rslt2);
-}
-return(cond0);
+return(rslt3);
 };
 
-// --------- apply-to main body --------------
-Function fn_373 = {FunctionType, -1, "apply-to", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_374}}};
-
-
-// --------- comp --------------
-Function fn_376;
-Value *arityImpl_377(List *closures, Value *varArgs) {
+Value *arityImpl_375(List *closures, Value *varArgs) {
 List *argsList = (List *)varArgs;
 Value *arg0 = argsList->head;
 if (argsList->tail) argsList->tail->len = argsList->len - 1;
 argsList = argsList->tail;
-Value *arg1 = (Value *)argsList;
+Value *arg1 = (Value *) argsList;
+Value *rslt0 = arityImpl_138(empty_list, arg1);
+Value *rslt1 = protoFnImpl_240(empty_list, rslt0, arg0);
+Value *rslt2 = protoFnImpl_247(empty_list, rslt1, arg1);
+incRef(rslt2);
+dec_and_free(rslt2);
+dec_and_free(rslt0);
+dec_and_free(rslt1);
+return(rslt2);
+};
+
+// --------- apply-to main body --------------
+Function fn_373 = {FunctionType, -1, "apply-to", 2, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_374}, &(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_375}}};
+
+
+// --------- comp --------------
+Function fn_377;
+Value *arityImpl_378(List *closures, Value *varArgs) {
+List *argsList = (List *)varArgs;
+Value *arg0 = argsList->head;
+if (argsList->tail) argsList->tail->len = argsList->len - 1;
+argsList = argsList->tail;
+Value *arg1 = (Value *) argsList;
 Value *cond0;
 Value *rslt2 = arityImpl_279(empty_list, arg1);
 
@@ -3329,12 +3319,12 @@ return(cond0);
 };
 
 // --------- comp main body --------------
-Function fn_376 = {FunctionType, -1, "comp", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_377}}};
+Function fn_377 = {FunctionType, -1, "comp", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_378}}};
 
-ProtoImpls *protoImpls_379;
-Function protoFn_380;
-Value *protoFnImpl_388(List *closures, Value *arg0, Value *arg1, Value *arg2, Value *arg3, Value *arg4) {
-  Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_379);
+ProtoImpls *protoImpls_380;
+Function protoFn_381;
+Value *protoFnImpl_389(List *closures, Value *arg0, Value *arg1, Value *arg2, Value *arg3, Value *arg4) {
+  Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_380);
   if(implFn == (Function *)0) {
    fprintf(stderr, "\n*** Could not find proto impl for 'get*' %s\n", extractStr(protoFnImpl_25(empty_list, arg0)));
 abort();
@@ -3347,13 +3337,13 @@ abort();
   FnType5 *_fn = (FnType5 *)_arity->fn;
   return(_fn(_arity->closures, arg0, arg1, arg2, arg3, arg4));
 }
-FnArity protoFnArity_389 = {FnArityType, -1, 5, (List *)0, 0, protoFnImpl_388};
-Function protoFn_380 = {FunctionType, -1, "get*", 1, {&protoFnArity_389}};
+FnArity protoFnArity_390 = {FnArityType, -1, 5, (List *)0, 0, protoFnImpl_389};
+Function protoFn_381 = {FunctionType, -1, "get*", 1, {&protoFnArity_390}};
 
-ProtoImpls *protoImpls_382;
-Function protoFn_383;
-Value *protoFnImpl_390(List *closures, Value *arg0, Value *arg1, Value *arg2, Value *arg3, Value *arg4) {
-  Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_382);
+ProtoImpls *protoImpls_383;
+Function protoFn_384;
+Value *protoFnImpl_391(List *closures, Value *arg0, Value *arg1, Value *arg2, Value *arg3, Value *arg4) {
+  Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_383);
   if(implFn == (Function *)0) {
    fprintf(stderr, "\n*** Could not find proto impl for 'assoc*' %s\n", extractStr(protoFnImpl_25(empty_list, arg0)));
 abort();
@@ -3366,13 +3356,13 @@ abort();
   FnType5 *_fn = (FnType5 *)_arity->fn;
   return(_fn(_arity->closures, arg0, arg1, arg2, arg3, arg4));
 }
-FnArity protoFnArity_391 = {FnArityType, -1, 5, (List *)0, 0, protoFnImpl_390};
-Function protoFn_383 = {FunctionType, -1, "assoc*", 1, {&protoFnArity_391}};
+FnArity protoFnArity_392 = {FnArityType, -1, 5, (List *)0, 0, protoFnImpl_391};
+Function protoFn_384 = {FunctionType, -1, "assoc*", 1, {&protoFnArity_392}};
 
-ProtoImpls *protoImpls_385;
-Function protoFn_386;
-Value *protoFnImpl_392(List *closures, Value *arg0, Value *arg1) {
-  Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_385);
+ProtoImpls *protoImpls_386;
+Function protoFn_387;
+Value *protoFnImpl_393(List *closures, Value *arg0, Value *arg1) {
+  Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_386);
   if(implFn == (Function *)0) {
    fprintf(stderr, "\n*** Could not find proto impl for 'hash-seq' %s\n", extractStr(protoFnImpl_25(empty_list, arg0)));
 abort();
@@ -3385,8 +3375,8 @@ abort();
   FnType2 *_fn = (FnType2 *)_arity->fn;
   return(_fn(_arity->closures, arg0, arg1));
 }
-FnArity protoFnArity_393 = {FnArityType, -1, 2, (List *)0, 0, protoFnImpl_392};
-Function protoFn_386 = {FunctionType, -1, "hash-seq", 1, {&protoFnArity_393}};
+FnArity protoFnArity_394 = {FnArityType, -1, 2, (List *)0, 0, protoFnImpl_393};
+Function protoFn_387 = {FunctionType, -1, "hash-seq", 1, {&protoFnArity_394}};
 
 struct {int64_t type;
  int32_t refs;
@@ -3398,10 +3388,10 @@ struct {int64_t type;
    char buffer[3];} _str_43 = {1, -1, 2,": "};
 SubString _kw_1 = {5, -1, 2, 0, 0, ":k"};
 SubString _kw_0 = {5, -1, 2, 0, 0, ":m"};
-ProtoImpls *protoImpls_394;
-Function protoFn_395;
-Value *protoFnImpl_409(List *closures, Value *arg0, Value *arg1, Value *arg2) {
-  Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_394);
+ProtoImpls *protoImpls_395;
+Function protoFn_396;
+Value *protoFnImpl_410(List *closures, Value *arg0, Value *arg1, Value *arg2) {
+  Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_395);
   if(implFn == (Function *)0) {
    fprintf(stderr, "\n*** Could not find proto impl for 'assoc' %s\n", extractStr(protoFnImpl_25(empty_list, arg0)));
 abort();
@@ -3414,13 +3404,13 @@ abort();
   FnType3 *_fn = (FnType3 *)_arity->fn;
   return(_fn(_arity->closures, arg0, arg1, arg2));
 }
-FnArity protoFnArity_410 = {FnArityType, -1, 3, (List *)0, 0, protoFnImpl_409};
-Function protoFn_395 = {FunctionType, -1, "assoc", 1, {&protoFnArity_410}};
+FnArity protoFnArity_411 = {FnArityType, -1, 3, (List *)0, 0, protoFnImpl_410};
+Function protoFn_396 = {FunctionType, -1, "assoc", 1, {&protoFnArity_411}};
 
-ProtoImpls *protoImpls_397;
-Function protoFn_398;
-Value *protoFnImpl_411(List *closures, Value *arg0, Value *arg1) {
-  Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_397);
+ProtoImpls *protoImpls_398;
+Function protoFn_399;
+Value *protoFnImpl_412(List *closures, Value *arg0, Value *arg1) {
+  Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_398);
   if(implFn == (Function *)0) {
    fprintf(stderr, "\n*** Could not find proto impl for 'dissoc' %s\n", extractStr(protoFnImpl_25(empty_list, arg0)));
 abort();
@@ -3433,13 +3423,13 @@ abort();
   FnType2 *_fn = (FnType2 *)_arity->fn;
   return(_fn(_arity->closures, arg0, arg1));
 }
-FnArity protoFnArity_412 = {FnArityType, -1, 2, (List *)0, 0, protoFnImpl_411};
-Function protoFn_398 = {FunctionType, -1, "dissoc", 1, {&protoFnArity_412}};
+FnArity protoFnArity_413 = {FnArityType, -1, 2, (List *)0, 0, protoFnImpl_412};
+Function protoFn_399 = {FunctionType, -1, "dissoc", 1, {&protoFnArity_413}};
 
-ProtoImpls *protoImpls_400;
-Function protoFn_401;
-Value *protoFnImpl_413(List *closures, Value *arg0) {
-  Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_400);
+ProtoImpls *protoImpls_401;
+Function protoFn_402;
+Value *protoFnImpl_414(List *closures, Value *arg0) {
+  Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_401);
   if(implFn == (Function *)0) {
    fprintf(stderr, "\n*** Could not find proto impl for 'vals' %s\n", extractStr(protoFnImpl_25(empty_list, arg0)));
 abort();
@@ -3452,12 +3442,12 @@ abort();
   FnType1 *_fn = (FnType1 *)_arity->fn;
   return(_fn(_arity->closures, arg0));
 }
-FnArity protoFnArity_414 = {FnArityType, -1, 1, (List *)0, 0, protoFnImpl_413};
-Function protoFn_401 = {FunctionType, -1, "vals", 1, {&protoFnArity_414}};
+FnArity protoFnArity_415 = {FnArityType, -1, 1, (List *)0, 0, protoFnImpl_414};
+Function protoFn_402 = {FunctionType, -1, "vals", 1, {&protoFnArity_415}};
 
-ProtoImpls *protoImpls_403;
-Function protoFn_404;
-Value *arityImpl_415(List *closures, Value *arg0, Value *arg1, Value *arg2) {
+ProtoImpls *protoImpls_404;
+Function protoFn_405;
+Value *arityImpl_416(List *closures, Value *arg0, Value *arg1, Value *arg2) {
 Value *rslt0 = protoFnImpl_25(empty_list, arg0);
 Value *rslt4;
 if((var_53)->type != FunctionType) {
@@ -3493,14 +3483,14 @@ fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_53)->name);
 }
 Value *rslt5 = arityImpl_96(empty_list);
 incRef(rslt5);
-dec_and_free(rslt0);
-dec_and_free(rslt5);
 dec_and_free(rslt4);
+dec_and_free(rslt5);
+dec_and_free(rslt0);
 return(rslt5);
 };
 
-Value *protoFnImpl_416(List *closures, Value *arg0, Value *arg1, Value *arg2) {
-  Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_403);
+Value *protoFnImpl_417(List *closures, Value *arg0, Value *arg1, Value *arg2) {
+  Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_404);
   if(implFn == (Function *)0) {
    fprintf(stderr, "\n*** Could not find proto impl for 'get' %s\n", extractStr(protoFnImpl_25(empty_list, arg0)));
 abort();
@@ -3513,15 +3503,15 @@ abort();
   FnType3 *_fn = (FnType3 *)_arity->fn;
   return(_fn(_arity->closures, arg0, arg1, arg2));
 }
-FnArity protoFnArity_417 = {FnArityType, -1, 3, (List *)0, 0, protoFnImpl_416};
-Function defaultFn_405 = {FunctionType, -1, "get", 1, {&(FnArity){FnArityType, -1, 3, (List *)0, 0, arityImpl_415}}};
+FnArity protoFnArity_418 = {FnArityType, -1, 3, (List *)0, 0, protoFnImpl_417};
+Function defaultFn_406 = {FunctionType, -1, "get", 1, {&(FnArity){FnArityType, -1, 3, (List *)0, 0, arityImpl_416}}};
 
-Function protoFn_404 = {FunctionType, -1, "get", 1, {&protoFnArity_417}};
+Function protoFn_405 = {FunctionType, -1, "get", 1, {&protoFnArity_418}};
 
-ProtoImpls *protoImpls_406;
-Function protoFn_407;
-Value *protoFnImpl_418(List *closures, Value *arg0) {
-  Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_406);
+ProtoImpls *protoImpls_407;
+Function protoFn_408;
+Value *protoFnImpl_419(List *closures, Value *arg0) {
+  Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_407);
   if(implFn == (Function *)0) {
    fprintf(stderr, "\n*** Could not find proto impl for 'keys' %s\n", extractStr(protoFnImpl_25(empty_list, arg0)));
 abort();
@@ -3534,13 +3524,13 @@ abort();
   FnType1 *_fn = (FnType1 *)_arity->fn;
   return(_fn(_arity->closures, arg0));
 }
-FnArity protoFnArity_419 = {FnArityType, -1, 1, (List *)0, 0, protoFnImpl_418};
-Function protoFn_407 = {FunctionType, -1, "keys", 1, {&protoFnArity_419}};
+FnArity protoFnArity_420 = {FnArityType, -1, 1, (List *)0, 0, protoFnImpl_419};
+Function protoFn_408 = {FunctionType, -1, "keys", 1, {&protoFnArity_420}};
 
-ProtoImpls *protoImpls_420;
-Function protoFn_421;
-Value *protoFnImpl_423(List *closures, Value *arg0) {
-  Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_420);
+ProtoImpls *protoImpls_421;
+Function protoFn_422;
+Value *protoFnImpl_424(List *closures, Value *arg0) {
+  Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_421);
   if(implFn == (Function *)0) {
    fprintf(stderr, "\n*** Could not find proto impl for 'sha1' %s\n", extractStr(protoFnImpl_25(empty_list, arg0)));
 abort();
@@ -3553,13 +3543,13 @@ abort();
   FnType1 *_fn = (FnType1 *)_arity->fn;
   return(_fn(_arity->closures, arg0));
 }
-FnArity protoFnArity_424 = {FnArityType, -1, 1, (List *)0, 0, protoFnImpl_423};
-Function protoFn_421 = {FunctionType, -1, "sha1", 1, {&protoFnArity_424}};
+FnArity protoFnArity_425 = {FnArityType, -1, 1, (List *)0, 0, protoFnImpl_424};
+Function protoFn_422 = {FunctionType, -1, "sha1", 1, {&protoFnArity_425}};
 
 
 // --------- not --------------
-Function fn_425;
-Value *arityImpl_426(List *closures, Value *arg0) {
+Function fn_426;
+Value *arityImpl_427(List *closures, Value *arg0) {
 Value *cond0;
 
 if (isTrue(arg0)) {
@@ -3576,14 +3566,14 @@ return(cond0);
 
 
 // --------- not main body --------------
-Function fn_425 = {FunctionType, -1, "not", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_426}}};
+Function fn_426 = {FunctionType, -1, "not", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_427}}};
 
 
 // --------- and --------------
-Function fn_428;
-Value *arityImpl_429(List *closures, Value *varArgs) {
+Function fn_429;
+Value *arityImpl_430(List *closures, Value *varArgs) {
 List *argsList = (List *)varArgs;
-Value *arg0 = (Value *)argsList;
+Value *arg0 = (Value *) argsList;
 Value *cond0;
 Value *rslt1 = arityImpl_279(empty_list, arg0);
 
@@ -3603,7 +3593,7 @@ incRef((Value *)rslt3);
 varArgs4 = (List *)listCons((Value *)rslt3, varArgs4);
 Value *rslt5 = arityImpl_250(empty_list, (Value *)varArgs4);
 dec_and_free((Value *)varArgs4);
-Value *rslt6 = protoFnImpl_247(empty_list, (Value *)&fn_428, rslt5);
+Value *rslt6 = protoFnImpl_247(empty_list, (Value *)&fn_429, rslt5);
 incRef(rslt6);
 cond0 = rslt6;
 dec_and_free(rslt6);
@@ -3619,14 +3609,14 @@ return(cond0);
 };
 
 // --------- and main body --------------
-Function fn_428 = {FunctionType, -1, "and", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_429}}};
+Function fn_429 = {FunctionType, -1, "and", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_430}}};
 
 
 // --------- or --------------
-Function fn_431;
-Value *arityImpl_432(List *closures, Value *varArgs) {
+Function fn_432;
+Value *arityImpl_433(List *closures, Value *varArgs) {
 List *argsList = (List *)varArgs;
-Value *arg0 = (Value *)argsList;
+Value *arg0 = (Value *) argsList;
 Value *cond0;
 Value *rslt5 = arityImpl_279(empty_list, arg0);
 
@@ -3650,7 +3640,7 @@ incRef((Value *)rslt1);
 varArgs2 = (List *)listCons((Value *)rslt1, varArgs2);
 Value *rslt3 = arityImpl_250(empty_list, (Value *)varArgs2);
 dec_and_free((Value *)varArgs2);
-Value *rslt4 = protoFnImpl_247(empty_list, (Value *)&fn_431, rslt3);
+Value *rslt4 = protoFnImpl_247(empty_list, (Value *)&fn_432, rslt3);
 incRef(rslt4);
 cond0 = rslt4;
 dec_and_free(rslt1);
@@ -3662,22 +3652,22 @@ return(cond0);
 };
 
 // --------- or main body --------------
-Function fn_431 = {FunctionType, -1, "or", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_432}}};
+Function fn_432 = {FunctionType, -1, "or", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_433}}};
 
 
 // --------- = --------------
-Function fn_434;
-Value *arityImpl_435(List *closures, Value *arg0, Value *arg1) {
+Function fn_435;
+Value *arityImpl_436(List *closures, Value *arg0, Value *arg1) {
 Value *rslt0 = protoFnImpl_285(empty_list, arg0, arg1);
 return(rslt0);
 };
 
-Value *arityImpl_436(List *closures, Value *varArgs) {
+Value *arityImpl_437(List *closures, Value *varArgs) {
 List *argsList = (List *)varArgs;
 Value *arg0 = argsList->head;
 if (argsList->tail) argsList->tail->len = argsList->len - 1;
 argsList = argsList->tail;
-Value *arg1 = (Value *)argsList;
+Value *arg1 = (Value *) argsList;
 Value *cond0;
 Value *rslt4 = arityImpl_279(empty_list, arg1);
 
@@ -3689,7 +3679,7 @@ cond0 = (Value *)&_num_1;
 dec_and_free(rslt4);
 Value *rslt5 = arityImpl_138(empty_list, arg1);
 Value *rslt6 = protoFnImpl_285(empty_list, arg0, rslt5);
-Value *rslt7 = arityImpl_426(empty_list, rslt6);
+Value *rslt7 = arityImpl_427(empty_list, rslt6);
 dec_and_free(rslt6);
 dec_and_free(rslt5);
 
@@ -3714,7 +3704,7 @@ incRef((Value *)arg1);
 varArgs1 = (List *)listCons((Value *)arg1, varArgs1);
 Value *rslt2 = arityImpl_250(empty_list, (Value *)varArgs1);
 dec_and_free((Value *)varArgs1);
-Value *rslt3 = protoFnImpl_247(empty_list, (Value *)&fn_434, rslt2);
+Value *rslt3 = protoFnImpl_247(empty_list, (Value *)&fn_435, rslt2);
 incRef(rslt3);
 cond0 = rslt3;
 dec_and_free(rslt3);
@@ -3726,10 +3716,10 @@ return(cond0);
 };
 
 // --------- = main body --------------
-Function fn_434 = {FunctionType, -1, "=", 2, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_435}, &(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_436}}};
+Function fn_435 = {FunctionType, -1, "=", 2, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_436}, &(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_437}}};
 
 // forward declaration for 'maybe-val'
-Value *var_438;
+Value *var_439;
 
 struct {int64_t type;
  int32_t refs;
@@ -3737,53 +3727,53 @@ struct {int64_t type;
    char buffer[10];} _str_44 = {1, -1, 9,"<nothing>"};
 
 // --------- flatten_impl --------------
-Function fn_440;
-Value *arityImpl_457(List *closures, Value *arg0) {
+Function fn_441;
+Value *arityImpl_458(List *closures, Value *arg0) {
 incRef(arg0);
 return(arg0);
 };
 
 
 // --------- flatten_impl main body --------------
-Function fn_440 = {FunctionType, -1, "flatten_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_457}}};
+Function fn_441 = {FunctionType, -1, "flatten_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_458}}};
 
-Value *protoImpl_458(List *closures, Value *arg0) {
+Value *protoImpl_459(List *closures, Value *arg0) {
 FnArity *arityPtr = ((Function *)((ReifiedVal *)arg0)->impls[0])->arities[0];
 Value *rval = ((FnType1 *)arityPtr->fn)(arityPtr->closures, arg0);
 return(rval);
 };
 
-Function protoFn_439 = {FunctionType, -1, "flatten", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, protoImpl_458}}};
+Function protoFn_440 = {FunctionType, -1, "flatten", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, protoImpl_459}}};
 
 
 // --------- flat-map_impl --------------
-Function fn_442;
-Value *arityImpl_459(List *closures, Value *arg0, Value *arg1) {
+Function fn_443;
+Value *arityImpl_460(List *closures, Value *arg0, Value *arg1) {
 incRef(arg0);
 return(arg0);
 };
 
 
 // --------- flat-map_impl main body --------------
-Function fn_442 = {FunctionType, -1, "flat-map_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_459}}};
+Function fn_443 = {FunctionType, -1, "flat-map_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_460}}};
 
-Value *protoImpl_460(List *closures, Value *arg0, Value *arg1) {
+Value *protoImpl_461(List *closures, Value *arg0, Value *arg1) {
 FnArity *arityPtr = ((Function *)((ReifiedVal *)arg0)->impls[1])->arities[0];
 Value *rval = ((FnType2 *)arityPtr->fn)(arityPtr->closures, arg0, arg1);
 return(rval);
 };
 
-Function protoFn_441 = {FunctionType, -1, "flat-map", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, protoImpl_460}}};
+Function protoFn_442 = {FunctionType, -1, "flat-map", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, protoImpl_461}}};
 
 
 // --------- wrap_impl --------------
-Function fn_444;
-Value *arityImpl_461(List *closures, Value *arg0, Value *arg1) {
+Function fn_445;
+Value *arityImpl_462(List *closures, Value *arg0, Value *arg1) {
 Value *rslt3;
-if((var_438)->type != FunctionType) {
-rslt3 = protoFnImpl_11(empty_list, var_438, arg1);
+if((var_439)->type != FunctionType) {
+rslt3 = protoFnImpl_11(empty_list, var_439, arg1);
 } else {
-FnArity *arity0 = findFnArity(var_438, 1);
+FnArity *arity0 = findFnArity(var_439, 1);
 if(arity0 != (FnArity *)0 && !arity0->variadic) {
 FnType1 *fn2 = (FnType1 *)arity0->fn;
 rslt3 = fn2(arity0->closures, arg1);
@@ -3795,7 +3785,7 @@ varArgs1 = (List *)listCons(arg1, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 dec_and_free((Value *)varArgs1);
 } else {
-fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_438)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)var_439)->name);
   abort();
 }
 }
@@ -3804,60 +3794,60 @@ return(rslt3);
 
 
 // --------- wrap_impl main body --------------
-Function fn_444 = {FunctionType, -1, "wrap_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_461}}};
+Function fn_445 = {FunctionType, -1, "wrap_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_462}}};
 
-Value *protoImpl_462(List *closures, Value *arg0, Value *arg1) {
+Value *protoImpl_463(List *closures, Value *arg0, Value *arg1) {
 FnArity *arityPtr = ((Function *)((ReifiedVal *)arg0)->impls[2])->arities[0];
 Value *rval = ((FnType2 *)arityPtr->fn)(arityPtr->closures, arg0, arg1);
 return(rval);
 };
 
-Function protoFn_443 = {FunctionType, -1, "wrap", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, protoImpl_462}}};
+Function protoFn_444 = {FunctionType, -1, "wrap", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, protoImpl_463}}};
 
 
 // --------- apply*_impl --------------
-Function fn_446;
-Value *arityImpl_463(List *closures, Value *arg0, Value *arg1) {
+Function fn_447;
+Value *arityImpl_464(List *closures, Value *arg0, Value *arg1) {
 incRef(arg0);
 return(arg0);
 };
 
 
 // --------- apply*_impl main body --------------
-Function fn_446 = {FunctionType, -1, "apply*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_463}}};
+Function fn_447 = {FunctionType, -1, "apply*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_464}}};
 
-Value *protoImpl_464(List *closures, Value *arg0, Value *arg1) {
+Value *protoImpl_465(List *closures, Value *arg0, Value *arg1) {
 FnArity *arityPtr = ((Function *)((ReifiedVal *)arg0)->impls[3])->arities[0];
 Value *rval = ((FnType2 *)arityPtr->fn)(arityPtr->closures, arg0, arg1);
 return(rval);
 };
 
-Function protoFn_445 = {FunctionType, -1, "apply*", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, protoImpl_464}}};
+Function protoFn_446 = {FunctionType, -1, "apply*", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, protoImpl_465}}};
 
 
 // --------- zero_impl --------------
-Function fn_448;
-Value *arityImpl_465(List *closures, Value *arg0) {
+Function fn_449;
+Value *arityImpl_466(List *closures, Value *arg0) {
 incRef(arg0);
 return(arg0);
 };
 
 
 // --------- zero_impl main body --------------
-Function fn_448 = {FunctionType, -1, "zero_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_465}}};
+Function fn_449 = {FunctionType, -1, "zero_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_466}}};
 
-Value *protoImpl_466(List *closures, Value *arg0) {
+Value *protoImpl_467(List *closures, Value *arg0) {
 FnArity *arityPtr = ((Function *)((ReifiedVal *)arg0)->impls[4])->arities[0];
 Value *rval = ((FnType1 *)arityPtr->fn)(arityPtr->closures, arg0);
 return(rval);
 };
 
-Function protoFn_447 = {FunctionType, -1, "zero", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, protoImpl_466}}};
+Function protoFn_448 = {FunctionType, -1, "zero", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, protoImpl_467}}};
 
 
 // --------- comp*_impl --------------
-Function fn_450;
-Value *arityImpl_467(List *closures, Value *arg0, Value *arg1) {
+Function fn_451;
+Value *arityImpl_468(List *closures, Value *arg0, Value *arg1) {
 Value *cond0;
 Value *rslt4 = arityImpl_279(empty_list, arg1);
 
@@ -3881,40 +3871,40 @@ return(cond0);
 
 
 // --------- comp*_impl main body --------------
-Function fn_450 = {FunctionType, -1, "comp*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_467}}};
+Function fn_451 = {FunctionType, -1, "comp*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_468}}};
 
-Value *protoImpl_468(List *closures, Value *arg0, Value *arg1) {
+Value *protoImpl_469(List *closures, Value *arg0, Value *arg1) {
 FnArity *arityPtr = ((Function *)((ReifiedVal *)arg0)->impls[5])->arities[0];
 Value *rval = ((FnType2 *)arityPtr->fn)(arityPtr->closures, arg0, arg1);
 return(rval);
 };
 
-Function protoFn_449 = {FunctionType, -1, "comp*", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, protoImpl_468}}};
+Function protoFn_450 = {FunctionType, -1, "comp*", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, protoImpl_469}}};
 
 
 // --------- =*_impl --------------
-Function fn_452;
-Value *arityImpl_469(List *closures, Value *arg0, Value *arg1) {
+Function fn_453;
+Value *arityImpl_470(List *closures, Value *arg0, Value *arg1) {
 Value *rslt0 = arityImpl_102(empty_list, arg0, arg1);
 return(rslt0);
 };
 
 
 // --------- =*_impl main body --------------
-Function fn_452 = {FunctionType, -1, "=*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_469}}};
+Function fn_453 = {FunctionType, -1, "=*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_470}}};
 
-Value *protoImpl_470(List *closures, Value *arg0, Value *arg1) {
+Value *protoImpl_471(List *closures, Value *arg0, Value *arg1) {
 FnArity *arityPtr = ((Function *)((ReifiedVal *)arg0)->impls[6])->arities[0];
 Value *rval = ((FnType2 *)arityPtr->fn)(arityPtr->closures, arg0, arg1);
 return(rval);
 };
 
-Function protoFn_451 = {FunctionType, -1, "=*", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, protoImpl_470}}};
+Function protoFn_452 = {FunctionType, -1, "=*", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, protoImpl_471}}};
 
 
 // --------- string-list_impl --------------
-Function fn_454;
-Value *arityImpl_471(List *closures, Value *arg0) {
+Function fn_455;
+Value *arityImpl_472(List *closures, Value *arg0) {
 List *varArgs0 = empty_list;
 incRef((Value *)(Value *)&_str_44);
 varArgs0 = (List *)listCons((Value *)(Value *)&_str_44, varArgs0);
@@ -3925,41 +3915,41 @@ return(rslt1);
 
 
 // --------- string-list_impl main body --------------
-Function fn_454 = {FunctionType, -1, "string-list_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_471}}};
+Function fn_455 = {FunctionType, -1, "string-list_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_472}}};
 
-Value *protoImpl_472(List *closures, Value *arg0) {
+Value *protoImpl_473(List *closures, Value *arg0) {
 FnArity *arityPtr = ((Function *)((ReifiedVal *)arg0)->impls[7])->arities[0];
 Value *rval = ((FnType1 *)arityPtr->fn)(arityPtr->closures, arg0);
 return(rval);
 };
 
-Function protoFn_453 = {FunctionType, -1, "string-list", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, protoImpl_472}}};
+Function protoFn_454 = {FunctionType, -1, "string-list", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, protoImpl_473}}};
 
 
 // --------- map_impl --------------
-Function fn_456;
-Value *arityImpl_473(List *closures, Value *arg0, Value *arg1) {
+Function fn_457;
+Value *arityImpl_474(List *closures, Value *arg0, Value *arg1) {
 incRef(arg0);
 return(arg0);
 };
 
 
 // --------- map_impl main body --------------
-Function fn_456 = {FunctionType, -1, "map_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_473}}};
+Function fn_457 = {FunctionType, -1, "map_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_474}}};
 
-Value *protoImpl_474(List *closures, Value *arg0, Value *arg1) {
+Value *protoImpl_475(List *closures, Value *arg0, Value *arg1) {
 FnArity *arityPtr = ((Function *)((ReifiedVal *)arg0)->impls[8])->arities[0];
 Value *rval = ((FnType2 *)arityPtr->fn)(arityPtr->closures, arg0, arg1);
 return(rval);
 };
 
-Function protoFn_455 = {FunctionType, -1, "map", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, protoImpl_474}}};
+Function protoFn_456 = {FunctionType, -1, "map", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, protoImpl_475}}};
 
-ReifiedVal reified_475 = {13, -1, 9, {(Value *)&fn_440, (Value *)&fn_442, (Value *)&fn_444, (Value *)&fn_446, (Value *)&fn_448, (Value *)&fn_450, (Value *)&fn_452, (Value *)&fn_454, (Value *)&fn_456}};
+ReifiedVal reified_476 = {13, -1, 9, {(Value *)&fn_441, (Value *)&fn_443, (Value *)&fn_445, (Value *)&fn_447, (Value *)&fn_449, (Value *)&fn_451, (Value *)&fn_453, (Value *)&fn_455, (Value *)&fn_457}};
 
 // --------- some --------------
-Function fn_477;
-Value *arityImpl_478(List *closures, Value *arg0, Value *arg1) {
+Function fn_478;
+Value *arityImpl_479(List *closures, Value *arg0, Value *arg1) {
 Value *cond0;
 Value *rslt3 = protoFnImpl_319(empty_list, arg0);
 
@@ -4001,7 +3991,7 @@ dec_and_free(rslt9);
 } else {
 dec_and_free(rslt8);
 Value *rslt1 = protoFnImpl_338(empty_list, arg0);
-Value *rslt2 = arityImpl_478(closures, rslt1, arg1);
+Value *rslt2 = arityImpl_479(closures, rslt1, arg1);
 incRef(rslt2);
 cond0 = rslt2;
 dec_and_free(rslt1);
@@ -4013,12 +4003,12 @@ return(cond0);
 
 
 // --------- some main body --------------
-Function fn_477 = {FunctionType, -1, "some", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_478}}};
+Function fn_478 = {FunctionType, -1, "some", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_479}}};
 
-ProtoImpls *protoImpls_480;
-Function protoFn_481;
-Value *protoFnImpl_483(List *closures, Value *arg0) {
-  Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_480);
+ProtoImpls *protoImpls_481;
+Function protoFn_482;
+Value *protoFnImpl_484(List *closures, Value *arg0) {
+  Function *implFn = (Function *)findProtoImpl(arg0->type, protoImpls_481);
   if(implFn == (Function *)0) {
    fprintf(stderr, "\n*** Could not find proto impl for '.v' %s\n", extractStr(protoFnImpl_25(empty_list, arg0)));
 abort();
@@ -4031,10 +4021,10 @@ abort();
   FnType1 *_fn = (FnType1 *)_arity->fn;
   return(_fn(_arity->closures, arg0));
 }
-FnArity protoFnArity_484 = {FnArityType, -1, 1, (List *)0, 0, protoFnImpl_483};
-Function protoFn_481 = {FunctionType, -1, ".v", 1, {&protoFnArity_484}};
+FnArity protoFnArity_485 = {FnArityType, -1, 1, (List *)0, 0, protoFnImpl_484};
+Function protoFn_482 = {FunctionType, -1, ".v", 1, {&protoFnArity_485}};
 
-Value *protoFnImpl_486(List *, Value *, Value *);
+Value *protoFnImpl_487(List *, Value *, Value *);
 struct {int64_t type;
  int32_t refs;
    int64_t len;
@@ -4050,8 +4040,8 @@ struct {int64_t type;
 Number _num_14 = {2, -1, 15};
 
 // --------- apply*_impl --------------
-Function fn_488;
-Value *arityImpl_493(List *closures, Value *arg0, Value *arg1) {
+Function fn_489;
+Value *arityImpl_494(List *closures, Value *arg0, Value *arg1) {
 List *varArgs0 = empty_list;
 incRef((Value *)arg1);
 varArgs0 = (List *)listCons((Value *)arg1, varArgs0);
@@ -4066,23 +4056,23 @@ return(rslt1);
 
 
 // --------- apply*_impl main body --------------
-Function fn_488 = {FunctionType, -1, "apply*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_493}}};
+Function fn_489 = {FunctionType, -1, "apply*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_494}}};
 
-Value *protoImpl_494(List *closures, Value *arg0, Value *arg1) {
+Value *protoImpl_495(List *closures, Value *arg0, Value *arg1) {
 FnArity *arityPtr = ((Function *)((ReifiedVal *)arg0)->impls[0])->arities[0];
 Value *rval = ((FnType2 *)arityPtr->fn)(arityPtr->closures, arg0, arg1);
 return(rval);
 };
 
-Function protoFn_487 = {FunctionType, -1, "apply*", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, protoImpl_494}}};
+Function protoFn_488 = {FunctionType, -1, "apply*", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, protoImpl_495}}};
 
 
 // --------- invoke_impl --------------
-Function fn_490;
+Function fn_491;
 
 // --------- flatten_impl --------------
-Function fn_497;
-Value *arityImpl_518(List *closures, Value *arg0) {
+Function fn_498;
+Value *arityImpl_519(List *closures, Value *arg0) {
 Value *val0 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
@@ -4091,18 +4081,18 @@ incRef(val0);
 return(val0);
 };
 
-Value *protoImpl_519(List *closures, Value *arg0) {
+Value *protoImpl_520(List *closures, Value *arg0) {
 FnArity *arityPtr = ((Function *)((ReifiedVal *)arg0)->impls[0])->arities[0];
 Value *rval = ((FnType1 *)arityPtr->fn)(arityPtr->closures, arg0);
 return(rval);
 };
 
-Function protoFn_496 = {FunctionType, -1, "flatten", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, protoImpl_519}}};
+Function protoFn_497 = {FunctionType, -1, "flatten", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, protoImpl_520}}};
 
 
 // --------- flat-map_impl --------------
-Function fn_499;
-Value *arityImpl_520(List *closures, Value *arg0, Value *arg1) {
+Function fn_500;
+Value *arityImpl_521(List *closures, Value *arg0, Value *arg1) {
 Value *val0 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
@@ -4130,68 +4120,68 @@ fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)arg1)->name);
 return(rslt4);
 };
 
-Value *protoImpl_521(List *closures, Value *arg0, Value *arg1) {
+Value *protoImpl_522(List *closures, Value *arg0, Value *arg1) {
 FnArity *arityPtr = ((Function *)((ReifiedVal *)arg0)->impls[1])->arities[0];
 Value *rval = ((FnType2 *)arityPtr->fn)(arityPtr->closures, arg0, arg1);
 return(rval);
 };
 
-Function protoFn_498 = {FunctionType, -1, "flat-map", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, protoImpl_521}}};
+Function protoFn_499 = {FunctionType, -1, "flat-map", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, protoImpl_522}}};
 
 
 // --------- wrap_impl --------------
-Function fn_501;
-Value *arityImpl_522(List *closures, Value *arg0, Value *arg1) {
-Value *rslt0 = protoFnImpl_486(empty_list, var_438, arg1);
+Function fn_502;
+Value *arityImpl_523(List *closures, Value *arg0, Value *arg1) {
+Value *rslt0 = protoFnImpl_487(empty_list, var_439, arg1);
 return(rslt0);
 };
 
 
 // --------- wrap_impl main body --------------
-Function fn_501 = {FunctionType, -1, "wrap_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_522}}};
+Function fn_502 = {FunctionType, -1, "wrap_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_523}}};
 
-Value *protoImpl_523(List *closures, Value *arg0, Value *arg1) {
+Value *protoImpl_524(List *closures, Value *arg0, Value *arg1) {
 FnArity *arityPtr = ((Function *)((ReifiedVal *)arg0)->impls[2])->arities[0];
 Value *rval = ((FnType2 *)arityPtr->fn)(arityPtr->closures, arg0, arg1);
 return(rval);
 };
 
-Function protoFn_500 = {FunctionType, -1, "wrap", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, protoImpl_523}}};
+Function protoFn_501 = {FunctionType, -1, "wrap", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, protoImpl_524}}};
 
 
 // --------- apply*_impl --------------
-Function fn_503;
+Function fn_504;
 
 // --------- anon --------------
-Function fn_525;
-Value *arityImpl_526(List *closures, Value *arg0) {
-Value *rslt0 = arityImpl_435(empty_list, (Value *)&reified_475, arg0);
+Function fn_526;
+Value *arityImpl_527(List *closures, Value *arg0) {
+Value *rslt0 = arityImpl_436(empty_list, (Value *)&reified_476, arg0);
 return(rslt0);
 };
 
 
 // --------- anon main body --------------
-Function fn_525 = {FunctionType, -1, "anon", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_526}}};
+Function fn_526 = {FunctionType, -1, "anon", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_527}}};
 
-Value *arityImpl_524(List *closures, Value *arg0, Value *arg1) {
+Value *arityImpl_525(List *closures, Value *arg0, Value *arg1) {
 Value *cond0;
-Value *rslt8 = arityImpl_478(empty_list, arg1, (Value *)&fn_525);
+Value *rslt8 = arityImpl_479(empty_list, arg1, (Value *)&fn_526);
 
 if (isTrue(rslt8)) {
 dec_and_free(rslt8);
-incRef((Value *)&reified_475);
-cond0 = (Value *)&reified_475;
+incRef((Value *)&reified_476);
+cond0 = (Value *)&reified_476;
 } else {
 dec_and_free(rslt8);
-Value *rslt1 = protoFnImpl_483(empty_list, arg0);
-Value *rslt2 = protoFnImpl_258(empty_list, arg1, (Value *)&protoFn_481);
+Value *rslt1 = protoFnImpl_484(empty_list, arg0);
+Value *rslt2 = protoFnImpl_258(empty_list, arg1, (Value *)&protoFn_482);
 List *varArgs3 = empty_list;
 incRef((Value *)rslt2);
 varArgs3 = (List *)listCons((Value *)rslt2, varArgs3);
 Value *rslt4 = arityImpl_250(empty_list, (Value *)varArgs3);
 dec_and_free((Value *)varArgs3);
 Value *rslt5 = protoFnImpl_247(empty_list, rslt1, rslt4);
-Value *rslt6 = protoFnImpl_486(empty_list, var_438, rslt5);
+Value *rslt6 = protoFnImpl_487(empty_list, var_439, rslt5);
 incRef(rslt6);
 cond0 = rslt6;
 dec_and_free(rslt6);
@@ -4205,66 +4195,66 @@ return(cond0);
 
 
 // --------- apply*_impl main body --------------
-Function fn_503 = {FunctionType, -1, "apply*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_524}}};
+Function fn_504 = {FunctionType, -1, "apply*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_525}}};
 
-Value *protoImpl_527(List *closures, Value *arg0, Value *arg1) {
+Value *protoImpl_528(List *closures, Value *arg0, Value *arg1) {
 FnArity *arityPtr = ((Function *)((ReifiedVal *)arg0)->impls[3])->arities[0];
 Value *rval = ((FnType2 *)arityPtr->fn)(arityPtr->closures, arg0, arg1);
 return(rval);
 };
 
-Function protoFn_502 = {FunctionType, -1, "apply*", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, protoImpl_527}}};
+Function protoFn_503 = {FunctionType, -1, "apply*", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, protoImpl_528}}};
 
 
 // --------- zero_impl --------------
-Function fn_505;
-Value *arityImpl_528(List *closures, Value *arg0) {
-incRef((Value *)&reified_475);
-return((Value *)&reified_475);
+Function fn_506;
+Value *arityImpl_529(List *closures, Value *arg0) {
+incRef((Value *)&reified_476);
+return((Value *)&reified_476);
 };
 
 
 // --------- zero_impl main body --------------
-Function fn_505 = {FunctionType, -1, "zero_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_528}}};
+Function fn_506 = {FunctionType, -1, "zero_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_529}}};
 
-Value *protoImpl_529(List *closures, Value *arg0) {
+Value *protoImpl_530(List *closures, Value *arg0) {
 FnArity *arityPtr = ((Function *)((ReifiedVal *)arg0)->impls[4])->arities[0];
 Value *rval = ((FnType1 *)arityPtr->fn)(arityPtr->closures, arg0);
 return(rval);
 };
 
-Function protoFn_504 = {FunctionType, -1, "zero", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, protoImpl_529}}};
+Function protoFn_505 = {FunctionType, -1, "zero", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, protoImpl_530}}};
 
 
 // --------- comp*_impl --------------
-Function fn_507;
-Value *arityImpl_530(List *closures, Value *arg0, Value *arg1) {
+Function fn_508;
+Value *arityImpl_531(List *closures, Value *arg0, Value *arg1) {
 incRef(arg0);
 return(arg0);
 };
 
 
 // --------- comp*_impl main body --------------
-Function fn_507 = {FunctionType, -1, "comp*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_530}}};
+Function fn_508 = {FunctionType, -1, "comp*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_531}}};
 
-Value *protoImpl_531(List *closures, Value *arg0, Value *arg1) {
+Value *protoImpl_532(List *closures, Value *arg0, Value *arg1) {
 FnArity *arityPtr = ((Function *)((ReifiedVal *)arg0)->impls[5])->arities[0];
 Value *rval = ((FnType2 *)arityPtr->fn)(arityPtr->closures, arg0, arg1);
 return(rval);
 };
 
-Function protoFn_506 = {FunctionType, -1, "comp*", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, protoImpl_531}}};
+Function protoFn_507 = {FunctionType, -1, "comp*", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, protoImpl_532}}};
 
 
 // --------- string-list_impl --------------
-Function fn_509;
-Value *arityImpl_532(List *closures, Value *arg0) {
+Function fn_510;
+Value *arityImpl_533(List *closures, Value *arg0) {
 List *varArgs0 = empty_list;
 incRef((Value *)(Value *)&_str_45);
 varArgs0 = (List *)listCons((Value *)(Value *)&_str_45, varArgs0);
 Value *rslt1 = arityImpl_250(empty_list, (Value *)varArgs0);
 dec_and_free((Value *)varArgs0);
-Value *rslt2 = protoFnImpl_483(empty_list, arg0);
+Value *rslt2 = protoFnImpl_484(empty_list, arg0);
 Value *rslt3 = protoFnImpl_270(empty_list, rslt2);
 List *varArgs4 = empty_list;
 incRef((Value *)(Value *)&_str_46);
@@ -4280,31 +4270,31 @@ Value *rslt7 = arityImpl_250(empty_list, (Value *)varArgs6);
 dec_and_free((Value *)varArgs6);
 Value *rslt8 = protoFnImpl_366(empty_list, rslt1, rslt7);
 incRef(rslt8);
-dec_and_free(rslt1);
-dec_and_free(rslt8);
-dec_and_free(rslt5);
-dec_and_free(rslt7);
-dec_and_free(rslt3);
 dec_and_free(rslt2);
+dec_and_free(rslt3);
+dec_and_free(rslt7);
+dec_and_free(rslt5);
+dec_and_free(rslt8);
+dec_and_free(rslt1);
 return(rslt8);
 };
 
 
 // --------- string-list_impl main body --------------
-Function fn_509 = {FunctionType, -1, "string-list_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_532}}};
+Function fn_510 = {FunctionType, -1, "string-list_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_533}}};
 
-Value *protoImpl_533(List *closures, Value *arg0) {
+Value *protoImpl_534(List *closures, Value *arg0) {
 FnArity *arityPtr = ((Function *)((ReifiedVal *)arg0)->impls[6])->arities[0];
 Value *rval = ((FnType1 *)arityPtr->fn)(arityPtr->closures, arg0);
 return(rval);
 };
 
-Function protoFn_508 = {FunctionType, -1, "string-list", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, protoImpl_533}}};
+Function protoFn_509 = {FunctionType, -1, "string-list", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, protoImpl_534}}};
 
 
 // --------- map_impl --------------
-Function fn_511;
-Value *arityImpl_534(List *closures, Value *arg0, Value *arg1) {
+Function fn_512;
+Value *arityImpl_535(List *closures, Value *arg0, Value *arg1) {
 Value *val0 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
@@ -4329,25 +4319,25 @@ fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)arg1)->name);
   abort();
 }
 }
-Value *rslt5 = protoFnImpl_486(empty_list, var_438, rslt4);
+Value *rslt5 = protoFnImpl_487(empty_list, var_439, rslt4);
 incRef(rslt5);
-dec_and_free(rslt5);
 dec_and_free(rslt4);
+dec_and_free(rslt5);
 return(rslt5);
 };
 
-Value *protoImpl_535(List *closures, Value *arg0, Value *arg1) {
+Value *protoImpl_536(List *closures, Value *arg0, Value *arg1) {
 FnArity *arityPtr = ((Function *)((ReifiedVal *)arg0)->impls[7])->arities[0];
 Value *rval = ((FnType2 *)arityPtr->fn)(arityPtr->closures, arg0, arg1);
 return(rval);
 };
 
-Function protoFn_510 = {FunctionType, -1, "map", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, protoImpl_535}}};
+Function protoFn_511 = {FunctionType, -1, "map", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, protoImpl_536}}};
 
 
 // --------- type-args_impl --------------
-Function fn_513;
-Value *arityImpl_536(List *closures, Value *arg0) {
+Function fn_514;
+Value *arityImpl_537(List *closures, Value *arg0) {
 Value *val0 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
@@ -4360,38 +4350,38 @@ dec_and_free((Value *)varArgs1);
 return(rslt2);
 };
 
-Value *protoImpl_537(List *closures, Value *arg0) {
+Value *protoImpl_538(List *closures, Value *arg0) {
 FnArity *arityPtr = ((Function *)((ReifiedVal *)arg0)->impls[8])->arities[0];
 Value *rval = ((FnType1 *)arityPtr->fn)(arityPtr->closures, arg0);
 return(rval);
 };
 
-Function protoFn_512 = {FunctionType, -1, "type-args", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, protoImpl_537}}};
+Function protoFn_513 = {FunctionType, -1, "type-args", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, protoImpl_538}}};
 
 
 // --------- type-name_impl --------------
-Function fn_515;
-Value *arityImpl_538(List *closures, Value *arg0) {
+Function fn_516;
+Value *arityImpl_539(List *closures, Value *arg0) {
 incRef((Value *)&_str_47);
 return((Value *)&_str_47);
 };
 
 
 // --------- type-name_impl main body --------------
-Function fn_515 = {FunctionType, -1, "type-name_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_538}}};
+Function fn_516 = {FunctionType, -1, "type-name_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_539}}};
 
-Value *protoImpl_539(List *closures, Value *arg0) {
+Value *protoImpl_540(List *closures, Value *arg0) {
 FnArity *arityPtr = ((Function *)((ReifiedVal *)arg0)->impls[9])->arities[0];
 Value *rval = ((FnType1 *)arityPtr->fn)(arityPtr->closures, arg0);
 return(rval);
 };
 
-Function protoFn_514 = {FunctionType, -1, "type-name", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, protoImpl_539}}};
+Function protoFn_515 = {FunctionType, -1, "type-name", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, protoImpl_540}}};
 
 
 // --------- .v_impl --------------
-Function fn_517;
-Value *arityImpl_540(List *closures, Value *arg0) {
+Function fn_518;
+Value *arityImpl_541(List *closures, Value *arg0) {
 Value *val0 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
@@ -4400,268 +4390,268 @@ incRef(val0);
 return(val0);
 };
 
-Value *protoImpl_541(List *closures, Value *arg0) {
+Value *protoImpl_542(List *closures, Value *arg0) {
 FnArity *arityPtr = ((Function *)((ReifiedVal *)arg0)->impls[10])->arities[0];
 Value *rval = ((FnType1 *)arityPtr->fn)(arityPtr->closures, arg0);
 return(rval);
 };
 
-Function protoFn_516 = {FunctionType, -1, ".v", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, protoImpl_541}}};
+Function protoFn_517 = {FunctionType, -1, ".v", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, protoImpl_542}}};
 
-Value *arityImpl_495(List *closures, Value *arg0, Value *arg1) {
+Value *arityImpl_496(List *closures, Value *arg0, Value *arg1) {
 FnArity *arity_0 = malloc_fnArity();
 arity_0->type = FnArityType;
 arity_0->count = 1;
 arity_0->closures = empty_list;
 arity_0->variadic = 0;
-arity_0->fn = arityImpl_518;
+arity_0->fn = arityImpl_519;
 incRef((Value *)arg1);
 arity_0->closures = listCons((Value *)arg1, (List *)arity_0->closures);
-Function *fn_497 = malloc_function(1);
-fn_497->type = FunctionType;
-fn_497->name = "flatten_impl";
-fn_497->arityCount = 1;
-fn_497->arities[0] = arity_0;
+Function *fn_498 = malloc_function(1);
+fn_498->type = FunctionType;
+fn_498->name = "flatten_impl";
+fn_498->arityCount = 1;
+fn_498->arities[0] = arity_0;
 FnArity *arity_1 = malloc_fnArity();
 arity_1->type = FnArityType;
 arity_1->count = 2;
 arity_1->closures = empty_list;
 arity_1->variadic = 0;
-arity_1->fn = arityImpl_520;
+arity_1->fn = arityImpl_521;
 incRef((Value *)arg1);
 arity_1->closures = listCons((Value *)arg1, (List *)arity_1->closures);
-Function *fn_499 = malloc_function(1);
-fn_499->type = FunctionType;
-fn_499->name = "flat-map_impl";
-fn_499->arityCount = 1;
-fn_499->arities[0] = arity_1;
+Function *fn_500 = malloc_function(1);
+fn_500->type = FunctionType;
+fn_500->name = "flat-map_impl";
+fn_500->arityCount = 1;
+fn_500->arities[0] = arity_1;
 FnArity *arity_7 = malloc_fnArity();
 arity_7->type = FnArityType;
 arity_7->count = 2;
 arity_7->closures = empty_list;
 arity_7->variadic = 0;
-arity_7->fn = arityImpl_534;
+arity_7->fn = arityImpl_535;
 incRef((Value *)arg1);
 arity_7->closures = listCons((Value *)arg1, (List *)arity_7->closures);
-Function *fn_511 = malloc_function(1);
-fn_511->type = FunctionType;
-fn_511->name = "map_impl";
-fn_511->arityCount = 1;
-fn_511->arities[0] = arity_7;
+Function *fn_512 = malloc_function(1);
+fn_512->type = FunctionType;
+fn_512->name = "map_impl";
+fn_512->arityCount = 1;
+fn_512->arities[0] = arity_7;
 FnArity *arity_8 = malloc_fnArity();
 arity_8->type = FnArityType;
 arity_8->count = 1;
 arity_8->closures = empty_list;
 arity_8->variadic = 0;
-arity_8->fn = arityImpl_536;
+arity_8->fn = arityImpl_537;
 incRef((Value *)arg1);
 arity_8->closures = listCons((Value *)arg1, (List *)arity_8->closures);
-Function *fn_513 = malloc_function(1);
-fn_513->type = FunctionType;
-fn_513->name = "type-args_impl";
-fn_513->arityCount = 1;
-fn_513->arities[0] = arity_8;
+Function *fn_514 = malloc_function(1);
+fn_514->type = FunctionType;
+fn_514->name = "type-args_impl";
+fn_514->arityCount = 1;
+fn_514->arities[0] = arity_8;
 FnArity *arity_10 = malloc_fnArity();
 arity_10->type = FnArityType;
 arity_10->count = 1;
 arity_10->closures = empty_list;
 arity_10->variadic = 0;
-arity_10->fn = arityImpl_540;
+arity_10->fn = arityImpl_541;
 incRef((Value *)arg1);
 arity_10->closures = listCons((Value *)arg1, (List *)arity_10->closures);
-Function *fn_517 = malloc_function(1);
-fn_517->type = FunctionType;
-fn_517->name = ".v_impl";
-fn_517->arityCount = 1;
-fn_517->arities[0] = arity_10;
+Function *fn_518 = malloc_function(1);
+fn_518->type = FunctionType;
+fn_518->name = ".v_impl";
+fn_518->arityCount = 1;
+fn_518->arities[0] = arity_10;
 Value *reified_11 = (Value *)malloc_reified(11);
 ((ReifiedVal *)reified_11)->type = 15;
 ((ReifiedVal *)reified_11)->implCount = 11;
-((ReifiedVal *)reified_11)->impls[0] = (Value *)fn_497;
-incRef((Value *)fn_497);
-((ReifiedVal *)reified_11)->impls[1] = (Value *)fn_499;
-incRef((Value *)fn_499);
-((ReifiedVal *)reified_11)->impls[2] = (Value *)&fn_501;
-incRef((Value *)&fn_501);
-((ReifiedVal *)reified_11)->impls[3] = (Value *)&fn_503;
-incRef((Value *)&fn_503);
-((ReifiedVal *)reified_11)->impls[4] = (Value *)&fn_505;
-incRef((Value *)&fn_505);
-((ReifiedVal *)reified_11)->impls[5] = (Value *)&fn_507;
-incRef((Value *)&fn_507);
-((ReifiedVal *)reified_11)->impls[6] = (Value *)&fn_509;
-incRef((Value *)&fn_509);
-((ReifiedVal *)reified_11)->impls[7] = (Value *)fn_511;
-incRef((Value *)fn_511);
-((ReifiedVal *)reified_11)->impls[8] = (Value *)fn_513;
-incRef((Value *)fn_513);
-((ReifiedVal *)reified_11)->impls[9] = (Value *)&fn_515;
-incRef((Value *)&fn_515);
-((ReifiedVal *)reified_11)->impls[10] = (Value *)fn_517;
-incRef((Value *)fn_517);
+((ReifiedVal *)reified_11)->impls[0] = (Value *)fn_498;
+incRef((Value *)fn_498);
+((ReifiedVal *)reified_11)->impls[1] = (Value *)fn_500;
+incRef((Value *)fn_500);
+((ReifiedVal *)reified_11)->impls[2] = (Value *)&fn_502;
+incRef((Value *)&fn_502);
+((ReifiedVal *)reified_11)->impls[3] = (Value *)&fn_504;
+incRef((Value *)&fn_504);
+((ReifiedVal *)reified_11)->impls[4] = (Value *)&fn_506;
+incRef((Value *)&fn_506);
+((ReifiedVal *)reified_11)->impls[5] = (Value *)&fn_508;
+incRef((Value *)&fn_508);
+((ReifiedVal *)reified_11)->impls[6] = (Value *)&fn_510;
+incRef((Value *)&fn_510);
+((ReifiedVal *)reified_11)->impls[7] = (Value *)fn_512;
+incRef((Value *)fn_512);
+((ReifiedVal *)reified_11)->impls[8] = (Value *)fn_514;
+incRef((Value *)fn_514);
+((ReifiedVal *)reified_11)->impls[9] = (Value *)&fn_516;
+incRef((Value *)&fn_516);
+((ReifiedVal *)reified_11)->impls[10] = (Value *)fn_518;
+incRef((Value *)fn_518);
 incRef(reified_11);
-dec_and_free((Value *)fn_513);
+dec_and_free((Value *)fn_500);
+dec_and_free((Value *)fn_512);
+dec_and_free((Value *)fn_518);
 dec_and_free(reified_11);
-dec_and_free((Value *)fn_499);
-dec_and_free((Value *)fn_497);
-dec_and_free((Value *)fn_511);
-dec_and_free((Value *)fn_517);
+dec_and_free((Value *)fn_498);
+dec_and_free((Value *)fn_514);
 return(reified_11);
 };
 
 
 // --------- invoke_impl main body --------------
-Function fn_490 = {FunctionType, -1, "invoke_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_495}}};
+Function fn_491 = {FunctionType, -1, "invoke_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_496}}};
 
-Value *protoFnImpl_486(List *closures, Value *arg0, Value *arg1) {
+Value *protoFnImpl_487(List *closures, Value *arg0, Value *arg1) {
 FnArity *arityPtr = ((Function *)((ReifiedVal *)arg0)->impls[1])->arities[0];
 Value *rval = ((FnType2 *)arityPtr->fn)(arityPtr->closures, arg0, arg1);
 return(rval);
 };
 
-Function protoFn_489 = {FunctionType, -1, "invoke", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, protoFnImpl_486}}};
+Function protoFn_490 = {FunctionType, -1, "invoke", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, protoFnImpl_487}}};
 
 
 // --------- instance?_impl --------------
-Function fn_492;
-Value *arityImpl_542(List *closures, Value *arg0, Value *arg1) {
+Function fn_493;
+Value *arityImpl_543(List *closures, Value *arg0, Value *arg1) {
 Value *rslt0 = arityImpl_99(empty_list, arg1);
-Value *rslt1 = arityImpl_435(empty_list, (Value *)&_num_14, rslt0);
+Value *rslt1 = arityImpl_436(empty_list, (Value *)&_num_14, rslt0);
 incRef(rslt1);
-dec_and_free(rslt1);
 dec_and_free(rslt0);
+dec_and_free(rslt1);
 return(rslt1);
 };
 
 
 // --------- instance?_impl main body --------------
-Function fn_492 = {FunctionType, -1, "instance?_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_542}}};
+Function fn_493 = {FunctionType, -1, "instance?_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_543}}};
 
-Value *protoImpl_543(List *closures, Value *arg0, Value *arg1) {
+Value *protoImpl_544(List *closures, Value *arg0, Value *arg1) {
 FnArity *arityPtr = ((Function *)((ReifiedVal *)arg0)->impls[2])->arities[0];
 Value *rval = ((FnType2 *)arityPtr->fn)(arityPtr->closures, arg0, arg1);
 return(rval);
 };
 
-Function protoFn_491 = {FunctionType, -1, "instance?", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, protoImpl_543}}};
+Function protoFn_492 = {FunctionType, -1, "instance?", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, protoImpl_544}}};
 
-ReifiedVal reified_544 = {14, -1, 3, {(Value *)&fn_488, (Value *)&fn_490, (Value *)&fn_492}};
-Value *var_438 = (Value *)&reified_544;
+ReifiedVal reified_545 = {14, -1, 3, {(Value *)&fn_489, (Value *)&fn_491, (Value *)&fn_493}};
+Value *var_439 = (Value *)&reified_545;
 SubString _kw_2 = {5, -1, 13, 0, 0, ":nothing-here"};
 
 // --------- zero_impl --------------
-Function fn_546;
-Value *arityImpl_553(List *closures, Value *arg0) {
-incRef((Value *)&reified_475);
-return((Value *)&reified_475);
+Function fn_547;
+Value *arityImpl_554(List *closures, Value *arg0) {
+incRef((Value *)&reified_476);
+return((Value *)&reified_476);
 };
 
 
 // --------- zero_impl main body --------------
-Function fn_546 = {FunctionType, -1, "zero_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_553}}};
+Function fn_547 = {FunctionType, -1, "zero_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_554}}};
 
-Value *protoImpl_554(List *closures, Value *arg0) {
+Value *protoImpl_555(List *closures, Value *arg0) {
 FnArity *arityPtr = ((Function *)((ReifiedVal *)arg0)->impls[0])->arities[0];
 Value *rval = ((FnType1 *)arityPtr->fn)(arityPtr->closures, arg0);
 return(rval);
 };
 
-Function protoFn_545 = {FunctionType, -1, "zero", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, protoImpl_554}}};
+Function protoFn_546 = {FunctionType, -1, "zero", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, protoImpl_555}}};
 
 
 // --------- comp*_impl --------------
-Function fn_548;
-Value *arityImpl_555(List *closures, Value *arg0, Value *arg1) {
+Function fn_549;
+Value *arityImpl_556(List *closures, Value *arg0, Value *arg1) {
 incRef((Value *)&_kw_2);
 return((Value *)&_kw_2);
 };
 
 
 // --------- comp*_impl main body --------------
-Function fn_548 = {FunctionType, -1, "comp*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_555}}};
+Function fn_549 = {FunctionType, -1, "comp*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_556}}};
 
-Value *protoImpl_556(List *closures, Value *arg0, Value *arg1) {
+Value *protoImpl_557(List *closures, Value *arg0, Value *arg1) {
 FnArity *arityPtr = ((Function *)((ReifiedVal *)arg0)->impls[1])->arities[0];
 Value *rval = ((FnType2 *)arityPtr->fn)(arityPtr->closures, arg0, arg1);
 return(rval);
 };
 
-Function protoFn_547 = {FunctionType, -1, "comp*", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, protoImpl_556}}};
+Function protoFn_548 = {FunctionType, -1, "comp*", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, protoImpl_557}}};
 
 
 // --------- invoke_impl --------------
-Function fn_550;
-Value *arityImpl_557(List *closures, Value *arg0, Value *arg1) {
-Value *rslt0 = protoFnImpl_486(empty_list, var_438, arg1);
+Function fn_551;
+Value *arityImpl_558(List *closures, Value *arg0, Value *arg1) {
+Value *rslt0 = protoFnImpl_487(empty_list, var_439, arg1);
 return(rslt0);
 };
 
 
 // --------- invoke_impl main body --------------
-Function fn_550 = {FunctionType, -1, "invoke_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_557}}};
+Function fn_551 = {FunctionType, -1, "invoke_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_558}}};
 
-Value *protoImpl_558(List *closures, Value *arg0, Value *arg1) {
+Value *protoImpl_559(List *closures, Value *arg0, Value *arg1) {
 FnArity *arityPtr = ((Function *)((ReifiedVal *)arg0)->impls[2])->arities[0];
 Value *rval = ((FnType2 *)arityPtr->fn)(arityPtr->closures, arg0, arg1);
 return(rval);
 };
 
-Function protoFn_549 = {FunctionType, -1, "invoke", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, protoImpl_558}}};
+Function protoFn_550 = {FunctionType, -1, "invoke", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, protoImpl_559}}};
 
 
 // --------- instance?_impl --------------
-Function fn_552;
-Value *arityImpl_559(List *closures, Value *arg0, Value *arg1) {
-Value *rslt0 = protoImpl_543(empty_list, var_438, arg1);
+Function fn_553;
+Value *arityImpl_560(List *closures, Value *arg0, Value *arg1) {
+Value *rslt0 = protoImpl_544(empty_list, var_439, arg1);
 return(rslt0);
 };
 
 
 // --------- instance?_impl main body --------------
-Function fn_552 = {FunctionType, -1, "instance?_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_559}}};
+Function fn_553 = {FunctionType, -1, "instance?_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_560}}};
 
-Value *protoImpl_560(List *closures, Value *arg0, Value *arg1) {
+Value *protoImpl_561(List *closures, Value *arg0, Value *arg1) {
 FnArity *arityPtr = ((Function *)((ReifiedVal *)arg0)->impls[3])->arities[0];
 Value *rval = ((FnType2 *)arityPtr->fn)(arityPtr->closures, arg0, arg1);
 return(rval);
 };
 
-Function protoFn_551 = {FunctionType, -1, "instance?", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, protoImpl_560}}};
+Function protoFn_552 = {FunctionType, -1, "instance?", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, protoImpl_561}}};
 
-ReifiedVal reified_561 = {16, -1, 4, {(Value *)&fn_546, (Value *)&fn_548, (Value *)&fn_550, (Value *)&fn_552}};
+ReifiedVal reified_562 = {16, -1, 4, {(Value *)&fn_547, (Value *)&fn_549, (Value *)&fn_551, (Value *)&fn_553}};
 
 // --------- m= --------------
-Function fn_563;
-Value *arityImpl_564(List *closures, Value *arg0, Value *arg1) {
+Function fn_564;
+Value *arityImpl_565(List *closures, Value *arg0, Value *arg1) {
 Value *cond0;
 Value *rslt1 = protoFnImpl_285(empty_list, arg0, arg1);
 
 if (isTrue(rslt1)) {
 dec_and_free(rslt1);
-Value *rslt2 = protoImpl_558(empty_list, (Value *)&reified_561, arg0);
+Value *rslt2 = protoImpl_559(empty_list, (Value *)&reified_562, arg0);
 incRef(rslt2);
 cond0 = rslt2;
 dec_and_free(rslt2);
 } else {
 dec_and_free(rslt1);
-incRef((Value *)&reified_475);
-cond0 = (Value *)&reified_475;
+incRef((Value *)&reified_476);
+cond0 = (Value *)&reified_476;
 }
 return(cond0);
 };
 
-Value *arityImpl_565(List *closures, Value *varArgs) {
+Value *arityImpl_566(List *closures, Value *varArgs) {
 List *argsList = (List *)varArgs;
 Value *arg0 = argsList->head;
 if (argsList->tail) argsList->tail->len = argsList->len - 1;
 argsList = argsList->tail;
-Value *arg1 = (Value *)argsList;
+Value *arg1 = (Value *) argsList;
 Value *cond0;
 Value *rslt4 = arityImpl_279(empty_list, arg1);
 
 if (isTrue(rslt4)) {
 dec_and_free(rslt4);
-Value *rslt5 = protoImpl_558(empty_list, (Value *)&reified_561, arg0);
+Value *rslt5 = protoImpl_559(empty_list, (Value *)&reified_562, arg0);
 incRef(rslt5);
 cond0 = rslt5;
 dec_and_free(rslt5);
@@ -4669,14 +4659,14 @@ dec_and_free(rslt5);
 dec_and_free(rslt4);
 Value *rslt6 = arityImpl_138(empty_list, arg1);
 Value *rslt7 = protoFnImpl_285(empty_list, arg0, rslt6);
-Value *rslt8 = arityImpl_426(empty_list, rslt7);
+Value *rslt8 = arityImpl_427(empty_list, rslt7);
 dec_and_free(rslt6);
 dec_and_free(rslt7);
 
 if (isTrue(rslt8)) {
 dec_and_free(rslt8);
-incRef((Value *)&reified_475);
-cond0 = (Value *)&reified_475;
+incRef((Value *)&reified_476);
+cond0 = (Value *)&reified_476;
 } else {
 dec_and_free(rslt8);
 Value *rslt9 = arityImpl_135(empty_list, arg1);
@@ -4685,7 +4675,7 @@ dec_and_free(rslt9);
 
 if (isTrue(rslt10)) {
 dec_and_free(rslt10);
-Value *rslt11 = protoImpl_558(empty_list, (Value *)&reified_561, arg0);
+Value *rslt11 = protoImpl_559(empty_list, (Value *)&reified_562, arg0);
 incRef(rslt11);
 cond0 = rslt11;
 dec_and_free(rslt11);
@@ -4696,7 +4686,7 @@ incRef((Value *)arg1);
 varArgs1 = (List *)listCons((Value *)arg1, varArgs1);
 Value *rslt2 = arityImpl_250(empty_list, (Value *)varArgs1);
 dec_and_free((Value *)varArgs1);
-Value *rslt3 = protoFnImpl_247(empty_list, (Value *)&fn_434, rslt2);
+Value *rslt3 = protoFnImpl_247(empty_list, (Value *)&fn_435, rslt2);
 incRef(rslt3);
 cond0 = rslt3;
 dec_and_free(rslt3);
@@ -4708,22 +4698,22 @@ return(cond0);
 };
 
 // --------- m= main body --------------
-Function fn_563 = {FunctionType, -1, "m=", 2, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_564}, &(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_565}}};
+Function fn_564 = {FunctionType, -1, "m=", 2, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_565}, &(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_566}}};
 
 
 // --------- < --------------
-Function fn_567;
-Value *arityImpl_568(List *closures, Value *arg0, Value *arg1) {
+Function fn_568;
+Value *arityImpl_569(List *closures, Value *arg0, Value *arg1) {
 Value *rslt0 = protoFnImpl_291(empty_list, arg0, arg1);
 return(rslt0);
 };
 
-Value *arityImpl_569(List *closures, Value *varArgs) {
+Value *arityImpl_570(List *closures, Value *varArgs) {
 List *argsList = (List *)varArgs;
 Value *arg0 = argsList->head;
 if (argsList->tail) argsList->tail->len = argsList->len - 1;
 argsList = argsList->tail;
-Value *arg1 = (Value *)argsList;
+Value *arg1 = (Value *) argsList;
 Value *cond0;
 Value *rslt4 = arityImpl_279(empty_list, arg1);
 
@@ -4735,7 +4725,7 @@ cond0 = (Value *)&_num_1;
 dec_and_free(rslt4);
 Value *rslt5 = arityImpl_138(empty_list, arg1);
 Value *rslt6 = protoFnImpl_291(empty_list, arg0, rslt5);
-Value *rslt7 = arityImpl_426(empty_list, rslt6);
+Value *rslt7 = arityImpl_427(empty_list, rslt6);
 dec_and_free(rslt6);
 dec_and_free(rslt5);
 
@@ -4760,7 +4750,7 @@ incRef((Value *)arg1);
 varArgs1 = (List *)listCons((Value *)arg1, varArgs1);
 Value *rslt2 = arityImpl_250(empty_list, (Value *)varArgs1);
 dec_and_free((Value *)varArgs1);
-Value *rslt3 = protoFnImpl_247(empty_list, (Value *)&fn_567, rslt2);
+Value *rslt3 = protoFnImpl_247(empty_list, (Value *)&fn_568, rslt2);
 incRef(rslt3);
 cond0 = rslt3;
 dec_and_free(rslt3);
@@ -4772,12 +4762,12 @@ return(cond0);
 };
 
 // --------- < main body --------------
-Function fn_567 = {FunctionType, -1, "<", 2, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_568}, &(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_569}}};
+Function fn_568 = {FunctionType, -1, "<", 2, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_569}, &(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_570}}};
 
 
 // --------- list** --------------
-Function fn_571;
-Value *arityImpl_572(List *closures, Value *arg0, Value *arg1) {
+Function fn_572;
+Value *arityImpl_573(List *closures, Value *arg0, Value *arg1) {
 Value *cond0;
 Value *rslt5 = arityImpl_279(empty_list, arg1);
 
@@ -4787,9 +4777,9 @@ incRef(arg0);
 cond0 = arg0;
 } else {
 dec_and_free(rslt5);
-Value *rslt1 = protoFnImpl_342(empty_list, arg1);
-Value *rslt2 = protoFnImpl_338(empty_list, arg1);
-Value *rslt3 = arityImpl_572(closures, rslt1, rslt2);
+Value *rslt1 = arityImpl_138(empty_list, arg1);
+Value *rslt2 = arityImpl_141(empty_list, arg1);
+Value *rslt3 = arityImpl_573(closures, rslt1, rslt2);
 Value *rslt4 = arityImpl_132(empty_list, arg0, rslt3);
 incRef(rslt4);
 cond0 = rslt4;
@@ -4803,28 +4793,28 @@ return(cond0);
 
 
 // --------- list** main body --------------
-Function fn_571 = {FunctionType, -1, "list**", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_572}}};
+Function fn_572 = {FunctionType, -1, "list**", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_573}}};
 
 
 // --------- list* --------------
-Function fn_574;
-Value *arityImpl_575(List *closures, Value *varArgs) {
+Function fn_575;
+Value *arityImpl_576(List *closures, Value *varArgs) {
 List *argsList = (List *)varArgs;
 Value *arg0 = argsList->head;
 if (argsList->tail) argsList->tail->len = argsList->len - 1;
 argsList = argsList->tail;
-Value *arg1 = (Value *)argsList;
-Value *rslt0 = arityImpl_572(empty_list, arg0, arg1);
+Value *arg1 = (Value *) argsList;
+Value *rslt0 = arityImpl_573(empty_list, arg0, arg1);
 return(rslt0);
 };
 
 // --------- list* main body --------------
-Function fn_574 = {FunctionType, -1, "list*", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_575}}};
+Function fn_575 = {FunctionType, -1, "list*", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_576}}};
 
 
 // --------- filter --------------
-Function fn_577;
-Value *arityImpl_578(List *closures, Value *arg0, Value *arg1) {
+Function fn_578;
+Value *arityImpl_579(List *closures, Value *arg0, Value *arg1) {
 List *l = (List *)arg0;
       if (arg0->type != ListType) {
          fprintf(stderr, "'filter' is only defined for 'List' values\n");
@@ -4892,15 +4882,15 @@ List *l = (List *)arg0;
 
 
 // --------- filter main body --------------
-Function fn_577 = {FunctionType, -1, "filter", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_578}}};
+Function fn_578 = {FunctionType, -1, "filter", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_579}}};
 
 
 // --------- remove --------------
-Function fn_580;
+Function fn_581;
 
 // --------- anon --------------
-Function fn_582;
-Value *arityImpl_583(List *closures, Value *arg0) {
+Function fn_583;
+Value *arityImpl_584(List *closures, Value *arg0) {
 Value *val0 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
@@ -4925,65 +4915,65 @@ fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)val0)->name);
   abort();
 }
 }
-Value *rslt5 = arityImpl_426(empty_list, rslt4);
+Value *rslt5 = arityImpl_427(empty_list, rslt4);
 incRef(rslt5);
-dec_and_free(rslt5);
 dec_and_free(rslt4);
+dec_and_free(rslt5);
 return(rslt5);
 };
 
-Value *arityImpl_581(List *closures, Value *arg0, Value *arg1) {
+Value *arityImpl_582(List *closures, Value *arg0, Value *arg1) {
 FnArity *arity_0 = malloc_fnArity();
 arity_0->type = FnArityType;
 arity_0->count = 1;
 arity_0->closures = empty_list;
 arity_0->variadic = 0;
-arity_0->fn = arityImpl_583;
+arity_0->fn = arityImpl_584;
 incRef((Value *)arg1);
 arity_0->closures = listCons((Value *)arg1, (List *)arity_0->closures);
-Function *fn_582 = malloc_function(1);
-fn_582->type = FunctionType;
-fn_582->name = "anon";
-fn_582->arityCount = 1;
-fn_582->arities[0] = arity_0;
-Value *rslt1 = arityImpl_578(empty_list, arg0, (Value *)fn_582);
+Function *fn_583 = malloc_function(1);
+fn_583->type = FunctionType;
+fn_583->name = "anon";
+fn_583->arityCount = 1;
+fn_583->arities[0] = arity_0;
+Value *rslt1 = arityImpl_579(empty_list, arg0, (Value *)fn_583);
 incRef(rslt1);
+dec_and_free((Value *)fn_583);
 dec_and_free(rslt1);
-dec_and_free((Value *)fn_582);
 return(rslt1);
 };
 
 
 // --------- remove main body --------------
-Function fn_580 = {FunctionType, -1, "remove", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_581}}};
+Function fn_581 = {FunctionType, -1, "remove", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_582}}};
 
 
 // --------- reverse --------------
-Function fn_585;
-Value *arityImpl_586(List *closures, Value *arg0) {
+Function fn_586;
+Value *arityImpl_587(List *closures, Value *arg0) {
 Value *rslt0 = protoFnImpl_311(empty_list, arg0);
 Value *rslt1 = protoFnImpl_321(empty_list, arg0, rslt0, (Value *)&protoFn_300);
 incRef(rslt1);
-dec_and_free(rslt1);
 dec_and_free(rslt0);
+dec_and_free(rslt1);
 return(rslt1);
 };
 
 
 // --------- reverse main body --------------
-Function fn_585 = {FunctionType, -1, "reverse", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_586}}};
+Function fn_586 = {FunctionType, -1, "reverse", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_587}}};
 
 
 // --------- identity --------------
-Function fn_588;
-Value *arityImpl_589(List *closures, Value *arg0) {
+Function fn_589;
+Value *arityImpl_590(List *closures, Value *arg0) {
 incRef(arg0);
 return(arg0);
 };
 
 
 // --------- identity main body --------------
-Function fn_588 = {FunctionType, -1, "identity", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_589}}};
+Function fn_589 = {FunctionType, -1, "identity", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_590}}};
 
 struct {int64_t type;
  int32_t refs;
@@ -4991,8 +4981,8 @@ struct {int64_t type;
    char buffer[6];} _str_48 = {1, -1, 5,"<Fn: "};
 
 // --------- apply*_impl --------------
-Function fn_591;
-Value *arityImpl_595(List *closures, Value *arg0, Value *arg1) {
+Function fn_592;
+Value *arityImpl_596(List *closures, Value *arg0, Value *arg1) {
 Value *cond0;
 Value *rslt5 = arityImpl_279(empty_list, arg1);
 
@@ -5023,7 +5013,7 @@ dec_and_free(rslt9);
 dec_and_free(rslt5);
 Value *rslt1 = protoFnImpl_342(empty_list, arg1);
 Value *rslt2 = protoFnImpl_338(empty_list, arg1);
-Value *rslt3 = arityImpl_572(empty_list, rslt1, rslt2);
+Value *rslt3 = arityImpl_573(empty_list, rslt1, rslt2);
 Value *rslt4 = arityImpl_171(empty_list, arg0, rslt3);
 incRef(rslt4);
 cond0 = rslt4;
@@ -5037,30 +5027,30 @@ return(cond0);
 
 
 // --------- apply*_impl main body --------------
-Function fn_591 = {FunctionType, -1, "apply*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_595}}};
+Function fn_592 = {FunctionType, -1, "apply*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_596}}};
 
 
 // --------- zero_impl --------------
-Function fn_592;
-Value *arityImpl_596(List *closures, Value *arg0) {
-incRef((Value *)&fn_588);
-return((Value *)&fn_588);
+Function fn_593;
+Value *arityImpl_597(List *closures, Value *arg0) {
+incRef((Value *)&fn_589);
+return((Value *)&fn_589);
 };
 
 
 // --------- zero_impl main body --------------
-Function fn_592 = {FunctionType, -1, "zero_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_596}}};
+Function fn_593 = {FunctionType, -1, "zero_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_597}}};
 
 
 // --------- comp*_impl --------------
-Function fn_593;
+Function fn_594;
 
 // --------- anon --------------
-Function fn_598;
+Function fn_599;
 
 // --------- anon --------------
-Function fn_600;
-Value *arityImpl_601(List *closures, Value *arg0, Value *arg1) {
+Function fn_601;
+Value *arityImpl_602(List *closures, Value *arg0, Value *arg1) {
 Value *rslt3;
 if((arg1)->type != FunctionType) {
 rslt3 = protoFnImpl_11(empty_list, arg1, arg0);
@@ -5086,11 +5076,11 @@ return(rslt3);
 
 
 // --------- anon main body --------------
-Function fn_600 = {FunctionType, -1, "anon", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_601}}};
+Function fn_601 = {FunctionType, -1, "anon", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_602}}};
 
-Value *arityImpl_599(List *closures, Value *varArgs) {
+Value *arityImpl_600(List *closures, Value *varArgs) {
 List *argsList = (List *)varArgs;
-Value *arg0 = (Value *)argsList;
+Value *arg0 = (Value *) argsList;
 Value *val0 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
@@ -5105,40 +5095,40 @@ varArgs2 = (List *)listCons((Value *)arg0, varArgs2);
 Value *rslt3 = arityImpl_250(empty_list, (Value *)varArgs2);
 dec_and_free((Value *)varArgs2);
 Value *rslt4 = protoFnImpl_247(empty_list, val1, rslt3);
-Value *rslt6 = protoFnImpl_321(empty_list, val0, rslt4, (Value *)&fn_600);
+Value *rslt6 = protoFnImpl_321(empty_list, val0, rslt4, (Value *)&fn_601);
 incRef(rslt6);
-dec_and_free(rslt6);
-dec_and_free(rslt4);
 dec_and_free(rslt3);
+dec_and_free(rslt4);
+dec_and_free(rslt6);
 return(rslt6);
 };
-Value *arityImpl_597(List *closures, Value *arg0, Value *arg1) {
+Value *arityImpl_598(List *closures, Value *arg0, Value *arg1) {
 FnArity *arity_0 = malloc_fnArity();
 arity_0->type = FnArityType;
 arity_0->count = 2;
 arity_0->closures = empty_list;
 arity_0->variadic = 1;
-arity_0->fn = arityImpl_599;
+arity_0->fn = arityImpl_600;
 incRef((Value *)arg0);
 arity_0->closures = listCons((Value *)arg0, (List *)arity_0->closures);
 incRef((Value *)arg1);
 arity_0->closures = listCons((Value *)arg1, (List *)arity_0->closures);
-Function *fn_598 = malloc_function(1);
-fn_598->type = FunctionType;
-fn_598->name = "anon";
-fn_598->arityCount = 1;
-fn_598->arities[0] = arity_0;
-return((Value *)fn_598);
+Function *fn_599 = malloc_function(1);
+fn_599->type = FunctionType;
+fn_599->name = "anon";
+fn_599->arityCount = 1;
+fn_599->arities[0] = arity_0;
+return((Value *)fn_599);
 };
 
 
 // --------- comp*_impl main body --------------
-Function fn_593 = {FunctionType, -1, "comp*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_597}}};
+Function fn_594 = {FunctionType, -1, "comp*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_598}}};
 
 
 // --------- string-list_impl --------------
-Function fn_594;
-Value *arityImpl_602(List *closures, Value *arg0) {
+Function fn_595;
+Value *arityImpl_603(List *closures, Value *arg0) {
 Value *rslt0 = arityImpl_144(empty_list, arg0);
 List *varArgs1 = empty_list;
 incRef((Value *)(Value *)&_str_46);
@@ -5150,19 +5140,19 @@ varArgs1 = (List *)listCons((Value *)(Value *)&_str_48, varArgs1);
 Value *rslt2 = arityImpl_250(empty_list, (Value *)varArgs1);
 dec_and_free((Value *)varArgs1);
 incRef(rslt2);
-dec_and_free(rslt0);
 dec_and_free(rslt2);
+dec_and_free(rslt0);
 return(rslt2);
 };
 
 
 // --------- string-list_impl main body --------------
-Function fn_594 = {FunctionType, -1, "string-list_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_602}}};
+Function fn_595 = {FunctionType, -1, "string-list_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_603}}};
 
 
 // --------- sha1_impl --------------
-Function fn_603;
-Value *arityImpl_607(List *closures, Value *arg0) {
+Function fn_604;
+Value *arityImpl_608(List *closures, Value *arg0) {
 
 int64_t shaVal;
 Sha1Context context;
@@ -5177,36 +5167,36 @@ return((Value *)numberValue(shaVal));
 
 
 // --------- sha1_impl main body --------------
-Function fn_603 = {FunctionType, -1, "sha1_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_607}}};
+Function fn_604 = {FunctionType, -1, "sha1_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_608}}};
 
 
 // --------- <*_impl --------------
-Function fn_604;
-Value *arityImpl_608(List *closures, Value *arg0, Value *arg1) {
+Function fn_605;
+Value *arityImpl_609(List *closures, Value *arg0, Value *arg1) {
 Value *rslt0 = arityImpl_115(empty_list, arg0, arg1);
 return(rslt0);
 };
 
 
 // --------- <*_impl main body --------------
-Function fn_604 = {FunctionType, -1, "<*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_608}}};
+Function fn_605 = {FunctionType, -1, "<*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_609}}};
 
 
 // --------- =*_impl --------------
-Function fn_605;
-Value *arityImpl_609(List *closures, Value *arg0, Value *arg1) {
+Function fn_606;
+Value *arityImpl_610(List *closures, Value *arg0, Value *arg1) {
 Value *rslt0 = arityImpl_112(empty_list, arg0, arg1);
 return(rslt0);
 };
 
 
 // --------- =*_impl main body --------------
-Function fn_605 = {FunctionType, -1, "=*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_609}}};
+Function fn_606 = {FunctionType, -1, "=*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_610}}};
 
 
 // --------- string-list_impl --------------
-Function fn_606;
-Value *arityImpl_610(List *closures, Value *arg0) {
+Function fn_607;
+Value *arityImpl_611(List *closures, Value *arg0) {
 Value *rslt0 = arityImpl_109(empty_list, arg0);
 List *varArgs1 = empty_list;
 incRef((Value *)rslt0);
@@ -5214,19 +5204,19 @@ varArgs1 = (List *)listCons((Value *)rslt0, varArgs1);
 Value *rslt2 = arityImpl_250(empty_list, (Value *)varArgs1);
 dec_and_free((Value *)varArgs1);
 incRef(rslt2);
-dec_and_free(rslt0);
 dec_and_free(rslt2);
+dec_and_free(rslt0);
 return(rslt2);
 };
 
 
 // --------- string-list_impl main body --------------
-Function fn_606 = {FunctionType, -1, "string-list_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_610}}};
+Function fn_607 = {FunctionType, -1, "string-list_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_611}}};
 
 
 // --------- any? --------------
-Function fn_611;
-Value *arityImpl_612(List *closures, Value *arg0, Value *arg1) {
+Function fn_612;
+Value *arityImpl_613(List *closures, Value *arg0, Value *arg1) {
 Value *cond0;
 Value *rslt3 = protoFnImpl_319(empty_list, arg1);
 
@@ -5266,7 +5256,7 @@ cond0 = (Value *)&_num_1;
 } else {
 dec_and_free(rslt8);
 Value *rslt1 = protoFnImpl_338(empty_list, arg1);
-Value *rslt2 = arityImpl_612(closures, arg0, rslt1);
+Value *rslt2 = arityImpl_613(closures, arg0, rslt1);
 incRef(rslt2);
 cond0 = rslt2;
 dec_and_free(rslt1);
@@ -5278,17 +5268,17 @@ return(cond0);
 
 
 // --------- any? main body --------------
-Function fn_611 = {FunctionType, -1, "any?", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_612}}};
+Function fn_612 = {FunctionType, -1, "any?", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_613}}};
 
 
 // --------- partial --------------
-Function fn_614;
+Function fn_615;
 
 // --------- anon --------------
-Function fn_616;
-Value *arityImpl_617(List *closures, Value *varArgs) {
+Function fn_617;
+Value *arityImpl_618(List *closures, Value *varArgs) {
 List *argsList = (List *)varArgs;
-Value *arg0 = (Value *)argsList;
+Value *arg0 = (Value *) argsList;
 Value *val0 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
@@ -5310,46 +5300,68 @@ Value *rslt6 = arityImpl_250(empty_list, (Value *)varArgs5);
 dec_and_free((Value *)varArgs5);
 Value *rslt7 = protoFnImpl_247(empty_list, val0, rslt6);
 incRef(rslt7);
-dec_and_free(rslt6);
-dec_and_free(rslt4);
-dec_and_free(rslt7);
 dec_and_free(rslt3);
+dec_and_free(rslt7);
+dec_and_free(rslt4);
+dec_and_free(rslt6);
 return(rslt7);
 };
-Value *arityImpl_615(List *closures, Value *varArgs) {
+Value *arityImpl_616(List *closures, Value *varArgs) {
 List *argsList = (List *)varArgs;
 Value *arg0 = argsList->head;
 if (argsList->tail) argsList->tail->len = argsList->len - 1;
 argsList = argsList->tail;
-Value *arg1 = (Value *)argsList;
+Value *arg1 = (Value *) argsList;
 FnArity *arity_0 = malloc_fnArity();
 arity_0->type = FnArityType;
 arity_0->count = 2;
 arity_0->closures = empty_list;
 arity_0->variadic = 1;
-arity_0->fn = arityImpl_617;
+arity_0->fn = arityImpl_618;
 incRef((Value *)arg1);
 arity_0->closures = listCons((Value *)arg1, (List *)arity_0->closures);
 incRef((Value *)arg0);
 arity_0->closures = listCons((Value *)arg0, (List *)arity_0->closures);
-Function *fn_616 = malloc_function(1);
-fn_616->type = FunctionType;
-fn_616->name = "anon";
-fn_616->arityCount = 1;
-fn_616->arities[0] = arity_0;
-return((Value *)fn_616);
+Function *fn_617 = malloc_function(1);
+fn_617->type = FunctionType;
+fn_617->name = "anon";
+fn_617->arityCount = 1;
+fn_617->arities[0] = arity_0;
+return((Value *)fn_617);
 };
 
 // --------- partial main body --------------
-Function fn_614 = {FunctionType, -1, "partial", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_615}}};
+Function fn_615 = {FunctionType, -1, "partial", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_616}}};
 
 
 // --------- comprehend --------------
-Function fn_620;
+Function fn_621;
+Value *arityImpl_622(List *closures, Value *arg0) {
+Value *rslt3;
+if((arg0)->type != FunctionType) {
+rslt3 = protoFnImpl_9(empty_list, arg0);
+} else {
+FnArity *arity0 = findFnArity(arg0, 0);
+if(arity0 != (FnArity *)0 && !arity0->variadic) {
+FnType0 *fn2 = (FnType0 *)arity0->fn;
+rslt3 = fn2(arity0->closures);
+} else if(arity0 != (FnArity *)0 && arity0->variadic) {
+FnType1 *fn2 = (FnType1 *)arity0->fn;
+List *varArgs1 = empty_list;
+rslt3 = fn2(arity0->closures, (Value *)varArgs1);
+dec_and_free((Value *)varArgs1);
+} else {
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)arg0)->name);
+  abort();
+}
+}
+return(rslt3);
+};
+
 
 // --------- anon --------------
-Function fn_622;
-Value *arityImpl_624(List *closures, Value *arg0, Value *arg1) {
+Function fn_624;
+Value *arityImpl_626(List *closures, Value *arg0, Value *arg1) {
 Value *val0 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
@@ -5359,7 +5371,7 @@ if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
 Value *rslt2 = arityImpl_132(empty_list, arg1, arg0);
-Value *rslt3 = arityImpl_586(empty_list, rslt2);
+Value *rslt3 = arityImpl_587(empty_list, rslt2);
 List *varArgs4 = empty_list;
 incRef((Value *)rslt3);
 varArgs4 = (List *)listCons((Value *)rslt3, varArgs4);
@@ -5368,21 +5380,21 @@ dec_and_free((Value *)varArgs4);
 Value *rslt6 = protoFnImpl_247(empty_list, val1, rslt5);
 Value *rslt7 = protoFnImpl_240(empty_list, val0, rslt6);
 incRef(rslt7);
-dec_and_free(rslt6);
-dec_and_free(rslt5);
-dec_and_free(rslt7);
-dec_and_free(rslt3);
 dec_and_free(rslt2);
+dec_and_free(rslt3);
+dec_and_free(rslt7);
+dec_and_free(rslt5);
+dec_and_free(rslt6);
 return(rslt7);
 };
 
 
 // --------- anon --------------
-Function fn_623;
+Function fn_625;
 
 // --------- anon --------------
-Function fn_626;
-Value *arityImpl_627(List *closures, Value *arg0, Value *arg1) {
+Function fn_628;
+Value *arityImpl_629(List *closures, Value *arg0, Value *arg1) {
 Value *val0 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
@@ -5397,43 +5409,43 @@ incRef((Value *)rslt2);
 varArgs3 = (List *)listCons((Value *)rslt2, varArgs3);
 incRef((Value *)val1);
 varArgs3 = (List *)listCons((Value *)val1, varArgs3);
-Value *rslt4 = arityImpl_615(empty_list, (Value *)varArgs3);
+Value *rslt4 = arityImpl_616(empty_list, (Value *)varArgs3);
 dec_and_free((Value *)varArgs3);
 Value *rslt5 = protoFnImpl_209(empty_list, val0, rslt4);
 incRef(rslt5);
-dec_and_free(rslt5);
-dec_and_free(rslt4);
 dec_and_free(rslt2);
+dec_and_free(rslt4);
+dec_and_free(rslt5);
 return(rslt5);
 };
 
-Value *arityImpl_625(List *closures, Value *arg0, Value *arg1) {
+Value *arityImpl_627(List *closures, Value *arg0, Value *arg1) {
 FnArity *arity_0 = malloc_fnArity();
 arity_0->type = FnArityType;
 arity_0->count = 2;
 arity_0->closures = empty_list;
 arity_0->variadic = 0;
-arity_0->fn = arityImpl_627;
+arity_0->fn = arityImpl_629;
 incRef((Value *)arg0);
 arity_0->closures = listCons((Value *)arg0, (List *)arity_0->closures);
 incRef((Value *)arg1);
 arity_0->closures = listCons((Value *)arg1, (List *)arity_0->closures);
-Function *fn_626 = malloc_function(1);
-fn_626->type = FunctionType;
-fn_626->name = "anon";
-fn_626->arityCount = 1;
-fn_626->arities[0] = arity_0;
-return((Value *)fn_626);
+Function *fn_628 = malloc_function(1);
+fn_628->type = FunctionType;
+fn_628->name = "anon";
+fn_628->arityCount = 1;
+fn_628->arities[0] = arity_0;
+return((Value *)fn_628);
 };
 
 
 // --------- anon main body --------------
-Function fn_623 = {FunctionType, -1, "anon", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_625}}};
+Function fn_625 = {FunctionType, -1, "anon", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_627}}};
 
 
 // --------- anon --------------
-Function fn_628;
-Value *arityImpl_629(List *closures, Value *arg0) {
+Function fn_630;
+Value *arityImpl_631(List *closures, Value *arg0) {
 Value *val0 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
@@ -5464,122 +5476,93 @@ fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)val1)->name);
 }
 Value *rslt6 = protoFnImpl_240(empty_list, val0, rslt5);
 incRef(rslt6);
-dec_and_free(rslt6);
 dec_and_free(rslt5);
+dec_and_free(rslt6);
 return(rslt6);
 };
 
-Value *arityImpl_621(List *closures, Value *arg0, Value *arg1) {
-Value *cond0;
-Value *rslt15 = arityImpl_279(empty_list, arg1);
-
-if (isTrue(rslt15)) {
-dec_and_free(rslt15);
-Value *rslt19;
-if((arg0)->type != FunctionType) {
-rslt19 = protoFnImpl_9(empty_list, arg0);
-} else {
-FnArity *arity16 = findFnArity(arg0, 0);
-if(arity16 != (FnArity *)0 && !arity16->variadic) {
-FnType0 *fn18 = (FnType0 *)arity16->fn;
-rslt19 = fn18(arity16->closures);
-} else if(arity16 != (FnArity *)0 && arity16->variadic) {
-FnType1 *fn18 = (FnType1 *)arity16->fn;
-List *varArgs17 = empty_list;
-rslt19 = fn18(arity16->closures, (Value *)varArgs17);
-dec_and_free((Value *)varArgs17);
-} else {
-fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)arg0)->name);
-  abort();
-}
-}
-incRef(rslt19);
-cond0 = rslt19;
-dec_and_free(rslt19);
-} else {
-dec_and_free(rslt15);
-Value *rslt1 = arityImpl_138(empty_list, arg1);
-Value *rslt2 = arityImpl_141(empty_list, arg1);
-Value *rslt3 = arityImpl_586(empty_list, rslt2);
-FnArity *arity_4 = malloc_fnArity();
-arity_4->type = FnArityType;
-arity_4->count = 2;
-arity_4->closures = empty_list;
-arity_4->variadic = 0;
-arity_4->fn = arityImpl_624;
+Value *arityImpl_623(List *closures, Value *arg0, Value *arg3) {
+List *arg4 = (List *)arg3;
+Value *arg1 = arg4->head;
+if (arg4->tail) arg4->tail->len = arg4->len - 1;
+arg4 = arg4->tail;
+Value *arg2 = (Value *) arg4;
+Value *rslt0 = arityImpl_587(empty_list, arg2);
+FnArity *arity_1 = malloc_fnArity();
+arity_1->type = FnArityType;
+arity_1->count = 2;
+arity_1->closures = empty_list;
+arity_1->variadic = 0;
+arity_1->fn = arityImpl_626;
 incRef((Value *)arg0);
-arity_4->closures = listCons((Value *)arg0, (List *)arity_4->closures);
-incRef((Value *)rslt1);
-arity_4->closures = listCons((Value *)rslt1, (List *)arity_4->closures);
-Function *fn_622 = malloc_function(1);
-fn_622->type = FunctionType;
-fn_622->name = "anon";
-fn_622->arityCount = 1;
-fn_622->arities[0] = arity_4;
-Value *rslt6 = protoFnImpl_321(empty_list, rslt3, (Value *)fn_622, (Value *)&fn_623);
-Value *cond7;
-Value *rslt11 = arityImpl_135(empty_list, arg1);
-Value *rslt12 = arityImpl_112(empty_list, (Value *)&_num_1, rslt11);
-dec_and_free(rslt11);
+arity_1->closures = listCons((Value *)arg0, (List *)arity_1->closures);
+incRef((Value *)arg1);
+arity_1->closures = listCons((Value *)arg1, (List *)arity_1->closures);
+Function *fn_624 = malloc_function(1);
+fn_624->type = FunctionType;
+fn_624->name = "anon";
+fn_624->arityCount = 1;
+fn_624->arities[0] = arity_1;
+Value *rslt3 = protoFnImpl_321(empty_list, rslt0, (Value *)fn_624, (Value *)&fn_625);
+Value *cond4;
+Value *rslt8 = arityImpl_135(empty_list, arg2);
+Value *rslt9 = arityImpl_112(empty_list, (Value *)&_num_1, rslt8);
+dec_and_free(rslt8);
 
-if (isTrue(rslt12)) {
-dec_and_free(rslt12);
-FnArity *arity_13 = malloc_fnArity();
-arity_13->type = FnArityType;
-arity_13->count = 1;
-arity_13->closures = empty_list;
-arity_13->variadic = 0;
-arity_13->fn = arityImpl_629;
-incRef((Value *)arg0);
-arity_13->closures = listCons((Value *)arg0, (List *)arity_13->closures);
-incRef((Value *)rslt1);
-arity_13->closures = listCons((Value *)rslt1, (List *)arity_13->closures);
-Function *fn_628 = malloc_function(1);
-fn_628->type = FunctionType;
-fn_628->name = "anon";
-fn_628->arityCount = 1;
-fn_628->arities[0] = arity_13;
-Value *rslt14 = protoFnImpl_209(empty_list, rslt1, (Value *)fn_628);
-incRef(rslt14);
-cond7 = rslt14;
-dec_and_free(rslt14);
-dec_and_free((Value *)fn_628);
-} else {
-dec_and_free(rslt12);
-List *varArgs8 = empty_list;
-incRef((Value *)var_129);
-varArgs8 = (List *)listCons((Value *)var_129, varArgs8);
-incRef((Value *)rslt6);
-varArgs8 = (List *)listCons((Value *)rslt6, varArgs8);
-Value *rslt9 = arityImpl_615(empty_list, (Value *)varArgs8);
-dec_and_free((Value *)varArgs8);
-Value *rslt10 = protoFnImpl_209(empty_list, rslt1, rslt9);
-incRef(rslt10);
-cond7 = rslt10;
-dec_and_free(rslt10);
+if (isTrue(rslt9)) {
 dec_and_free(rslt9);
-}
-incRef(cond7);
-cond0 = cond7;
+FnArity *arity_10 = malloc_fnArity();
+arity_10->type = FnArityType;
+arity_10->count = 1;
+arity_10->closures = empty_list;
+arity_10->variadic = 0;
+arity_10->fn = arityImpl_631;
+incRef((Value *)arg0);
+arity_10->closures = listCons((Value *)arg0, (List *)arity_10->closures);
+incRef((Value *)arg1);
+arity_10->closures = listCons((Value *)arg1, (List *)arity_10->closures);
+Function *fn_630 = malloc_function(1);
+fn_630->type = FunctionType;
+fn_630->name = "anon";
+fn_630->arityCount = 1;
+fn_630->arities[0] = arity_10;
+Value *rslt11 = protoFnImpl_209(empty_list, arg1, (Value *)fn_630);
+incRef(rslt11);
+cond4 = rslt11;
+dec_and_free((Value *)fn_630);
+dec_and_free(rslt11);
+} else {
+dec_and_free(rslt9);
+List *varArgs5 = empty_list;
+incRef((Value *)var_129);
+varArgs5 = (List *)listCons((Value *)var_129, varArgs5);
+incRef((Value *)rslt3);
+varArgs5 = (List *)listCons((Value *)rslt3, varArgs5);
+Value *rslt6 = arityImpl_616(empty_list, (Value *)varArgs5);
+dec_and_free((Value *)varArgs5);
+Value *rslt7 = protoFnImpl_209(empty_list, arg1, rslt6);
+incRef(rslt7);
+cond4 = rslt7;
 dec_and_free(rslt6);
-dec_and_free(rslt1);
-dec_and_free(cond7);
-dec_and_free((Value *)fn_622);
-dec_and_free(rslt3);
-dec_and_free(rslt2);
+dec_and_free(rslt7);
 }
-return(cond0);
+incRef(cond4);
+dec_and_free(rslt3);
+dec_and_free(rslt0);
+dec_and_free((Value *)fn_624);
+dec_and_free(cond4);
+return(cond4);
 };
 
 
 // --------- comprehend main body --------------
-Function fn_620 = {FunctionType, -1, "comprehend", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_621}}};
+Function fn_621 = {FunctionType, -1, "comprehend", 2, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_622}, &(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_623}}};
 
-Value *var_232 = (Value *)&fn_620;
+Value *var_232 = (Value *)&fn_621;
 
 // --------- list-concat --------------
-Function fn_630;
-Value *arityImpl_631(List *closures, Value *arg0) {
+Function fn_632;
+Value *arityImpl_633(List *closures, Value *arg0) {
  List *ls = (List *)arg0;
 
   if (ls->len == 0) {
@@ -5626,24 +5609,24 @@ Value *arityImpl_631(List *closures, Value *arg0) {
 
 
 // --------- list-concat main body --------------
-Function fn_630 = {FunctionType, -1, "list-concat", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_631}}};
+Function fn_632 = {FunctionType, -1, "list-concat", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_633}}};
 
 
 // --------- list=* --------------
-Function fn_633;
+Function fn_635;
 
 // --------- anon --------------
-Function fn_635;
-Value *arityImpl_636(List *closures, Value *arg0) {
+Function fn_637;
+Value *arityImpl_638(List *closures, Value *arg0) {
 Value *rslt0 = arityImpl_138(empty_list, arg0);
 return(rslt0);
 };
 
 
 // --------- anon main body --------------
-Function fn_635 = {FunctionType, -1, "anon", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_636}}};
+Function fn_637 = {FunctionType, -1, "anon", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_638}}};
 
-Value *arityImpl_634(List *closures, Value *arg0) {
+Value *arityImpl_636(List *closures, Value *arg0) {
 Value *cond0;
 Value *rslt3 = arityImpl_279(empty_list, arg0);
 
@@ -5663,14 +5646,14 @@ incRef((Value *)&_num_1);
 cond0 = (Value *)&_num_1;
 } else {
 dec_and_free(rslt5);
-Value *rslt7 = protoFnImpl_258(empty_list, arg0, (Value *)&fn_635);
+Value *rslt7 = protoFnImpl_258(empty_list, arg0, (Value *)&fn_637);
 List *varArgs8 = empty_list;
 incRef((Value *)rslt7);
 varArgs8 = (List *)listCons((Value *)rslt7, varArgs8);
 Value *rslt9 = arityImpl_250(empty_list, (Value *)varArgs8);
 dec_and_free((Value *)varArgs8);
-Value *rslt10 = arityImpl_595(empty_list, (Value *)&fn_434, rslt9);
-Value *rslt11 = arityImpl_426(empty_list, rslt10);
+Value *rslt10 = arityImpl_596(empty_list, (Value *)&fn_435, rslt9);
+Value *rslt11 = arityImpl_427(empty_list, rslt10);
 dec_and_free(rslt10);
 dec_and_free(rslt9);
 dec_and_free(rslt7);
@@ -5682,7 +5665,7 @@ cond0 = (Value *)&_num_13;
 } else {
 dec_and_free(rslt11);
 Value *rslt1 = protoFnImpl_258(empty_list, arg0, (Value *)&protoFn_327);
-Value *rslt2 = arityImpl_634(closures, rslt1);
+Value *rslt2 = arityImpl_636(closures, rslt1);
 incRef(rslt2);
 cond0 = rslt2;
 dec_and_free(rslt1);
@@ -5695,80 +5678,80 @@ return(cond0);
 
 
 // --------- list=* main body --------------
-Function fn_633 = {FunctionType, -1, "list=*", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_634}}};
+Function fn_635 = {FunctionType, -1, "list=*", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_636}}};
 
 
 // --------- traverse_impl --------------
-Function fn_638;
-Value *arityImpl_655(List *closures, Value *arg0, Value *arg1) {
+Function fn_640;
+Value *arityImpl_657(List *closures, Value *arg0, Value *arg1) {
 Value *rslt0 = protoFnImpl_258(empty_list, arg0, arg1);
-Value *rslt1 = protoFnImpl_342(empty_list, rslt0);
+Value *rslt1 = arityImpl_138(empty_list, rslt0);
 Value *rslt2 = protoFnImpl_240(empty_list, rslt1, (Value *)&fn_249);
 Value *rslt3 = protoFnImpl_247(empty_list, rslt2, rslt0);
 incRef(rslt3);
-dec_and_free(rslt1);
-dec_and_free(rslt0);
-dec_and_free(rslt3);
 dec_and_free(rslt2);
+dec_and_free(rslt3);
+dec_and_free(rslt0);
+dec_and_free(rslt1);
 return(rslt3);
 };
 
 
 // --------- traverse_impl main body --------------
-Function fn_638 = {FunctionType, -1, "traverse_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_655}}};
+Function fn_640 = {FunctionType, -1, "traverse_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_657}}};
 
 
 // --------- empty?_impl --------------
-Function fn_639;
-Value *arityImpl_656(List *closures, Value *arg0) {
+Function fn_641;
+Value *arityImpl_658(List *closures, Value *arg0) {
 Value *rslt0 = arityImpl_279(empty_list, arg0);
 return(rslt0);
 };
 
 
 // --------- empty?_impl main body --------------
-Function fn_639 = {FunctionType, -1, "empty?_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_656}}};
+Function fn_641 = {FunctionType, -1, "empty?_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_658}}};
 
 
 // --------- empty_impl --------------
-Function fn_640;
-Value *arityImpl_657(List *closures, Value *arg0) {
+Function fn_642;
+Value *arityImpl_659(List *closures, Value *arg0) {
 incRef(var_129);
 return(var_129);
 };
 
 
 // --------- empty_impl main body --------------
-Function fn_640 = {FunctionType, -1, "empty_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_657}}};
+Function fn_642 = {FunctionType, -1, "empty_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_659}}};
 
 
 // --------- conj_impl --------------
-Function fn_641;
-Value *arityImpl_658(List *closures, Value *arg0, Value *arg1) {
+Function fn_643;
+Value *arityImpl_660(List *closures, Value *arg0, Value *arg1) {
 Value *rslt0 = arityImpl_132(empty_list, arg1, arg0);
 return(rslt0);
 };
 
 
 // --------- conj_impl main body --------------
-Function fn_641 = {FunctionType, -1, "conj_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_658}}};
+Function fn_643 = {FunctionType, -1, "conj_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_660}}};
 
 
 // --------- count_impl --------------
-Function fn_642;
-Value *arityImpl_659(List *closures, Value *arg0) {
+Function fn_644;
+Value *arityImpl_661(List *closures, Value *arg0) {
 Value *rslt0 = arityImpl_135(empty_list, arg0);
 return(rslt0);
 };
 
 
 // --------- count_impl main body --------------
-Function fn_642 = {FunctionType, -1, "count_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_659}}};
+Function fn_644 = {FunctionType, -1, "count_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_661}}};
 
 
 // --------- reduce_impl --------------
-Function fn_643;
-Value *arityImpl_660(List *closures, Value *arg0, Value *arg1, Value *arg2) {
+Function fn_645;
+Value *arityImpl_662(List *closures, Value *arg0, Value *arg1, Value *arg2) {
 Value *cond0;
 Value *rslt10 = arityImpl_279(empty_list, arg0);
 
@@ -5828,15 +5811,15 @@ return(cond0);
 
 
 // --------- reduce_impl main body --------------
-Function fn_643 = {FunctionType, -1, "reduce_impl", 1, {&(FnArity){FnArityType, -1, 3, (List *)0, 0, arityImpl_660}}};
+Function fn_645 = {FunctionType, -1, "reduce_impl", 1, {&(FnArity){FnArityType, -1, 3, (List *)0, 0, arityImpl_662}}};
 
 
 // --------- crush_impl --------------
-Function fn_644;
+Function fn_646;
 
 // --------- anon --------------
-Function fn_662;
-Value *arityImpl_663(List *closures, Value *arg0, Value *arg1) {
+Function fn_664;
+Value *arityImpl_665(List *closures, Value *arg0, Value *arg1) {
 Value *val0 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
@@ -5868,13 +5851,13 @@ Value *rslt6 = arityImpl_250(empty_list, (Value *)varArgs5);
 dec_and_free((Value *)varArgs5);
 Value *rslt7 = protoFnImpl_366(empty_list, arg0, rslt6);
 incRef(rslt7);
-dec_and_free(rslt6);
-dec_and_free(rslt4);
 dec_and_free(rslt7);
+dec_and_free(rslt4);
+dec_and_free(rslt6);
 return(rslt7);
 };
 
-Value *arityImpl_661(List *closures, Value *arg0, Value *arg1) {
+Value *arityImpl_663(List *closures, Value *arg0, Value *arg1) {
 Value *rslt0 = arityImpl_141(empty_list, arg0);
 Value *rslt1 = arityImpl_138(empty_list, arg0);
 Value *rslt5;
@@ -5902,32 +5885,32 @@ arity_6->type = FnArityType;
 arity_6->count = 2;
 arity_6->closures = empty_list;
 arity_6->variadic = 0;
-arity_6->fn = arityImpl_663;
+arity_6->fn = arityImpl_665;
 incRef((Value *)arg1);
 arity_6->closures = listCons((Value *)arg1, (List *)arity_6->closures);
-Function *fn_662 = malloc_function(1);
-fn_662->type = FunctionType;
-fn_662->name = "anon";
-fn_662->arityCount = 1;
-fn_662->arities[0] = arity_6;
-Value *rslt7 = arityImpl_660(empty_list, rslt0, rslt5, (Value *)fn_662);
+Function *fn_664 = malloc_function(1);
+fn_664->type = FunctionType;
+fn_664->name = "anon";
+fn_664->arityCount = 1;
+fn_664->arities[0] = arity_6;
+Value *rslt7 = arityImpl_662(empty_list, rslt0, rslt5, (Value *)fn_664);
 incRef(rslt7);
-dec_and_free(rslt1);
-dec_and_free((Value *)fn_662);
-dec_and_free(rslt0);
-dec_and_free(rslt5);
 dec_and_free(rslt7);
+dec_and_free(rslt5);
+dec_and_free(rslt0);
+dec_and_free((Value *)fn_664);
+dec_and_free(rslt1);
 return(rslt7);
 };
 
 
 // --------- crush_impl main body --------------
-Function fn_644 = {FunctionType, -1, "crush_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_661}}};
+Function fn_646 = {FunctionType, -1, "crush_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_663}}};
 
 
 // --------- flat-map_impl --------------
-Function fn_645;
-Value *arityImpl_664(List *closures, Value *arg0, Value *arg1) {
+Function fn_647;
+Value *arityImpl_666(List *closures, Value *arg0, Value *arg1) {
 Value *rslt0 = protoFnImpl_258(empty_list, arg0, arg1);
 Value *cond1;
 Value *rslt5 = arityImpl_279(empty_list, rslt0);
@@ -5948,19 +5931,19 @@ dec_and_free(rslt3);
 dec_and_free(rslt2);
 }
 incRef(cond1);
-dec_and_free(cond1);
 dec_and_free(rslt0);
+dec_and_free(cond1);
 return(cond1);
 };
 
 
 // --------- flat-map_impl main body --------------
-Function fn_645 = {FunctionType, -1, "flat-map_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_664}}};
+Function fn_647 = {FunctionType, -1, "flat-map_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_666}}};
 
 
 // --------- wrap_impl --------------
-Function fn_646;
-Value *arityImpl_665(List *closures, Value *arg0, Value *arg1) {
+Function fn_648;
+Value *arityImpl_667(List *closures, Value *arg0, Value *arg1) {
 List *varArgs0 = empty_list;
 incRef((Value *)arg1);
 varArgs0 = (List *)listCons((Value *)arg1, varArgs0);
@@ -5971,45 +5954,45 @@ return(rslt1);
 
 
 // --------- wrap_impl main body --------------
-Function fn_646 = {FunctionType, -1, "wrap_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_665}}};
+Function fn_648 = {FunctionType, -1, "wrap_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_667}}};
 
 
 // --------- zero_impl --------------
-Function fn_647;
-Value *arityImpl_666(List *closures, Value *arg0) {
+Function fn_649;
+Value *arityImpl_668(List *closures, Value *arg0) {
 incRef(var_129);
 return(var_129);
 };
 
 
 // --------- zero_impl main body --------------
-Function fn_647 = {FunctionType, -1, "zero_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_666}}};
+Function fn_649 = {FunctionType, -1, "zero_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_668}}};
 
 
 // --------- comp*_impl --------------
-Function fn_648;
-Value *arityImpl_667(List *closures, Value *arg0, Value *arg1) {
+Function fn_650;
+Value *arityImpl_669(List *closures, Value *arg0, Value *arg1) {
 Value *rslt0 = arityImpl_132(empty_list, arg0, arg1);
-Value *rslt1 = arityImpl_631(empty_list, rslt0);
+Value *rslt1 = arityImpl_633(empty_list, rslt0);
 incRef(rslt1);
-dec_and_free(rslt1);
 dec_and_free(rslt0);
+dec_and_free(rslt1);
 return(rslt1);
 };
 
 
 // --------- comp*_impl main body --------------
-Function fn_648 = {FunctionType, -1, "comp*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_667}}};
+Function fn_650 = {FunctionType, -1, "comp*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_669}}};
 
 
 // --------- =*_impl --------------
-Function fn_649;
-Value *arityImpl_668(List *closures, Value *arg0, Value *arg1) {
+Function fn_651;
+Value *arityImpl_670(List *closures, Value *arg0, Value *arg1) {
 Value *cond0;
 Value *rslt4 = arityImpl_99(empty_list, arg0);
 Value *rslt5 = arityImpl_99(empty_list, arg1);
 Value *rslt6 = arityImpl_112(empty_list, rslt4, rslt5);
-Value *rslt7 = arityImpl_426(empty_list, rslt6);
+Value *rslt7 = arityImpl_427(empty_list, rslt6);
 dec_and_free(rslt6);
 dec_and_free(rslt5);
 dec_and_free(rslt4);
@@ -6023,7 +6006,7 @@ dec_and_free(rslt7);
 Value *rslt8 = protoFnImpl_313(empty_list, arg0);
 Value *rslt9 = protoFnImpl_313(empty_list, arg1);
 Value *rslt10 = arityImpl_112(empty_list, rslt8, rslt9);
-Value *rslt11 = arityImpl_426(empty_list, rslt10);
+Value *rslt11 = arityImpl_427(empty_list, rslt10);
 dec_and_free(rslt8);
 dec_and_free(rslt10);
 dec_and_free(rslt9);
@@ -6041,7 +6024,7 @@ incRef((Value *)arg0);
 varArgs1 = (List *)listCons((Value *)arg0, varArgs1);
 Value *rslt2 = arityImpl_250(empty_list, (Value *)varArgs1);
 dec_and_free((Value *)varArgs1);
-Value *rslt3 = arityImpl_634(empty_list, rslt2);
+Value *rslt3 = arityImpl_636(empty_list, rslt2);
 incRef(rslt3);
 cond0 = rslt3;
 dec_and_free(rslt3);
@@ -6053,60 +6036,60 @@ return(cond0);
 
 
 // --------- =*_impl main body --------------
-Function fn_649 = {FunctionType, -1, "=*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_668}}};
+Function fn_651 = {FunctionType, -1, "=*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_670}}};
 
 
 // --------- seq?_impl --------------
-Function fn_650;
-Value *arityImpl_669(List *closures, Value *arg0) {
+Function fn_652;
+Value *arityImpl_671(List *closures, Value *arg0) {
 incRef(var_75);
 return(var_75);
 };
 
 
 // --------- seq?_impl main body --------------
-Function fn_650 = {FunctionType, -1, "seq?_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_669}}};
+Function fn_652 = {FunctionType, -1, "seq?_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_671}}};
 
 
 // --------- seq_impl --------------
-Function fn_651;
-Value *arityImpl_670(List *closures, Value *arg0) {
+Function fn_653;
+Value *arityImpl_672(List *closures, Value *arg0) {
 incRef(arg0);
 return(arg0);
 };
 
 
 // --------- seq_impl main body --------------
-Function fn_651 = {FunctionType, -1, "seq_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_670}}};
+Function fn_653 = {FunctionType, -1, "seq_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_672}}};
 
 
 // --------- first_impl --------------
-Function fn_652;
-Value *arityImpl_671(List *closures, Value *arg0) {
+Function fn_654;
+Value *arityImpl_673(List *closures, Value *arg0) {
 Value *rslt0 = arityImpl_138(empty_list, arg0);
 return(rslt0);
 };
 
 
 // --------- first_impl main body --------------
-Function fn_652 = {FunctionType, -1, "first_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_671}}};
+Function fn_654 = {FunctionType, -1, "first_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_673}}};
 
 
 // --------- rest_impl --------------
-Function fn_653;
-Value *arityImpl_672(List *closures, Value *arg0) {
+Function fn_655;
+Value *arityImpl_674(List *closures, Value *arg0) {
 Value *rslt0 = arityImpl_141(empty_list, arg0);
 return(rslt0);
 };
 
 
 // --------- rest_impl main body --------------
-Function fn_653 = {FunctionType, -1, "rest_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_672}}};
+Function fn_655 = {FunctionType, -1, "rest_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_674}}};
 
 
 // --------- map_impl --------------
-Function fn_654;
-Value *arityImpl_673(List *closures, Value *arg0, Value *arg1) {
+Function fn_656;
+Value *arityImpl_675(List *closures, Value *arg0, Value *arg1) {
 List *l = (List *)arg0;
       if (l->len == 0)
         return((Value *)empty_list);
@@ -6162,15 +6145,15 @@ List *l = (List *)arg0;
 
 
 // --------- map_impl main body --------------
-Function fn_654 = {FunctionType, -1, "map_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_673}}};
+Function fn_656 = {FunctionType, -1, "map_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_675}}};
 
 
 // --------- interpose --------------
-Function fn_674;
+Function fn_676;
 
 // --------- anon --------------
-Function fn_676;
-Value *arityImpl_677(List *closures, Value *arg0) {
+Function fn_678;
+Value *arityImpl_679(List *closures, Value *arg0) {
 Value *val0 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
@@ -6185,7 +6168,7 @@ dec_and_free((Value *)varArgs1);
 return(rslt2);
 };
 
-Value *arityImpl_675(List *closures, Value *arg0, Value *arg1) {
+Value *arityImpl_677(List *closures, Value *arg0, Value *arg1) {
 Value *cond0;
 Value *rslt6 = arityImpl_279(empty_list, arg0);
 
@@ -6202,22 +6185,22 @@ arity_3->type = FnArityType;
 arity_3->count = 1;
 arity_3->closures = empty_list;
 arity_3->variadic = 0;
-arity_3->fn = arityImpl_677;
+arity_3->fn = arityImpl_679;
 incRef((Value *)arg1);
 arity_3->closures = listCons((Value *)arg1, (List *)arity_3->closures);
-Function *fn_676 = malloc_function(1);
-fn_676->type = FunctionType;
-fn_676->name = "anon";
-fn_676->arityCount = 1;
-fn_676->arities[0] = arity_3;
-Value *rslt4 = arityImpl_664(empty_list, rslt2, (Value *)fn_676);
+Function *fn_678 = malloc_function(1);
+fn_678->type = FunctionType;
+fn_678->name = "anon";
+fn_678->arityCount = 1;
+fn_678->arities[0] = arity_3;
+Value *rslt4 = arityImpl_666(empty_list, rslt2, (Value *)fn_678);
 Value *rslt5 = arityImpl_132(empty_list, rslt1, rslt4);
 incRef(rslt5);
 cond0 = rslt5;
 dec_and_free(rslt1);
 dec_and_free(rslt5);
-dec_and_free((Value *)fn_676);
 dec_and_free(rslt4);
+dec_and_free((Value *)fn_678);
 dec_and_free(rslt2);
 }
 return(cond0);
@@ -6225,7 +6208,7 @@ return(cond0);
 
 
 // --------- interpose main body --------------
-Function fn_674 = {FunctionType, -1, "interpose", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_675}}};
+Function fn_676 = {FunctionType, -1, "interpose", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_677}}};
 
 struct {int64_t type;
  int32_t refs;
@@ -6241,14 +6224,14 @@ struct {int64_t type;
    char buffer[2];} _str_51 = {1, -1, 1,")"};
 
 // --------- string-list_impl --------------
-Function fn_679;
-Value *arityImpl_680(List *closures, Value *arg0) {
+Function fn_681;
+Value *arityImpl_682(List *closures, Value *arg0) {
 List *varArgs0 = empty_list;
 incRef((Value *)(Value *)&_str_49);
 varArgs0 = (List *)listCons((Value *)(Value *)&_str_49, varArgs0);
 Value *rslt1 = arityImpl_250(empty_list, (Value *)varArgs0);
 dec_and_free((Value *)varArgs0);
-Value *rslt2 = arityImpl_675(empty_list, arg0, (Value *)&_str_50);
+Value *rslt2 = arityImpl_677(empty_list, arg0, (Value *)&_str_50);
 Value *rslt3 = protoFnImpl_209(empty_list, rslt2, (Value *)&protoFn_267);
 List *varArgs4 = empty_list;
 incRef((Value *)(Value *)&_str_51);
@@ -6264,20 +6247,20 @@ incRef((Value *)rslt1);
 varArgs6 = (List *)listCons((Value *)rslt1, varArgs6);
 Value *rslt7 = arityImpl_250(empty_list, (Value *)varArgs6);
 dec_and_free((Value *)varArgs6);
-Value *rslt8 = arityImpl_631(empty_list, rslt7);
+Value *rslt8 = arityImpl_633(empty_list, rslt7);
 incRef(rslt8);
-dec_and_free(rslt1);
-dec_and_free(rslt8);
-dec_and_free(rslt5);
-dec_and_free(rslt7);
-dec_and_free(rslt3);
 dec_and_free(rslt2);
+dec_and_free(rslt3);
+dec_and_free(rslt7);
+dec_and_free(rslt5);
+dec_and_free(rslt8);
+dec_and_free(rslt1);
 return(rslt8);
 };
 
 
 // --------- string-list_impl main body --------------
-Function fn_679 = {FunctionType, -1, "string-list_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_680}}};
+Function fn_681 = {FunctionType, -1, "string-list_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_682}}};
 
 struct {int64_t type;
  int32_t refs;
@@ -6289,64 +6272,64 @@ struct {int64_t type;
    char buffer[2];} _str_53 = {1, -1, 1,"\n"};
 
 // --------- prn --------------
-Function fn_681;
-Value *arityImpl_682(List *closures, Value *varArgs) {
+Function fn_683;
+Value *arityImpl_684(List *closures, Value *varArgs) {
 List *argsList = (List *)varArgs;
-Value *arg0 = (Value *)argsList;
-Value *rslt0 = arityImpl_664(empty_list, arg0, (Value *)&protoFn_273);
-Value *rslt1 = arityImpl_675(empty_list, rslt0, (Value *)&_str_52);
+Value *arg0 = (Value *) argsList;
+Value *rslt0 = protoFnImpl_209(empty_list, arg0, (Value *)&protoFn_273);
+Value *rslt1 = arityImpl_677(empty_list, rslt0, (Value *)&_str_52);
 Value *rslt2 = protoFnImpl_258(empty_list, rslt1, (Value *)&fn_176);
 Value *rslt3 = arityImpl_177(empty_list, (Value *)&_str_53);
 incRef(rslt3);
-dec_and_free(rslt1);
-dec_and_free(rslt0);
-dec_and_free(rslt3);
 dec_and_free(rslt2);
+dec_and_free(rslt3);
+dec_and_free(rslt0);
+dec_and_free(rslt1);
 return(rslt3);
 };
 
 // --------- prn main body --------------
-Function fn_681 = {FunctionType, -1, "prn", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_682}}};
+Function fn_683 = {FunctionType, -1, "prn", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_684}}};
 
 
 // --------- print --------------
-Function fn_684;
-Value *arityImpl_685(List *closures, Value *varArgs) {
+Function fn_686;
+Value *arityImpl_687(List *closures, Value *varArgs) {
 List *argsList = (List *)varArgs;
-Value *arg0 = (Value *)argsList;
-Value *rslt0 = arityImpl_675(empty_list, arg0, (Value *)&_str_52);
+Value *arg0 = (Value *) argsList;
+Value *rslt0 = arityImpl_677(empty_list, arg0, (Value *)&_str_52);
 Value *rslt1 = protoFnImpl_209(empty_list, rslt0, (Value *)&protoFn_267);
 Value *rslt2 = protoFnImpl_258(empty_list, rslt1, (Value *)&fn_176);
 incRef(rslt2);
-dec_and_free(rslt1);
-dec_and_free(rslt0);
 dec_and_free(rslt2);
+dec_and_free(rslt0);
+dec_and_free(rslt1);
 return(rslt2);
 };
 
 // --------- print main body --------------
-Function fn_684 = {FunctionType, -1, "print", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_685}}};
+Function fn_686 = {FunctionType, -1, "print", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_687}}};
 
 
 // --------- println --------------
-Function fn_687;
-Value *arityImpl_688(List *closures, Value *varArgs) {
+Function fn_689;
+Value *arityImpl_690(List *closures, Value *varArgs) {
 List *argsList = (List *)varArgs;
-Value *arg0 = (Value *)argsList;
-Value *rslt0 = arityImpl_675(empty_list, arg0, (Value *)&_str_52);
+Value *arg0 = (Value *) argsList;
+Value *rslt0 = arityImpl_677(empty_list, arg0, (Value *)&_str_52);
 Value *rslt1 = protoFnImpl_209(empty_list, rslt0, (Value *)&protoFn_267);
 Value *rslt2 = protoFnImpl_258(empty_list, rslt1, (Value *)&fn_176);
 Value *rslt3 = arityImpl_177(empty_list, (Value *)&_str_53);
 incRef(rslt3);
-dec_and_free(rslt1);
-dec_and_free(rslt0);
-dec_and_free(rslt3);
 dec_and_free(rslt2);
+dec_and_free(rslt3);
+dec_and_free(rslt0);
+dec_and_free(rslt1);
 return(rslt3);
 };
 
 // --------- println main body --------------
-Function fn_687 = {FunctionType, -1, "println", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_688}}};
+Function fn_689 = {FunctionType, -1, "println", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_690}}};
 
 struct {int64_t type;
  int32_t refs;
@@ -6354,46 +6337,46 @@ struct {int64_t type;
    char buffer[6];} _str_54 = {1, -1, 5,"\n*** "};
 
 // --------- print-err --------------
-Function fn_691;
-Value *arityImpl_692(List *closures, Value *varArgs) {
+Function fn_693;
+Value *arityImpl_694(List *closures, Value *varArgs) {
 List *argsList = (List *)varArgs;
-Value *arg0 = (Value *)argsList;
+Value *arg0 = (Value *) argsList;
 Value *rslt0 = arityImpl_165(empty_list, (Value *)&_str_54);
-Value *rslt1 = arityImpl_675(empty_list, arg0, (Value *)&_str_52);
+Value *rslt1 = arityImpl_677(empty_list, arg0, (Value *)&_str_52);
 Value *rslt2 = protoFnImpl_209(empty_list, rslt1, (Value *)&protoFn_267);
 Value *rslt3 = protoFnImpl_258(empty_list, rslt2, (Value *)&fn_164);
 Value *rslt4 = arityImpl_165(empty_list, (Value *)&_str_53);
 incRef(rslt4);
-dec_and_free(rslt1);
-dec_and_free(rslt0);
-dec_and_free(rslt4);
-dec_and_free(rslt3);
 dec_and_free(rslt2);
+dec_and_free(rslt3);
+dec_and_free(rslt4);
+dec_and_free(rslt0);
+dec_and_free(rslt1);
 return(rslt4);
 };
 
 // --------- print-err main body --------------
-Function fn_691 = {FunctionType, -1, "print-err", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_692}}};
+Function fn_693 = {FunctionType, -1, "print-err", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_694}}};
 
-Value *var_53 = (Value *)&fn_691;
+Value *var_53 = (Value *)&fn_693;
 
 // --------- inc --------------
-Function fn_693;
-Value *arityImpl_694(List *closures, Value *arg0) {
+Function fn_695;
+Value *arityImpl_696(List *closures, Value *arg0) {
 Value *rslt0 = arityImpl_118(empty_list, arg0, (Value *)&_num_1);
 return(rslt0);
 };
 
 
 // --------- inc main body --------------
-Function fn_693 = {FunctionType, -1, "inc", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_694}}};
+Function fn_695 = {FunctionType, -1, "inc", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_696}}};
 
 
 // --------- + --------------
-Function fn_696;
-Value *arityImpl_697(List *closures, Value *varArgs) {
+Function fn_698;
+Value *arityImpl_699(List *closures, Value *varArgs) {
 List *argsList = (List *)varArgs;
-Value *arg0 = (Value *)argsList;
+Value *arg0 = (Value *) argsList;
 Value *cond0;
 Value *rslt2 = arityImpl_279(empty_list, arg0);
 
@@ -6403,7 +6386,7 @@ incRef((Value *)&_num_13);
 cond0 = (Value *)&_num_13;
 } else {
 dec_and_free(rslt2);
-Value *rslt1 = arityImpl_660(empty_list, arg0, (Value *)&_num_13, (Value *)&fn_117);
+Value *rslt1 = protoFnImpl_321(empty_list, arg0, (Value *)&_num_13, (Value *)&fn_117);
 incRef(rslt1);
 cond0 = rslt1;
 dec_and_free(rslt1);
@@ -6412,14 +6395,14 @@ return(cond0);
 };
 
 // --------- + main body --------------
-Function fn_696 = {FunctionType, -1, "+", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_697}}};
+Function fn_698 = {FunctionType, -1, "+", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_699}}};
 
 
 // --------- * --------------
-Function fn_699;
-Value *arityImpl_700(List *closures, Value *varArgs) {
+Function fn_701;
+Value *arityImpl_702(List *closures, Value *varArgs) {
 List *argsList = (List *)varArgs;
-Value *arg0 = (Value *)argsList;
+Value *arg0 = (Value *) argsList;
 Value *cond0;
 Value *rslt2 = arityImpl_279(empty_list, arg0);
 
@@ -6429,7 +6412,7 @@ incRef((Value *)&_num_1);
 cond0 = (Value *)&_num_1;
 } else {
 dec_and_free(rslt2);
-Value *rslt1 = arityImpl_660(empty_list, arg0, (Value *)&_num_1, (Value *)&fn_123);
+Value *rslt1 = protoFnImpl_321(empty_list, arg0, (Value *)&_num_1, (Value *)&fn_123);
 incRef(rslt1);
 cond0 = rslt1;
 dec_and_free(rslt1);
@@ -6438,62 +6421,53 @@ return(cond0);
 };
 
 // --------- * main body --------------
-Function fn_699 = {FunctionType, -1, "*", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_700}}};
+Function fn_701 = {FunctionType, -1, "*", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_702}}};
 
 
 // --------- dec --------------
-Function fn_702;
-Value *arityImpl_703(List *closures, Value *arg0) {
+Function fn_704;
+Value *arityImpl_705(List *closures, Value *arg0) {
 Value *rslt0 = arityImpl_121(empty_list, arg0, (Value *)&_num_1);
 return(rslt0);
 };
 
 
 // --------- dec main body --------------
-Function fn_702 = {FunctionType, -1, "dec", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_703}}};
+Function fn_704 = {FunctionType, -1, "dec", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_705}}};
 
 
 // --------- - --------------
-Function fn_705;
-Value *arityImpl_706(List *closures, Value *varArgs) {
-List *argsList = (List *)varArgs;
-Value *arg0 = (Value *)argsList;
-Value *cond0;
-Value *rslt6 = arityImpl_279(empty_list, arg0);
-
-if (isTrue(rslt6)) {
-dec_and_free(rslt6);
+Function fn_707;
+Value *arityImpl_708(List *closures) {
 incRef((Value *)&_num_13);
-cond0 = (Value *)&_num_13;
-} else {
-dec_and_free(rslt6);
-Value *rslt1 = arityImpl_671(empty_list, arg0);
-Value *rslt2 = arityImpl_672(empty_list, arg0);
-Value *cond3;
-Value *rslt5 = arityImpl_279(empty_list, rslt2);
+return((Value *)&_num_13);
+};
 
-if (isTrue(rslt5)) {
-dec_and_free(rslt5);
-incRef(rslt1);
-cond3 = rslt1;
-} else {
-dec_and_free(rslt5);
-Value *rslt4 = arityImpl_660(empty_list, rslt2, rslt1, (Value *)&fn_120);
-incRef(rslt4);
-cond3 = rslt4;
-dec_and_free(rslt4);
-}
-incRef(cond3);
-cond0 = cond3;
-dec_and_free(rslt1);
-dec_and_free(cond3);
+Value *arityImpl_709(List *closures, Value *varArgs) {
+List *argsList = (List *)varArgs;
+Value *arg0 = argsList->head;
+if (argsList->tail) argsList->tail->len = argsList->len - 1;
+argsList = argsList->tail;
+Value *arg1 = (Value *) argsList;
+Value *cond0;
+Value *rslt2 = arityImpl_279(empty_list, arg1);
+
+if (isTrue(rslt2)) {
 dec_and_free(rslt2);
+incRef(arg0);
+cond0 = arg0;
+} else {
+dec_and_free(rslt2);
+Value *rslt1 = protoFnImpl_321(empty_list, arg1, arg0, (Value *)&fn_120);
+incRef(rslt1);
+cond0 = rslt1;
+dec_and_free(rslt1);
 }
 return(cond0);
 };
 
 // --------- - main body --------------
-Function fn_705 = {FunctionType, -1, "-", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_706}}};
+Function fn_707 = {FunctionType, -1, "-", 2, {&(FnArity){FnArityType, -1, 0, (List *)0, 0, arityImpl_708}, &(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_709}}};
 
 struct {int64_t type;
  int32_t refs;
@@ -6501,8 +6475,8 @@ struct {int64_t type;
    char buffer[1];} _str_55 = {1, -1, 0,""};
 
 // --------- sha1_impl --------------
-Function fn_708;
-Value *arityImpl_720(List *closures, Value *arg0) {
+Function fn_711;
+Value *arityImpl_723(List *closures, Value *arg0) {
 
 int64_t shaVal;
 Sha1Context context;
@@ -6516,52 +6490,52 @@ return((Value *)numberValue(shaVal));
 
 
 // --------- sha1_impl main body --------------
-Function fn_708 = {FunctionType, -1, "sha1_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_720}}};
+Function fn_711 = {FunctionType, -1, "sha1_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_723}}};
 
 
 // --------- empty?_impl --------------
-Function fn_709;
-Value *arityImpl_721(List *closures, Value *arg0) {
+Function fn_712;
+Value *arityImpl_724(List *closures, Value *arg0) {
 Value *rslt0 = arityImpl_150(empty_list, arg0);
-Value *rslt1 = arityImpl_435(empty_list, (Value *)&_num_13, rslt0);
+Value *rslt1 = arityImpl_436(empty_list, (Value *)&_num_13, rslt0);
 incRef(rslt1);
-dec_and_free(rslt1);
 dec_and_free(rslt0);
+dec_and_free(rslt1);
 return(rslt1);
 };
 
 
 // --------- empty?_impl main body --------------
-Function fn_709 = {FunctionType, -1, "empty?_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_721}}};
+Function fn_712 = {FunctionType, -1, "empty?_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_724}}};
 
 
 // --------- empty_impl --------------
-Function fn_710;
-Value *arityImpl_722(List *closures, Value *arg0) {
+Function fn_713;
+Value *arityImpl_725(List *closures, Value *arg0) {
 incRef((Value *)&_str_55);
 return((Value *)&_str_55);
 };
 
 
 // --------- empty_impl main body --------------
-Function fn_710 = {FunctionType, -1, "empty_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_722}}};
+Function fn_713 = {FunctionType, -1, "empty_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_725}}};
 
 
 // --------- count_impl --------------
-Function fn_711;
-Value *arityImpl_723(List *closures, Value *arg0) {
+Function fn_714;
+Value *arityImpl_726(List *closures, Value *arg0) {
 Value *rslt0 = arityImpl_150(empty_list, arg0);
 return(rslt0);
 };
 
 
 // --------- count_impl main body --------------
-Function fn_711 = {FunctionType, -1, "count_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_723}}};
+Function fn_714 = {FunctionType, -1, "count_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_726}}};
 
 
 // --------- conj_impl --------------
-Function fn_712;
-Value *arityImpl_724(List *closures, Value *arg0, Value *arg1) {
+Function fn_715;
+Value *arityImpl_727(List *closures, Value *arg0, Value *arg1) {
 List *varArgs0 = empty_list;
 incRef((Value *)arg1);
 varArgs0 = (List *)listCons((Value *)arg1, varArgs0);
@@ -6569,62 +6543,62 @@ incRef((Value *)arg0);
 varArgs0 = (List *)listCons((Value *)arg0, varArgs0);
 Value *rslt1 = arityImpl_250(empty_list, (Value *)varArgs0);
 dec_and_free((Value *)varArgs0);
-Value *rslt2 = arityImpl_664(empty_list, rslt1, (Value *)&protoFn_267);
+Value *rslt2 = protoFnImpl_209(empty_list, rslt1, (Value *)&protoFn_267);
 Value *rslt3 = arityImpl_138(empty_list, rslt2);
 Value *rslt4 = arityImpl_141(empty_list, rslt2);
 Value *rslt5 = protoFnImpl_366(empty_list, rslt3, rslt4);
 incRef(rslt5);
-dec_and_free(rslt1);
-dec_and_free(rslt5);
-dec_and_free(rslt4);
-dec_and_free(rslt3);
 dec_and_free(rslt2);
+dec_and_free(rslt3);
+dec_and_free(rslt4);
+dec_and_free(rslt5);
+dec_and_free(rslt1);
 return(rslt5);
 };
 
 
 // --------- conj_impl main body --------------
-Function fn_712 = {FunctionType, -1, "conj_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_724}}};
+Function fn_715 = {FunctionType, -1, "conj_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_727}}};
 
 
 // --------- reduce_impl --------------
-Function fn_713;
-Value *arityImpl_725(List *closures, Value *arg0, Value *arg1, Value *arg2) {
+Function fn_716;
+Value *arityImpl_728(List *closures, Value *arg0, Value *arg1, Value *arg2) {
 Value *rslt0 = protoFnImpl_340(empty_list, arg0);
 Value *rslt1 = protoFnImpl_321(empty_list, rslt0, arg1, arg2);
 incRef(rslt1);
-dec_and_free(rslt1);
 dec_and_free(rslt0);
+dec_and_free(rslt1);
 return(rslt1);
 };
 
 
 // --------- reduce_impl main body --------------
-Function fn_713 = {FunctionType, -1, "reduce_impl", 1, {&(FnArity){FnArityType, -1, 3, (List *)0, 0, arityImpl_725}}};
+Function fn_716 = {FunctionType, -1, "reduce_impl", 1, {&(FnArity){FnArityType, -1, 3, (List *)0, 0, arityImpl_728}}};
 
 
 // --------- comp*_impl --------------
-Function fn_714;
+Function fn_717;
 
 // --------- anon --------------
-Function fn_727;
-Value *arityImpl_728(List *closures, Value *arg0, Value *arg1) {
+Function fn_730;
+Value *arityImpl_731(List *closures, Value *arg0, Value *arg1) {
 Value *rslt0 = arityImpl_150(empty_list, arg1);
 Value *rslt1 = arityImpl_118(empty_list, arg0, rslt0);
 incRef(rslt1);
-dec_and_free(rslt1);
 dec_and_free(rslt0);
+dec_and_free(rslt1);
 return(rslt1);
 };
 
 
 // --------- anon main body --------------
-Function fn_727 = {FunctionType, -1, "anon", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_728}}};
+Function fn_730 = {FunctionType, -1, "anon", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_731}}};
 
 
 // --------- anon --------------
-Function fn_729;
-Value *arityImpl_730(List *closures, Value *arg0) {
+Function fn_732;
+Value *arityImpl_733(List *closures, Value *arg0) {
 Value *val0 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
@@ -6635,7 +6609,7 @@ dec_and_free(rslt1);
 return((Value *)&_num_13);
 };
 
-Value *arityImpl_726(List *closures, Value *arg0, Value *arg1) {
+Value *arityImpl_729(List *closures, Value *arg0, Value *arg1) {
 Value *cond0;
 Value *rslt8 = arityImpl_279(empty_list, arg1);
 
@@ -6646,28 +6620,28 @@ cond0 = arg0;
 } else {
 dec_and_free(rslt8);
 Value *rslt1 = arityImpl_132(empty_list, arg0, arg1);
-Value *rslt2 = arityImpl_664(empty_list, rslt1, (Value *)&protoFn_267);
-Value *rslt4 = arityImpl_660(empty_list, rslt2, (Value *)&_num_13, (Value *)&fn_727);
+Value *rslt2 = arityImpl_666(empty_list, rslt1, (Value *)&protoFn_267);
+Value *rslt4 = arityImpl_662(empty_list, rslt2, (Value *)&_num_13, (Value *)&fn_730);
 Value *rslt5 = arityImpl_159(empty_list, rslt4);
 FnArity *arity_6 = malloc_fnArity();
 arity_6->type = FnArityType;
 arity_6->count = 1;
 arity_6->closures = empty_list;
 arity_6->variadic = 0;
-arity_6->fn = arityImpl_730;
+arity_6->fn = arityImpl_733;
 incRef((Value *)rslt5);
 arity_6->closures = listCons((Value *)rslt5, (List *)arity_6->closures);
-Function *fn_729 = malloc_function(1);
-fn_729->type = FunctionType;
-fn_729->name = "anon";
-fn_729->arityCount = 1;
-fn_729->arities[0] = arity_6;
-Value *rslt7 = arityImpl_673(empty_list, rslt2, (Value *)fn_729);
+Function *fn_732 = malloc_function(1);
+fn_732->type = FunctionType;
+fn_732->name = "anon";
+fn_732->arityCount = 1;
+fn_732->arities[0] = arity_6;
+Value *rslt7 = arityImpl_675(empty_list, rslt2, (Value *)fn_732);
 incRef(rslt5);
 cond0 = rslt5;
 dec_and_free(rslt1);
+dec_and_free((Value *)fn_732);
 dec_and_free(rslt5);
-dec_and_free((Value *)fn_729);
 dec_and_free(rslt4);
 dec_and_free(rslt7);
 dec_and_free(rslt2);
@@ -6677,24 +6651,24 @@ return(cond0);
 
 
 // --------- comp*_impl main body --------------
-Function fn_714 = {FunctionType, -1, "comp*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_726}}};
+Function fn_717 = {FunctionType, -1, "comp*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_729}}};
 
 
 // --------- =*_impl --------------
-Function fn_715;
-Value *arityImpl_731(List *closures, Value *arg0, Value *arg1) {
+Function fn_718;
+Value *arityImpl_734(List *closures, Value *arg0, Value *arg1) {
 Value *rslt0 = arityImpl_153(empty_list, arg0, arg1);
 return(rslt0);
 };
 
 
 // --------- =*_impl main body --------------
-Function fn_715 = {FunctionType, -1, "=*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_731}}};
+Function fn_718 = {FunctionType, -1, "=*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_734}}};
 
 
 // --------- string-list_impl --------------
-Function fn_716;
-Value *arityImpl_732(List *closures, Value *arg0) {
+Function fn_719;
+Value *arityImpl_735(List *closures, Value *arg0) {
 List *varArgs0 = empty_list;
 incRef((Value *)arg0);
 varArgs0 = (List *)listCons((Value *)arg0, varArgs0);
@@ -6705,14 +6679,14 @@ return(rslt1);
 
 
 // --------- string-list_impl main body --------------
-Function fn_716 = {FunctionType, -1, "string-list_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_732}}};
+Function fn_719 = {FunctionType, -1, "string-list_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_735}}};
 
 
 // --------- seq_impl --------------
-Function fn_717;
-Value *arityImpl_733(List *closures, Value *arg0) {
+Function fn_720;
+Value *arityImpl_736(List *closures, Value *arg0) {
 Value *cond0;
-Value *rslt5 = arityImpl_435(empty_list, arg0, (Value *)&_str_55);
+Value *rslt5 = arityImpl_436(empty_list, arg0, (Value *)&_str_55);
 
 if (isTrue(rslt5)) {
 dec_and_free(rslt5);
@@ -6736,23 +6710,23 @@ return(cond0);
 
 
 // --------- seq_impl main body --------------
-Function fn_717 = {FunctionType, -1, "seq_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_733}}};
+Function fn_720 = {FunctionType, -1, "seq_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_736}}};
 
 
 // --------- first_impl --------------
-Function fn_718;
-Value *arityImpl_734(List *closures, Value *arg0) {
+Function fn_721;
+Value *arityImpl_737(List *closures, Value *arg0) {
 Value *cond0;
-Value *rslt3 = arityImpl_435(empty_list, arg0, (Value *)&_str_55);
+Value *rslt3 = arityImpl_436(empty_list, arg0, (Value *)&_str_55);
 
 if (isTrue(rslt3)) {
 dec_and_free(rslt3);
-incRef((Value *)&reified_475);
-cond0 = (Value *)&reified_475;
+incRef((Value *)&reified_476);
+cond0 = (Value *)&reified_476;
 } else {
 dec_and_free(rslt3);
 Value *rslt1 = arityImpl_106(empty_list, arg0, (Value *)&_num_13, (Value *)&_num_1);
-Value *rslt2 = protoImpl_558(empty_list, (Value *)&reified_561, rslt1);
+Value *rslt2 = protoImpl_559(empty_list, (Value *)&reified_562, rslt1);
 incRef(rslt2);
 cond0 = rslt2;
 dec_and_free(rslt1);
@@ -6763,24 +6737,24 @@ return(cond0);
 
 
 // --------- first_impl main body --------------
-Function fn_718 = {FunctionType, -1, "first_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_734}}};
+Function fn_721 = {FunctionType, -1, "first_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_737}}};
 
 
 // --------- rest_impl --------------
-Function fn_719;
-Value *arityImpl_735(List *closures, Value *arg0) {
+Function fn_722;
+Value *arityImpl_738(List *closures, Value *arg0) {
 Value *rslt0 = arityImpl_105(empty_list, arg0, (Value *)&_num_1);
 return(rslt0);
 };
 
 
 // --------- rest_impl main body --------------
-Function fn_719 = {FunctionType, -1, "rest_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_735}}};
+Function fn_722 = {FunctionType, -1, "rest_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_738}}};
 
 
 // --------- sha1_impl --------------
-Function fn_736;
-Value *arityImpl_748(List *closures, Value *arg0) {
+Function fn_739;
+Value *arityImpl_751(List *closures, Value *arg0) {
 
 int64_t shaVal;
 Sha1Context context;
@@ -6794,52 +6768,52 @@ return((Value *)numberValue(shaVal));
 
 
 // --------- sha1_impl main body --------------
-Function fn_736 = {FunctionType, -1, "sha1_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_748}}};
+Function fn_739 = {FunctionType, -1, "sha1_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_751}}};
 
 
 // --------- empty?_impl --------------
-Function fn_737;
-Value *arityImpl_749(List *closures, Value *arg0) {
+Function fn_740;
+Value *arityImpl_752(List *closures, Value *arg0) {
 Value *rslt0 = arityImpl_150(empty_list, arg0);
-Value *rslt1 = arityImpl_435(empty_list, (Value *)&_num_13, rslt0);
+Value *rslt1 = arityImpl_436(empty_list, (Value *)&_num_13, rslt0);
 incRef(rslt1);
-dec_and_free(rslt1);
 dec_and_free(rslt0);
+dec_and_free(rslt1);
 return(rslt1);
 };
 
 
 // --------- empty?_impl main body --------------
-Function fn_737 = {FunctionType, -1, "empty?_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_749}}};
+Function fn_740 = {FunctionType, -1, "empty?_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_752}}};
 
 
 // --------- empty_impl --------------
-Function fn_738;
-Value *arityImpl_750(List *closures, Value *arg0) {
+Function fn_741;
+Value *arityImpl_753(List *closures, Value *arg0) {
 incRef((Value *)&_str_55);
 return((Value *)&_str_55);
 };
 
 
 // --------- empty_impl main body --------------
-Function fn_738 = {FunctionType, -1, "empty_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_750}}};
+Function fn_741 = {FunctionType, -1, "empty_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_753}}};
 
 
 // --------- count_impl --------------
-Function fn_739;
-Value *arityImpl_751(List *closures, Value *arg0) {
+Function fn_742;
+Value *arityImpl_754(List *closures, Value *arg0) {
 Value *rslt0 = arityImpl_150(empty_list, arg0);
 return(rslt0);
 };
 
 
 // --------- count_impl main body --------------
-Function fn_739 = {FunctionType, -1, "count_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_751}}};
+Function fn_742 = {FunctionType, -1, "count_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_754}}};
 
 
 // --------- conj_impl --------------
-Function fn_740;
-Value *arityImpl_752(List *closures, Value *arg0, Value *arg1) {
+Function fn_743;
+Value *arityImpl_755(List *closures, Value *arg0, Value *arg1) {
 List *varArgs0 = empty_list;
 incRef((Value *)arg1);
 varArgs0 = (List *)listCons((Value *)arg1, varArgs0);
@@ -6847,62 +6821,62 @@ incRef((Value *)arg0);
 varArgs0 = (List *)listCons((Value *)arg0, varArgs0);
 Value *rslt1 = arityImpl_250(empty_list, (Value *)varArgs0);
 dec_and_free((Value *)varArgs0);
-Value *rslt2 = arityImpl_664(empty_list, rslt1, (Value *)&protoFn_267);
+Value *rslt2 = protoFnImpl_209(empty_list, rslt1, (Value *)&protoFn_267);
 Value *rslt3 = arityImpl_138(empty_list, rslt2);
 Value *rslt4 = arityImpl_141(empty_list, rslt2);
 Value *rslt5 = protoFnImpl_366(empty_list, rslt3, rslt4);
 incRef(rslt5);
-dec_and_free(rslt1);
-dec_and_free(rslt5);
-dec_and_free(rslt4);
-dec_and_free(rslt3);
 dec_and_free(rslt2);
+dec_and_free(rslt3);
+dec_and_free(rslt4);
+dec_and_free(rslt5);
+dec_and_free(rslt1);
 return(rslt5);
 };
 
 
 // --------- conj_impl main body --------------
-Function fn_740 = {FunctionType, -1, "conj_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_752}}};
+Function fn_743 = {FunctionType, -1, "conj_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_755}}};
 
 
 // --------- reduce_impl --------------
-Function fn_741;
-Value *arityImpl_753(List *closures, Value *arg0, Value *arg1, Value *arg2) {
+Function fn_744;
+Value *arityImpl_756(List *closures, Value *arg0, Value *arg1, Value *arg2) {
 Value *rslt0 = protoFnImpl_340(empty_list, arg0);
 Value *rslt1 = protoFnImpl_321(empty_list, rslt0, arg1, arg2);
 incRef(rslt1);
-dec_and_free(rslt1);
 dec_and_free(rslt0);
+dec_and_free(rslt1);
 return(rslt1);
 };
 
 
 // --------- reduce_impl main body --------------
-Function fn_741 = {FunctionType, -1, "reduce_impl", 1, {&(FnArity){FnArityType, -1, 3, (List *)0, 0, arityImpl_753}}};
+Function fn_744 = {FunctionType, -1, "reduce_impl", 1, {&(FnArity){FnArityType, -1, 3, (List *)0, 0, arityImpl_756}}};
 
 
 // --------- comp*_impl --------------
-Function fn_742;
+Function fn_745;
 
 // --------- anon --------------
-Function fn_755;
-Value *arityImpl_756(List *closures, Value *arg0, Value *arg1) {
+Function fn_758;
+Value *arityImpl_759(List *closures, Value *arg0, Value *arg1) {
 Value *rslt0 = arityImpl_150(empty_list, arg1);
 Value *rslt1 = arityImpl_118(empty_list, arg0, rslt0);
 incRef(rslt1);
-dec_and_free(rslt1);
 dec_and_free(rslt0);
+dec_and_free(rslt1);
 return(rslt1);
 };
 
 
 // --------- anon main body --------------
-Function fn_755 = {FunctionType, -1, "anon", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_756}}};
+Function fn_758 = {FunctionType, -1, "anon", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_759}}};
 
 
 // --------- anon --------------
-Function fn_757;
-Value *arityImpl_758(List *closures, Value *arg0) {
+Function fn_760;
+Value *arityImpl_761(List *closures, Value *arg0) {
 Value *val0 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
@@ -6913,7 +6887,7 @@ dec_and_free(rslt1);
 return((Value *)&_num_13);
 };
 
-Value *arityImpl_754(List *closures, Value *arg0, Value *arg1) {
+Value *arityImpl_757(List *closures, Value *arg0, Value *arg1) {
 Value *cond0;
 Value *rslt8 = arityImpl_279(empty_list, arg1);
 
@@ -6924,28 +6898,28 @@ cond0 = arg0;
 } else {
 dec_and_free(rslt8);
 Value *rslt1 = arityImpl_132(empty_list, arg0, arg1);
-Value *rslt2 = arityImpl_664(empty_list, rslt1, (Value *)&protoFn_267);
-Value *rslt4 = arityImpl_660(empty_list, rslt2, (Value *)&_num_13, (Value *)&fn_755);
+Value *rslt2 = arityImpl_666(empty_list, rslt1, (Value *)&protoFn_267);
+Value *rslt4 = arityImpl_662(empty_list, rslt2, (Value *)&_num_13, (Value *)&fn_758);
 Value *rslt5 = arityImpl_159(empty_list, rslt4);
 FnArity *arity_6 = malloc_fnArity();
 arity_6->type = FnArityType;
 arity_6->count = 1;
 arity_6->closures = empty_list;
 arity_6->variadic = 0;
-arity_6->fn = arityImpl_758;
+arity_6->fn = arityImpl_761;
 incRef((Value *)rslt5);
 arity_6->closures = listCons((Value *)rslt5, (List *)arity_6->closures);
-Function *fn_757 = malloc_function(1);
-fn_757->type = FunctionType;
-fn_757->name = "anon";
-fn_757->arityCount = 1;
-fn_757->arities[0] = arity_6;
-Value *rslt7 = arityImpl_673(empty_list, rslt2, (Value *)fn_757);
+Function *fn_760 = malloc_function(1);
+fn_760->type = FunctionType;
+fn_760->name = "anon";
+fn_760->arityCount = 1;
+fn_760->arities[0] = arity_6;
+Value *rslt7 = arityImpl_675(empty_list, rslt2, (Value *)fn_760);
 incRef(rslt5);
 cond0 = rslt5;
 dec_and_free(rslt1);
-dec_and_free((Value *)fn_757);
 dec_and_free(rslt5);
+dec_and_free((Value *)fn_760);
 dec_and_free(rslt4);
 dec_and_free(rslt7);
 dec_and_free(rslt2);
@@ -6955,24 +6929,24 @@ return(cond0);
 
 
 // --------- comp*_impl main body --------------
-Function fn_742 = {FunctionType, -1, "comp*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_754}}};
+Function fn_745 = {FunctionType, -1, "comp*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_757}}};
 
 
 // --------- =*_impl --------------
-Function fn_743;
-Value *arityImpl_759(List *closures, Value *arg0, Value *arg1) {
+Function fn_746;
+Value *arityImpl_762(List *closures, Value *arg0, Value *arg1) {
 Value *rslt0 = arityImpl_153(empty_list, arg0, arg1);
 return(rslt0);
 };
 
 
 // --------- =*_impl main body --------------
-Function fn_743 = {FunctionType, -1, "=*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_759}}};
+Function fn_746 = {FunctionType, -1, "=*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_762}}};
 
 
 // --------- string-list_impl --------------
-Function fn_744;
-Value *arityImpl_760(List *closures, Value *arg0) {
+Function fn_747;
+Value *arityImpl_763(List *closures, Value *arg0) {
 List *varArgs0 = empty_list;
 incRef((Value *)arg0);
 varArgs0 = (List *)listCons((Value *)arg0, varArgs0);
@@ -6983,14 +6957,14 @@ return(rslt1);
 
 
 // --------- string-list_impl main body --------------
-Function fn_744 = {FunctionType, -1, "string-list_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_760}}};
+Function fn_747 = {FunctionType, -1, "string-list_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_763}}};
 
 
 // --------- seq_impl --------------
-Function fn_745;
-Value *arityImpl_761(List *closures, Value *arg0) {
+Function fn_748;
+Value *arityImpl_764(List *closures, Value *arg0) {
 Value *cond0;
-Value *rslt5 = arityImpl_435(empty_list, arg0, (Value *)&_str_55);
+Value *rslt5 = arityImpl_436(empty_list, arg0, (Value *)&_str_55);
 
 if (isTrue(rslt5)) {
 dec_and_free(rslt5);
@@ -7014,23 +6988,23 @@ return(cond0);
 
 
 // --------- seq_impl main body --------------
-Function fn_745 = {FunctionType, -1, "seq_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_761}}};
+Function fn_748 = {FunctionType, -1, "seq_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_764}}};
 
 
 // --------- first_impl --------------
-Function fn_746;
-Value *arityImpl_762(List *closures, Value *arg0) {
+Function fn_749;
+Value *arityImpl_765(List *closures, Value *arg0) {
 Value *cond0;
-Value *rslt3 = arityImpl_435(empty_list, arg0, (Value *)&_str_55);
+Value *rslt3 = arityImpl_436(empty_list, arg0, (Value *)&_str_55);
 
 if (isTrue(rslt3)) {
 dec_and_free(rslt3);
-incRef((Value *)&reified_475);
-cond0 = (Value *)&reified_475;
+incRef((Value *)&reified_476);
+cond0 = (Value *)&reified_476;
 } else {
 dec_and_free(rslt3);
 Value *rslt1 = arityImpl_106(empty_list, arg0, (Value *)&_num_13, (Value *)&_num_1);
-Value *rslt2 = protoImpl_558(empty_list, (Value *)&reified_561, rslt1);
+Value *rslt2 = protoImpl_559(empty_list, (Value *)&reified_562, rslt1);
 incRef(rslt2);
 cond0 = rslt2;
 dec_and_free(rslt1);
@@ -7041,43 +7015,43 @@ return(cond0);
 
 
 // --------- first_impl main body --------------
-Function fn_746 = {FunctionType, -1, "first_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_762}}};
+Function fn_749 = {FunctionType, -1, "first_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_765}}};
 
 
 // --------- rest_impl --------------
-Function fn_747;
-Value *arityImpl_763(List *closures, Value *arg0) {
+Function fn_750;
+Value *arityImpl_766(List *closures, Value *arg0) {
 Value *rslt0 = arityImpl_105(empty_list, arg0, (Value *)&_num_1);
 return(rslt0);
 };
 
 
 // --------- rest_impl main body --------------
-Function fn_747 = {FunctionType, -1, "rest_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_763}}};
+Function fn_750 = {FunctionType, -1, "rest_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_766}}};
 
 
 // --------- str --------------
-Function fn_764;
+Function fn_767;
 
 // --------- anon --------------
-Function fn_766;
-Value *arityImpl_767(List *closures, Value *arg0, Value *arg1) {
+Function fn_769;
+Value *arityImpl_770(List *closures, Value *arg0, Value *arg1) {
 Value *rslt0 = arityImpl_150(empty_list, arg1);
 Value *rslt1 = arityImpl_118(empty_list, arg0, rslt0);
 incRef(rslt1);
-dec_and_free(rslt1);
 dec_and_free(rslt0);
+dec_and_free(rslt1);
 return(rslt1);
 };
 
 
 // --------- anon main body --------------
-Function fn_766 = {FunctionType, -1, "anon", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_767}}};
+Function fn_769 = {FunctionType, -1, "anon", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_770}}};
 
 
 // --------- anon --------------
-Function fn_768;
-Value *arityImpl_769(List *closures, Value *arg0) {
+Function fn_771;
+Value *arityImpl_772(List *closures, Value *arg0) {
 Value *val0 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
@@ -7088,9 +7062,9 @@ dec_and_free(rslt1);
 return((Value *)&_num_13);
 };
 
-Value *arityImpl_765(List *closures, Value *varArgs) {
+Value *arityImpl_768(List *closures, Value *varArgs) {
 List *argsList = (List *)varArgs;
-Value *arg0 = (Value *)argsList;
+Value *arg0 = (Value *) argsList;
 Value *cond0;
 Value *rslt7 = arityImpl_279(empty_list, arg0);
 
@@ -7100,41 +7074,41 @@ incRef((Value *)&_str_55);
 cond0 = (Value *)&_str_55;
 } else {
 dec_and_free(rslt7);
-Value *rslt1 = arityImpl_664(empty_list, arg0, (Value *)&protoFn_267);
-Value *rslt3 = arityImpl_660(empty_list, rslt1, (Value *)&_num_13, (Value *)&fn_766);
+Value *rslt1 = protoFnImpl_209(empty_list, arg0, (Value *)&protoFn_267);
+Value *rslt3 = protoFnImpl_321(empty_list, rslt1, (Value *)&_num_13, (Value *)&fn_769);
 Value *rslt4 = arityImpl_159(empty_list, rslt3);
 FnArity *arity_5 = malloc_fnArity();
 arity_5->type = FnArityType;
 arity_5->count = 1;
 arity_5->closures = empty_list;
 arity_5->variadic = 0;
-arity_5->fn = arityImpl_769;
+arity_5->fn = arityImpl_772;
 incRef((Value *)rslt4);
 arity_5->closures = listCons((Value *)rslt4, (List *)arity_5->closures);
-Function *fn_768 = malloc_function(1);
-fn_768->type = FunctionType;
-fn_768->name = "anon";
-fn_768->arityCount = 1;
-fn_768->arities[0] = arity_5;
-Value *rslt6 = arityImpl_673(empty_list, rslt1, (Value *)fn_768);
+Function *fn_771 = malloc_function(1);
+fn_771->type = FunctionType;
+fn_771->name = "anon";
+fn_771->arityCount = 1;
+fn_771->arities[0] = arity_5;
+Value *rslt6 = protoFnImpl_258(empty_list, rslt1, (Value *)fn_771);
 incRef(rslt4);
 cond0 = rslt4;
 dec_and_free(rslt6);
 dec_and_free(rslt1);
-dec_and_free((Value *)fn_768);
 dec_and_free(rslt4);
+dec_and_free((Value *)fn_771);
 dec_and_free(rslt3);
 }
 return(cond0);
 };
 
 // --------- str main body --------------
-Function fn_764 = {FunctionType, -1, "str", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_765}}};
+Function fn_767 = {FunctionType, -1, "str", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_768}}};
 
 
 // --------- take --------------
-Function fn_771;
-Value *arityImpl_772(List *closures, Value *arg0, Value *arg1) {
+Function fn_774;
+Value *arityImpl_775(List *closures, Value *arg0, Value *arg1) {
 Value *cond0;
 Value *rslt6 = protoFnImpl_319(empty_list, arg0);
 
@@ -7144,7 +7118,7 @@ incRef(arg0);
 cond0 = arg0;
 } else {
 dec_and_free(rslt6);
-Value *rslt7 = arityImpl_435(empty_list, (Value *)&_num_13, arg1);
+Value *rslt7 = arityImpl_436(empty_list, (Value *)&_num_13, arg1);
 
 if (isTrue(rslt7)) {
 dec_and_free(rslt7);
@@ -7154,8 +7128,8 @@ cond0 = var_129;
 dec_and_free(rslt7);
 Value *rslt1 = protoFnImpl_342(empty_list, arg0);
 Value *rslt2 = protoFnImpl_338(empty_list, arg0);
-Value *rslt3 = arityImpl_703(empty_list, arg1);
-Value *rslt4 = arityImpl_772(closures, rslt2, rslt3);
+Value *rslt3 = arityImpl_705(empty_list, arg1);
+Value *rslt4 = arityImpl_775(closures, rslt2, rslt3);
 Value *rslt5 = arityImpl_132(empty_list, rslt1, rslt4);
 incRef(rslt5);
 cond0 = rslt5;
@@ -7171,14 +7145,14 @@ return(cond0);
 
 
 // --------- take main body --------------
-Function fn_771 = {FunctionType, -1, "take", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_772}}};
+Function fn_774 = {FunctionType, -1, "take", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_775}}};
 
 
 // --------- drop --------------
-Function fn_774;
-Value *arityImpl_775(List *closures, Value *arg0, Value *arg1) {
+Function fn_777;
+Value *arityImpl_778(List *closures, Value *arg0, Value *arg1) {
 Value *cond0;
-Value *rslt4 = arityImpl_568(empty_list, arg1, (Value *)&_num_1);
+Value *rslt4 = arityImpl_569(empty_list, arg1, (Value *)&_num_1);
 
 if (isTrue(rslt4)) {
 dec_and_free(rslt4);
@@ -7187,8 +7161,8 @@ cond0 = arg0;
 } else {
 dec_and_free(rslt4);
 Value *rslt1 = protoFnImpl_338(empty_list, arg0);
-Value *rslt2 = arityImpl_703(empty_list, arg1);
-Value *rslt3 = arityImpl_775(closures, rslt1, rslt2);
+Value *rslt2 = arityImpl_705(empty_list, arg1);
+Value *rslt3 = arityImpl_778(closures, rslt1, rslt2);
 incRef(rslt3);
 cond0 = rslt3;
 dec_and_free(rslt1);
@@ -7200,28 +7174,28 @@ return(cond0);
 
 
 // --------- drop main body --------------
-Function fn_774 = {FunctionType, -1, "drop", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_775}}};
+Function fn_777 = {FunctionType, -1, "drop", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_778}}};
 
 
 // --------- split --------------
-Function fn_777;
-Value *arityImpl_778(List *closures, Value *arg0, Value *arg1, Value *arg2) {
+Function fn_780;
+Value *arityImpl_781(List *closures, Value *arg0, Value *arg1, Value *arg2) {
 Value *cond0;
 Value *rslt6 = protoFnImpl_319(empty_list, arg0);
-Value *rslt7 = arityImpl_568(empty_list, arg1, (Value *)&_num_1);
+Value *rslt7 = arityImpl_569(empty_list, arg1, (Value *)&_num_1);
 List *varArgs8 = empty_list;
 incRef((Value *)rslt7);
 varArgs8 = (List *)listCons((Value *)rslt7, varArgs8);
 incRef((Value *)rslt6);
 varArgs8 = (List *)listCons((Value *)rslt6, varArgs8);
-Value *rslt9 = arityImpl_432(empty_list, (Value *)varArgs8);
+Value *rslt9 = arityImpl_433(empty_list, (Value *)varArgs8);
 dec_and_free((Value *)varArgs8);
 dec_and_free(rslt6);
 dec_and_free(rslt7);
 
 if (isTrue(rslt9)) {
 dec_and_free(rslt9);
-Value *rslt10 = arityImpl_586(empty_list, arg2);
+Value *rslt10 = arityImpl_587(empty_list, arg2);
 List *varArgs11 = empty_list;
 incRef((Value *)arg0);
 varArgs11 = (List *)listCons((Value *)arg0, varArgs11);
@@ -7236,10 +7210,10 @@ dec_and_free(rslt12);
 } else {
 dec_and_free(rslt9);
 Value *rslt1 = protoFnImpl_338(empty_list, arg0);
-Value *rslt2 = arityImpl_703(empty_list, arg1);
+Value *rslt2 = arityImpl_705(empty_list, arg1);
 Value *rslt3 = protoFnImpl_342(empty_list, arg0);
 Value *rslt4 = arityImpl_132(empty_list, rslt3, arg2);
-Value *rslt5 = arityImpl_778(closures, rslt1, rslt2, rslt4);
+Value *rslt5 = arityImpl_781(closures, rslt1, rslt2, rslt4);
 incRef(rslt5);
 cond0 = rslt5;
 dec_and_free(rslt1);
@@ -7251,9 +7225,9 @@ dec_and_free(rslt2);
 return(cond0);
 };
 
-Value *arityImpl_779(List *closures, Value *arg0, Value *arg1) {
+Value *arityImpl_782(List *closures, Value *arg0, Value *arg1) {
 Value *rslt3;
-FnArity *arity0 = findFnArity((Value *)&fn_777, 3);
+FnArity *arity0 = findFnArity((Value *)&fn_780, 3);
 if(arity0 != (FnArity *)0 && !arity0->variadic) {
 FnType3 *fn2 = (FnType3 *)arity0->fn;
 rslt3 = fn2(arity0->closures, arg0, arg1, var_129);
@@ -7269,7 +7243,7 @@ varArgs1 = (List *)listCons(arg0, varArgs1);
 rslt3 = fn2(arity0->closures, (Value *)varArgs1);
 dec_and_free((Value *)varArgs1);
 } else {
-fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)(Value *)&fn_777)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)(Value *)&fn_780)->name);
   abort();
 }
 return(rslt3);
@@ -7277,12 +7251,12 @@ return(rslt3);
 
 
 // --------- split main body --------------
-Function fn_777 = {FunctionType, -1, "split", 2, {&(FnArity){FnArityType, -1, 3, (List *)0, 0, arityImpl_778}, &(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_779}}};
+Function fn_780 = {FunctionType, -1, "split", 2, {&(FnArity){FnArityType, -1, 3, (List *)0, 0, arityImpl_781}, &(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_782}}};
 
 
 // --------- replace-at-nth --------------
-Function fn_781;
-Value *arityImpl_782(List *closures, Value *arg0, Value *arg1, Value *arg2) {
+Function fn_784;
+Value *arityImpl_785(List *closures, Value *arg0, Value *arg1, Value *arg2) {
 Value *cond0;
 Value *rslt10 = protoFnImpl_319(empty_list, arg0);
 
@@ -7293,8 +7267,8 @@ cond0 = arg0;
 } else {
 dec_and_free(rslt10);
 Value *rslt11 = protoFnImpl_313(empty_list, arg0);
-Value *rslt12 = arityImpl_703(empty_list, rslt11);
-Value *rslt13 = arityImpl_568(empty_list, rslt12, arg1);
+Value *rslt12 = arityImpl_705(empty_list, rslt11);
+Value *rslt13 = arityImpl_569(empty_list, rslt12, arg1);
 dec_and_free(rslt11);
 dec_and_free(rslt12);
 
@@ -7304,7 +7278,7 @@ incRef(arg0);
 cond0 = arg0;
 } else {
 dec_and_free(rslt13);
-Value *rslt1 = arityImpl_779(empty_list, arg0, arg1);
+Value *rslt1 = arityImpl_782(empty_list, arg0, arg1);
 Value *rslt2 = protoFnImpl_342(empty_list, rslt1);
 List *varArgs3 = empty_list;
 incRef((Value *)arg2);
@@ -7337,12 +7311,12 @@ return(cond0);
 
 
 // --------- replace-at-nth main body --------------
-Function fn_781 = {FunctionType, -1, "replace-at-nth", 1, {&(FnArity){FnArityType, -1, 3, (List *)0, 0, arityImpl_782}}};
+Function fn_784 = {FunctionType, -1, "replace-at-nth", 1, {&(FnArity){FnArityType, -1, 3, (List *)0, 0, arityImpl_785}}};
 
 
 // --------- remove-nth --------------
-Function fn_784;
-Value *arityImpl_785(List *closures, Value *arg0, Value *arg1) {
+Function fn_787;
+Value *arityImpl_788(List *closures, Value *arg0, Value *arg1) {
 Value *cond0;
 Value *rslt8 = protoFnImpl_319(empty_list, arg0);
 
@@ -7353,8 +7327,8 @@ cond0 = arg0;
 } else {
 dec_and_free(rslt8);
 Value *rslt9 = protoFnImpl_313(empty_list, arg0);
-Value *rslt10 = arityImpl_703(empty_list, rslt9);
-Value *rslt11 = arityImpl_568(empty_list, rslt10, arg1);
+Value *rslt10 = arityImpl_705(empty_list, rslt9);
+Value *rslt11 = arityImpl_569(empty_list, rslt10, arg1);
 dec_and_free(rslt10);
 dec_and_free(rslt9);
 
@@ -7364,7 +7338,7 @@ incRef(arg0);
 cond0 = arg0;
 } else {
 dec_and_free(rslt11);
-Value *rslt1 = arityImpl_779(empty_list, arg0, arg1);
+Value *rslt1 = arityImpl_782(empty_list, arg0, arg1);
 Value *rslt2 = protoFnImpl_342(empty_list, rslt1);
 Value *rslt3 = arityImpl_348(empty_list, rslt1);
 Value *rslt4 = protoFnImpl_338(empty_list, rslt3);
@@ -7389,15 +7363,15 @@ return(cond0);
 
 
 // --------- remove-nth main body --------------
-Function fn_784 = {FunctionType, -1, "remove-nth", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_785}}};
+Function fn_787 = {FunctionType, -1, "remove-nth", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_788}}};
 
 
 // --------- partition --------------
-Function fn_787;
-Value *arityImpl_788(List *closures, Value *arg0, Value *arg1) {
+Function fn_790;
+Value *arityImpl_791(List *closures, Value *arg0, Value *arg1) {
 Value *cond0;
 Value *rslt5 = protoFnImpl_313(empty_list, arg0);
-Value *rslt6 = arityImpl_568(empty_list, rslt5, arg1);
+Value *rslt6 = arityImpl_569(empty_list, rslt5, arg1);
 dec_and_free(rslt5);
 
 if (isTrue(rslt6)) {
@@ -7406,9 +7380,9 @@ incRef(var_129);
 cond0 = var_129;
 } else {
 dec_and_free(rslt6);
-Value *rslt1 = arityImpl_772(empty_list, arg0, arg1);
-Value *rslt2 = arityImpl_775(empty_list, arg0, arg1);
-Value *rslt3 = arityImpl_788(closures, rslt2, arg1);
+Value *rslt1 = arityImpl_775(empty_list, arg0, arg1);
+Value *rslt2 = arityImpl_778(empty_list, arg0, arg1);
+Value *rslt3 = arityImpl_791(closures, rslt2, arg1);
 Value *rslt4 = arityImpl_132(empty_list, rslt1, rslt3);
 incRef(rslt4);
 cond0 = rslt4;
@@ -7422,15 +7396,15 @@ return(cond0);
 
 
 // --------- partition main body --------------
-Function fn_787 = {FunctionType, -1, "partition", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_788}}};
+Function fn_790 = {FunctionType, -1, "partition", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_791}}};
 
 
 // --------- partition-all --------------
-Function fn_790;
-Value *arityImpl_791(List *closures, Value *arg0, Value *arg1) {
+Function fn_793;
+Value *arityImpl_794(List *closures, Value *arg0, Value *arg1) {
 Value *cond0;
 Value *rslt5 = protoFnImpl_313(empty_list, arg0);
-Value *rslt6 = arityImpl_568(empty_list, rslt5, arg1);
+Value *rslt6 = arityImpl_569(empty_list, rslt5, arg1);
 dec_and_free(rslt5);
 
 if (isTrue(rslt6)) {
@@ -7445,9 +7419,9 @@ cond0 = rslt8;
 dec_and_free(rslt8);
 } else {
 dec_and_free(rslt6);
-Value *rslt1 = arityImpl_772(empty_list, arg0, arg1);
-Value *rslt2 = arityImpl_775(empty_list, arg0, arg1);
-Value *rslt3 = arityImpl_791(closures, rslt2, arg1);
+Value *rslt1 = arityImpl_775(empty_list, arg0, arg1);
+Value *rslt2 = arityImpl_778(empty_list, arg0, arg1);
+Value *rslt3 = arityImpl_794(closures, rslt2, arg1);
 Value *rslt4 = arityImpl_132(empty_list, rslt1, rslt3);
 incRef(rslt4);
 cond0 = rslt4;
@@ -7461,7 +7435,7 @@ return(cond0);
 
 
 // --------- partition-all main body --------------
-Function fn_790 = {FunctionType, -1, "partition-all", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_791}}};
+Function fn_793 = {FunctionType, -1, "partition-all", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_794}}};
 
 struct {int64_t type;
  int32_t refs;
@@ -7469,8 +7443,8 @@ struct {int64_t type;
    char buffer[21];} _str_56 = {1, -1, 20,"'nth' from empty seq"};
 
 // --------- nth --------------
-Function fn_793;
-Value *arityImpl_794(List *closures, Value *arg0, Value *arg1) {
+Function fn_796;
+Value *arityImpl_797(List *closures, Value *arg0, Value *arg1) {
 Value *cond0;
 Value *rslt5 = protoFnImpl_319(empty_list, arg0);
 
@@ -7479,7 +7453,7 @@ dec_and_free(rslt5);
 List *varArgs6 = empty_list;
 incRef((Value *)(Value *)&_str_56);
 varArgs6 = (List *)listCons((Value *)(Value *)&_str_56, varArgs6);
-Value *rslt7 = arityImpl_692(empty_list, (Value *)varArgs6);
+Value *rslt7 = arityImpl_694(empty_list, (Value *)varArgs6);
 dec_and_free((Value *)varArgs6);
 Value *rslt8 = arityImpl_96(empty_list);
 incRef(rslt8);
@@ -7488,7 +7462,7 @@ dec_and_free(rslt8);
 dec_and_free(rslt7);
 } else {
 dec_and_free(rslt5);
-Value *rslt9 = arityImpl_435(empty_list, arg1, (Value *)&_num_13);
+Value *rslt9 = arityImpl_436(empty_list, arg1, (Value *)&_num_13);
 
 if (isTrue(rslt9)) {
 dec_and_free(rslt9);
@@ -7502,8 +7476,8 @@ dec_and_free(rslt11);
 dec_and_free(rslt9);
 Value *rslt1 = protoFnImpl_340(empty_list, arg0);
 Value *rslt2 = protoFnImpl_338(empty_list, rslt1);
-Value *rslt3 = arityImpl_703(empty_list, arg1);
-Value *rslt4 = arityImpl_794(closures, rslt2, rslt3);
+Value *rslt3 = arityImpl_705(empty_list, arg1);
+Value *rslt4 = arityImpl_797(closures, rslt2, rslt3);
 incRef(rslt4);
 cond0 = rslt4;
 dec_and_free(rslt1);
@@ -7515,7 +7489,7 @@ dec_and_free(rslt2);
 return(cond0);
 };
 
-Value *arityImpl_795(List *closures, Value *arg0, Value *arg1, Value *arg2) {
+Value *arityImpl_798(List *closures, Value *arg0, Value *arg1, Value *arg2) {
 Value *cond0;
 Value *rslt5 = protoFnImpl_319(empty_list, arg0);
 
@@ -7525,7 +7499,7 @@ incRef(arg2);
 cond0 = arg2;
 } else {
 dec_and_free(rslt5);
-Value *rslt6 = arityImpl_435(empty_list, arg1, (Value *)&_num_13);
+Value *rslt6 = arityImpl_436(empty_list, arg1, (Value *)&_num_13);
 
 if (isTrue(rslt6)) {
 dec_and_free(rslt6);
@@ -7539,8 +7513,8 @@ dec_and_free(rslt7);
 dec_and_free(rslt6);
 Value *rslt1 = protoFnImpl_340(empty_list, arg0);
 Value *rslt2 = protoFnImpl_338(empty_list, rslt1);
-Value *rslt3 = arityImpl_703(empty_list, arg1);
-Value *rslt4 = arityImpl_795(closures, rslt2, rslt3, arg2);
+Value *rslt3 = arityImpl_705(empty_list, arg1);
+Value *rslt4 = arityImpl_798(closures, rslt2, rslt3, arg2);
 incRef(rslt4);
 cond0 = rslt4;
 dec_and_free(rslt1);
@@ -7554,30 +7528,30 @@ return(cond0);
 
 
 // --------- nth main body --------------
-Function fn_793 = {FunctionType, -1, "nth", 2, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_794}, &(FnArity){FnArityType, -1, 3, (List *)0, 0, arityImpl_795}}};
+Function fn_796 = {FunctionType, -1, "nth", 2, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_797}, &(FnArity){FnArityType, -1, 3, (List *)0, 0, arityImpl_798}}};
 
 
 // --------- last --------------
-Function fn_797;
-Value *arityImpl_798(List *closures, Value *arg0, Value *arg1) {
+Function fn_800;
+Value *arityImpl_801(List *closures, Value *arg0, Value *arg1) {
 Value *rslt0 = protoFnImpl_313(empty_list, arg0);
-Value *rslt1 = arityImpl_703(empty_list, rslt0);
-Value *rslt2 = arityImpl_794(empty_list, arg0, rslt1);
+Value *rslt1 = arityImpl_705(empty_list, rslt0);
+Value *rslt2 = arityImpl_797(empty_list, arg0, rslt1);
 incRef(rslt2);
-dec_and_free(rslt1);
-dec_and_free(rslt0);
 dec_and_free(rslt2);
+dec_and_free(rslt0);
+dec_and_free(rslt1);
 return(rslt2);
 };
 
 
 // --------- last main body --------------
-Function fn_797 = {FunctionType, -1, "last", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_798}}};
+Function fn_800 = {FunctionType, -1, "last", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_801}}};
 
 
 // --------- butlast --------------
-Function fn_800;
-Value *arityImpl_801(List *closures, Value *arg0) {
+Function fn_803;
+Value *arityImpl_804(List *closures, Value *arg0) {
 Value *cond0;
 Value *rslt5 = protoFnImpl_319(empty_list, arg0);
 
@@ -7588,7 +7562,7 @@ cond0 = arg0;
 } else {
 dec_and_free(rslt5);
 Value *rslt6 = protoFnImpl_313(empty_list, arg0);
-Value *rslt7 = arityImpl_435(empty_list, (Value *)&_num_1, rslt6);
+Value *rslt7 = arityImpl_436(empty_list, (Value *)&_num_1, rslt6);
 dec_and_free(rslt6);
 
 if (isTrue(rslt7)) {
@@ -7599,7 +7573,7 @@ cond0 = var_129;
 dec_and_free(rslt7);
 Value *rslt1 = protoFnImpl_342(empty_list, arg0);
 Value *rslt2 = protoFnImpl_338(empty_list, arg0);
-Value *rslt3 = arityImpl_801(closures, rslt2);
+Value *rslt3 = arityImpl_804(closures, rslt2);
 Value *rslt4 = arityImpl_132(empty_list, rslt1, rslt3);
 incRef(rslt4);
 cond0 = rslt4;
@@ -7614,7 +7588,7 @@ return(cond0);
 
 
 // --------- butlast main body --------------
-Function fn_800 = {FunctionType, -1, "butlast", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_801}}};
+Function fn_803 = {FunctionType, -1, "butlast", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_804}}};
 
 
 BitmapIndexedNode emptyBMI = {BitmapIndexedType, -1, 0, 0};
@@ -7675,7 +7649,7 @@ Value *createNode(int shift,
   }
   return((Value *)newNode);
 }
-Value *var_803 = (Value *)&emptyBMI;
+Value *var_806 = (Value *)&emptyBMI;
 struct {int64_t type;
  int32_t refs;
    int64_t len;
@@ -7690,8 +7664,8 @@ struct {int64_t type;
    char buffer[2];} _str_58 = {1, -1, 1,"{"};
 
 // --------- count_impl --------------
-Function fn_804;
-Value *arityImpl_817(List *closures, Value *arg0) {
+Function fn_807;
+Value *arityImpl_820(List *closures, Value *arg0) {
 
 int cnt = __builtin_popcount(((BitmapIndexedNode *)arg0)->bitmap);
 int accum = 0;
@@ -7709,12 +7683,12 @@ return(numberValue(accum));
 
 
 // --------- count_impl main body --------------
-Function fn_804 = {FunctionType, -1, "count_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_817}}};
+Function fn_807 = {FunctionType, -1, "count_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_820}}};
 
 
 // --------- empty?_impl --------------
-Function fn_805;
-Value *arityImpl_818(List *closures, Value *arg0) {
+Function fn_808;
+Value *arityImpl_821(List *closures, Value *arg0) {
 
 if (((BitmapIndexedNode *)arg0)->bitmap == 0)
    return(true);
@@ -7724,30 +7698,30 @@ else
 
 
 // --------- empty?_impl main body --------------
-Function fn_805 = {FunctionType, -1, "empty?_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_818}}};
+Function fn_808 = {FunctionType, -1, "empty?_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_821}}};
 
 
 // --------- zero_impl --------------
-Function fn_806;
-Value *arityImpl_819(List *closures, Value *arg0) {
-incRef(var_803);
-return(var_803);
+Function fn_809;
+Value *arityImpl_822(List *closures, Value *arg0) {
+incRef(var_806);
+return(var_806);
 };
 
 
 // --------- zero_impl main body --------------
-Function fn_806 = {FunctionType, -1, "zero_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_819}}};
+Function fn_809 = {FunctionType, -1, "zero_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_822}}};
 
 
 // --------- comp*_impl --------------
-Function fn_807;
+Function fn_810;
 
 // --------- anon --------------
-Function fn_821;
+Function fn_824;
 
 // --------- anon --------------
-Function fn_823;
-Value *arityImpl_824(List *closures, Value *arg0, Value *arg1) {
+Function fn_826;
+Value *arityImpl_827(List *closures, Value *arg0, Value *arg1) {
 List *varArgs0 = empty_list;
 incRef((Value *)arg1);
 varArgs0 = (List *)listCons((Value *)arg1, varArgs0);
@@ -7755,43 +7729,43 @@ incRef((Value *)arg0);
 varArgs0 = (List *)listCons((Value *)arg0, varArgs0);
 Value *rslt1 = arityImpl_250(empty_list, (Value *)varArgs0);
 dec_and_free((Value *)varArgs0);
-Value *rslt2 = arityImpl_595(empty_list, (Value *)&protoFn_395, rslt1);
+Value *rslt2 = arityImpl_596(empty_list, (Value *)&protoFn_396, rslt1);
 incRef(rslt2);
+dec_and_free(rslt2);
 dec_and_free(rslt1);
-dec_and_free(rslt2);
 return(rslt2);
 };
 
 
 // --------- anon main body --------------
-Function fn_823 = {FunctionType, -1, "anon", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_824}}};
+Function fn_826 = {FunctionType, -1, "anon", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_827}}};
 
-Value *arityImpl_822(List *closures, Value *arg0, Value *arg1) {
+Value *arityImpl_825(List *closures, Value *arg0, Value *arg1) {
 Value *rslt0 = protoFnImpl_340(empty_list, arg1);
-Value *rslt2 = protoFnImpl_321(empty_list, rslt0, arg0, (Value *)&fn_823);
+Value *rslt2 = protoFnImpl_321(empty_list, rslt0, arg0, (Value *)&fn_826);
 incRef(rslt2);
-dec_and_free(rslt0);
 dec_and_free(rslt2);
+dec_and_free(rslt0);
 return(rslt2);
 };
 
 
 // --------- anon main body --------------
-Function fn_821 = {FunctionType, -1, "anon", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_822}}};
+Function fn_824 = {FunctionType, -1, "anon", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_825}}};
 
-Value *arityImpl_820(List *closures, Value *arg0, Value *arg1) {
-Value *rslt1 = protoFnImpl_321(empty_list, arg1, arg0, (Value *)&fn_821);
+Value *arityImpl_823(List *closures, Value *arg0, Value *arg1) {
+Value *rslt1 = protoFnImpl_321(empty_list, arg1, arg0, (Value *)&fn_824);
 return(rslt1);
 };
 
 
 // --------- comp*_impl main body --------------
-Function fn_807 = {FunctionType, -1, "comp*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_820}}};
+Function fn_810 = {FunctionType, -1, "comp*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_823}}};
 
 
 // --------- get_impl --------------
-Function fn_808;
-Value *arityImpl_825(List *closures, Value *arg0, Value *arg1, Value *arg2) {
+Function fn_811;
+Value *arityImpl_828(List *closures, Value *arg0, Value *arg1, Value *arg2) {
 
 Value *hash = sha1(arg1);
 Value *shift = numberValue(0);
@@ -7803,44 +7777,44 @@ return(found);
 
 
 // --------- get_impl main body --------------
-Function fn_808 = {FunctionType, -1, "get_impl", 1, {&(FnArity){FnArityType, -1, 3, (List *)0, 0, arityImpl_825}}};
+Function fn_811 = {FunctionType, -1, "get_impl", 1, {&(FnArity){FnArityType, -1, 3, (List *)0, 0, arityImpl_828}}};
 
 
 // --------- keys_impl --------------
-Function fn_809;
-Value *arityImpl_826(List *closures, Value *arg0) {
+Function fn_812;
+Value *arityImpl_829(List *closures, Value *arg0) {
 Value *rslt0 = protoFnImpl_340(empty_list, arg0);
 Value *rslt1 = protoFnImpl_258(empty_list, rslt0, (Value *)&protoFn_333);
 incRef(rslt1);
-dec_and_free(rslt1);
 dec_and_free(rslt0);
+dec_and_free(rslt1);
 return(rslt1);
 };
 
 
 // --------- keys_impl main body --------------
-Function fn_809 = {FunctionType, -1, "keys_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_826}}};
+Function fn_812 = {FunctionType, -1, "keys_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_829}}};
 
 
 // --------- vals_impl --------------
-Function fn_810;
-Value *arityImpl_827(List *closures, Value *arg0) {
+Function fn_813;
+Value *arityImpl_830(List *closures, Value *arg0) {
 Value *rslt0 = protoFnImpl_340(empty_list, arg0);
 Value *rslt1 = protoFnImpl_258(empty_list, rslt0, (Value *)&fn_347);
 incRef(rslt1);
-dec_and_free(rslt1);
 dec_and_free(rslt0);
+dec_and_free(rslt1);
 return(rslt1);
 };
 
 
 // --------- vals_impl main body --------------
-Function fn_810 = {FunctionType, -1, "vals_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_827}}};
+Function fn_813 = {FunctionType, -1, "vals_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_830}}};
 
 
 // --------- assoc_impl --------------
-Function fn_811;
-Value *arityImpl_828(List *closures, Value *arg0, Value *arg1, Value *arg2) {
+Function fn_814;
+Value *arityImpl_831(List *closures, Value *arg0, Value *arg1, Value *arg2) {
 
 Value *hash = sha1(arg1);
 Value *shift = numberValue(0);
@@ -7852,40 +7826,40 @@ return(newNode);
 
 
 // --------- assoc_impl main body --------------
-Function fn_811 = {FunctionType, -1, "assoc_impl", 1, {&(FnArity){FnArityType, -1, 3, (List *)0, 0, arityImpl_828}}};
+Function fn_814 = {FunctionType, -1, "assoc_impl", 1, {&(FnArity){FnArityType, -1, 3, (List *)0, 0, arityImpl_831}}};
 
 
 // --------- string-list_impl --------------
-Function fn_812;
+Function fn_815;
 
 // --------- anon --------------
-Function fn_830;
-Value *arityImpl_831(List *closures, Value *arg0) {
+Function fn_833;
+Value *arityImpl_834(List *closures, Value *arg0) {
 Value *rslt0 = protoFnImpl_258(empty_list, arg0, (Value *)&protoFn_267);
 List *varArgs1 = empty_list;
 incRef((Value *)(Value *)&_str_52);
 varArgs1 = (List *)listCons((Value *)(Value *)&_str_52, varArgs1);
 Value *rslt2 = arityImpl_250(empty_list, (Value *)varArgs1);
 dec_and_free((Value *)varArgs1);
-Value *rslt3 = arityImpl_675(empty_list, rslt0, rslt2);
+Value *rslt3 = arityImpl_677(empty_list, rslt0, rslt2);
 Value *rslt4 = arityImpl_138(empty_list, rslt3);
 Value *rslt5 = arityImpl_141(empty_list, rslt3);
 Value *rslt6 = protoFnImpl_366(empty_list, rslt4, rslt5);
 incRef(rslt6);
-dec_and_free(rslt6);
-dec_and_free(rslt0);
-dec_and_free(rslt5);
-dec_and_free(rslt4);
-dec_and_free(rslt3);
 dec_and_free(rslt2);
+dec_and_free(rslt3);
+dec_and_free(rslt4);
+dec_and_free(rslt5);
+dec_and_free(rslt0);
+dec_and_free(rslt6);
 return(rslt6);
 };
 
 
 // --------- anon main body --------------
-Function fn_830 = {FunctionType, -1, "anon", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_831}}};
+Function fn_833 = {FunctionType, -1, "anon", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_834}}};
 
-Value *arityImpl_829(List *closures, Value *arg0) {
+Value *arityImpl_832(List *closures, Value *arg0) {
 Value *rslt0 = protoFnImpl_340(empty_list, arg0);
 Value *cond1;
 Value *rslt17 = arityImpl_279(empty_list, rslt0);
@@ -7902,13 +7876,13 @@ cond1 = rslt19;
 dec_and_free(rslt19);
 } else {
 dec_and_free(rslt17);
-Value *rslt3 = protoFnImpl_258(empty_list, rslt0, (Value *)&fn_830);
+Value *rslt3 = protoFnImpl_258(empty_list, rslt0, (Value *)&fn_833);
 List *varArgs4 = empty_list;
 incRef((Value *)(Value *)&_str_50);
 varArgs4 = (List *)listCons((Value *)(Value *)&_str_50, varArgs4);
 Value *rslt5 = arityImpl_250(empty_list, (Value *)varArgs4);
 dec_and_free((Value *)varArgs4);
-Value *rslt6 = arityImpl_675(empty_list, rslt3, rslt5);
+Value *rslt6 = arityImpl_677(empty_list, rslt3, rslt5);
 Value *rslt7 = arityImpl_138(empty_list, rslt6);
 Value *rslt8 = arityImpl_141(empty_list, rslt6);
 Value *rslt9 = protoFnImpl_366(empty_list, rslt7, rslt8);
@@ -7929,7 +7903,7 @@ incRef((Value *)rslt9);
 varArgs14 = (List *)listCons((Value *)rslt9, varArgs14);
 Value *rslt15 = arityImpl_250(empty_list, (Value *)varArgs14);
 dec_and_free((Value *)varArgs14);
-Value *rslt16 = arityImpl_667(empty_list, rslt11, rslt15);
+Value *rslt16 = protoFnImpl_366(empty_list, rslt11, rslt15);
 incRef(rslt16);
 cond1 = rslt16;
 dec_and_free(rslt6);
@@ -7944,31 +7918,31 @@ dec_and_free(rslt7);
 dec_and_free(rslt3);
 }
 incRef(cond1);
-dec_and_free(cond1);
 dec_and_free(rslt0);
+dec_and_free(cond1);
 return(cond1);
 };
 
 
 // --------- string-list_impl main body --------------
-Function fn_812 = {FunctionType, -1, "string-list_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_829}}};
+Function fn_815 = {FunctionType, -1, "string-list_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_832}}};
 
 
 // --------- seq_impl --------------
-Function fn_813;
-Value *arityImpl_832(List *closures, Value *arg0) {
-Value *rslt0 = protoFnImpl_392(empty_list, arg0, var_129);
+Function fn_816;
+Value *arityImpl_835(List *closures, Value *arg0) {
+Value *rslt0 = protoFnImpl_393(empty_list, arg0, var_129);
 return(rslt0);
 };
 
 
 // --------- seq_impl main body --------------
-Function fn_813 = {FunctionType, -1, "seq_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_832}}};
+Function fn_816 = {FunctionType, -1, "seq_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_835}}};
 
 
 // --------- hash-seq_impl --------------
-Function fn_814;
-Value *arityImpl_833(List *closures, Value *arg0, Value *arg1) {
+Function fn_817;
+Value *arityImpl_836(List *closures, Value *arg0, Value *arg1) {
 
 BitmapIndexedNode *node = (BitmapIndexedNode *)arg0;
 int cnt = __builtin_popcount(node->bitmap);
@@ -7988,12 +7962,12 @@ return((Value *)seq);
 
 
 // --------- hash-seq_impl main body --------------
-Function fn_814 = {FunctionType, -1, "hash-seq_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_833}}};
+Function fn_817 = {FunctionType, -1, "hash-seq_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_836}}};
 
 
 // --------- assoc*_impl --------------
-Function fn_815;
-Value *arityImpl_834(List *closures, Value *arg0, Value *arg1, Value *arg2, Value *arg3, Value *arg4) {
+Function fn_818;
+Value *arityImpl_837(List *closures, Value *arg0, Value *arg1, Value *arg2, Value *arg3, Value *arg4) {
 
 BitmapIndexedNode *node = (BitmapIndexedNode *)arg0;
 Value *key = arg1;
@@ -8109,12 +8083,12 @@ if (node->bitmap & bit) {
 
 
 // --------- assoc*_impl main body --------------
-Function fn_815 = {FunctionType, -1, "assoc*_impl", 1, {&(FnArity){FnArityType, -1, 5, (List *)0, 0, arityImpl_834}}};
+Function fn_818 = {FunctionType, -1, "assoc*_impl", 1, {&(FnArity){FnArityType, -1, 5, (List *)0, 0, arityImpl_837}}};
 
 
 // --------- get*_impl --------------
-Function fn_816;
-Value *arityImpl_835(List *closures, Value *arg0, Value *arg1, Value *arg2, Value *arg3, Value *arg4) {
+Function fn_819;
+Value *arityImpl_838(List *closures, Value *arg0, Value *arg1, Value *arg2, Value *arg3, Value *arg4) {
 
 BitmapIndexedNode *node = (BitmapIndexedNode *)arg0;
 Value *key = arg1;
@@ -8152,12 +8126,12 @@ if (node->bitmap & bit) {
 
 
 // --------- get*_impl main body --------------
-Function fn_816 = {FunctionType, -1, "get*_impl", 1, {&(FnArity){FnArityType, -1, 5, (List *)0, 0, arityImpl_835}}};
+Function fn_819 = {FunctionType, -1, "get*_impl", 1, {&(FnArity){FnArityType, -1, 5, (List *)0, 0, arityImpl_838}}};
 
 
 // --------- count_impl --------------
-Function fn_836;
-Value *arityImpl_849(List *closures, Value *arg0) {
+Function fn_839;
+Value *arityImpl_852(List *closures, Value *arg0) {
 
 int accum = 0;
 for(int i = 0; i < 32; i++){
@@ -8172,42 +8146,42 @@ return(numberValue(accum));
 
 
 // --------- count_impl main body --------------
-Function fn_836 = {FunctionType, -1, "count_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_849}}};
+Function fn_839 = {FunctionType, -1, "count_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_852}}};
 
 
 // --------- empty?_impl --------------
-Function fn_837;
-Value *arityImpl_850(List *closures, Value *arg0) {
+Function fn_840;
+Value *arityImpl_853(List *closures, Value *arg0) {
 incRef(var_76);
 return(var_76);
 };
 
 
 // --------- empty?_impl main body --------------
-Function fn_837 = {FunctionType, -1, "empty?_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_850}}};
+Function fn_840 = {FunctionType, -1, "empty?_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_853}}};
 
 
 // --------- zero_impl --------------
-Function fn_838;
-Value *arityImpl_851(List *closures, Value *arg0) {
-incRef(var_803);
-return(var_803);
+Function fn_841;
+Value *arityImpl_854(List *closures, Value *arg0) {
+incRef(var_806);
+return(var_806);
 };
 
 
 // --------- zero_impl main body --------------
-Function fn_838 = {FunctionType, -1, "zero_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_851}}};
+Function fn_841 = {FunctionType, -1, "zero_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_854}}};
 
 
 // --------- comp*_impl --------------
-Function fn_839;
+Function fn_842;
 
 // --------- anon --------------
-Function fn_853;
+Function fn_856;
 
 // --------- anon --------------
-Function fn_855;
-Value *arityImpl_856(List *closures, Value *arg0, Value *arg1) {
+Function fn_858;
+Value *arityImpl_859(List *closures, Value *arg0, Value *arg1) {
 List *varArgs0 = empty_list;
 incRef((Value *)arg1);
 varArgs0 = (List *)listCons((Value *)arg1, varArgs0);
@@ -8215,43 +8189,43 @@ incRef((Value *)arg0);
 varArgs0 = (List *)listCons((Value *)arg0, varArgs0);
 Value *rslt1 = arityImpl_250(empty_list, (Value *)varArgs0);
 dec_and_free((Value *)varArgs0);
-Value *rslt2 = arityImpl_595(empty_list, (Value *)&protoFn_395, rslt1);
+Value *rslt2 = arityImpl_596(empty_list, (Value *)&protoFn_396, rslt1);
 incRef(rslt2);
+dec_and_free(rslt2);
 dec_and_free(rslt1);
-dec_and_free(rslt2);
 return(rslt2);
 };
 
 
 // --------- anon main body --------------
-Function fn_855 = {FunctionType, -1, "anon", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_856}}};
+Function fn_858 = {FunctionType, -1, "anon", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_859}}};
 
-Value *arityImpl_854(List *closures, Value *arg0, Value *arg1) {
+Value *arityImpl_857(List *closures, Value *arg0, Value *arg1) {
 Value *rslt0 = protoFnImpl_340(empty_list, arg1);
-Value *rslt2 = protoFnImpl_321(empty_list, rslt0, arg0, (Value *)&fn_855);
+Value *rslt2 = protoFnImpl_321(empty_list, rslt0, arg0, (Value *)&fn_858);
 incRef(rslt2);
-dec_and_free(rslt0);
 dec_and_free(rslt2);
+dec_and_free(rslt0);
 return(rslt2);
 };
 
 
 // --------- anon main body --------------
-Function fn_853 = {FunctionType, -1, "anon", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_854}}};
+Function fn_856 = {FunctionType, -1, "anon", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_857}}};
 
-Value *arityImpl_852(List *closures, Value *arg0, Value *arg1) {
-Value *rslt1 = protoFnImpl_321(empty_list, arg1, arg0, (Value *)&fn_853);
+Value *arityImpl_855(List *closures, Value *arg0, Value *arg1) {
+Value *rslt1 = protoFnImpl_321(empty_list, arg1, arg0, (Value *)&fn_856);
 return(rslt1);
 };
 
 
 // --------- comp*_impl main body --------------
-Function fn_839 = {FunctionType, -1, "comp*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_852}}};
+Function fn_842 = {FunctionType, -1, "comp*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_855}}};
 
 
 // --------- get_impl --------------
-Function fn_840;
-Value *arityImpl_857(List *closures, Value *arg0, Value *arg1, Value *arg2) {
+Function fn_843;
+Value *arityImpl_860(List *closures, Value *arg0, Value *arg1, Value *arg2) {
 
 Value *hash = sha1(arg1);
 Value *shift = numberValue(0);
@@ -8263,44 +8237,44 @@ return(found);
 
 
 // --------- get_impl main body --------------
-Function fn_840 = {FunctionType, -1, "get_impl", 1, {&(FnArity){FnArityType, -1, 3, (List *)0, 0, arityImpl_857}}};
+Function fn_843 = {FunctionType, -1, "get_impl", 1, {&(FnArity){FnArityType, -1, 3, (List *)0, 0, arityImpl_860}}};
 
 
 // --------- keys_impl --------------
-Function fn_841;
-Value *arityImpl_858(List *closures, Value *arg0) {
+Function fn_844;
+Value *arityImpl_861(List *closures, Value *arg0) {
 Value *rslt0 = protoFnImpl_340(empty_list, arg0);
 Value *rslt1 = protoFnImpl_258(empty_list, rslt0, (Value *)&protoFn_333);
 incRef(rslt1);
-dec_and_free(rslt1);
 dec_and_free(rslt0);
+dec_and_free(rslt1);
 return(rslt1);
 };
 
 
 // --------- keys_impl main body --------------
-Function fn_841 = {FunctionType, -1, "keys_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_858}}};
+Function fn_844 = {FunctionType, -1, "keys_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_861}}};
 
 
 // --------- vals_impl --------------
-Function fn_842;
-Value *arityImpl_859(List *closures, Value *arg0) {
+Function fn_845;
+Value *arityImpl_862(List *closures, Value *arg0) {
 Value *rslt0 = protoFnImpl_340(empty_list, arg0);
 Value *rslt1 = protoFnImpl_258(empty_list, rslt0, (Value *)&fn_347);
 incRef(rslt1);
-dec_and_free(rslt1);
 dec_and_free(rslt0);
+dec_and_free(rslt1);
 return(rslt1);
 };
 
 
 // --------- vals_impl main body --------------
-Function fn_842 = {FunctionType, -1, "vals_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_859}}};
+Function fn_845 = {FunctionType, -1, "vals_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_862}}};
 
 
 // --------- assoc_impl --------------
-Function fn_843;
-Value *arityImpl_860(List *closures, Value *arg0, Value *arg1, Value *arg2) {
+Function fn_846;
+Value *arityImpl_863(List *closures, Value *arg0, Value *arg1, Value *arg2) {
 
 Value *hash = sha1(arg1);
 Value *shift = numberValue(0);
@@ -8312,40 +8286,40 @@ return(newNode);
 
 
 // --------- assoc_impl main body --------------
-Function fn_843 = {FunctionType, -1, "assoc_impl", 1, {&(FnArity){FnArityType, -1, 3, (List *)0, 0, arityImpl_860}}};
+Function fn_846 = {FunctionType, -1, "assoc_impl", 1, {&(FnArity){FnArityType, -1, 3, (List *)0, 0, arityImpl_863}}};
 
 
 // --------- string-list_impl --------------
-Function fn_844;
+Function fn_847;
 
 // --------- anon --------------
-Function fn_862;
-Value *arityImpl_863(List *closures, Value *arg0) {
+Function fn_865;
+Value *arityImpl_866(List *closures, Value *arg0) {
 Value *rslt0 = protoFnImpl_258(empty_list, arg0, (Value *)&protoFn_267);
 List *varArgs1 = empty_list;
 incRef((Value *)(Value *)&_str_52);
 varArgs1 = (List *)listCons((Value *)(Value *)&_str_52, varArgs1);
 Value *rslt2 = arityImpl_250(empty_list, (Value *)varArgs1);
 dec_and_free((Value *)varArgs1);
-Value *rslt3 = arityImpl_675(empty_list, rslt0, rslt2);
+Value *rslt3 = arityImpl_677(empty_list, rslt0, rslt2);
 Value *rslt4 = arityImpl_138(empty_list, rslt3);
 Value *rslt5 = arityImpl_141(empty_list, rslt3);
 Value *rslt6 = protoFnImpl_366(empty_list, rslt4, rslt5);
 incRef(rslt6);
-dec_and_free(rslt6);
-dec_and_free(rslt0);
-dec_and_free(rslt5);
-dec_and_free(rslt4);
-dec_and_free(rslt3);
 dec_and_free(rslt2);
+dec_and_free(rslt3);
+dec_and_free(rslt4);
+dec_and_free(rslt5);
+dec_and_free(rslt0);
+dec_and_free(rslt6);
 return(rslt6);
 };
 
 
 // --------- anon main body --------------
-Function fn_862 = {FunctionType, -1, "anon", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_863}}};
+Function fn_865 = {FunctionType, -1, "anon", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_866}}};
 
-Value *arityImpl_861(List *closures, Value *arg0) {
+Value *arityImpl_864(List *closures, Value *arg0) {
 Value *rslt0 = protoFnImpl_340(empty_list, arg0);
 Value *cond1;
 Value *rslt17 = arityImpl_279(empty_list, rslt0);
@@ -8362,13 +8336,13 @@ cond1 = rslt19;
 dec_and_free(rslt19);
 } else {
 dec_and_free(rslt17);
-Value *rslt3 = protoFnImpl_258(empty_list, rslt0, (Value *)&fn_862);
+Value *rslt3 = protoFnImpl_258(empty_list, rslt0, (Value *)&fn_865);
 List *varArgs4 = empty_list;
 incRef((Value *)(Value *)&_str_50);
 varArgs4 = (List *)listCons((Value *)(Value *)&_str_50, varArgs4);
 Value *rslt5 = arityImpl_250(empty_list, (Value *)varArgs4);
 dec_and_free((Value *)varArgs4);
-Value *rslt6 = arityImpl_675(empty_list, rslt3, rslt5);
+Value *rslt6 = arityImpl_677(empty_list, rslt3, rslt5);
 Value *rslt7 = arityImpl_138(empty_list, rslt6);
 Value *rslt8 = arityImpl_141(empty_list, rslt6);
 Value *rslt9 = protoFnImpl_366(empty_list, rslt7, rslt8);
@@ -8389,7 +8363,7 @@ incRef((Value *)rslt9);
 varArgs14 = (List *)listCons((Value *)rslt9, varArgs14);
 Value *rslt15 = arityImpl_250(empty_list, (Value *)varArgs14);
 dec_and_free((Value *)varArgs14);
-Value *rslt16 = arityImpl_667(empty_list, rslt11, rslt15);
+Value *rslt16 = protoFnImpl_366(empty_list, rslt11, rslt15);
 incRef(rslt16);
 cond1 = rslt16;
 dec_and_free(rslt6);
@@ -8404,31 +8378,31 @@ dec_and_free(rslt7);
 dec_and_free(rslt3);
 }
 incRef(cond1);
-dec_and_free(cond1);
 dec_and_free(rslt0);
+dec_and_free(cond1);
 return(cond1);
 };
 
 
 // --------- string-list_impl main body --------------
-Function fn_844 = {FunctionType, -1, "string-list_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_861}}};
+Function fn_847 = {FunctionType, -1, "string-list_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_864}}};
 
 
 // --------- seq_impl --------------
-Function fn_845;
-Value *arityImpl_864(List *closures, Value *arg0) {
-Value *rslt0 = protoFnImpl_392(empty_list, arg0, var_129);
+Function fn_848;
+Value *arityImpl_867(List *closures, Value *arg0) {
+Value *rslt0 = protoFnImpl_393(empty_list, arg0, var_129);
 return(rslt0);
 };
 
 
 // --------- seq_impl main body --------------
-Function fn_845 = {FunctionType, -1, "seq_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_864}}};
+Function fn_848 = {FunctionType, -1, "seq_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_867}}};
 
 
 // --------- hash-seq_impl --------------
-Function fn_846;
-Value *arityImpl_865(List *closures, Value *arg0, Value *arg1) {
+Function fn_849;
+Value *arityImpl_868(List *closures, Value *arg0, Value *arg1) {
 
 ArrayNode *node = (ArrayNode *)arg0;
 List *seq = (List *)arg1;
@@ -8441,12 +8415,12 @@ return((Value *)seq);
 
 
 // --------- hash-seq_impl main body --------------
-Function fn_846 = {FunctionType, -1, "hash-seq_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_865}}};
+Function fn_849 = {FunctionType, -1, "hash-seq_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_868}}};
 
 
 // --------- assoc*_impl --------------
-Function fn_847;
-Value *arityImpl_866(List *closures, Value *arg0, Value *arg1, Value *arg2, Value *arg3, Value *arg4) {
+Function fn_850;
+Value *arityImpl_869(List *closures, Value *arg0, Value *arg1, Value *arg2, Value *arg3, Value *arg4) {
 
 ArrayNode *node = (ArrayNode *)arg0;
 Value *key = arg1;
@@ -8492,12 +8466,12 @@ return((Value *)newNode);
 
 
 // --------- assoc*_impl main body --------------
-Function fn_847 = {FunctionType, -1, "assoc*_impl", 1, {&(FnArity){FnArityType, -1, 5, (List *)0, 0, arityImpl_866}}};
+Function fn_850 = {FunctionType, -1, "assoc*_impl", 1, {&(FnArity){FnArityType, -1, 5, (List *)0, 0, arityImpl_869}}};
 
 
 // --------- get*_impl --------------
-Function fn_848;
-Value *arityImpl_867(List *closures, Value *arg0, Value *arg1, Value *arg2, Value *arg3, Value *arg4) {
+Function fn_851;
+Value *arityImpl_870(List *closures, Value *arg0, Value *arg1, Value *arg2, Value *arg3, Value *arg4) {
 
 ArrayNode *node = (ArrayNode *)arg0;
 Value *key = arg1;
@@ -8520,54 +8494,54 @@ return((Value *)found);
 
 
 // --------- get*_impl main body --------------
-Function fn_848 = {FunctionType, -1, "get*_impl", 1, {&(FnArity){FnArityType, -1, 5, (List *)0, 0, arityImpl_867}}};
+Function fn_851 = {FunctionType, -1, "get*_impl", 1, {&(FnArity){FnArityType, -1, 5, (List *)0, 0, arityImpl_870}}};
 
 
 // --------- count_impl --------------
-Function fn_868;
-Value *arityImpl_881(List *closures, Value *arg0) {
+Function fn_871;
+Value *arityImpl_884(List *closures, Value *arg0) {
 
 return(numberValue(((HashCollisionNode *) arg0)->count / 2));
 };
 
 
 // --------- count_impl main body --------------
-Function fn_868 = {FunctionType, -1, "count_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_881}}};
+Function fn_871 = {FunctionType, -1, "count_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_884}}};
 
 
 // --------- empty?_impl --------------
-Function fn_869;
-Value *arityImpl_882(List *closures, Value *arg0) {
+Function fn_872;
+Value *arityImpl_885(List *closures, Value *arg0) {
 incRef(var_76);
 return(var_76);
 };
 
 
 // --------- empty?_impl main body --------------
-Function fn_869 = {FunctionType, -1, "empty?_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_882}}};
+Function fn_872 = {FunctionType, -1, "empty?_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_885}}};
 
 
 // --------- zero_impl --------------
-Function fn_870;
-Value *arityImpl_883(List *closures, Value *arg0) {
-incRef(var_803);
-return(var_803);
+Function fn_873;
+Value *arityImpl_886(List *closures, Value *arg0) {
+incRef(var_806);
+return(var_806);
 };
 
 
 // --------- zero_impl main body --------------
-Function fn_870 = {FunctionType, -1, "zero_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_883}}};
+Function fn_873 = {FunctionType, -1, "zero_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_886}}};
 
 
 // --------- comp*_impl --------------
-Function fn_871;
+Function fn_874;
 
 // --------- anon --------------
-Function fn_885;
+Function fn_888;
 
 // --------- anon --------------
-Function fn_887;
-Value *arityImpl_888(List *closures, Value *arg0, Value *arg1) {
+Function fn_890;
+Value *arityImpl_891(List *closures, Value *arg0, Value *arg1) {
 List *varArgs0 = empty_list;
 incRef((Value *)arg1);
 varArgs0 = (List *)listCons((Value *)arg1, varArgs0);
@@ -8575,43 +8549,43 @@ incRef((Value *)arg0);
 varArgs0 = (List *)listCons((Value *)arg0, varArgs0);
 Value *rslt1 = arityImpl_250(empty_list, (Value *)varArgs0);
 dec_and_free((Value *)varArgs0);
-Value *rslt2 = arityImpl_595(empty_list, (Value *)&protoFn_395, rslt1);
+Value *rslt2 = arityImpl_596(empty_list, (Value *)&protoFn_396, rslt1);
 incRef(rslt2);
+dec_and_free(rslt2);
 dec_and_free(rslt1);
-dec_and_free(rslt2);
 return(rslt2);
 };
 
 
 // --------- anon main body --------------
-Function fn_887 = {FunctionType, -1, "anon", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_888}}};
+Function fn_890 = {FunctionType, -1, "anon", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_891}}};
 
-Value *arityImpl_886(List *closures, Value *arg0, Value *arg1) {
+Value *arityImpl_889(List *closures, Value *arg0, Value *arg1) {
 Value *rslt0 = protoFnImpl_340(empty_list, arg1);
-Value *rslt2 = protoFnImpl_321(empty_list, rslt0, arg0, (Value *)&fn_887);
+Value *rslt2 = protoFnImpl_321(empty_list, rslt0, arg0, (Value *)&fn_890);
 incRef(rslt2);
-dec_and_free(rslt0);
 dec_and_free(rslt2);
+dec_and_free(rslt0);
 return(rslt2);
 };
 
 
 // --------- anon main body --------------
-Function fn_885 = {FunctionType, -1, "anon", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_886}}};
+Function fn_888 = {FunctionType, -1, "anon", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_889}}};
 
-Value *arityImpl_884(List *closures, Value *arg0, Value *arg1) {
-Value *rslt1 = protoFnImpl_321(empty_list, arg1, arg0, (Value *)&fn_885);
+Value *arityImpl_887(List *closures, Value *arg0, Value *arg1) {
+Value *rslt1 = protoFnImpl_321(empty_list, arg1, arg0, (Value *)&fn_888);
 return(rslt1);
 };
 
 
 // --------- comp*_impl main body --------------
-Function fn_871 = {FunctionType, -1, "comp*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_884}}};
+Function fn_874 = {FunctionType, -1, "comp*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_887}}};
 
 
 // --------- get_impl --------------
-Function fn_872;
-Value *arityImpl_889(List *closures, Value *arg0, Value *arg1, Value *arg2) {
+Function fn_875;
+Value *arityImpl_892(List *closures, Value *arg0, Value *arg1, Value *arg2) {
 
 Value *hash = sha1(arg1);
 Value *shift = numberValue(0);
@@ -8623,44 +8597,44 @@ return(found);
 
 
 // --------- get_impl main body --------------
-Function fn_872 = {FunctionType, -1, "get_impl", 1, {&(FnArity){FnArityType, -1, 3, (List *)0, 0, arityImpl_889}}};
+Function fn_875 = {FunctionType, -1, "get_impl", 1, {&(FnArity){FnArityType, -1, 3, (List *)0, 0, arityImpl_892}}};
 
 
 // --------- keys_impl --------------
-Function fn_873;
-Value *arityImpl_890(List *closures, Value *arg0) {
+Function fn_876;
+Value *arityImpl_893(List *closures, Value *arg0) {
 Value *rslt0 = protoFnImpl_340(empty_list, arg0);
 Value *rslt1 = protoFnImpl_258(empty_list, rslt0, (Value *)&protoFn_333);
 incRef(rslt1);
-dec_and_free(rslt1);
 dec_and_free(rslt0);
+dec_and_free(rslt1);
 return(rslt1);
 };
 
 
 // --------- keys_impl main body --------------
-Function fn_873 = {FunctionType, -1, "keys_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_890}}};
+Function fn_876 = {FunctionType, -1, "keys_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_893}}};
 
 
 // --------- vals_impl --------------
-Function fn_874;
-Value *arityImpl_891(List *closures, Value *arg0) {
+Function fn_877;
+Value *arityImpl_894(List *closures, Value *arg0) {
 Value *rslt0 = protoFnImpl_340(empty_list, arg0);
 Value *rslt1 = protoFnImpl_258(empty_list, rslt0, (Value *)&fn_347);
 incRef(rslt1);
-dec_and_free(rslt1);
 dec_and_free(rslt0);
+dec_and_free(rslt1);
 return(rslt1);
 };
 
 
 // --------- vals_impl main body --------------
-Function fn_874 = {FunctionType, -1, "vals_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_891}}};
+Function fn_877 = {FunctionType, -1, "vals_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_894}}};
 
 
 // --------- assoc_impl --------------
-Function fn_875;
-Value *arityImpl_892(List *closures, Value *arg0, Value *arg1, Value *arg2) {
+Function fn_878;
+Value *arityImpl_895(List *closures, Value *arg0, Value *arg1, Value *arg2) {
 
 Value *hash = sha1(arg1);
 Value *shift = numberValue(0);
@@ -8672,40 +8646,40 @@ return(newNode);
 
 
 // --------- assoc_impl main body --------------
-Function fn_875 = {FunctionType, -1, "assoc_impl", 1, {&(FnArity){FnArityType, -1, 3, (List *)0, 0, arityImpl_892}}};
+Function fn_878 = {FunctionType, -1, "assoc_impl", 1, {&(FnArity){FnArityType, -1, 3, (List *)0, 0, arityImpl_895}}};
 
 
 // --------- string-list_impl --------------
-Function fn_876;
+Function fn_879;
 
 // --------- anon --------------
-Function fn_894;
-Value *arityImpl_895(List *closures, Value *arg0) {
+Function fn_897;
+Value *arityImpl_898(List *closures, Value *arg0) {
 Value *rslt0 = protoFnImpl_258(empty_list, arg0, (Value *)&protoFn_267);
 List *varArgs1 = empty_list;
 incRef((Value *)(Value *)&_str_52);
 varArgs1 = (List *)listCons((Value *)(Value *)&_str_52, varArgs1);
 Value *rslt2 = arityImpl_250(empty_list, (Value *)varArgs1);
 dec_and_free((Value *)varArgs1);
-Value *rslt3 = arityImpl_675(empty_list, rslt0, rslt2);
+Value *rslt3 = arityImpl_677(empty_list, rslt0, rslt2);
 Value *rslt4 = arityImpl_138(empty_list, rslt3);
 Value *rslt5 = arityImpl_141(empty_list, rslt3);
 Value *rslt6 = protoFnImpl_366(empty_list, rslt4, rslt5);
 incRef(rslt6);
-dec_and_free(rslt6);
-dec_and_free(rslt0);
-dec_and_free(rslt5);
-dec_and_free(rslt4);
-dec_and_free(rslt3);
 dec_and_free(rslt2);
+dec_and_free(rslt3);
+dec_and_free(rslt4);
+dec_and_free(rslt5);
+dec_and_free(rslt0);
+dec_and_free(rslt6);
 return(rslt6);
 };
 
 
 // --------- anon main body --------------
-Function fn_894 = {FunctionType, -1, "anon", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_895}}};
+Function fn_897 = {FunctionType, -1, "anon", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_898}}};
 
-Value *arityImpl_893(List *closures, Value *arg0) {
+Value *arityImpl_896(List *closures, Value *arg0) {
 Value *rslt0 = protoFnImpl_340(empty_list, arg0);
 Value *cond1;
 Value *rslt17 = arityImpl_279(empty_list, rslt0);
@@ -8722,13 +8696,13 @@ cond1 = rslt19;
 dec_and_free(rslt19);
 } else {
 dec_and_free(rslt17);
-Value *rslt3 = protoFnImpl_258(empty_list, rslt0, (Value *)&fn_894);
+Value *rslt3 = protoFnImpl_258(empty_list, rslt0, (Value *)&fn_897);
 List *varArgs4 = empty_list;
 incRef((Value *)(Value *)&_str_50);
 varArgs4 = (List *)listCons((Value *)(Value *)&_str_50, varArgs4);
 Value *rslt5 = arityImpl_250(empty_list, (Value *)varArgs4);
 dec_and_free((Value *)varArgs4);
-Value *rslt6 = arityImpl_675(empty_list, rslt3, rslt5);
+Value *rslt6 = arityImpl_677(empty_list, rslt3, rslt5);
 Value *rslt7 = arityImpl_138(empty_list, rslt6);
 Value *rslt8 = arityImpl_141(empty_list, rslt6);
 Value *rslt9 = protoFnImpl_366(empty_list, rslt7, rslt8);
@@ -8749,7 +8723,7 @@ incRef((Value *)rslt9);
 varArgs14 = (List *)listCons((Value *)rslt9, varArgs14);
 Value *rslt15 = arityImpl_250(empty_list, (Value *)varArgs14);
 dec_and_free((Value *)varArgs14);
-Value *rslt16 = arityImpl_667(empty_list, rslt11, rslt15);
+Value *rslt16 = protoFnImpl_366(empty_list, rslt11, rslt15);
 incRef(rslt16);
 cond1 = rslt16;
 dec_and_free(rslt6);
@@ -8764,31 +8738,31 @@ dec_and_free(rslt7);
 dec_and_free(rslt3);
 }
 incRef(cond1);
-dec_and_free(cond1);
 dec_and_free(rslt0);
+dec_and_free(cond1);
 return(cond1);
 };
 
 
 // --------- string-list_impl main body --------------
-Function fn_876 = {FunctionType, -1, "string-list_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_893}}};
+Function fn_879 = {FunctionType, -1, "string-list_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_896}}};
 
 
 // --------- seq_impl --------------
-Function fn_877;
-Value *arityImpl_896(List *closures, Value *arg0) {
-Value *rslt0 = protoFnImpl_392(empty_list, arg0, var_129);
+Function fn_880;
+Value *arityImpl_899(List *closures, Value *arg0) {
+Value *rslt0 = protoFnImpl_393(empty_list, arg0, var_129);
 return(rslt0);
 };
 
 
 // --------- seq_impl main body --------------
-Function fn_877 = {FunctionType, -1, "seq_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_896}}};
+Function fn_880 = {FunctionType, -1, "seq_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_899}}};
 
 
 // --------- hash-seq_impl --------------
-Function fn_878;
-Value *arityImpl_897(List *closures, Value *arg0, Value *arg1) {
+Function fn_881;
+Value *arityImpl_900(List *closures, Value *arg0, Value *arg1) {
 
 HashCollisionNode *node = (HashCollisionNode *)arg0;
 List *seq = (List *)arg1;
@@ -8805,12 +8779,12 @@ return((Value *)seq);
 
 
 // --------- hash-seq_impl main body --------------
-Function fn_878 = {FunctionType, -1, "hash-seq_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_897}}};
+Function fn_881 = {FunctionType, -1, "hash-seq_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_900}}};
 
 
 // --------- assoc*_impl --------------
-Function fn_879;
-Value *arityImpl_898(List *closures, Value *arg0, Value *arg1, Value *arg2, Value *arg3, Value *arg4) {
+Function fn_882;
+Value *arityImpl_901(List *closures, Value *arg0, Value *arg1, Value *arg2, Value *arg3, Value *arg4) {
 
 HashCollisionNode *node = (HashCollisionNode *)arg0;
 Value *key = arg1;
@@ -8858,12 +8832,12 @@ if(equal(sha1(node->array[0]), arg3)) {
 
 
 // --------- assoc*_impl main body --------------
-Function fn_879 = {FunctionType, -1, "assoc*_impl", 1, {&(FnArity){FnArityType, -1, 5, (List *)0, 0, arityImpl_898}}};
+Function fn_882 = {FunctionType, -1, "assoc*_impl", 1, {&(FnArity){FnArityType, -1, 5, (List *)0, 0, arityImpl_901}}};
 
 
 // --------- get*_impl --------------
-Function fn_880;
-Value *arityImpl_899(List *closures, Value *arg0, Value *arg1, Value *arg2, Value *arg3, Value *arg4) {
+Function fn_883;
+Value *arityImpl_902(List *closures, Value *arg0, Value *arg1, Value *arg2, Value *arg3, Value *arg4) {
 
 HashCollisionNode *node = (HashCollisionNode *)arg0;
 List *seq = (List *)arg1;
@@ -8884,15 +8858,15 @@ return(arg2);
 
 
 // --------- get*_impl main body --------------
-Function fn_880 = {FunctionType, -1, "get*_impl", 1, {&(FnArity){FnArityType, -1, 5, (List *)0, 0, arityImpl_899}}};
+Function fn_883 = {FunctionType, -1, "get*_impl", 1, {&(FnArity){FnArityType, -1, 5, (List *)0, 0, arityImpl_902}}};
 
 
 // --------- hash-map --------------
-Function fn_900;
+Function fn_903;
 
 // --------- anon --------------
-Function fn_902;
-Value *arityImpl_903(List *closures, Value *arg0, Value *arg1) {
+Function fn_905;
+Value *arityImpl_906(List *closures, Value *arg0, Value *arg1) {
 List *varArgs0 = empty_list;
 incRef((Value *)arg1);
 varArgs0 = (List *)listCons((Value *)arg1, varArgs0);
@@ -8900,112 +8874,100 @@ incRef((Value *)arg0);
 varArgs0 = (List *)listCons((Value *)arg0, varArgs0);
 Value *rslt1 = arityImpl_250(empty_list, (Value *)varArgs0);
 dec_and_free((Value *)varArgs0);
-Value *rslt2 = arityImpl_595(empty_list, (Value *)&protoFn_395, rslt1);
+Value *rslt2 = arityImpl_596(empty_list, (Value *)&protoFn_396, rslt1);
 incRef(rslt2);
-dec_and_free(rslt1);
 dec_and_free(rslt2);
+dec_and_free(rslt1);
 return(rslt2);
 };
 
 
 // --------- anon main body --------------
-Function fn_902 = {FunctionType, -1, "anon", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_903}}};
+Function fn_905 = {FunctionType, -1, "anon", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_906}}};
 
-Value *arityImpl_901(List *closures, Value *varArgs) {
+Value *arityImpl_904(List *closures, Value *varArgs) {
 List *argsList = (List *)varArgs;
-Value *arg0 = (Value *)argsList;
-Value *rslt0 = arityImpl_788(empty_list, arg0, (Value *)&_num_2);
-Value *rslt2 = protoFnImpl_321(empty_list, rslt0, var_803, (Value *)&fn_902);
+Value *arg0 = (Value *) argsList;
+Value *rslt0 = arityImpl_791(empty_list, arg0, (Value *)&_num_2);
+Value *rslt2 = protoFnImpl_321(empty_list, rslt0, var_806, (Value *)&fn_905);
 incRef(rslt2);
-dec_and_free(rslt0);
 dec_and_free(rslt2);
+dec_and_free(rslt0);
 return(rslt2);
 };
 
 // --------- hash-map main body --------------
-Function fn_900 = {FunctionType, -1, "hash-map", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_901}}};
+Function fn_903 = {FunctionType, -1, "hash-map", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_904}}};
 
 SubString _kw_3 = {5, -1, 10, 0, 0, ":not-found"};
 
 // --------- merge-with --------------
-Function fn_905;
+Function fn_908;
 
 // --------- anon --------------
-Function fn_907;
+Function fn_910;
 
 // --------- anon --------------
-Function fn_909;
-Value *arityImpl_910(List *closures, Value *arg0, Value *arg1) {
-Value *val5 = closures->head;
+Function fn_912;
+Value *arityImpl_913(List *closures, Value *arg0, Value *arg3) {
+Value *val2 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
 closures = closures->tail;
-Value *cond0;
-Value *rslt13 = protoFnImpl_313(empty_list, arg1);
-Value *rslt14 = arityImpl_435(empty_list, (Value *)&_num_2, rslt13);
-Value *rslt15 = arityImpl_426(empty_list, rslt14);
-dec_and_free(rslt14);
-dec_and_free(rslt13);
+List *arg4 = (List *)arg3;
+Value *arg1 = arg4->head;
+if (arg4->tail) arg4->tail->len = arg4->len - 1;
+arg4 = arg4->tail;
+Value *arg2 = arg4->head;
+if (arg4->tail) arg4->tail->len = arg4->len - 1;
+arg4 = arg4->tail;
+Value *rslt0 = protoFnImpl_417(empty_list, arg0, arg1, (Value *)&_kw_3);
+Value *cond1;
+Value *rslt8 = arityImpl_436(empty_list, (Value *)&_kw_3, rslt0);
 
-if (isTrue(rslt15)) {
-dec_and_free(rslt15);
-incRef(arg0);
-cond0 = arg0;
+if (isTrue(rslt8)) {
+dec_and_free(rslt8);
+Value *rslt9 = protoFnImpl_410(empty_list, arg0, arg1, arg2);
+incRef(rslt9);
+cond1 = rslt9;
+dec_and_free(rslt9);
 } else {
-dec_and_free(rslt15);
-Value *rslt1 = arityImpl_794(empty_list, arg1, (Value *)&_num_13);
-Value *rslt2 = arityImpl_794(empty_list, arg1, (Value *)&_num_1);
-Value *rslt3 = protoFnImpl_416(empty_list, arg0, rslt1, (Value *)&_kw_3);
-Value *cond4;
-Value *rslt11 = arityImpl_435(empty_list, (Value *)&_kw_3, rslt3);
-
-if (isTrue(rslt11)) {
-dec_and_free(rslt11);
-Value *rslt12 = protoFnImpl_409(empty_list, arg0, rslt1, rslt2);
-incRef(rslt12);
-cond4 = rslt12;
-dec_and_free(rslt12);
+dec_and_free(rslt8);
+Value *rslt6;
+if((val2)->type != FunctionType) {
+rslt6 = protoFnImpl_13(empty_list, val2, rslt0, arg2);
 } else {
-dec_and_free(rslt11);
-Value *rslt9;
-if((val5)->type != FunctionType) {
-rslt9 = protoFnImpl_13(empty_list, val5, rslt3, rslt2);
+FnArity *arity3 = findFnArity(val2, 2);
+if(arity3 != (FnArity *)0 && !arity3->variadic) {
+FnType2 *fn5 = (FnType2 *)arity3->fn;
+rslt6 = fn5(arity3->closures, rslt0, arg2);
+} else if(arity3 != (FnArity *)0 && arity3->variadic) {
+FnType1 *fn5 = (FnType1 *)arity3->fn;
+List *varArgs4 = empty_list;
+incRef(arg2);
+varArgs4 = (List *)listCons(arg2, varArgs4);
+incRef(rslt0);
+varArgs4 = (List *)listCons(rslt0, varArgs4);
+rslt6 = fn5(arity3->closures, (Value *)varArgs4);
+dec_and_free((Value *)varArgs4);
 } else {
-FnArity *arity6 = findFnArity(val5, 2);
-if(arity6 != (FnArity *)0 && !arity6->variadic) {
-FnType2 *fn8 = (FnType2 *)arity6->fn;
-rslt9 = fn8(arity6->closures, rslt3, rslt2);
-} else if(arity6 != (FnArity *)0 && arity6->variadic) {
-FnType1 *fn8 = (FnType1 *)arity6->fn;
-List *varArgs7 = empty_list;
-incRef(rslt2);
-varArgs7 = (List *)listCons(rslt2, varArgs7);
-incRef(rslt3);
-varArgs7 = (List *)listCons(rslt3, varArgs7);
-rslt9 = fn8(arity6->closures, (Value *)varArgs7);
-dec_and_free((Value *)varArgs7);
-} else {
-fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)val5)->name);
+fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)val2)->name);
   abort();
 }
 }
-Value *rslt10 = protoFnImpl_409(empty_list, arg0, rslt1, rslt9);
-incRef(rslt10);
-cond4 = rslt10;
-dec_and_free(rslt10);
-dec_and_free(rslt9);
+Value *rslt7 = protoFnImpl_410(empty_list, arg0, arg1, rslt6);
+incRef(rslt7);
+cond1 = rslt7;
+dec_and_free(rslt6);
+dec_and_free(rslt7);
 }
-incRef(cond4);
-cond0 = cond4;
-dec_and_free(rslt1);
-dec_and_free(cond4);
-dec_and_free(rslt3);
-dec_and_free(rslt2);
-}
-return(cond0);
+incRef(cond1);
+dec_and_free(rslt0);
+dec_and_free(cond1);
+return(cond1);
 };
 
-Value *arityImpl_908(List *closures, Value *arg0, Value *arg1) {
+Value *arityImpl_911(List *closures, Value *arg0, Value *arg1) {
 Value *val2 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
@@ -9016,23 +8978,23 @@ arity_1->type = FnArityType;
 arity_1->count = 2;
 arity_1->closures = empty_list;
 arity_1->variadic = 0;
-arity_1->fn = arityImpl_910;
+arity_1->fn = arityImpl_913;
 incRef((Value *)val2);
 arity_1->closures = listCons((Value *)val2, (List *)arity_1->closures);
-Function *fn_909 = malloc_function(1);
-fn_909->type = FunctionType;
-fn_909->name = "anon";
-fn_909->arityCount = 1;
-fn_909->arities[0] = arity_1;
-Value *rslt3 = protoFnImpl_321(empty_list, rslt0, arg0, (Value *)fn_909);
+Function *fn_912 = malloc_function(1);
+fn_912->type = FunctionType;
+fn_912->name = "anon";
+fn_912->arityCount = 1;
+fn_912->arities[0] = arity_1;
+Value *rslt3 = protoFnImpl_321(empty_list, rslt0, arg0, (Value *)fn_912);
 incRef(rslt3);
-dec_and_free((Value *)fn_909);
-dec_and_free(rslt0);
 dec_and_free(rslt3);
+dec_and_free(rslt0);
+dec_and_free((Value *)fn_912);
 return(rslt3);
 };
 
-Value *arityImpl_906(List *closures, Value *varArgs) {
+Value *arityImpl_909(List *closures, Value *varArgs) {
 List *argsList = (List *)varArgs;
 Value *arg0 = argsList->head;
 if (argsList->tail) argsList->tail->len = argsList->len - 1;
@@ -9040,7 +9002,7 @@ argsList = argsList->tail;
 Value *arg1 = argsList->head;
 if (argsList->tail) argsList->tail->len = argsList->len - 1;
 argsList = argsList->tail;
-Value *arg2 = (Value *)argsList;
+Value *arg2 = (Value *) argsList;
 Value *cond0;
 Value *rslt3 = arityImpl_279(empty_list, arg2);
 
@@ -9055,34 +9017,34 @@ arity_1->type = FnArityType;
 arity_1->count = 2;
 arity_1->closures = empty_list;
 arity_1->variadic = 0;
-arity_1->fn = arityImpl_908;
+arity_1->fn = arityImpl_911;
 incRef((Value *)arg0);
 arity_1->closures = listCons((Value *)arg0, (List *)arity_1->closures);
-Function *fn_907 = malloc_function(1);
-fn_907->type = FunctionType;
-fn_907->name = "anon";
-fn_907->arityCount = 1;
-fn_907->arities[0] = arity_1;
-Value *rslt2 = arityImpl_660(empty_list, arg2, arg1, (Value *)fn_907);
+Function *fn_910 = malloc_function(1);
+fn_910->type = FunctionType;
+fn_910->name = "anon";
+fn_910->arityCount = 1;
+fn_910->arities[0] = arity_1;
+Value *rslt2 = protoFnImpl_321(empty_list, arg2, arg1, (Value *)fn_910);
 incRef(rslt2);
 cond0 = rslt2;
-dec_and_free((Value *)fn_907);
+dec_and_free((Value *)fn_910);
 dec_and_free(rslt2);
 }
 return(cond0);
 };
 
 // --------- merge-with main body --------------
-Function fn_905 = {FunctionType, -1, "merge-with", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_906}}};
+Function fn_908 = {FunctionType, -1, "merge-with", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 1, arityImpl_909}}};
 
 SubString _kw_4 = {5, -1, 17, 0, 0, ":get-in-not-found"};
 
 // --------- get-in --------------
-Function fn_912;
-Value *arityImpl_913(List *closures, Value *arg0, Value *arg1, Value *arg2) {
+Function fn_915;
+Value *arityImpl_916(List *closures, Value *arg0, Value *arg1, Value *arg2) {
 Value *cond0;
 Value *rslt7 = protoFnImpl_313(empty_list, arg1);
-Value *rslt8 = arityImpl_435(empty_list, rslt7, (Value *)&_num_13);
+Value *rslt8 = arityImpl_436(empty_list, rslt7, (Value *)&_num_13);
 dec_and_free(rslt7);
 
 if (isTrue(rslt8)) {
@@ -9092,13 +9054,13 @@ cond0 = arg2;
 } else {
 dec_and_free(rslt8);
 Value *rslt9 = protoFnImpl_313(empty_list, arg1);
-Value *rslt10 = arityImpl_435(empty_list, rslt9, (Value *)&_num_1);
+Value *rslt10 = arityImpl_436(empty_list, rslt9, (Value *)&_num_1);
 dec_and_free(rslt9);
 
 if (isTrue(rslt10)) {
 dec_and_free(rslt10);
 Value *rslt11 = protoFnImpl_342(empty_list, arg1);
-Value *rslt12 = protoFnImpl_416(empty_list, arg0, rslt11, arg2);
+Value *rslt12 = protoFnImpl_417(empty_list, arg0, rslt11, arg2);
 incRef(rslt12);
 cond0 = rslt12;
 dec_and_free(rslt11);
@@ -9106,9 +9068,9 @@ dec_and_free(rslt12);
 } else {
 dec_and_free(rslt10);
 Value *rslt1 = protoFnImpl_342(empty_list, arg1);
-Value *rslt2 = protoFnImpl_416(empty_list, arg0, rslt1, (Value *)&_kw_4);
+Value *rslt2 = protoFnImpl_417(empty_list, arg0, rslt1, (Value *)&_kw_4);
 Value *cond3;
-Value *rslt6 = arityImpl_435(empty_list, (Value *)&_kw_4, rslt2);
+Value *rslt6 = arityImpl_436(empty_list, (Value *)&_kw_4, rslt2);
 
 if (isTrue(rslt6)) {
 dec_and_free(rslt6);
@@ -9117,7 +9079,7 @@ cond3 = arg2;
 } else {
 dec_and_free(rslt6);
 Value *rslt4 = protoFnImpl_338(empty_list, arg1);
-Value *rslt5 = arityImpl_913(closures, rslt2, rslt4, arg2);
+Value *rslt5 = arityImpl_916(closures, rslt2, rslt4, arg2);
 incRef(rslt5);
 cond3 = rslt5;
 dec_and_free(rslt5);
@@ -9135,16 +9097,16 @@ return(cond0);
 
 
 // --------- get-in main body --------------
-Function fn_912 = {FunctionType, -1, "get-in", 1, {&(FnArity){FnArityType, -1, 3, (List *)0, 0, arityImpl_913}}};
+Function fn_915 = {FunctionType, -1, "get-in", 1, {&(FnArity){FnArityType, -1, 3, (List *)0, 0, arityImpl_916}}};
 
 SubString _kw_5 = {5, -1, 14, 0, 0, ":update-in-nil"};
 
 // --------- update-in --------------
-Function fn_915;
-Value *arityImpl_916(List *closures, Value *arg0, Value *arg1, Value *arg2) {
+Function fn_918;
+Value *arityImpl_919(List *closures, Value *arg0, Value *arg1, Value *arg2) {
 Value *cond0;
 Value *rslt8 = protoFnImpl_313(empty_list, arg1);
-Value *rslt9 = arityImpl_435(empty_list, rslt8, (Value *)&_num_13);
+Value *rslt9 = arityImpl_436(empty_list, rslt8, (Value *)&_num_13);
 dec_and_free(rslt8);
 
 if (isTrue(rslt9)) {
@@ -9154,15 +9116,15 @@ cond0 = arg0;
 } else {
 dec_and_free(rslt9);
 Value *rslt10 = protoFnImpl_313(empty_list, arg1);
-Value *rslt11 = arityImpl_435(empty_list, rslt10, (Value *)&_num_1);
+Value *rslt11 = arityImpl_436(empty_list, rslt10, (Value *)&_num_1);
 dec_and_free(rslt10);
 
 if (isTrue(rslt11)) {
 dec_and_free(rslt11);
 Value *rslt12 = protoFnImpl_342(empty_list, arg1);
-Value *rslt13 = protoFnImpl_416(empty_list, arg0, rslt12, (Value *)&_kw_5);
+Value *rslt13 = protoFnImpl_417(empty_list, arg0, rslt12, (Value *)&_kw_5);
 Value *cond14;
-Value *rslt20 = arityImpl_435(empty_list, (Value *)&_kw_5, rslt13);
+Value *rslt20 = arityImpl_436(empty_list, (Value *)&_kw_5, rslt13);
 
 if (isTrue(rslt20)) {
 dec_and_free(rslt20);
@@ -9190,7 +9152,7 @@ fprintf(stderr, "\n*** no arity found for '%s'.\n", ((Function *)arg2)->name);
   abort();
 }
 }
-Value *rslt19 = protoFnImpl_409(empty_list, arg0, rslt12, rslt18);
+Value *rslt19 = protoFnImpl_410(empty_list, arg0, rslt12, rslt18);
 incRef(rslt19);
 cond14 = rslt19;
 dec_and_free(rslt19);
@@ -9204,9 +9166,9 @@ dec_and_free(rslt12);
 } else {
 dec_and_free(rslt11);
 Value *rslt1 = protoFnImpl_342(empty_list, arg1);
-Value *rslt2 = protoFnImpl_416(empty_list, arg0, rslt1, (Value *)&_kw_5);
+Value *rslt2 = protoFnImpl_417(empty_list, arg0, rslt1, (Value *)&_kw_5);
 Value *cond3;
-Value *rslt7 = arityImpl_435(empty_list, (Value *)&_kw_5, rslt2);
+Value *rslt7 = arityImpl_436(empty_list, (Value *)&_kw_5, rslt2);
 
 if (isTrue(rslt7)) {
 dec_and_free(rslt7);
@@ -9215,8 +9177,8 @@ cond3 = arg0;
 } else {
 dec_and_free(rslt7);
 Value *rslt4 = protoFnImpl_338(empty_list, arg1);
-Value *rslt5 = arityImpl_916(closures, rslt2, rslt4, arg2);
-Value *rslt6 = protoFnImpl_409(empty_list, arg0, rslt1, rslt5);
+Value *rslt5 = arityImpl_919(closures, rslt2, rslt4, arg2);
+Value *rslt6 = protoFnImpl_410(empty_list, arg0, rslt1, rslt5);
 incRef(rslt6);
 cond3 = rslt6;
 dec_and_free(rslt6);
@@ -9235,16 +9197,16 @@ return(cond0);
 
 
 // --------- update-in main body --------------
-Function fn_915 = {FunctionType, -1, "update-in", 1, {&(FnArity){FnArityType, -1, 3, (List *)0, 0, arityImpl_916}}};
+Function fn_918 = {FunctionType, -1, "update-in", 1, {&(FnArity){FnArityType, -1, 3, (List *)0, 0, arityImpl_919}}};
 
 SubString _kw_6 = {5, -1, 13, 0, 0, ":assoc-in-nil"};
 
 // --------- assoc-in --------------
-Function fn_918;
-Value *arityImpl_919(List *closures, Value *arg0, Value *arg1, Value *arg2) {
+Function fn_921;
+Value *arityImpl_922(List *closures, Value *arg0, Value *arg1, Value *arg2) {
 Value *cond0;
 Value *rslt13 = protoFnImpl_313(empty_list, arg1);
-Value *rslt14 = arityImpl_435(empty_list, rslt13, (Value *)&_num_13);
+Value *rslt14 = arityImpl_436(empty_list, rslt13, (Value *)&_num_13);
 dec_and_free(rslt13);
 
 if (isTrue(rslt14)) {
@@ -9254,13 +9216,13 @@ cond0 = arg0;
 } else {
 dec_and_free(rslt14);
 Value *rslt15 = protoFnImpl_313(empty_list, arg1);
-Value *rslt16 = arityImpl_435(empty_list, rslt15, (Value *)&_num_1);
+Value *rslt16 = arityImpl_436(empty_list, rslt15, (Value *)&_num_1);
 dec_and_free(rslt15);
 
 if (isTrue(rslt16)) {
 dec_and_free(rslt16);
 Value *rslt17 = protoFnImpl_342(empty_list, arg1);
-Value *rslt18 = protoFnImpl_409(empty_list, arg0, rslt17, arg2);
+Value *rslt18 = protoFnImpl_410(empty_list, arg0, rslt17, arg2);
 incRef(rslt18);
 cond0 = rslt18;
 dec_and_free(rslt18);
@@ -9268,18 +9230,18 @@ dec_and_free(rslt17);
 } else {
 dec_and_free(rslt16);
 Value *rslt1 = protoFnImpl_342(empty_list, arg1);
-Value *rslt2 = protoFnImpl_416(empty_list, arg0, rslt1, (Value *)&_kw_6);
+Value *rslt2 = protoFnImpl_417(empty_list, arg0, rslt1, (Value *)&_kw_6);
 Value *cond3;
-Value *rslt7 = arityImpl_435(empty_list, (Value *)&_kw_6, rslt2);
+Value *rslt7 = arityImpl_436(empty_list, (Value *)&_kw_6, rslt2);
 
 if (isTrue(rslt7)) {
 dec_and_free(rslt7);
 List *varArgs8 = empty_list;
-Value *rslt9 = arityImpl_901(empty_list, (Value *)varArgs8);
+Value *rslt9 = arityImpl_904(empty_list, (Value *)varArgs8);
 dec_and_free((Value *)varArgs8);
 Value *rslt10 = protoFnImpl_338(empty_list, arg1);
-Value *rslt11 = arityImpl_919(closures, rslt9, rslt10, arg2);
-Value *rslt12 = protoFnImpl_409(empty_list, arg0, rslt1, rslt11);
+Value *rslt11 = arityImpl_922(closures, rslt9, rslt10, arg2);
+Value *rslt12 = protoFnImpl_410(empty_list, arg0, rslt1, rslt11);
 incRef(rslt12);
 cond3 = rslt12;
 dec_and_free(rslt10);
@@ -9289,8 +9251,8 @@ dec_and_free(rslt12);
 } else {
 dec_and_free(rslt7);
 Value *rslt4 = protoFnImpl_338(empty_list, arg1);
-Value *rslt5 = arityImpl_919(closures, rslt2, rslt4, arg2);
-Value *rslt6 = protoFnImpl_409(empty_list, arg0, rslt1, rslt5);
+Value *rslt5 = arityImpl_922(closures, rslt2, rslt4, arg2);
+Value *rslt6 = protoFnImpl_410(empty_list, arg0, rslt1, rslt5);
 incRef(rslt6);
 cond3 = rslt6;
 dec_and_free(rslt6);
@@ -9309,43 +9271,43 @@ return(cond0);
 
 
 // --------- assoc-in main body --------------
-Function fn_918 = {FunctionType, -1, "assoc-in", 1, {&(FnArity){FnArityType, -1, 3, (List *)0, 0, arityImpl_919}}};
+Function fn_921 = {FunctionType, -1, "assoc-in", 1, {&(FnArity){FnArityType, -1, 3, (List *)0, 0, arityImpl_922}}};
 
 
 // --------- =*_impl --------------
-Function fn_922;
-Value *arityImpl_923(List *closures, Value *arg0, Value *arg1) {
+Function fn_925;
+Value *arityImpl_926(List *closures, Value *arg0, Value *arg1) {
 Value *rslt0 = arityImpl_99(empty_list, arg0);
 Value *rslt1 = arityImpl_99(empty_list, arg1);
-Value *rslt2 = arityImpl_435(empty_list, rslt0, rslt1);
+Value *rslt2 = arityImpl_436(empty_list, rslt0, rslt1);
 incRef(rslt2);
-dec_and_free(rslt1);
-dec_and_free(rslt0);
 dec_and_free(rslt2);
+dec_and_free(rslt0);
+dec_and_free(rslt1);
 return(rslt2);
 };
 
 
 // --------- =*_impl main body --------------
-Function fn_922 = {FunctionType, -1, "=*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_923}}};
+Function fn_925 = {FunctionType, -1, "=*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_926}}};
 
-Value *protoImpl_924(List *closures, Value *arg0, Value *arg1) {
+Value *protoImpl_927(List *closures, Value *arg0, Value *arg1) {
 FnArity *arityPtr = ((Function *)((ReifiedVal *)arg0)->impls[0])->arities[0];
 Value *rval = ((FnType2 *)arityPtr->fn)(arityPtr->closures, arg0, arg1);
 return(rval);
 };
 
-Function protoFn_921 = {FunctionType, -1, "=*", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, protoImpl_924}}};
+Function protoFn_924 = {FunctionType, -1, "=*", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, protoImpl_927}}};
 
-ReifiedVal reified_925 = {17, -1, 1, {(Value *)&fn_922}};
+ReifiedVal reified_928 = {17, -1, 1, {(Value *)&fn_925}};
 struct {int64_t type;
  int32_t refs;
    int64_t len;
    char buffer[19];} _str_60 = {1, -1, 18,"Could not look up "};
 
 // --------- sha1_impl --------------
-Function fn_927;
-Value *arityImpl_932(List *closures, Value *arg0) {
+Function fn_930;
+Value *arityImpl_935(List *closures, Value *arg0) {
 
 int64_t shaVal;
 Sha1Context context;
@@ -9369,24 +9331,24 @@ else {
 
 
 // --------- sha1_impl main body --------------
-Function fn_927 = {FunctionType, -1, "sha1_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_932}}};
+Function fn_930 = {FunctionType, -1, "sha1_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_935}}};
 
 
 // --------- =*_impl --------------
-Function fn_928;
-Value *arityImpl_933(List *closures, Value *arg0, Value *arg1) {
+Function fn_931;
+Value *arityImpl_936(List *closures, Value *arg0, Value *arg1) {
 Value *rslt0 = arityImpl_156(empty_list, arg0, arg1);
 return(rslt0);
 };
 
 
 // --------- =*_impl main body --------------
-Function fn_928 = {FunctionType, -1, "=*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_933}}};
+Function fn_931 = {FunctionType, -1, "=*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_936}}};
 
 
 // --------- string-list_impl --------------
-Function fn_929;
-Value *arityImpl_934(List *closures, Value *arg0) {
+Function fn_932;
+Value *arityImpl_937(List *closures, Value *arg0) {
 Value *rslt0 = protoFnImpl_264(empty_list, arg0);
 List *varArgs1 = empty_list;
 incRef((Value *)rslt0);
@@ -9394,22 +9356,22 @@ varArgs1 = (List *)listCons((Value *)rslt0, varArgs1);
 Value *rslt2 = arityImpl_250(empty_list, (Value *)varArgs1);
 dec_and_free((Value *)varArgs1);
 incRef(rslt2);
-dec_and_free(rslt0);
 dec_and_free(rslt2);
+dec_and_free(rslt0);
 return(rslt2);
 };
 
 
 // --------- string-list_impl main body --------------
-Function fn_929 = {FunctionType, -1, "string-list_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_934}}};
+Function fn_932 = {FunctionType, -1, "string-list_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_937}}};
 
 
 // --------- invoke_impl --------------
-Function fn_930;
-Value *arityImpl_935(List *closures, Value *arg0, Value *arg1) {
-Value *rslt0 = protoFnImpl_416(empty_list, arg1, arg0, (Value *)&reified_925);
+Function fn_933;
+Value *arityImpl_938(List *closures, Value *arg0, Value *arg1) {
+Value *rslt0 = protoFnImpl_417(empty_list, arg1, arg0, (Value *)&reified_928);
 Value *cond1;
-Value *rslt2 = arityImpl_435(empty_list, (Value *)&reified_925, rslt0);
+Value *rslt2 = arityImpl_436(empty_list, (Value *)&reified_928, rslt0);
 
 if (isTrue(rslt2)) {
 dec_and_free(rslt2);
@@ -9418,7 +9380,7 @@ incRef((Value *)arg0);
 varArgs3 = (List *)listCons((Value *)arg0, varArgs3);
 incRef((Value *)(Value *)&_str_60);
 varArgs3 = (List *)listCons((Value *)(Value *)&_str_60, varArgs3);
-Value *rslt4 = arityImpl_692(empty_list, (Value *)varArgs3);
+Value *rslt4 = arityImpl_694(empty_list, (Value *)varArgs3);
 dec_and_free((Value *)varArgs3);
 Value *rslt5 = arityImpl_96(empty_list);
 incRef(rslt5);
@@ -9431,31 +9393,31 @@ incRef(rslt0);
 cond1 = rslt0;
 }
 incRef(cond1);
-dec_and_free(cond1);
 dec_and_free(rslt0);
+dec_and_free(cond1);
 return(cond1);
 };
 
 
 // --------- invoke_impl main body --------------
-Function fn_930 = {FunctionType, -1, "invoke_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_935}}};
+Function fn_933 = {FunctionType, -1, "invoke_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_938}}};
 
 
 // --------- name_impl --------------
-Function fn_931;
-Value *arityImpl_936(List *closures, Value *arg0) {
+Function fn_934;
+Value *arityImpl_939(List *closures, Value *arg0) {
 Value *rslt0 = arityImpl_84(empty_list, arg0);
 return(rslt0);
 };
 
 
 // --------- name_impl main body --------------
-Function fn_931 = {FunctionType, -1, "name_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_936}}};
+Function fn_934 = {FunctionType, -1, "name_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_939}}};
 
 
 // --------- sha1_impl --------------
-Function fn_937;
-Value *arityImpl_943(List *closures, Value *arg0) {
+Function fn_940;
+Value *arityImpl_946(List *closures, Value *arg0) {
 
 int64_t shaVal;
 Sha1Context context;
@@ -9479,24 +9441,24 @@ else {
 
 
 // --------- sha1_impl main body --------------
-Function fn_937 = {FunctionType, -1, "sha1_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_943}}};
+Function fn_940 = {FunctionType, -1, "sha1_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_946}}};
 
 
 // --------- =*_impl --------------
-Function fn_938;
-Value *arityImpl_944(List *closures, Value *arg0, Value *arg1) {
+Function fn_941;
+Value *arityImpl_947(List *closures, Value *arg0, Value *arg1) {
 Value *rslt0 = arityImpl_156(empty_list, arg0, arg1);
 return(rslt0);
 };
 
 
 // --------- =*_impl main body --------------
-Function fn_938 = {FunctionType, -1, "=*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_944}}};
+Function fn_941 = {FunctionType, -1, "=*_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_947}}};
 
 
 // --------- string-list_impl --------------
-Function fn_939;
-Value *arityImpl_945(List *closures, Value *arg0) {
+Function fn_942;
+Value *arityImpl_948(List *closures, Value *arg0) {
 Value *rslt0 = protoFnImpl_264(empty_list, arg0);
 List *varArgs1 = empty_list;
 incRef((Value *)rslt0);
@@ -9504,22 +9466,22 @@ varArgs1 = (List *)listCons((Value *)rslt0, varArgs1);
 Value *rslt2 = arityImpl_250(empty_list, (Value *)varArgs1);
 dec_and_free((Value *)varArgs1);
 incRef(rslt2);
-dec_and_free(rslt0);
 dec_and_free(rslt2);
+dec_and_free(rslt0);
 return(rslt2);
 };
 
 
 // --------- string-list_impl main body --------------
-Function fn_939 = {FunctionType, -1, "string-list_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_945}}};
+Function fn_942 = {FunctionType, -1, "string-list_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_948}}};
 
 
 // --------- invoke_impl --------------
-Function fn_940;
-Value *arityImpl_946(List *closures, Value *arg0, Value *arg1) {
-Value *rslt0 = protoFnImpl_416(empty_list, arg1, arg0, (Value *)&reified_925);
+Function fn_943;
+Value *arityImpl_949(List *closures, Value *arg0, Value *arg1) {
+Value *rslt0 = protoFnImpl_417(empty_list, arg1, arg0, (Value *)&reified_928);
 Value *cond1;
-Value *rslt2 = arityImpl_435(empty_list, (Value *)&reified_925, rslt0);
+Value *rslt2 = arityImpl_436(empty_list, (Value *)&reified_928, rslt0);
 
 if (isTrue(rslt2)) {
 dec_and_free(rslt2);
@@ -9528,7 +9490,7 @@ incRef((Value *)arg0);
 varArgs3 = (List *)listCons((Value *)arg0, varArgs3);
 incRef((Value *)(Value *)&_str_60);
 varArgs3 = (List *)listCons((Value *)(Value *)&_str_60, varArgs3);
-Value *rslt4 = arityImpl_692(empty_list, (Value *)varArgs3);
+Value *rslt4 = arityImpl_694(empty_list, (Value *)varArgs3);
 dec_and_free((Value *)varArgs3);
 Value *rslt5 = arityImpl_96(empty_list);
 incRef(rslt5);
@@ -9541,54 +9503,54 @@ incRef(rslt0);
 cond1 = rslt0;
 }
 incRef(cond1);
-dec_and_free(cond1);
 dec_and_free(rslt0);
+dec_and_free(cond1);
 return(cond1);
 };
 
 
 // --------- invoke_impl main body --------------
-Function fn_940 = {FunctionType, -1, "invoke_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_946}}};
+Function fn_943 = {FunctionType, -1, "invoke_impl", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_949}}};
 
 
 // --------- invoke_impl --------------
-Function fn_941;
-Value *arityImpl_947(List *closures, Value *arg0, Value *arg1, Value *arg2) {
-Value *rslt0 = protoFnImpl_416(empty_list, arg1, arg0, arg2);
+Function fn_944;
+Value *arityImpl_950(List *closures, Value *arg0, Value *arg1, Value *arg2) {
+Value *rslt0 = protoFnImpl_417(empty_list, arg1, arg0, arg2);
 return(rslt0);
 };
 
 
 // --------- invoke_impl main body --------------
-Function fn_941 = {FunctionType, -1, "invoke_impl", 1, {&(FnArity){FnArityType, -1, 3, (List *)0, 0, arityImpl_947}}};
+Function fn_944 = {FunctionType, -1, "invoke_impl", 1, {&(FnArity){FnArityType, -1, 3, (List *)0, 0, arityImpl_950}}};
 
 
 // --------- name_impl --------------
-Function fn_942;
-Value *arityImpl_948(List *closures, Value *arg0) {
+Function fn_945;
+Value *arityImpl_951(List *closures, Value *arg0) {
 Value *rslt0 = arityImpl_84(empty_list, arg0);
 return(rslt0);
 };
 
 
 // --------- name_impl main body --------------
-Function fn_942 = {FunctionType, -1, "name_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_948}}};
+Function fn_945 = {FunctionType, -1, "name_impl", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_951}}};
 
 
 // --------- symbol? --------------
-Function fn_949;
-Value *arityImpl_950(List *closures, Value *arg0) {
+Function fn_952;
+Value *arityImpl_953(List *closures, Value *arg0) {
 Value *rslt0 = arityImpl_99(empty_list, arg0);
-Value *rslt1 = arityImpl_435(empty_list, (Value *)&_num_7, rslt0);
+Value *rslt1 = arityImpl_436(empty_list, (Value *)&_num_7, rslt0);
 incRef(rslt1);
-dec_and_free(rslt1);
 dec_and_free(rslt0);
+dec_and_free(rslt1);
 return(rslt1);
 };
 
 
 // --------- symbol? main body --------------
-Function fn_949 = {FunctionType, -1, "symbol?", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_950}}};
+Function fn_952 = {FunctionType, -1, "symbol?", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_953}}};
 
 struct {int64_t type;
  int32_t refs;
@@ -9596,92 +9558,92 @@ struct {int64_t type;
    char buffer[2];} _str_61 = {1, -1, 1,":"};
 
 // --------- keyword --------------
-Function fn_952;
-Value *arityImpl_953(List *closures, Value *arg0) {
+Function fn_955;
+Value *arityImpl_956(List *closures, Value *arg0) {
 List *varArgs0 = empty_list;
 incRef((Value *)arg0);
 varArgs0 = (List *)listCons((Value *)arg0, varArgs0);
 incRef((Value *)(Value *)&_str_61);
 varArgs0 = (List *)listCons((Value *)(Value *)&_str_61, varArgs0);
-Value *rslt1 = arityImpl_765(empty_list, (Value *)varArgs0);
+Value *rslt1 = arityImpl_768(empty_list, (Value *)varArgs0);
 dec_and_free((Value *)varArgs0);
 Value *rslt2 = arityImpl_93(empty_list, rslt1);
 incRef(rslt2);
-dec_and_free(rslt1);
 dec_and_free(rslt2);
+dec_and_free(rslt1);
 return(rslt2);
 };
 
 
 // --------- keyword main body --------------
-Function fn_952 = {FunctionType, -1, "keyword", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_953}}};
+Function fn_955 = {FunctionType, -1, "keyword", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_956}}};
 
 
 // --------- keyword? --------------
-Function fn_955;
-Value *arityImpl_956(List *closures, Value *arg0) {
+Function fn_958;
+Value *arityImpl_959(List *closures, Value *arg0) {
 Value *rslt0 = arityImpl_99(empty_list, arg0);
-Value *rslt1 = arityImpl_435(empty_list, (Value *)&_num_5, rslt0);
+Value *rslt1 = arityImpl_436(empty_list, (Value *)&_num_5, rslt0);
 incRef(rslt1);
-dec_and_free(rslt1);
 dec_and_free(rslt0);
+dec_and_free(rslt1);
 return(rslt1);
 };
 
 
 // --------- keyword? main body --------------
-Function fn_955 = {FunctionType, -1, "keyword?", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_956}}};
+Function fn_958 = {FunctionType, -1, "keyword?", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_959}}};
 
 
 // --------- number? --------------
-Function fn_958;
-Value *arityImpl_959(List *closures, Value *arg0) {
+Function fn_961;
+Value *arityImpl_962(List *closures, Value *arg0) {
 Value *rslt0 = arityImpl_99(empty_list, arg0);
-Value *rslt1 = arityImpl_435(empty_list, (Value *)&_num_2, rslt0);
+Value *rslt1 = arityImpl_436(empty_list, (Value *)&_num_2, rslt0);
 incRef(rslt1);
-dec_and_free(rslt1);
 dec_and_free(rslt0);
+dec_and_free(rslt1);
 return(rslt1);
 };
 
 
 // --------- number? main body --------------
-Function fn_958 = {FunctionType, -1, "number?", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_959}}};
+Function fn_961 = {FunctionType, -1, "number?", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_962}}};
 
 
 // --------- string? --------------
-Function fn_961;
-Value *arityImpl_962(List *closures, Value *arg0) {
+Function fn_964;
+Value *arityImpl_965(List *closures, Value *arg0) {
 Value *rslt0 = arityImpl_99(empty_list, arg0);
-Value *rslt1 = arityImpl_435(empty_list, (Value *)&_num_1, rslt0);
+Value *rslt1 = arityImpl_436(empty_list, (Value *)&_num_1, rslt0);
 Value *rslt2 = arityImpl_99(empty_list, arg0);
-Value *rslt3 = arityImpl_435(empty_list, (Value *)&_num_6, rslt2);
+Value *rslt3 = arityImpl_436(empty_list, (Value *)&_num_6, rslt2);
 List *varArgs4 = empty_list;
 incRef((Value *)rslt3);
 varArgs4 = (List *)listCons((Value *)rslt3, varArgs4);
 incRef((Value *)rslt1);
 varArgs4 = (List *)listCons((Value *)rslt1, varArgs4);
-Value *rslt5 = arityImpl_432(empty_list, (Value *)varArgs4);
+Value *rslt5 = arityImpl_433(empty_list, (Value *)varArgs4);
 dec_and_free((Value *)varArgs4);
 incRef(rslt5);
-dec_and_free(rslt1);
-dec_and_free(rslt0);
-dec_and_free(rslt5);
-dec_and_free(rslt3);
 dec_and_free(rslt2);
+dec_and_free(rslt3);
+dec_and_free(rslt5);
+dec_and_free(rslt0);
+dec_and_free(rslt1);
 return(rslt5);
 };
 
 
 // --------- string? main body --------------
-Function fn_961 = {FunctionType, -1, "string?", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_962}}};
+Function fn_964 = {FunctionType, -1, "string?", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_965}}};
 
 
 // --------- range* --------------
-Function fn_964;
-Value *arityImpl_965(List *closures, Value *arg0) {
+Function fn_967;
+Value *arityImpl_968(List *closures, Value *arg0) {
 Value *cond0;
-Value *rslt4 = arityImpl_435(empty_list, (Value *)&_num_13, arg0);
+Value *rslt4 = arityImpl_436(empty_list, (Value *)&_num_13, arg0);
 
 if (isTrue(rslt4)) {
 dec_and_free(rslt4);
@@ -9695,8 +9657,8 @@ cond0 = rslt6;
 dec_and_free(rslt6);
 } else {
 dec_and_free(rslt4);
-Value *rslt1 = arityImpl_703(empty_list, arg0);
-Value *rslt2 = arityImpl_965(closures, rslt1);
+Value *rslt1 = arityImpl_705(empty_list, arg0);
+Value *rslt2 = arityImpl_968(closures, rslt1);
 Value *rslt3 = arityImpl_132(empty_list, arg0, rslt2);
 incRef(rslt3);
 cond0 = rslt3;
@@ -9709,33 +9671,33 @@ return(cond0);
 
 
 // --------- range* main body --------------
-Function fn_964 = {FunctionType, -1, "range*", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_965}}};
+Function fn_967 = {FunctionType, -1, "range*", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_968}}};
 
 
 // --------- range --------------
-Function fn_967;
-Value *arityImpl_968(List *closures, Value *arg0) {
-Value *rslt0 = arityImpl_703(empty_list, arg0);
-Value *rslt1 = arityImpl_965(empty_list, rslt0);
-Value *rslt2 = arityImpl_586(empty_list, rslt1);
+Function fn_970;
+Value *arityImpl_971(List *closures, Value *arg0) {
+Value *rslt0 = arityImpl_705(empty_list, arg0);
+Value *rslt1 = arityImpl_968(empty_list, rslt0);
+Value *rslt2 = arityImpl_587(empty_list, rslt1);
 incRef(rslt2);
-dec_and_free(rslt1);
-dec_and_free(rslt0);
 dec_and_free(rslt2);
+dec_and_free(rslt0);
+dec_and_free(rslt1);
 return(rslt2);
 };
 
 
 // --------- range main body --------------
-Function fn_967 = {FunctionType, -1, "range", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_968}}};
+Function fn_970 = {FunctionType, -1, "range", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_971}}};
 
 
 // --------- repeat --------------
-Function fn_970;
+Function fn_973;
 
 // --------- anon --------------
-Function fn_972;
-Value *arityImpl_973(List *closures, Value *arg0) {
+Function fn_975;
+Value *arityImpl_976(List *closures, Value *arg0) {
 Value *val0 = closures->head;
 if (closures->tail)
 closures->tail->len = closures->len - 1;
@@ -9744,9 +9706,9 @@ incRef(val0);
 return(val0);
 };
 
-Value *arityImpl_971(List *closures, Value *arg0, Value *arg1) {
+Value *arityImpl_974(List *closures, Value *arg0, Value *arg1) {
 Value *cond0;
-Value *rslt5 = arityImpl_568(empty_list, arg0, (Value *)&_num_1);
+Value *rslt5 = arityImpl_569(empty_list, arg0, (Value *)&_num_1);
 
 if (isTrue(rslt5)) {
 dec_and_free(rslt5);
@@ -9754,26 +9716,26 @@ incRef(var_129);
 cond0 = var_129;
 } else {
 dec_and_free(rslt5);
-Value *rslt1 = arityImpl_703(empty_list, arg0);
-Value *rslt2 = arityImpl_965(empty_list, rslt1);
+Value *rslt1 = arityImpl_705(empty_list, arg0);
+Value *rslt2 = arityImpl_968(empty_list, rslt1);
 FnArity *arity_3 = malloc_fnArity();
 arity_3->type = FnArityType;
 arity_3->count = 1;
 arity_3->closures = empty_list;
 arity_3->variadic = 0;
-arity_3->fn = arityImpl_973;
+arity_3->fn = arityImpl_976;
 incRef((Value *)arg1);
 arity_3->closures = listCons((Value *)arg1, (List *)arity_3->closures);
-Function *fn_972 = malloc_function(1);
-fn_972->type = FunctionType;
-fn_972->name = "anon";
-fn_972->arityCount = 1;
-fn_972->arities[0] = arity_3;
-Value *rslt4 = arityImpl_673(empty_list, rslt2, (Value *)fn_972);
+Function *fn_975 = malloc_function(1);
+fn_975->type = FunctionType;
+fn_975->name = "anon";
+fn_975->arityCount = 1;
+fn_975->arities[0] = arity_3;
+Value *rslt4 = protoFnImpl_258(empty_list, rslt2, (Value *)fn_975);
 incRef(rslt4);
 cond0 = rslt4;
 dec_and_free(rslt1);
-dec_and_free((Value *)fn_972);
+dec_and_free((Value *)fn_975);
 dec_and_free(rslt4);
 dec_and_free(rslt2);
 }
@@ -9782,26 +9744,26 @@ return(cond0);
 
 
 // --------- repeat main body --------------
-Function fn_970 = {FunctionType, -1, "repeat", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_971}}};
+Function fn_973 = {FunctionType, -1, "repeat", 1, {&(FnArity){FnArityType, -1, 2, (List *)0, 0, arityImpl_974}}};
 
 
  int64_t sym_counter = 0;
 
 // --------- get-sym-count --------------
-Function fn_975;
-Value *arityImpl_976(List *closures) {
+Function fn_978;
+Value *arityImpl_979(List *closures) {
 
   return numberValue(sym_counter);
 };
 
 
 // --------- get-sym-count main body --------------
-Function fn_975 = {FunctionType, -1, "get-sym-count", 1, {&(FnArity){FnArityType, -1, 0, (List *)0, 0, arityImpl_976}}};
+Function fn_978 = {FunctionType, -1, "get-sym-count", 1, {&(FnArity){FnArityType, -1, 0, (List *)0, 0, arityImpl_979}}};
 
 
 // --------- set-sym-count --------------
-Function fn_978;
-Value *arityImpl_979(List *closures, Value *arg0) {
+Function fn_981;
+Value *arityImpl_982(List *closures, Value *arg0) {
 
   sym_counter = ((Number *)arg0)->numVal;
   return true;
@@ -9809,12 +9771,12 @@ Value *arityImpl_979(List *closures, Value *arg0) {
 
 
 // --------- set-sym-count main body --------------
-Function fn_978 = {FunctionType, -1, "set-sym-count", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_979}}};
+Function fn_981 = {FunctionType, -1, "set-sym-count", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_982}}};
 
 
 // --------- new-sym-count --------------
-Function fn_981;
-Value *arityImpl_982(List *closures) {
+Function fn_984;
+Value *arityImpl_985(List *closures) {
 
  static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -9832,46 +9794,46 @@ Value *arityImpl_982(List *closures) {
 
 
 // --------- new-sym-count main body --------------
-Function fn_981 = {FunctionType, -1, "new-sym-count", 1, {&(FnArity){FnArityType, -1, 0, (List *)0, 0, arityImpl_982}}};
+Function fn_984 = {FunctionType, -1, "new-sym-count", 1, {&(FnArity){FnArityType, -1, 0, (List *)0, 0, arityImpl_985}}};
 
 
 // --------- gensym --------------
-Function fn_984;
-Value *arityImpl_985(List *closures, Value *arg0) {
-Value *rslt0 = arityImpl_982(empty_list);
+Function fn_987;
+Value *arityImpl_988(List *closures, Value *arg0) {
+Value *rslt0 = arityImpl_985(empty_list);
 List *varArgs1 = empty_list;
 incRef((Value *)rslt0);
 varArgs1 = (List *)listCons((Value *)rslt0, varArgs1);
 incRef((Value *)arg0);
 varArgs1 = (List *)listCons((Value *)arg0, varArgs1);
-Value *rslt2 = arityImpl_765(empty_list, (Value *)varArgs1);
+Value *rslt2 = arityImpl_768(empty_list, (Value *)varArgs1);
 dec_and_free((Value *)varArgs1);
 Value *rslt3 = arityImpl_90(empty_list, rslt2);
 incRef(rslt3);
-dec_and_free(rslt0);
-dec_and_free(rslt3);
 dec_and_free(rslt2);
+dec_and_free(rslt3);
+dec_and_free(rslt0);
 return(rslt3);
 };
 
 
 // --------- gensym main body --------------
-Function fn_984 = {FunctionType, -1, "gensym", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_985}}};
+Function fn_987 = {FunctionType, -1, "gensym", 1, {&(FnArity){FnArityType, -1, 1, (List *)0, 0, arityImpl_988}}};
 
 Value *get(Value *node, Value *key, Value *val, Value *hash, Value *shift) {
-  return(protoFnImpl_388((List *)0, node, key, val, hash, shift));
+  return(protoFnImpl_389((List *)0, node, key, val, hash, shift));
 }
 Value *assoc(Value *node, Value *key, Value *val, Value *hash, Value *shift) {
-  return(protoFnImpl_390((List *)0, node, key, val, hash, shift));
+  return(protoFnImpl_391((List *)0, node, key, val, hash, shift));
 }
 Value *valsEqual(List *x, Value *v1, Value *v2) {
   return(protoFnImpl_285(x, v1, v2));
 }
 Value *sha1(Value *v) {
-  return(protoFnImpl_423((List *)0, v));
+  return(protoFnImpl_424((List *)0, v));
 }
 Value *hashSeq(Value *n, Value *s) {
-  return(protoFnImpl_392((List *)0, n, s));
+  return(protoFnImpl_393((List *)0, n, s));
 }
 Value *count(Value *n) {
   return(protoFnImpl_313((List *)0, n));
@@ -10156,23 +10118,23 @@ List *impl;
 protoInfo = empty_list;
 impls = empty_list;
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&protoFn_516"), impl);
+impl = listCons(stringValue("(Value *)&protoFn_517"), impl);
 impl = listCons(numberValue(15), impl);
 impls = listCons((Value *)impl, impls);
 protoInfo = listCons(symbolValue(".v"), protoInfo);
 protoInfo = listCons((Value *)impls, protoInfo);
-protoInfo = listCons(stringValue("extern Function protoFn_481;"), protoInfo);
-protoInfo = listCons(stringValue("protoImpls_480"), protoInfo);
+protoInfo = listCons(stringValue("extern Function protoFn_482;"), protoInfo);
+protoInfo = listCons(stringValue("protoImpls_481"), protoInfo);
 protoInfo = listCons(stringValue("Getter/.v"), protoInfo);
 protos = listCons((Value *)protoInfo, protos);
 protoInfo = empty_list;
 impls = empty_list;
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&protoFn_496"), impl);
+impl = listCons(stringValue("(Value *)&protoFn_497"), impl);
 impl = listCons(numberValue(15), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&protoFn_439"), impl);
+impl = listCons(stringValue("(Value *)&protoFn_440"), impl);
 impl = listCons(numberValue(13), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
@@ -10188,15 +10150,15 @@ protos = listCons((Value *)protoInfo, protos);
 protoInfo = empty_list;
 impls = empty_list;
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_640"), impl);
+impl = listCons(stringValue("(Value *)&fn_642"), impl);
 impl = listCons(numberValue(4), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_710"), impl);
+impl = listCons(stringValue("(Value *)&fn_713"), impl);
 impl = listCons(numberValue(1), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_738"), impl);
+impl = listCons(stringValue("(Value *)&fn_741"), impl);
 impl = listCons(numberValue(6), impl);
 impls = listCons((Value *)impl, impls);
 protoInfo = listCons(symbolValue("empty"), protoInfo);
@@ -10208,43 +10170,43 @@ protos = listCons((Value *)protoInfo, protos);
 protoInfo = empty_list;
 impls = empty_list;
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_648"), impl);
+impl = listCons(stringValue("(Value *)&fn_650"), impl);
 impl = listCons(numberValue(4), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&protoFn_506"), impl);
+impl = listCons(stringValue("(Value *)&protoFn_507"), impl);
 impl = listCons(numberValue(15), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_593"), impl);
+impl = listCons(stringValue("(Value *)&fn_594"), impl);
 impl = listCons(numberValue(3), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_839"), impl);
+impl = listCons(stringValue("(Value *)&fn_842"), impl);
 impl = listCons(numberValue(11), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_807"), impl);
+impl = listCons(stringValue("(Value *)&fn_810"), impl);
 impl = listCons(numberValue(10), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_871"), impl);
+impl = listCons(stringValue("(Value *)&fn_874"), impl);
 impl = listCons(numberValue(12), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_714"), impl);
+impl = listCons(stringValue("(Value *)&fn_717"), impl);
 impl = listCons(numberValue(1), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_742"), impl);
+impl = listCons(stringValue("(Value *)&fn_745"), impl);
 impl = listCons(numberValue(6), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&protoFn_547"), impl);
+impl = listCons(stringValue("(Value *)&protoFn_548"), impl);
 impl = listCons(numberValue(16), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&protoFn_449"), impl);
+impl = listCons(stringValue("(Value *)&protoFn_450"), impl);
 impl = listCons(numberValue(13), impl);
 impls = listCons((Value *)impl, impls);
 protoInfo = listCons(symbolValue("comp*"), protoInfo);
@@ -10256,35 +10218,35 @@ protos = listCons((Value *)protoInfo, protos);
 protoInfo = empty_list;
 impls = empty_list;
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_649"), impl);
+impl = listCons(stringValue("(Value *)&fn_651"), impl);
 impl = listCons(numberValue(4), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&protoFn_921"), impl);
+impl = listCons(stringValue("(Value *)&protoFn_924"), impl);
 impl = listCons(numberValue(17), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_928"), impl);
+impl = listCons(stringValue("(Value *)&fn_931"), impl);
 impl = listCons(numberValue(5), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_715"), impl);
+impl = listCons(stringValue("(Value *)&fn_718"), impl);
 impl = listCons(numberValue(1), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_938"), impl);
+impl = listCons(stringValue("(Value *)&fn_941"), impl);
 impl = listCons(numberValue(7), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_743"), impl);
+impl = listCons(stringValue("(Value *)&fn_746"), impl);
 impl = listCons(numberValue(6), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_605"), impl);
+impl = listCons(stringValue("(Value *)&fn_606"), impl);
 impl = listCons(numberValue(2), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&protoFn_451"), impl);
+impl = listCons(stringValue("(Value *)&protoFn_452"), impl);
 impl = listCons(numberValue(13), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
@@ -10308,7 +10270,7 @@ protos = listCons((Value *)protoInfo, protos);
 protoInfo = empty_list;
 impls = empty_list;
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_644"), impl);
+impl = listCons(stringValue("(Value *)&fn_646"), impl);
 impl = listCons(numberValue(4), impl);
 impls = listCons((Value *)impl, impls);
 protoInfo = listCons(symbolValue("crush"), protoInfo);
@@ -10320,15 +10282,15 @@ protos = listCons((Value *)protoInfo, protos);
 protoInfo = empty_list;
 impls = empty_list;
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_643"), impl);
+impl = listCons(stringValue("(Value *)&fn_645"), impl);
 impl = listCons(numberValue(4), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_713"), impl);
+impl = listCons(stringValue("(Value *)&fn_716"), impl);
 impl = listCons(numberValue(1), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_741"), impl);
+impl = listCons(stringValue("(Value *)&fn_744"), impl);
 impl = listCons(numberValue(6), impl);
 impls = listCons((Value *)impl, impls);
 protoInfo = listCons(symbolValue("reduce"), protoInfo);
@@ -10352,7 +10314,7 @@ protos = listCons((Value *)protoInfo, protos);
 protoInfo = empty_list;
 impls = empty_list;
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_638"), impl);
+impl = listCons(stringValue("(Value *)&fn_640"), impl);
 impl = listCons(numberValue(4), impl);
 impls = listCons((Value *)impl, impls);
 protoInfo = listCons(symbolValue("traverse"), protoInfo);
@@ -10364,35 +10326,35 @@ protos = listCons((Value *)protoInfo, protos);
 protoInfo = empty_list;
 impls = empty_list;
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_842"), impl);
+impl = listCons(stringValue("(Value *)&fn_845"), impl);
 impl = listCons(numberValue(11), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_810"), impl);
+impl = listCons(stringValue("(Value *)&fn_813"), impl);
 impl = listCons(numberValue(10), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_874"), impl);
+impl = listCons(stringValue("(Value *)&fn_877"), impl);
 impl = listCons(numberValue(12), impl);
 impls = listCons((Value *)impl, impls);
 protoInfo = listCons(symbolValue("vals"), protoInfo);
 protoInfo = listCons((Value *)impls, protoInfo);
-protoInfo = listCons(stringValue("extern Function protoFn_401;"), protoInfo);
-protoInfo = listCons(stringValue("protoImpls_400"), protoInfo);
+protoInfo = listCons(stringValue("extern Function protoFn_402;"), protoInfo);
+protoInfo = listCons(stringValue("protoImpls_401"), protoInfo);
 protoInfo = listCons(stringValue("core/Associative/vals"), protoInfo);
 protos = listCons((Value *)protoInfo, protos);
 protoInfo = empty_list;
 impls = empty_list;
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_654"), impl);
+impl = listCons(stringValue("(Value *)&fn_656"), impl);
 impl = listCons(numberValue(4), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&protoFn_510"), impl);
+impl = listCons(stringValue("(Value *)&protoFn_511"), impl);
 impl = listCons(numberValue(15), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&protoFn_455"), impl);
+impl = listCons(stringValue("(Value *)&protoFn_456"), impl);
 impl = listCons(numberValue(13), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
@@ -10408,39 +10370,39 @@ protos = listCons((Value *)protoInfo, protos);
 protoInfo = empty_list;
 impls = empty_list;
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_927"), impl);
+impl = listCons(stringValue("(Value *)&fn_930"), impl);
 impl = listCons(numberValue(5), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_708"), impl);
+impl = listCons(stringValue("(Value *)&fn_711"), impl);
 impl = listCons(numberValue(1), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_937"), impl);
+impl = listCons(stringValue("(Value *)&fn_940"), impl);
 impl = listCons(numberValue(7), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_736"), impl);
+impl = listCons(stringValue("(Value *)&fn_739"), impl);
 impl = listCons(numberValue(6), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_603"), impl);
+impl = listCons(stringValue("(Value *)&fn_604"), impl);
 impl = listCons(numberValue(2), impl);
 impls = listCons((Value *)impl, impls);
 protoInfo = listCons(symbolValue("sha1"), protoInfo);
 protoInfo = listCons((Value *)impls, protoInfo);
-protoInfo = listCons(stringValue("extern Function protoFn_421;"), protoInfo);
-protoInfo = listCons(stringValue("protoImpls_420"), protoInfo);
+protoInfo = listCons(stringValue("extern Function protoFn_422;"), protoInfo);
+protoInfo = listCons(stringValue("protoImpls_421"), protoInfo);
 protoInfo = listCons(stringValue("core/Hash/sha1"), protoInfo);
 protos = listCons((Value *)protoInfo, protos);
 protoInfo = empty_list;
 impls = empty_list;
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_931"), impl);
+impl = listCons(stringValue("(Value *)&fn_934"), impl);
 impl = listCons(numberValue(5), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_942"), impl);
+impl = listCons(stringValue("(Value *)&fn_945"), impl);
 impl = listCons(numberValue(7), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
@@ -10468,39 +10430,39 @@ protos = listCons((Value *)protoInfo, protos);
 protoInfo = empty_list;
 impls = empty_list;
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_846"), impl);
+impl = listCons(stringValue("(Value *)&fn_849"), impl);
 impl = listCons(numberValue(11), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_814"), impl);
+impl = listCons(stringValue("(Value *)&fn_817"), impl);
 impl = listCons(numberValue(10), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_878"), impl);
+impl = listCons(stringValue("(Value *)&fn_881"), impl);
 impl = listCons(numberValue(12), impl);
 impls = listCons((Value *)impl, impls);
 protoInfo = listCons(symbolValue("hash-seq"), protoInfo);
 protoInfo = listCons((Value *)impls, protoInfo);
-protoInfo = listCons(stringValue("extern Function protoFn_386;"), protoInfo);
-protoInfo = listCons(stringValue("protoImpls_385"), protoInfo);
+protoInfo = listCons(stringValue("extern Function protoFn_387;"), protoInfo);
+protoInfo = listCons(stringValue("protoImpls_386"), protoInfo);
 protoInfo = listCons(stringValue("core/HashMapNode/hash-seq"), protoInfo);
 protos = listCons((Value *)protoInfo, protos);
 protoInfo = empty_list;
 impls = empty_list;
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&protoFn_502"), impl);
+impl = listCons(stringValue("(Value *)&protoFn_503"), impl);
 impl = listCons(numberValue(15), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_591"), impl);
+impl = listCons(stringValue("(Value *)&fn_592"), impl);
 impl = listCons(numberValue(3), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&protoFn_487"), impl);
+impl = listCons(stringValue("(Value *)&protoFn_488"), impl);
 impl = listCons(numberValue(14), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&protoFn_445"), impl);
+impl = listCons(stringValue("(Value *)&protoFn_446"), impl);
 impl = listCons(numberValue(13), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
@@ -10516,15 +10478,15 @@ protos = listCons((Value *)protoInfo, protos);
 protoInfo = empty_list;
 impls = empty_list;
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_645"), impl);
+impl = listCons(stringValue("(Value *)&fn_647"), impl);
 impl = listCons(numberValue(4), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&protoFn_498"), impl);
+impl = listCons(stringValue("(Value *)&protoFn_499"), impl);
 impl = listCons(numberValue(15), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&protoFn_441"), impl);
+impl = listCons(stringValue("(Value *)&protoFn_442"), impl);
 impl = listCons(numberValue(13), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
@@ -10540,15 +10502,15 @@ protos = listCons((Value *)protoInfo, protos);
 protoInfo = empty_list;
 impls = empty_list;
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_652"), impl);
+impl = listCons(stringValue("(Value *)&fn_654"), impl);
 impl = listCons(numberValue(4), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_718"), impl);
+impl = listCons(stringValue("(Value *)&fn_721"), impl);
 impl = listCons(numberValue(1), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_746"), impl);
+impl = listCons(stringValue("(Value *)&fn_749"), impl);
 impl = listCons(numberValue(6), impl);
 impls = listCons((Value *)impl, impls);
 protoInfo = listCons(symbolValue("first"), protoInfo);
@@ -10560,27 +10522,27 @@ protos = listCons((Value *)protoInfo, protos);
 protoInfo = empty_list;
 impls = empty_list;
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_642"), impl);
+impl = listCons(stringValue("(Value *)&fn_644"), impl);
 impl = listCons(numberValue(4), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_836"), impl);
+impl = listCons(stringValue("(Value *)&fn_839"), impl);
 impl = listCons(numberValue(11), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_804"), impl);
+impl = listCons(stringValue("(Value *)&fn_807"), impl);
 impl = listCons(numberValue(10), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_868"), impl);
+impl = listCons(stringValue("(Value *)&fn_871"), impl);
 impl = listCons(numberValue(12), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_711"), impl);
+impl = listCons(stringValue("(Value *)&fn_714"), impl);
 impl = listCons(numberValue(1), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_739"), impl);
+impl = listCons(stringValue("(Value *)&fn_742"), impl);
 impl = listCons(numberValue(6), impl);
 impls = listCons((Value *)impl, impls);
 protoInfo = listCons(symbolValue("count"), protoInfo);
@@ -10592,65 +10554,65 @@ protos = listCons((Value *)protoInfo, protos);
 protoInfo = empty_list;
 impls = empty_list;
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_840"), impl);
+impl = listCons(stringValue("(Value *)&fn_843"), impl);
 impl = listCons(numberValue(11), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_808"), impl);
+impl = listCons(stringValue("(Value *)&fn_811"), impl);
 impl = listCons(numberValue(10), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_872"), impl);
+impl = listCons(stringValue("(Value *)&fn_875"), impl);
 impl = listCons(numberValue(12), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&defaultFn_405"), impl);
+impl = listCons(stringValue("(Value *)&defaultFn_406"), impl);
 impl = listCons(keywordValue(":default"), impl);
 impls = listCons((Value *)impl, impls);
 protoInfo = listCons(symbolValue("get"), protoInfo);
 protoInfo = listCons((Value *)impls, protoInfo);
-protoInfo = listCons(stringValue("extern Function protoFn_404;"), protoInfo);
-protoInfo = listCons(stringValue("protoImpls_403"), protoInfo);
+protoInfo = listCons(stringValue("extern Function protoFn_405;"), protoInfo);
+protoInfo = listCons(stringValue("protoImpls_404"), protoInfo);
 protoInfo = listCons(stringValue("core/Associative/get"), protoInfo);
 protos = listCons((Value *)protoInfo, protos);
 protoInfo = empty_list;
 impls = empty_list;
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_848"), impl);
+impl = listCons(stringValue("(Value *)&fn_851"), impl);
 impl = listCons(numberValue(11), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_816"), impl);
+impl = listCons(stringValue("(Value *)&fn_819"), impl);
 impl = listCons(numberValue(10), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_880"), impl);
+impl = listCons(stringValue("(Value *)&fn_883"), impl);
 impl = listCons(numberValue(12), impl);
 impls = listCons((Value *)impl, impls);
 protoInfo = listCons(symbolValue("get*"), protoInfo);
 protoInfo = listCons((Value *)impls, protoInfo);
-protoInfo = listCons(stringValue("extern Function protoFn_380;"), protoInfo);
-protoInfo = listCons(stringValue("protoImpls_379"), protoInfo);
+protoInfo = listCons(stringValue("extern Function protoFn_381;"), protoInfo);
+protoInfo = listCons(stringValue("protoImpls_380"), protoInfo);
 protoInfo = listCons(stringValue("core/HashMapNode/get*"), protoInfo);
 protos = listCons((Value *)protoInfo, protos);
 protoInfo = empty_list;
 impls = empty_list;
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_847"), impl);
+impl = listCons(stringValue("(Value *)&fn_850"), impl);
 impl = listCons(numberValue(11), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_815"), impl);
+impl = listCons(stringValue("(Value *)&fn_818"), impl);
 impl = listCons(numberValue(10), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_879"), impl);
+impl = listCons(stringValue("(Value *)&fn_882"), impl);
 impl = listCons(numberValue(12), impl);
 impls = listCons((Value *)impl, impls);
 protoInfo = listCons(symbolValue("assoc*"), protoInfo);
 protoInfo = listCons((Value *)impls, protoInfo);
-protoInfo = listCons(stringValue("extern Function protoFn_383;"), protoInfo);
-protoInfo = listCons(stringValue("protoImpls_382"), protoInfo);
+protoInfo = listCons(stringValue("extern Function protoFn_384;"), protoInfo);
+protoInfo = listCons(stringValue("protoImpls_383"), protoInfo);
 protoInfo = listCons(stringValue("core/HashMapNode/assoc*"), protoInfo);
 protos = listCons((Value *)protoInfo, protos);
 protoInfo = empty_list;
@@ -10660,7 +10622,7 @@ impl = listCons(stringValue("(Value *)&fn_37"), impl);
 impl = listCons(numberValue(4), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&protoFn_514"), impl);
+impl = listCons(stringValue("(Value *)&protoFn_515"), impl);
 impl = listCons(numberValue(15), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
@@ -10716,39 +10678,39 @@ protos = listCons((Value *)protoInfo, protos);
 protoInfo = empty_list;
 impls = empty_list;
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_841"), impl);
+impl = listCons(stringValue("(Value *)&fn_844"), impl);
 impl = listCons(numberValue(11), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_809"), impl);
+impl = listCons(stringValue("(Value *)&fn_812"), impl);
 impl = listCons(numberValue(10), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_873"), impl);
+impl = listCons(stringValue("(Value *)&fn_876"), impl);
 impl = listCons(numberValue(12), impl);
 impls = listCons((Value *)impl, impls);
 protoInfo = listCons(symbolValue("keys"), protoInfo);
 protoInfo = listCons((Value *)impls, protoInfo);
-protoInfo = listCons(stringValue("extern Function protoFn_407;"), protoInfo);
-protoInfo = listCons(stringValue("protoImpls_406"), protoInfo);
+protoInfo = listCons(stringValue("extern Function protoFn_408;"), protoInfo);
+protoInfo = listCons(stringValue("protoImpls_407"), protoInfo);
 protoInfo = listCons(stringValue("core/Associative/keys"), protoInfo);
 protos = listCons((Value *)protoInfo, protos);
 protoInfo = empty_list;
 impls = empty_list;
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_930"), impl);
+impl = listCons(stringValue("(Value *)&fn_933"), impl);
 impl = listCons(numberValue(5), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&protoFn_489"), impl);
+impl = listCons(stringValue("(Value *)&protoFn_490"), impl);
 impl = listCons(numberValue(14), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_941"), impl);
+impl = listCons(stringValue("(Value *)&fn_944"), impl);
 impl = listCons(numberValue(7), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&protoFn_549"), impl);
+impl = listCons(stringValue("(Value *)&protoFn_550"), impl);
 impl = listCons(numberValue(16), impl);
 impls = listCons((Value *)impl, impls);
 protoInfo = listCons(symbolValue("invoke"), protoInfo);
@@ -10760,15 +10722,15 @@ protos = listCons((Value *)protoInfo, protos);
 protoInfo = empty_list;
 impls = empty_list;
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_646"), impl);
+impl = listCons(stringValue("(Value *)&fn_648"), impl);
 impl = listCons(numberValue(4), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&protoFn_500"), impl);
+impl = listCons(stringValue("(Value *)&protoFn_501"), impl);
 impl = listCons(numberValue(15), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&protoFn_443"), impl);
+impl = listCons(stringValue("(Value *)&protoFn_444"), impl);
 impl = listCons(numberValue(13), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
@@ -10796,11 +10758,11 @@ protos = listCons((Value *)protoInfo, protos);
 protoInfo = empty_list;
 impls = empty_list;
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&protoFn_491"), impl);
+impl = listCons(stringValue("(Value *)&protoFn_492"), impl);
 impl = listCons(numberValue(14), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&protoFn_551"), impl);
+impl = listCons(stringValue("(Value *)&protoFn_552"), impl);
 impl = listCons(numberValue(16), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
@@ -10816,27 +10778,27 @@ protos = listCons((Value *)protoInfo, protos);
 protoInfo = empty_list;
 impls = empty_list;
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_639"), impl);
+impl = listCons(stringValue("(Value *)&fn_641"), impl);
 impl = listCons(numberValue(4), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_837"), impl);
+impl = listCons(stringValue("(Value *)&fn_840"), impl);
 impl = listCons(numberValue(11), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_805"), impl);
+impl = listCons(stringValue("(Value *)&fn_808"), impl);
 impl = listCons(numberValue(10), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_869"), impl);
+impl = listCons(stringValue("(Value *)&fn_872"), impl);
 impl = listCons(numberValue(12), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_709"), impl);
+impl = listCons(stringValue("(Value *)&fn_712"), impl);
 impl = listCons(numberValue(1), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_737"), impl);
+impl = listCons(stringValue("(Value *)&fn_740"), impl);
 impl = listCons(numberValue(6), impl);
 impls = listCons((Value *)impl, impls);
 protoInfo = listCons(symbolValue("empty?"), protoInfo);
@@ -10856,7 +10818,7 @@ protos = listCons((Value *)protoInfo, protos);
 protoInfo = empty_list;
 impls = empty_list;
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&protoFn_512"), impl);
+impl = listCons(stringValue("(Value *)&protoFn_513"), impl);
 impl = listCons(numberValue(15), impl);
 impls = listCons((Value *)impl, impls);
 protoInfo = listCons(symbolValue("type-args"), protoInfo);
@@ -10868,27 +10830,27 @@ protos = listCons((Value *)protoInfo, protos);
 protoInfo = empty_list;
 impls = empty_list;
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_651"), impl);
+impl = listCons(stringValue("(Value *)&fn_653"), impl);
 impl = listCons(numberValue(4), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_845"), impl);
+impl = listCons(stringValue("(Value *)&fn_848"), impl);
 impl = listCons(numberValue(11), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_813"), impl);
+impl = listCons(stringValue("(Value *)&fn_816"), impl);
 impl = listCons(numberValue(10), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_877"), impl);
+impl = listCons(stringValue("(Value *)&fn_880"), impl);
 impl = listCons(numberValue(12), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_717"), impl);
+impl = listCons(stringValue("(Value *)&fn_720"), impl);
 impl = listCons(numberValue(1), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_745"), impl);
+impl = listCons(stringValue("(Value *)&fn_748"), impl);
 impl = listCons(numberValue(6), impl);
 impls = listCons((Value *)impl, impls);
 protoInfo = listCons(symbolValue("seq"), protoInfo);
@@ -10900,7 +10862,7 @@ protos = listCons((Value *)protoInfo, protos);
 protoInfo = empty_list;
 impls = empty_list;
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_604"), impl);
+impl = listCons(stringValue("(Value *)&fn_605"), impl);
 impl = listCons(numberValue(2), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
@@ -10925,14 +10887,14 @@ protoInfo = empty_list;
 impls = empty_list;
 protoInfo = listCons(symbolValue("dissoc"), protoInfo);
 protoInfo = listCons((Value *)impls, protoInfo);
-protoInfo = listCons(stringValue("extern Function protoFn_398;"), protoInfo);
-protoInfo = listCons(stringValue("protoImpls_397"), protoInfo);
+protoInfo = listCons(stringValue("extern Function protoFn_399;"), protoInfo);
+protoInfo = listCons(stringValue("protoImpls_398"), protoInfo);
 protoInfo = listCons(stringValue("core/Associative/dissoc"), protoInfo);
 protos = listCons((Value *)protoInfo, protos);
 protoInfo = empty_list;
 impls = empty_list;
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_650"), impl);
+impl = listCons(stringValue("(Value *)&fn_652"), impl);
 impl = listCons(numberValue(4), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
@@ -10956,15 +10918,15 @@ protos = listCons((Value *)protoInfo, protos);
 protoInfo = empty_list;
 impls = empty_list;
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_641"), impl);
+impl = listCons(stringValue("(Value *)&fn_643"), impl);
 impl = listCons(numberValue(4), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_712"), impl);
+impl = listCons(stringValue("(Value *)&fn_715"), impl);
 impl = listCons(numberValue(1), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_740"), impl);
+impl = listCons(stringValue("(Value *)&fn_743"), impl);
 impl = listCons(numberValue(6), impl);
 impls = listCons((Value *)impl, impls);
 protoInfo = listCons(symbolValue("conj"), protoInfo);
@@ -10976,15 +10938,15 @@ protos = listCons((Value *)protoInfo, protos);
 protoInfo = empty_list;
 impls = empty_list;
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_653"), impl);
+impl = listCons(stringValue("(Value *)&fn_655"), impl);
 impl = listCons(numberValue(4), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_719"), impl);
+impl = listCons(stringValue("(Value *)&fn_722"), impl);
 impl = listCons(numberValue(1), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_747"), impl);
+impl = listCons(stringValue("(Value *)&fn_750"), impl);
 impl = listCons(numberValue(6), impl);
 impls = listCons((Value *)impl, impls);
 protoInfo = listCons(symbolValue("rest"), protoInfo);
@@ -10996,55 +10958,55 @@ protos = listCons((Value *)protoInfo, protos);
 protoInfo = empty_list;
 impls = empty_list;
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_843"), impl);
+impl = listCons(stringValue("(Value *)&fn_846"), impl);
 impl = listCons(numberValue(11), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_811"), impl);
+impl = listCons(stringValue("(Value *)&fn_814"), impl);
 impl = listCons(numberValue(10), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_875"), impl);
+impl = listCons(stringValue("(Value *)&fn_878"), impl);
 impl = listCons(numberValue(12), impl);
 impls = listCons((Value *)impl, impls);
 protoInfo = listCons(symbolValue("assoc"), protoInfo);
 protoInfo = listCons((Value *)impls, protoInfo);
-protoInfo = listCons(stringValue("extern Function protoFn_395;"), protoInfo);
-protoInfo = listCons(stringValue("protoImpls_394"), protoInfo);
+protoInfo = listCons(stringValue("extern Function protoFn_396;"), protoInfo);
+protoInfo = listCons(stringValue("protoImpls_395"), protoInfo);
 protoInfo = listCons(stringValue("core/Associative/assoc"), protoInfo);
 protos = listCons((Value *)protoInfo, protos);
 protoInfo = empty_list;
 impls = empty_list;
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_647"), impl);
+impl = listCons(stringValue("(Value *)&fn_649"), impl);
 impl = listCons(numberValue(4), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&protoFn_504"), impl);
+impl = listCons(stringValue("(Value *)&protoFn_505"), impl);
 impl = listCons(numberValue(15), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_592"), impl);
+impl = listCons(stringValue("(Value *)&fn_593"), impl);
 impl = listCons(numberValue(3), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_838"), impl);
+impl = listCons(stringValue("(Value *)&fn_841"), impl);
 impl = listCons(numberValue(11), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_806"), impl);
+impl = listCons(stringValue("(Value *)&fn_809"), impl);
 impl = listCons(numberValue(10), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_870"), impl);
+impl = listCons(stringValue("(Value *)&fn_873"), impl);
 impl = listCons(numberValue(12), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&protoFn_545"), impl);
+impl = listCons(stringValue("(Value *)&protoFn_546"), impl);
 impl = listCons(numberValue(16), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&protoFn_447"), impl);
+impl = listCons(stringValue("(Value *)&protoFn_448"), impl);
 impl = listCons(numberValue(13), impl);
 impls = listCons((Value *)impl, impls);
 protoInfo = listCons(symbolValue("zero"), protoInfo);
@@ -11056,51 +11018,51 @@ protos = listCons((Value *)protoInfo, protos);
 protoInfo = empty_list;
 impls = empty_list;
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_679"), impl);
+impl = listCons(stringValue("(Value *)&fn_681"), impl);
 impl = listCons(numberValue(4), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&protoFn_508"), impl);
+impl = listCons(stringValue("(Value *)&protoFn_509"), impl);
 impl = listCons(numberValue(15), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_594"), impl);
+impl = listCons(stringValue("(Value *)&fn_595"), impl);
 impl = listCons(numberValue(3), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_844"), impl);
+impl = listCons(stringValue("(Value *)&fn_847"), impl);
 impl = listCons(numberValue(11), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_929"), impl);
+impl = listCons(stringValue("(Value *)&fn_932"), impl);
 impl = listCons(numberValue(5), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_812"), impl);
+impl = listCons(stringValue("(Value *)&fn_815"), impl);
 impl = listCons(numberValue(10), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_876"), impl);
+impl = listCons(stringValue("(Value *)&fn_879"), impl);
 impl = listCons(numberValue(12), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_716"), impl);
+impl = listCons(stringValue("(Value *)&fn_719"), impl);
 impl = listCons(numberValue(1), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_939"), impl);
+impl = listCons(stringValue("(Value *)&fn_942"), impl);
 impl = listCons(numberValue(7), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_744"), impl);
+impl = listCons(stringValue("(Value *)&fn_747"), impl);
 impl = listCons(numberValue(6), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&fn_606"), impl);
+impl = listCons(stringValue("(Value *)&fn_607"), impl);
 impl = listCons(numberValue(2), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
-impl = listCons(stringValue("(Value *)&protoFn_453"), impl);
+impl = listCons(stringValue("(Value *)&protoFn_454"), impl);
 impl = listCons(numberValue(13), impl);
 impls = listCons((Value *)impl, impls);
 impl = empty_list;
@@ -11122,8 +11084,16 @@ List *fnInfo;
 List *arityInfo;
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_687"), arityInfo);
+arityInfo = listCons(keywordValue(":variadic"), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_686"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(numberValue(2), empty_list);
 arityInfo = listCons(stringValue("arityImpl_852"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_839"), fnInfo);
@@ -11154,11 +11124,19 @@ fnInfo = listCons(stringValue("(Value *)&fn_120"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_621"), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_827"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_620"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_826"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("protoFnImpl_389"), arityInfo);
+arityInfo = listCons(numberValue(5), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&protoFn_381"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
@@ -11178,19 +11156,35 @@ fnInfo = listCons(stringValue("(Value *)&fn_98"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_764"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_748"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("protoImpl_469"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&protoFn_450"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_837"), arityInfo);
+arityInfo = listCons(numberValue(5), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_818"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
 arityInfo = listCons(stringValue("protoFnImpl_285"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&protoFn_282"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_457"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_440"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(numberValue(2), empty_list);
@@ -11202,40 +11196,24 @@ fnInfo = listCons(stringValue("(Value *)&fn_739"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_634"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
+arityInfo = listCons(stringValue("protoFnImpl_417"), arityInfo);
+arityInfo = listCons(numberValue(3), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_633"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&protoFn_405"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(numberValue(4), empty_list);
-arityInfo = listCons(stringValue("arityImpl_581"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_580"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
 arityInfo = listCons(stringValue("arityImpl_669"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_650"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("protoImpl_494"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_487"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
 arityInfo = listCons(stringValue("arityImpl_670"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_651"), fnInfo);
@@ -11243,10 +11221,6 @@ staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
 arityInfo = listCons(stringValue("arityImpl_778"), arityInfo);
-arityInfo = listCons(numberValue(3), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_779"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
@@ -11255,82 +11229,110 @@ staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(numberValue(2), empty_list);
 arityInfo = listCons(stringValue("arityImpl_694"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
+arityInfo = listCons(keywordValue(":variadic"), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_693"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
+arityInfo = listCons(numberValue(2), empty_list);
+arityInfo = listCons(stringValue("arityImpl_731"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_730"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(numberValue(2), empty_list);
+arityInfo = listCons(stringValue("arityImpl_427"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_426"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_569"), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_611"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_607"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_533"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_510"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("protoImpl_542"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&protoFn_517"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(numberValue(2), empty_list);
+arityInfo = listCons(stringValue("arityImpl_690"), arityInfo);
 arityInfo = listCons(keywordValue(":variadic"), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_568"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_567"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_689"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("protoImpl_468"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_449"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(numberValue(3), empty_list);
-arityInfo = listCons(stringValue("arityImpl_615"), arityInfo);
-arityInfo = listCons(keywordValue(":variadic"), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_614"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(numberValue(4), empty_list);
-arityInfo = listCons(stringValue("arityImpl_897"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_895"), arityInfo);
+arityInfo = listCons(numberValue(3), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_878"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("protoFnImpl_483"), arityInfo);
+arityInfo = listCons(numberValue(13), empty_list);
+arityInfo = listCons(stringValue("protoImpl_530"), arityInfo);
 arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_481"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&protoFn_505"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
 arityInfo = listCons(stringValue("arityImpl_906"), arityInfo);
-arityInfo = listCons(keywordValue(":variadic"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_905"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_891"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_887"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_874"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(numberValue(1), empty_list);
 arityInfo = listCons(stringValue("arityImpl_725"), arityInfo);
-arityInfo = listCons(numberValue(3), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_713"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(4), empty_list);
-arityInfo = listCons(stringValue("arityImpl_665"), arityInfo);
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_922"), arityInfo);
+arityInfo = listCons(numberValue(3), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_921"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_663"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
@@ -11338,35 +11340,11 @@ fnInfo = listCons(stringValue("(Value *)&fn_646"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_429"), arityInfo);
-arityInfo = listCons(keywordValue(":variadic"), arityInfo);
+arityInfo = listCons(stringValue("protoFnImpl_393"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_428"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(numberValue(2), empty_list);
-arityInfo = listCons(stringValue("arityImpl_976"), arityInfo);
-arityInfo = listCons(numberValue(0), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_975"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(numberValue(2), empty_list);
-arityInfo = listCons(stringValue("arityImpl_656"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_639"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(numberValue(4), empty_list);
-arityInfo = listCons(stringValue("arityImpl_934"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_929"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&protoFn_387"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
@@ -11377,25 +11355,25 @@ fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_918"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("protoImpl_561"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&protoFn_552"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
 arityInfo = listCons(numberValue(2), empty_list);
-arityInfo = listCons(stringValue("arityImpl_692"), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_694"), arityInfo);
 arityInfo = listCons(keywordValue(":variadic"), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("var_53"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(13), empty_list);
-arityInfo = listCons(stringValue("arityImpl_528"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_505"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
 arityInfo = listCons(stringValue("arityImpl_666"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_647"), fnInfo);
@@ -11438,6 +11416,22 @@ fnInfo = listCons(stringValue("(Value *)&protoFn_1"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_433"), arityInfo);
+arityInfo = listCons(keywordValue(":variadic"), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_432"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_466"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_449"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
 arityInfo = listCons(stringValue("protoFnImpl_358"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
@@ -11453,36 +11447,28 @@ fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&protoFn_351"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(numberValue(2), empty_list);
 arityInfo = listCons(stringValue("arityImpl_762"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_746"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("protoImpl_535"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_510"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_884"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_871"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(numberValue(2), empty_list);
-arityInfo = listCons(stringValue("arityImpl_932"), arityInfo);
+arityInfo = listCons(numberValue(4), empty_list);
+arityInfo = listCons(stringValue("arityImpl_674"), arityInfo);
 arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_927"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_655"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(numberValue(2), empty_list);
+arityInfo = listCons(stringValue("arityImpl_884"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_871"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(numberValue(1), empty_list);
@@ -11526,11 +11512,27 @@ fnInfo = listCons(stringValue("(Value *)&fn_875"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_896"), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_894"), arityInfo);
 arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_877"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(numberValue(2), empty_list);
+arityInfo = listCons(stringValue("arityImpl_684"), arityInfo);
+arityInfo = listCons(keywordValue(":variadic"), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_683"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_909"), arityInfo);
+arityInfo = listCons(keywordValue(":variadic"), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_908"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(numberValue(2), empty_list);
@@ -11550,46 +11552,78 @@ fnInfo = listCons(stringValue("(Value *)&protoFn_327"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_950"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_437"), arityInfo);
+arityInfo = listCons(keywordValue(":variadic"), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_949"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(numberValue(4), empty_list);
-arityInfo = listCons(stringValue("arityImpl_578"), arityInfo);
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_436"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_577"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_435"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_946"), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_566"), arityInfo);
+arityInfo = listCons(keywordValue(":variadic"), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_565"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_564"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_859"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_858"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(numberValue(2), empty_list);
+arityInfo = listCons(stringValue("arityImpl_946"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_940"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(numberValue(4), empty_list);
 arityInfo = listCons(stringValue("arityImpl_660"), arityInfo);
-arityInfo = listCons(numberValue(3), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_643"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(numberValue(2), empty_list);
 arityInfo = listCons(stringValue("arityImpl_947"), arityInfo);
-arityInfo = listCons(numberValue(3), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_941"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(5), empty_list);
+arityInfo = listCons(numberValue(13), empty_list);
+arityInfo = listCons(stringValue("arityImpl_554"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_547"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("protoImpl_544"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&protoFn_492"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
 arityInfo = listCons(stringValue("arityImpl_953"), arityInfo);
 arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
@@ -11598,11 +11632,11 @@ fnInfo = listCons(stringValue("(Value *)&fn_952"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_819"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
+arityInfo = listCons(stringValue("protoImpl_927"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_806"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&protoFn_924"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(numberValue(1), empty_list);
@@ -11613,33 +11647,25 @@ fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_161"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(1), empty_list);
-arityInfo = listCons(stringValue("protoImpl_539"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_514"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("protoImpl_458"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_439"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(numberValue(2), empty_list);
-arityInfo = listCons(stringValue("arityImpl_933"), arityInfo);
+arityInfo = listCons(stringValue("protoImpl_463"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_928"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&protoFn_444"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_889"), arityInfo);
-arityInfo = listCons(numberValue(3), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_736"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_720"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_885"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_872"), fnInfo);
@@ -11651,14 +11677,6 @@ arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_123"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(numberValue(4), empty_list);
-arityInfo = listCons(stringValue("protoImpl_472"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_453"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(numberValue(1), empty_list);
@@ -11677,23 +11695,31 @@ fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_155"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(13), empty_list);
-arityInfo = listCons(stringValue("protoImpl_554"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
+arityInfo = listCons(numberValue(1), empty_list);
+arityInfo = listCons(stringValue("arityImpl_768"), arityInfo);
+arityInfo = listCons(keywordValue(":variadic"), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_545"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_767"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(numberValue(2), empty_list);
 arityInfo = listCons(stringValue("arityImpl_726"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_714"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(4), empty_list);
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_898"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_897"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
 arityInfo = listCons(stringValue("arityImpl_965"), arityInfo);
 arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
@@ -11709,20 +11735,32 @@ fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_811"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(13), empty_list);
-arityInfo = listCons(stringValue("protoImpl_529"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
+arityInfo = listCons(numberValue(4), empty_list);
+arityInfo = listCons(stringValue("arityImpl_579"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_504"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_578"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(2), empty_list);
-arityInfo = listCons(stringValue("arityImpl_759"), arityInfo);
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_755"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_743"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_781"), arityInfo);
+arityInfo = listCons(numberValue(3), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_782"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_780"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
@@ -11733,25 +11771,25 @@ fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_370"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(3), empty_list);
-arityInfo = listCons(stringValue("arityImpl_625"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("protoFnImpl_484"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_623"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&protoFn_482"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(numberValue(2), empty_list);
 arityInfo = listCons(stringValue("arityImpl_979"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
+arityInfo = listCons(numberValue(0), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_978"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_857"), arityInfo);
-arityInfo = listCons(numberValue(3), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_853"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_840"), fnInfo);
@@ -11765,22 +11803,6 @@ fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_961"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(1), empty_list);
-arityInfo = listCons(stringValue("arityImpl_765"), arityInfo);
-arityInfo = listCons(keywordValue(":variadic"), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_764"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("protoImpl_531"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_506"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
 arityInfo = listCons(stringValue("protoFnImpl_319"), arityInfo);
 arityInfo = listCons(numberValue(1), arityInfo);
@@ -11790,27 +11812,19 @@ fnInfo = listCons(stringValue("(Value *)&protoFn_306"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_493"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_488"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_572"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_571"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
 arityInfo = listCons(stringValue("arityImpl_324"), arityInfo);
 arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_323"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("protoImpl_538"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&protoFn_513"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(numberValue(1), empty_list);
@@ -11822,11 +11836,11 @@ fnInfo = listCons(stringValue("(Value *)&fn_31"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("protoFnImpl_392"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_834"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_386"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_833"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
@@ -11846,11 +11860,19 @@ fnInfo = listCons(stringValue("(Value *)&fn_51"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("protoImpl_464"), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_937"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_932"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_926"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_445"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_925"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
@@ -11870,16 +11892,24 @@ fnInfo = listCons(stringValue("(Value *)&fn_134"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("protoImpl_541"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
+arityInfo = listCons(stringValue("protoImpl_532"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_516"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&protoFn_507"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("protoImpl_528"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&protoFn_503"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
 arityInfo = listCons(stringValue("arityImpl_752"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_740"), fnInfo);
@@ -11894,31 +11924,19 @@ fnInfo = listCons(stringValue("(Value *)&protoFn_206"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_526"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_525"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_734"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_718"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_436"), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_904"), arityInfo);
 arityInfo = listCons(keywordValue(":variadic"), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_435"), arityInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_903"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(numberValue(2), empty_list);
+arityInfo = listCons(stringValue("arityImpl_734"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_434"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_718"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
@@ -11927,14 +11945,6 @@ arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_347"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_697"), arityInfo);
-arityInfo = listCons(keywordValue(":variadic"), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_696"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
@@ -11951,6 +11961,14 @@ arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_137"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(numberValue(15), empty_list);
+arityInfo = listCons(stringValue("protoFnImpl_487"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("var_439"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
@@ -11970,11 +11988,23 @@ fnInfo = listCons(stringValue("(Value *)&fn_605"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_621"), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_622"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_623"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("var_232"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_613"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_612"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(numberValue(2), empty_list);
@@ -11986,14 +12016,6 @@ fnInfo = listCons(stringValue("(Value *)&fn_111"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("protoImpl_543"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_491"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
 arityInfo = listCons(stringValue("arityImpl_860"), arityInfo);
 arityInfo = listCons(numberValue(3), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
@@ -12002,27 +12024,19 @@ fnInfo = listCons(stringValue("(Value *)&fn_843"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_685"), arityInfo);
-arityInfo = listCons(keywordValue(":variadic"), arityInfo);
+arityInfo = listCons(stringValue("protoImpl_467"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_684"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&protoFn_448"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_913"), arityInfo);
-arityInfo = listCons(numberValue(3), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_912"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("protoImpl_460"), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_462"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_441"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_445"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
@@ -12034,27 +12048,27 @@ fnInfo = listCons(stringValue("(Value *)&protoFn_303"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("protoImpl_521"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_527"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_498"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(numberValue(2), empty_list);
-arityInfo = listCons(stringValue("arityImpl_688"), arityInfo);
-arityInfo = listCons(keywordValue(":variadic"), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_687"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_526"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_595"), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_950"), arityInfo);
+arityInfo = listCons(numberValue(3), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_944"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(numberValue(5), empty_list);
+arityInfo = listCons(stringValue("protoImpl_557"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_591"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&protoFn_548"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
@@ -12074,35 +12088,27 @@ fnInfo = listCons(stringValue("(Value *)&fn_114"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_590"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_589"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(numberValue(2), empty_list);
 arityInfo = listCons(stringValue("arityImpl_754"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_742"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(15), empty_list);
-arityInfo = listCons(stringValue("arityImpl_522"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_501"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(numberValue(4), empty_list);
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
 arityInfo = listCons(stringValue("arityImpl_672"), arityInfo);
 arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_653"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("protoImpl_924"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_921"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(numberValue(1), empty_list);
@@ -12114,7 +12120,7 @@ fnInfo = listCons(stringValue("(Value *)&fn_83"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_832"), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_830"), arityInfo);
 arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
@@ -12122,14 +12128,6 @@ fnInfo = listCons(stringValue("(Value *)&fn_813"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("protoFnImpl_390"), arityInfo);
-arityInfo = listCons(numberValue(5), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_383"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(numberValue(4), empty_list);
 arityInfo = listCons(stringValue("arityImpl_829"), arityInfo);
 arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
@@ -12137,36 +12135,44 @@ fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_812"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_822"), arityInfo);
+arityInfo = listCons(numberValue(3), empty_list);
+arityInfo = listCons(stringValue("arityImpl_627"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_821"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_625"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_601"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_600"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_898"), arityInfo);
-arityInfo = listCons(numberValue(5), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_896"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_879"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_706"), arityInfo);
-arityInfo = listCons(keywordValue(":variadic"), arityInfo);
+arityInfo = listCons(numberValue(2), empty_list);
+arityInfo = listCons(stringValue("arityImpl_470"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_705"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_453"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("protoImpl_473"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&protoFn_454"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("protoImpl_495"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&protoFn_488"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
@@ -12177,28 +12183,20 @@ fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&protoFn_223"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
+arityInfo = listCons(numberValue(2), empty_list);
+arityInfo = listCons(stringValue("arityImpl_696"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_695"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_559"), arityInfo);
+arityInfo = listCons(stringValue("protoImpl_536"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_552"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(numberValue(2), empty_list);
-arityInfo = listCons(stringValue("arityImpl_756"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_755"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(numberValue(2), empty_list);
-arityInfo = listCons(stringValue("arityImpl_692"), arityInfo);
-arityInfo = listCons(keywordValue(":variadic"), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_691"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&protoFn_511"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(numberValue(1), empty_list);
@@ -12207,6 +12205,14 @@ arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_49"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(numberValue(4), empty_list);
+arityInfo = listCons(stringValue("arityImpl_836"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_817"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
@@ -12218,59 +12224,43 @@ fnInfo = listCons(stringValue("(Value *)&fn_170"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_473"), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_531"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_456"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(numberValue(4), empty_list);
-arityInfo = listCons(stringValue("arityImpl_680"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_679"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_508"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
 arityInfo = listCons(stringValue("arityImpl_724"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_712"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(5), empty_list);
-arityInfo = listCons(stringValue("protoImpl_556"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_547"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(numberValue(3), empty_list);
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
 arityInfo = listCons(stringValue("arityImpl_596"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_592"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("protoImpl_527"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_502"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(numberValue(1), empty_list);
-arityInfo = listCons(stringValue("arityImpl_750"), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_638"), arityInfo);
 arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_738"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_637"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_804"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_803"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
@@ -12282,15 +12272,15 @@ fnInfo = listCons(stringValue("(Value *)&fn_967"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_675"), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_468"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_674"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_451"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(2), empty_list);
-arityInfo = listCons(stringValue("arityImpl_731"), arityInfo);
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_727"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
@@ -12305,17 +12295,17 @@ fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_33"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(2), empty_list);
-arityInfo = listCons(stringValue("arityImpl_943"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
+arityInfo = listCons(numberValue(3), empty_list);
+arityInfo = listCons(stringValue("arityImpl_616"), arityInfo);
+arityInfo = listCons(keywordValue(":variadic"), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_937"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_615"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(7), empty_list);
+arityInfo = listCons(numberValue(2), empty_list);
 arityInfo = listCons(stringValue("arityImpl_985"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
+arityInfo = listCons(numberValue(0), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_984"), fnInfo);
@@ -12330,19 +12320,11 @@ fnInfo = listCons(stringValue("(Value *)&fn_86"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_864"), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_862"), arityInfo);
 arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_845"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_850"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_837"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(numberValue(2), empty_list);
@@ -12353,60 +12335,44 @@ fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_149"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(numberValue(1), empty_list);
 arityInfo = listCons(stringValue("arityImpl_753"), arityInfo);
-arityInfo = listCons(numberValue(3), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_741"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(13), empty_list);
-arityInfo = listCons(stringValue("arityImpl_553"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_602"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_546"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_601"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_782"), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_479"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_478"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_662"), arityInfo);
 arityInfo = listCons(numberValue(3), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_781"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_882"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_869"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("protoImpl_560"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_551"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_664"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_645"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_772"), arityInfo);
+arityInfo = listCons(numberValue(4), empty_list);
+arityInfo = listCons(stringValue("arityImpl_675"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_771"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_656"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
@@ -12426,8 +12392,28 @@ fnInfo = listCons(stringValue("(Value *)&protoFn_4"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_374"), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_458"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_441"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_891"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_890"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_375"), arityInfo);
 arityInfo = listCons(keywordValue(":variadic"), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_374"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_373"), fnInfo);
@@ -12441,39 +12427,47 @@ fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&protoFn_330"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(numberValue(2), empty_list);
 arityInfo = listCons(stringValue("arityImpl_661"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_644"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("protoFnImpl_419"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&protoFn_408"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
 arityInfo = listCons(stringValue("arityImpl_835"), arityInfo);
-arityInfo = listCons(numberValue(5), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_816"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_530"), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_464"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_507"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_447"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(numberValue(2), empty_list);
+arityInfo = listCons(stringValue("arityImpl_705"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_704"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_901"), arityInfo);
-arityInfo = listCons(keywordValue(":variadic"), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_900"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(numberValue(4), empty_list);
 arityInfo = listCons(stringValue("arityImpl_667"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
@@ -12481,12 +12475,12 @@ fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_648"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(2), empty_list);
-arityInfo = listCons(stringValue("arityImpl_818"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_869"), arityInfo);
+arityInfo = listCons(numberValue(5), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_805"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_850"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
@@ -12498,35 +12492,27 @@ fnInfo = listCons(stringValue("(Value *)&protoFn_197"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_886"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_885"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(numberValue(2), empty_list);
-arityInfo = listCons(stringValue("arityImpl_720"), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_603"), arityInfo);
 arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_708"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_595"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_465"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_448"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(numberValue(5), empty_list);
-arityInfo = listCons(stringValue("arityImpl_555"), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_460"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_548"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_443"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_587"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_586"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
@@ -12538,16 +12524,24 @@ fnInfo = listCons(stringValue("(Value *)&fn_719"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_798"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
+arityInfo = listCons(stringValue("protoFnImpl_424"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_797"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&protoFn_422"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_866"), arityInfo);
-arityInfo = listCons(numberValue(5), arityInfo);
+arityInfo = listCons(stringValue("protoImpl_522"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&protoFn_499"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_864"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_847"), fnInfo);
@@ -12561,15 +12555,15 @@ fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_80"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_432"), arityInfo);
-arityInfo = listCons(keywordValue(":variadic"), arityInfo);
+arityInfo = listCons(numberValue(4), empty_list);
+arityInfo = listCons(stringValue("arityImpl_868"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_431"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_849"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(1), empty_list);
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
 arityInfo = listCons(stringValue("arityImpl_948"), arityInfo);
 arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
@@ -12577,20 +12571,36 @@ fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_942"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(4), empty_list);
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_525"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_504"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(numberValue(15), empty_list);
+arityInfo = listCons(stringValue("protoFnImpl_487"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&protoFn_490"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_870"), arityInfo);
+arityInfo = listCons(numberValue(5), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_851"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
 arityInfo = listCons(stringValue("arityImpl_861"), arityInfo);
 arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_844"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("protoImpl_466"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_447"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(numberValue(4), empty_list);
@@ -12601,6 +12611,22 @@ fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_140"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_576"), arityInfo);
+arityInfo = listCons(keywordValue(":variadic"), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_575"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(numberValue(15), empty_list);
+arityInfo = listCons(stringValue("arityImpl_496"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_491"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
 arityInfo = listCons(numberValue(2), empty_list);
 arityInfo = listCons(stringValue("arityImpl_127"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
@@ -12609,12 +12635,20 @@ fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_126"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(2), empty_list);
+arityInfo = listCons(numberValue(4), empty_list);
 arityInfo = listCons(stringValue("arityImpl_682"), arityInfo);
-arityInfo = listCons(keywordValue(":variadic"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_681"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(numberValue(2), empty_list);
+arityInfo = listCons(stringValue("arityImpl_770"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_769"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
@@ -12626,70 +12660,30 @@ fnInfo = listCons(stringValue("(Value *)&protoFn_273"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(numberValue(2), empty_list);
-arityInfo = listCons(stringValue("arityImpl_849"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_836"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_589"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_588"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
 arityInfo = listCons(stringValue("arityImpl_935"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_930"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_827"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_823"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_810"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(2), empty_list);
-arityInfo = listCons(stringValue("arityImpl_944"), arityInfo);
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_573"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_938"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_572"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_851"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_838"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(numberValue(1), empty_list);
-arityInfo = listCons(stringValue("arityImpl_722"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_710"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("protoFnImpl_423"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_421"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(numberValue(5), empty_list);
 arityInfo = listCons(stringValue("arityImpl_956"), arityInfo);
 arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
@@ -12698,38 +12692,14 @@ fnInfo = listCons(stringValue("(Value *)&fn_955"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_532"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_509"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("protoImpl_474"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_455"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("protoFnImpl_411"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_398"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_858"), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_854"), arityInfo);
 arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_841"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(4), empty_list);
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
 arityInfo = listCons(stringValue("arityImpl_791"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
@@ -12737,58 +12707,54 @@ fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_790"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(4), empty_list);
-arityInfo = listCons(stringValue("arityImpl_471"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_454"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_831"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_830"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(numberValue(2), empty_list);
-arityInfo = listCons(stringValue("arityImpl_728"), arityInfo);
+arityInfo = listCons(stringValue("protoImpl_461"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_727"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&protoFn_442"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(2), empty_list);
-arityInfo = listCons(stringValue("arityImpl_607"), arityInfo);
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("protoImpl_534"), arityInfo);
 arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_603"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&protoFn_509"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(numberValue(13), empty_list);
+arityInfo = listCons(stringValue("arityImpl_529"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_506"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(numberValue(15), empty_list);
-arityInfo = listCons(stringValue("arityImpl_557"), arityInfo);
+arityInfo = listCons(stringValue("protoImpl_524"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_550"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&protoFn_501"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_834"), arityInfo);
-arityInfo = listCons(numberValue(5), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_974"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_973"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_832"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_815"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_795"), arityInfo);
-arityInfo = listCons(numberValue(3), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
 arityInfo = listCons(stringValue("arityImpl_794"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
@@ -12797,20 +12763,20 @@ fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_793"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(4), empty_list);
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
 arityInfo = listCons(stringValue("arityImpl_899"), arityInfo);
-arityInfo = listCons(numberValue(5), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_880"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(2), empty_list);
-arityInfo = listCons(stringValue("arityImpl_817"), arityInfo);
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("protoImpl_459"), arityInfo);
 arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_804"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&protoFn_440"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(numberValue(2), empty_list);
@@ -12830,27 +12796,11 @@ fnInfo = listCons(stringValue("(Value *)&protoFn_336"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_895"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
+arityInfo = listCons(stringValue("protoFnImpl_391"), arityInfo);
+arityInfo = listCons(numberValue(5), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_894"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_575"), arityInfo);
-arityInfo = listCons(keywordValue(":variadic"), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_574"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_749"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_737"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&protoFn_384"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
@@ -12869,68 +12819,60 @@ fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_787"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(4), empty_list);
-arityInfo = listCons(stringValue("arityImpl_732"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_430"), arityInfo);
+arityInfo = listCons(keywordValue(":variadic"), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_429"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_728"), arityInfo);
+arityInfo = listCons(numberValue(3), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_716"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("protoImpl_537"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_512"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("protoImpl_533"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_508"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("protoFnImpl_418"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_407"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_820"), arityInfo);
+arityInfo = listCons(numberValue(4), empty_list);
+arityInfo = listCons(stringValue("arityImpl_900"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_881"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(numberValue(15), empty_list);
+arityInfo = listCons(stringValue("protoImpl_559"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&protoFn_550"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(numberValue(13), empty_list);
+arityInfo = listCons(stringValue("protoImpl_555"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&protoFn_546"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(numberValue(2), empty_list);
+arityInfo = listCons(stringValue("arityImpl_820"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_807"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(4), empty_list);
-arityInfo = listCons(stringValue("arityImpl_631"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_630"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_524"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
+arityInfo = listCons(stringValue("protoFnImpl_410"), arityInfo);
+arityInfo = listCons(numberValue(3), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_503"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(numberValue(15), empty_list);
-arityInfo = listCons(stringValue("protoImpl_523"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_500"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&protoFn_396"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
@@ -12941,17 +12883,17 @@ fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_747"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(4), empty_list);
+arityInfo = listCons(numberValue(2), empty_list);
 arityInfo = listCons(stringValue("arityImpl_610"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_606"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(4), empty_list);
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
 arityInfo = listCons(stringValue("arityImpl_673"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_654"), fnInfo);
@@ -12965,6 +12907,14 @@ fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&protoFn_7"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
+arityInfo = listCons(numberValue(1), empty_list);
+arityInfo = listCons(stringValue("arityImpl_939"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_934"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
 arityInfo = listCons(stringValue("arityImpl_636"), arityInfo);
 arityInfo = listCons(numberValue(1), arityInfo);
@@ -12975,7 +12925,7 @@ staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(numberValue(3), empty_list);
 arityInfo = listCons(stringValue("arityImpl_597"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_593"), fnInfo);
@@ -12998,40 +12948,8 @@ fnInfo = listCons(stringValue("(Value *)&fn_167"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_467"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_450"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("protoFnImpl_416"), arityInfo);
-arityInfo = listCons(numberValue(3), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_404"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_700"), arityInfo);
-arityInfo = listCons(keywordValue(":variadic"), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_699"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("protoImpl_519"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_496"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
 arityInfo = listCons(stringValue("arityImpl_785"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
+arityInfo = listCons(numberValue(3), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_784"), fnInfo);
@@ -13045,20 +12963,12 @@ fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_164"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(15), empty_list);
-arityInfo = listCons(stringValue("protoFnImpl_486"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_738"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("var_438"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(numberValue(2), empty_list);
-arityInfo = listCons(stringValue("arityImpl_767"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_766"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_722"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(numberValue(2), empty_list);
@@ -13069,25 +12979,41 @@ fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_711"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_824"), arityInfo);
+arityInfo = listCons(numberValue(15), empty_list);
+arityInfo = listCons(stringValue("arityImpl_558"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_823"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_551"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_463"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_765"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_446"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_749"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_866"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_865"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(numberValue(7), empty_list);
+arityInfo = listCons(stringValue("arityImpl_988"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_987"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
 arityInfo = listCons(stringValue("arityImpl_657"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_640"), fnInfo);
@@ -13101,20 +13027,12 @@ fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_45"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(4), empty_list);
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
 arityInfo = listCons(stringValue("arityImpl_250"), arityInfo);
 arityInfo = listCons(keywordValue(":variadic"), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_249"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(numberValue(15), empty_list);
-arityInfo = listCons(stringValue("protoFnImpl_486"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_489"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
@@ -13134,11 +13052,11 @@ fnInfo = listCons(stringValue("(Value *)&protoFn_333"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_863"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_825"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_862"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_824"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
@@ -13151,18 +13069,46 @@ staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
 arityInfo = listCons(stringValue("arityImpl_867"), arityInfo);
-arityInfo = listCons(numberValue(5), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_848"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(4), empty_list);
-arityInfo = listCons(stringValue("arityImpl_760"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_570"), arityInfo);
+arityInfo = listCons(keywordValue(":variadic"), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_569"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_568"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_756"), arityInfo);
+arityInfo = listCons(numberValue(3), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_744"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_938"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_933"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_766"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_750"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(numberValue(2), empty_list);
@@ -13181,20 +13127,20 @@ fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_117"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(15), empty_list);
-arityInfo = listCons(stringValue("arityImpl_495"), arityInfo);
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_729"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_490"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_717"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_733"), arityInfo);
+arityInfo = listCons(stringValue("protoImpl_520"), arityInfo);
 arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_717"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&protoFn_497"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
@@ -13205,28 +13151,28 @@ fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&protoFn_261"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(4), empty_list);
-arityInfo = listCons(stringValue("arityImpl_602"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
+arityInfo = listCons(numberValue(3), empty_list);
+arityInfo = listCons(stringValue("arityImpl_598"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_594"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_586"), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_472"), arityInfo);
 arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_585"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_455"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_655"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_378"), arityInfo);
+arityInfo = listCons(keywordValue(":variadic"), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_638"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_377"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
@@ -13246,11 +13192,11 @@ fnInfo = listCons(stringValue("(Value *)&fn_89"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_856"), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_889"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_855"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_888"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
@@ -13261,9 +13207,17 @@ fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&protoFn_180"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(4), empty_list);
-arityInfo = listCons(stringValue("arityImpl_833"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_901"), arityInfo);
+arityInfo = listCons(numberValue(5), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_882"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_831"), arityInfo);
+arityInfo = listCons(numberValue(3), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_814"), fnInfo);
@@ -13287,50 +13241,18 @@ staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
 arityInfo = listCons(stringValue("arityImpl_971"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_970"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_459"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
+arityInfo = listCons(numberValue(1), empty_list);
+arityInfo = listCons(stringValue("arityImpl_951"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_442"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_854"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_853"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_888"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_887"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_461"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_444"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("protoFnImpl_409"), arityInfo);
-arityInfo = listCons(numberValue(3), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_395"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_945"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(numberValue(4), empty_list);
@@ -13345,14 +13267,6 @@ fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_130"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_883"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_870"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
 arityInfo = listCons(numberValue(2), empty_list);
 arityInfo = listCons(stringValue("arityImpl_279"), arityInfo);
 arityInfo = listCons(numberValue(1), arityInfo);
@@ -13362,31 +13276,11 @@ fnInfo = listCons(stringValue("(Value *)&fn_278"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_565"), arityInfo);
-arityInfo = listCons(keywordValue(":variadic"), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_564"), arityInfo);
+arityInfo = listCons(stringValue("protoImpl_465"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_563"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(numberValue(2), empty_list);
-arityInfo = listCons(stringValue("protoImpl_470"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_451"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_612"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_611"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&protoFn_446"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
@@ -13395,6 +13289,14 @@ arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_212"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(numberValue(2), empty_list);
+arityInfo = listCons(stringValue("arityImpl_759"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_758"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
@@ -13406,8 +13308,8 @@ fnInfo = listCons(stringValue("(Value *)&fn_915"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_761"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_757"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_745"), fnInfo);
@@ -13415,26 +13317,26 @@ staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
 arityInfo = listCons(stringValue("arityImpl_801"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_800"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_668"), arityInfo);
+arityInfo = listCons(numberValue(15), empty_list);
+arityInfo = listCons(stringValue("arityImpl_523"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_649"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_502"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_721"), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_668"), arityInfo);
 arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_709"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_649"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(numberValue(1), empty_list);
@@ -13454,7 +13356,7 @@ fnInfo = listCons(stringValue("(Value *)&fn_108"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_826"), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_822"), arityInfo);
 arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
@@ -13485,12 +13387,36 @@ fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_774"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_377"), arityInfo);
-arityInfo = listCons(keywordValue(":variadic"), arityInfo);
+arityInfo = listCons(numberValue(4), empty_list);
+arityInfo = listCons(stringValue("arityImpl_902"), arityInfo);
+arityInfo = listCons(numberValue(5), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_376"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_883"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_737"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_721"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_494"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_489"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(numberValue(2), empty_list);
+arityInfo = listCons(stringValue("protoImpl_471"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&protoFn_452"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
@@ -13506,19 +13432,55 @@ fnInfo = listCons(stringValue("(Value *)&protoFn_183"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("protoFnImpl_388"), arityInfo);
-arityInfo = listCons(numberValue(5), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_380"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(numberValue(15), empty_list);
-arityInfo = listCons(stringValue("protoImpl_558"), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_677"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_549"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_676"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(numberValue(4), empty_list);
+arityInfo = listCons(stringValue("arityImpl_633"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_632"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("protoFnImpl_412"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&protoFn_399"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_949"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_943"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_699"), arityInfo);
+arityInfo = listCons(keywordValue(":variadic"), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_698"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_798"), arityInfo);
+arityInfo = listCons(numberValue(3), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_797"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_796"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(numberValue(1), empty_list);
@@ -13537,6 +13499,18 @@ fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&protoFn_203"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_709"), arityInfo);
+arityInfo = listCons(keywordValue(":variadic"), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+arityInfo = listCons(numberValue(2), empty_list);
+arityInfo = listCons(stringValue("arityImpl_708"), arityInfo);
+arityInfo = listCons(numberValue(0), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_707"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
 arityInfo = listCons(numberValue(2), empty_list);
 arityInfo = listCons(stringValue("arityImpl_177"), arityInfo);
 arityInfo = listCons(numberValue(1), arityInfo);
@@ -13545,25 +13519,9 @@ fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_176"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(1), empty_list);
-arityInfo = listCons(stringValue("arityImpl_538"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_515"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_542"), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_855"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_492"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_859"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_842"), fnInfo);
@@ -13571,7 +13529,7 @@ staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(numberValue(2), empty_list);
 arityInfo = listCons(stringValue("arityImpl_982"), arityInfo);
-arityInfo = listCons(numberValue(0), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_981"), fnInfo);
@@ -13587,21 +13545,21 @@ staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(numberValue(2), empty_list);
 arityInfo = listCons(stringValue("arityImpl_608"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_604"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_478"), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_543"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_477"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_493"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(4), empty_list);
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
 arityInfo = listCons(stringValue("arityImpl_893"), arityInfo);
 arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
@@ -13617,17 +13575,29 @@ fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_173"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(2), empty_list);
-arityInfo = listCons(stringValue("arityImpl_703"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_560"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_702"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_553"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(4), empty_list);
-arityInfo = listCons(stringValue("arityImpl_658"), arityInfo);
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_622"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_623"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_621"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(numberValue(2), empty_list);
+arityInfo = listCons(stringValue("arityImpl_658"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_641"), fnInfo);
@@ -13642,51 +13612,59 @@ fnInfo = listCons(stringValue("(Value *)&protoFn_300"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_890"), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_886"), arityInfo);
 arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_873"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(2), empty_list);
-arityInfo = listCons(stringValue("arityImpl_469"), arityInfo);
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_838"), arityInfo);
+arityInfo = listCons(numberValue(5), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_819"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_702"), arityInfo);
+arityInfo = listCons(keywordValue(":variadic"), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_701"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("protoImpl_475"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_452"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&protoFn_456"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(1), empty_list);
+arityInfo = listCons(numberValue(5), empty_list);
+arityInfo = listCons(stringValue("arityImpl_556"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_549"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(numberValue(2), empty_list);
 arityInfo = listCons(stringValue("arityImpl_936"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_931"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_825"), arityInfo);
-arityInfo = listCons(numberValue(3), arityInfo);
+arityInfo = listCons(numberValue(2), empty_list);
+arityInfo = listCons(stringValue("arityImpl_821"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_808"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(numberValue(2), empty_list);
-arityInfo = listCons(stringValue("arityImpl_426"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_425"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("protoFnImpl_413"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_401"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(numberValue(1), empty_list);
@@ -13697,39 +13675,47 @@ fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_47"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_923"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_922"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
 arityInfo = listCons(numberValue(4), empty_list);
-arityInfo = listCons(stringValue("arityImpl_945"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_939"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(numberValue(2), empty_list);
-arityInfo = listCons(stringValue("arityImpl_748"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_736"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
-arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("arityImpl_903"), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_582"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_902"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_581"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(2), empty_list);
+arityInfo = listCons(numberValue(1), empty_list);
+arityInfo = listCons(stringValue("arityImpl_539"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_516"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("protoFnImpl_414"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&protoFn_402"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(numberValue(1), empty_list);
+arityInfo = listCons(stringValue("protoImpl_540"), arityInfo);
+arityInfo = listCons(numberValue(1), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&protoFn_515"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_857"), arityInfo);
+arityInfo = listCons(numberValue(2), arityInfo);
+fnInfo = listCons((Value *)arityInfo, fnInfo);
+fnInfo = listCons((Value *)fnInfo, empty_list);
+fnInfo = listCons(stringValue("(Value *)&fn_856"), fnInfo);
+staticFns = listCons((Value *)fnInfo, staticFns);
+fnInfo = empty_list;
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
 arityInfo = listCons(stringValue("arityImpl_659"), arityInfo);
 arityInfo = listCons(numberValue(1), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
@@ -13737,28 +13723,20 @@ fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_642"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(4), empty_list);
-arityInfo = listCons(stringValue("arityImpl_865"), arityInfo);
-arityInfo = listCons(numberValue(2), arityInfo);
+arityInfo = listCons(keywordValue(":no-type"), empty_list);
+arityInfo = listCons(stringValue("arityImpl_863"), arityInfo);
+arityInfo = listCons(numberValue(3), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
 fnInfo = listCons(stringValue("(Value *)&fn_846"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
-arityInfo = listCons(numberValue(2), empty_list);
-arityInfo = listCons(stringValue("arityImpl_881"), arityInfo);
-arityInfo = listCons(numberValue(1), arityInfo);
-fnInfo = listCons((Value *)arityInfo, fnInfo);
-fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&fn_868"), fnInfo);
-staticFns = listCons((Value *)fnInfo, staticFns);
-fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
-arityInfo = listCons(stringValue("protoImpl_462"), arityInfo);
+arityInfo = listCons(stringValue("arityImpl_474"), arityInfo);
 arityInfo = listCons(numberValue(2), arityInfo);
 fnInfo = listCons((Value *)arityInfo, fnInfo);
 fnInfo = listCons((Value *)fnInfo, empty_list);
-fnInfo = listCons(stringValue("(Value *)&protoFn_443"), fnInfo);
+fnInfo = listCons(stringValue("(Value *)&fn_457"), fnInfo);
 staticFns = listCons((Value *)fnInfo, staticFns);
 fnInfo = empty_list;
 arityInfo = listCons(keywordValue(":no-type"), empty_list);
@@ -13791,14 +13769,14 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("rest"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_879"), symInfo);
-symInfo = listCons(stringValue("Function fn_879"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_882"), symInfo);
+symInfo = listCons(stringValue("Function fn_882"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("assoc*_impl"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(16), empty_list);
-symInfo = listCons(stringValue("(Value *)&reified_561"), symInfo);
-symInfo = listCons(stringValue("ReifiedVal reified_561"), symInfo);
+symInfo = listCons(stringValue("(Value *)&reified_562"), symInfo);
+symInfo = listCons(stringValue("ReifiedVal reified_562"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("maybe"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -13815,8 +13793,8 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("wrap"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_684"), symInfo);
-symInfo = listCons(stringValue("Function fn_684"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_686"), symInfo);
+symInfo = listCons(stringValue("Function fn_686"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("print"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -13833,8 +13811,8 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("ArrayNodeVal"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_877"), symInfo);
-symInfo = listCons(stringValue("Function fn_877"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_880"), symInfo);
+symInfo = listCons(stringValue("Function fn_880"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("seq_impl"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -13845,32 +13823,32 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("VoidT"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_681"), symInfo);
-symInfo = listCons(stringValue("Function fn_681"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_683"), symInfo);
+symInfo = listCons(stringValue("Function fn_683"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("prn"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_434"), symInfo);
-symInfo = listCons(stringValue("Function fn_434"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_435"), symInfo);
+symInfo = listCons(stringValue("Function fn_435"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("="), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_905"), symInfo);
-symInfo = listCons(stringValue("Function fn_905"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_908"), symInfo);
+symInfo = listCons(stringValue("Function fn_908"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("merge-with"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_633"), symInfo);
-symInfo = listCons(stringValue("Function fn_633"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_635"), symInfo);
+symInfo = listCons(stringValue("Function fn_635"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("list=*"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_567"), symInfo);
-symInfo = listCons(stringValue("Function fn_567"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_568"), symInfo);
+symInfo = listCons(stringValue("Function fn_568"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("<"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -13881,8 +13859,8 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("list-count"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_604"), symInfo);
-symInfo = listCons(stringValue("Function fn_604"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_605"), symInfo);
+symInfo = listCons(stringValue("Function fn_605"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("<*_impl"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -13893,14 +13871,14 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("standard-output"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_915"), symInfo);
-symInfo = listCons(stringValue("Function fn_915"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_918"), symInfo);
+symInfo = listCons(stringValue("Function fn_918"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("update-in"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&protoFn_380"), symInfo);
-symInfo = listCons(stringValue("Function protoFn_380"), symInfo);
+symInfo = listCons(stringValue("(Value *)&protoFn_381"), symInfo);
+symInfo = listCons(stringValue("Function protoFn_381"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("get*"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -13917,8 +13895,8 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("ArrayNode"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&protoFn_395"), symInfo);
-symInfo = listCons(stringValue("Function protoFn_395"), symInfo);
+symInfo = listCons(stringValue("(Value *)&protoFn_396"), symInfo);
+symInfo = listCons(stringValue("Function protoFn_396"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("assoc"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -13929,8 +13907,8 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("Symbol"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_912"), symInfo);
-symInfo = listCons(stringValue("Function fn_912"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_915"), symInfo);
+symInfo = listCons(stringValue("Function fn_915"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("get-in"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -13941,8 +13919,8 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("flat-map"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_693"), symInfo);
-symInfo = listCons(stringValue("Function fn_693"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_695"), symInfo);
+symInfo = listCons(stringValue("Function fn_695"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("inc"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -13953,20 +13931,20 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("extend"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_645"), symInfo);
-symInfo = listCons(stringValue("Function fn_645"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_647"), symInfo);
+symInfo = listCons(stringValue("Function fn_647"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("flat-map_impl"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_975"), symInfo);
-symInfo = listCons(stringValue("Function fn_975"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_978"), symInfo);
+symInfo = listCons(stringValue("Function fn_978"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("get-sym-count"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_630"), symInfo);
-symInfo = listCons(stringValue("Function fn_630"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_632"), symInfo);
+symInfo = listCons(stringValue("Function fn_632"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("list-concat"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -13989,20 +13967,20 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("slurp"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_702"), symInfo);
-symInfo = listCons(stringValue("Function fn_702"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_704"), symInfo);
+symInfo = listCons(stringValue("Function fn_704"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("dec"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&protoFn_383"), symInfo);
-symInfo = listCons(stringValue("Function protoFn_383"), symInfo);
+symInfo = listCons(stringValue("(Value *)&protoFn_384"), symInfo);
+symInfo = listCons(stringValue("Function protoFn_384"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("assoc*"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(keywordValue(":no-type"), empty_list);
-symInfo = listCons(stringValue("var_803"), symInfo);
-symInfo = listCons(stringValue("Value *var_803;"), symInfo);
+symInfo = listCons(stringValue("var_806"), symInfo);
+symInfo = listCons(stringValue("Value *var_806;"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("emptyBMI"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14025,20 +14003,20 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("abort"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_900"), symInfo);
-symInfo = listCons(stringValue("Function fn_900"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_903"), symInfo);
+symInfo = listCons(stringValue("Function fn_903"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("hash-map"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(14), empty_list);
-symInfo = listCons(stringValue("var_438"), symInfo);
-symInfo = listCons(stringValue("Value *var_438"), symInfo);
+symInfo = listCons(stringValue("var_439"), symInfo);
+symInfo = listCons(stringValue("Value *var_439"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("maybe-val"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_777"), symInfo);
-symInfo = listCons(stringValue("Function fn_777"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_780"), symInfo);
+symInfo = listCons(stringValue("Function fn_780"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("split"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14049,8 +14027,8 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("name"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_747"), symInfo);
-symInfo = listCons(stringValue("Function fn_747"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_750"), symInfo);
+symInfo = listCons(stringValue("Function fn_750"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("rest_impl"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14079,8 +14057,8 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("=*"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_875"), symInfo);
-symInfo = listCons(stringValue("Function fn_875"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_878"), symInfo);
+symInfo = listCons(stringValue("Function fn_878"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("assoc_impl"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14103,8 +14081,8 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("Int8"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_517"), symInfo);
-symInfo = listCons(stringValue("Function fn_517"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_518"), symInfo);
+symInfo = listCons(stringValue("Function fn_518"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue(".v_impl"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14115,8 +14093,8 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("SubStr"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_937"), symInfo);
-symInfo = listCons(stringValue("Function fn_937"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_940"), symInfo);
+symInfo = listCons(stringValue("Function fn_940"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("sha1_impl"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14151,8 +14129,8 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("type-args"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_431"), symInfo);
-symInfo = listCons(stringValue("Function fn_431"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_432"), symInfo);
+symInfo = listCons(stringValue("Function fn_432"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("or"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14169,8 +14147,8 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("count"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_978"), symInfo);
-symInfo = listCons(stringValue("Function fn_978"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_981"), symInfo);
+symInfo = listCons(stringValue("Function fn_981"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("set-sym-count"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14193,26 +14171,26 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("NumberVal"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(17), empty_list);
-symInfo = listCons(stringValue("(Value *)&reified_925"), symInfo);
-symInfo = listCons(stringValue("ReifiedVal reified_925"), symInfo);
+symInfo = listCons(stringValue("(Value *)&reified_928"), symInfo);
+symInfo = listCons(stringValue("ReifiedVal reified_928"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("not-found"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_674"), symInfo);
-symInfo = listCons(stringValue("Function fn_674"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_676"), symInfo);
+symInfo = listCons(stringValue("Function fn_676"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("interpose"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_984"), symInfo);
-symInfo = listCons(stringValue("Function fn_984"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_987"), symInfo);
+symInfo = listCons(stringValue("Function fn_987"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("gensym"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_938"), symInfo);
-symInfo = listCons(stringValue("Function fn_938"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_941"), symInfo);
+symInfo = listCons(stringValue("Function fn_941"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("=*_impl"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14223,14 +14201,14 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("get-type"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_870"), symInfo);
-symInfo = listCons(stringValue("Function fn_870"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_873"), symInfo);
+symInfo = listCons(stringValue("Function fn_873"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("zero_impl"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_620"), symInfo);
-symInfo = listCons(stringValue("Function fn_620"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_621"), symInfo);
+symInfo = listCons(stringValue("Function fn_621"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("comprehend"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14247,8 +14225,8 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("instance?"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_577"), symInfo);
-symInfo = listCons(stringValue("Function fn_577"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_578"), symInfo);
+symInfo = listCons(stringValue("Function fn_578"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("filter"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14265,8 +14243,8 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("SubStringVal"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_654"), symInfo);
-symInfo = listCons(stringValue("Function fn_654"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_656"), symInfo);
+symInfo = listCons(stringValue("Function fn_656"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("map_impl"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14283,8 +14261,8 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("str-malloc"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_563"), symInfo);
-symInfo = listCons(stringValue("Function fn_563"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_564"), symInfo);
+symInfo = listCons(stringValue("Function fn_564"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("m="), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14295,8 +14273,8 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("FnArityVal"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_955"), symInfo);
-symInfo = listCons(stringValue("Function fn_955"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_958"), symInfo);
+symInfo = listCons(stringValue("Function fn_958"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("keyword?"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14331,8 +14309,8 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("destruct"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_874"), symInfo);
-symInfo = listCons(stringValue("Function fn_874"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_877"), symInfo);
+symInfo = listCons(stringValue("Function fn_877"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("vals_impl"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14343,8 +14321,8 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("type-name"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_591"), symInfo);
-symInfo = listCons(stringValue("Function fn_591"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_592"), symInfo);
+symInfo = listCons(stringValue("Function fn_592"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("apply*_impl"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14355,8 +14333,8 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("mult-numbers"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_970"), symInfo);
-symInfo = listCons(stringValue("Function fn_970"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_973"), symInfo);
+symInfo = listCons(stringValue("Function fn_973"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("repeat"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14367,8 +14345,8 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("serialize"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_958"), symInfo);
-symInfo = listCons(stringValue("Function fn_958"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_961"), symInfo);
+symInfo = listCons(stringValue("Function fn_961"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("number?"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14385,14 +14363,14 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("escape-chars"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&protoFn_398"), symInfo);
-symInfo = listCons(stringValue("Function protoFn_398"), symInfo);
+symInfo = listCons(stringValue("(Value *)&protoFn_399"), symInfo);
+symInfo = listCons(stringValue("Function protoFn_399"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("dissoc"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_880"), symInfo);
-symInfo = listCons(stringValue("Function fn_880"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_883"), symInfo);
+symInfo = listCons(stringValue("Function fn_883"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("get*_impl"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14403,8 +14381,8 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("map"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_574"), symInfo);
-symInfo = listCons(stringValue("Function fn_574"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_575"), symInfo);
+symInfo = listCons(stringValue("Function fn_575"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("list*"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14433,20 +14411,20 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("add-numbers"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_918"), symInfo);
-symInfo = listCons(stringValue("Function fn_918"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_921"), symInfo);
+symInfo = listCons(stringValue("Function fn_921"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("assoc-in"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_687"), symInfo);
-symInfo = listCons(stringValue("Function fn_687"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_689"), symInfo);
+symInfo = listCons(stringValue("Function fn_689"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("println"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_967"), symInfo);
-symInfo = listCons(stringValue("Function fn_967"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_970"), symInfo);
+symInfo = listCons(stringValue("Function fn_970"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("range"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14463,14 +14441,14 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("output-to-file"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_497"), symInfo);
-symInfo = listCons(stringValue("Function fn_497"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_498"), symInfo);
+symInfo = listCons(stringValue("Function fn_498"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("flatten_impl"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_614"), symInfo);
-symInfo = listCons(stringValue("Function fn_614"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_615"), symInfo);
+symInfo = listCons(stringValue("Function fn_615"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("partial"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14487,14 +14465,14 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("not-empty?"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&protoFn_386"), symInfo);
-symInfo = listCons(stringValue("Function protoFn_386"), symInfo);
+symInfo = listCons(stringValue("(Value *)&protoFn_387"), symInfo);
+symInfo = listCons(stringValue("Function protoFn_387"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("hash-seq"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_746"), symInfo);
-symInfo = listCons(stringValue("Function fn_746"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_749"), symInfo);
+symInfo = listCons(stringValue("Function fn_749"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("first_impl"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14505,14 +14483,14 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("BitmapIndexedNode"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_740"), symInfo);
-symInfo = listCons(stringValue("Function fn_740"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_743"), symInfo);
+symInfo = listCons(stringValue("Function fn_743"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("conj_impl"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_691"), symInfo);
-symInfo = listCons(stringValue("Function fn_691"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_693"), symInfo);
+symInfo = listCons(stringValue("Function fn_693"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("print-err"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14529,8 +14507,8 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("invoke"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_425"), symInfo);
-symInfo = listCons(stringValue("Function fn_425"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_426"), symInfo);
+symInfo = listCons(stringValue("Function fn_426"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("not"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14541,8 +14519,8 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("empty?"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_787"), symInfo);
-symInfo = listCons(stringValue("Function fn_787"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_790"), symInfo);
+symInfo = listCons(stringValue("Function fn_790"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("partition"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14553,14 +14531,14 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("HashCollisionVal"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_868"), symInfo);
-symInfo = listCons(stringValue("Function fn_868"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_871"), symInfo);
+symInfo = listCons(stringValue("Function fn_871"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("count_impl"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_376"), symInfo);
-symInfo = listCons(stringValue("Function fn_376"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_377"), symInfo);
+symInfo = listCons(stringValue("Function fn_377"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("comp"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14571,8 +14549,8 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("pr-err*"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_871"), symInfo);
-symInfo = listCons(stringValue("Function fn_871"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_874"), symInfo);
+symInfo = listCons(stringValue("Function fn_874"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("comp*_impl"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14583,32 +14561,32 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("StringVal"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_873"), symInfo);
-symInfo = listCons(stringValue("Function fn_873"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_876"), symInfo);
+symInfo = listCons(stringValue("Function fn_876"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("keys_impl"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_552"), symInfo);
-symInfo = listCons(stringValue("Function fn_552"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_553"), symInfo);
+symInfo = listCons(stringValue("Function fn_553"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("instance?_impl"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_588"), symInfo);
-symInfo = listCons(stringValue("Function fn_588"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_589"), symInfo);
+symInfo = listCons(stringValue("Function fn_589"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("identity"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_972"), symInfo);
-symInfo = listCons(stringValue("Function fn_972"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_975"), symInfo);
+symInfo = listCons(stringValue("Function fn_975"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("anon"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_793"), symInfo);
-symInfo = listCons(stringValue("Function fn_793"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_796"), symInfo);
+symInfo = listCons(stringValue("Function fn_796"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("nth"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14625,8 +14603,8 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("subs"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_477"), symInfo);
-symInfo = listCons(stringValue("Function fn_477"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_478"), symInfo);
+symInfo = listCons(stringValue("Function fn_478"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("some"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14637,8 +14615,8 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("Int32"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_428"), symInfo);
-symInfo = listCons(stringValue("Function fn_428"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_429"), symInfo);
+symInfo = listCons(stringValue("Function fn_429"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("and"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14679,8 +14657,8 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("car"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_797"), symInfo);
-symInfo = listCons(stringValue("Function fn_797"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_800"), symInfo);
+symInfo = listCons(stringValue("Function fn_800"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("last"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14691,14 +14669,14 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("extract"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_961"), symInfo);
-symInfo = listCons(stringValue("Function fn_961"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_964"), symInfo);
+symInfo = listCons(stringValue("Function fn_964"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("string?"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_705"), symInfo);
-symInfo = listCons(stringValue("Function fn_705"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_707"), symInfo);
+symInfo = listCons(stringValue("Function fn_707"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("-"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14715,8 +14693,8 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("<*"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(13), empty_list);
-symInfo = listCons(stringValue("(Value *)&reified_475"), symInfo);
-symInfo = listCons(stringValue("ReifiedVal reified_475"), symInfo);
+symInfo = listCons(stringValue("(Value *)&reified_476"), symInfo);
+symInfo = listCons(stringValue("ReifiedVal reified_476"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("nothing"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14745,44 +14723,44 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("number="), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_611"), symInfo);
-symInfo = listCons(stringValue("Function fn_611"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_612"), symInfo);
+symInfo = listCons(stringValue("Function fn_612"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("any?"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_515"), symInfo);
-symInfo = listCons(stringValue("Function fn_515"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_516"), symInfo);
+symInfo = listCons(stringValue("Function fn_516"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("type-name_impl"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_699"), symInfo);
-symInfo = listCons(stringValue("Function fn_699"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_701"), symInfo);
+symInfo = listCons(stringValue("Function fn_701"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("*"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_941"), symInfo);
-symInfo = listCons(stringValue("Function fn_941"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_944"), symInfo);
+symInfo = listCons(stringValue("Function fn_944"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("invoke_impl"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&protoFn_401"), symInfo);
-symInfo = listCons(stringValue("Function protoFn_401"), symInfo);
+symInfo = listCons(stringValue("(Value *)&protoFn_402"), symInfo);
+symInfo = listCons(stringValue("Function protoFn_402"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("vals"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_696"), symInfo);
-symInfo = listCons(stringValue("Function fn_696"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_698"), symInfo);
+symInfo = listCons(stringValue("Function fn_698"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("+"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_952"), symInfo);
-symInfo = listCons(stringValue("Function fn_952"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_955"), symInfo);
+symInfo = listCons(stringValue("Function fn_955"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("keyword"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14805,14 +14783,14 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("number-less-than"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_580"), symInfo);
-symInfo = listCons(stringValue("Function fn_580"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_581"), symInfo);
+symInfo = listCons(stringValue("Function fn_581"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("remove"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_741"), symInfo);
-symInfo = listCons(stringValue("Function fn_741"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_744"), symInfo);
+symInfo = listCons(stringValue("Function fn_744"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("reduce_impl"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14823,26 +14801,26 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("bippity"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&protoFn_421"), symInfo);
-symInfo = listCons(stringValue("Function protoFn_421"), symInfo);
+symInfo = listCons(stringValue("(Value *)&protoFn_422"), symInfo);
+symInfo = listCons(stringValue("Function protoFn_422"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("sha1"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_800"), symInfo);
-symInfo = listCons(stringValue("Function fn_800"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_803"), symInfo);
+symInfo = listCons(stringValue("Function fn_803"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("butlast"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_872"), symInfo);
-symInfo = listCons(stringValue("Function fn_872"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_875"), symInfo);
+symInfo = listCons(stringValue("Function fn_875"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("get_impl"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_949"), symInfo);
-symInfo = listCons(stringValue("Function fn_949"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_952"), symInfo);
+symInfo = listCons(stringValue("Function fn_952"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("symbol?"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14865,14 +14843,14 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("FunctionVal"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_764"), symInfo);
-symInfo = listCons(stringValue("Function fn_764"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_767"), symInfo);
+symInfo = listCons(stringValue("Function fn_767"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("str"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_638"), symInfo);
-symInfo = listCons(stringValue("Function fn_638"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_640"), symInfo);
+symInfo = listCons(stringValue("Function fn_640"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("traverse_impl"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14889,8 +14867,8 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("Opaque"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_650"), symInfo);
-symInfo = listCons(stringValue("Function fn_650"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_652"), symInfo);
+symInfo = listCons(stringValue("Function fn_652"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("seq?_impl"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14901,14 +14879,14 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("Value*"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_771"), symInfo);
-symInfo = listCons(stringValue("Function fn_771"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_774"), symInfo);
+symInfo = listCons(stringValue("Function fn_774"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("take"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_981"), symInfo);
-symInfo = listCons(stringValue("Function fn_981"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_984"), symInfo);
+symInfo = listCons(stringValue("Function fn_984"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("new-sym-count"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14925,26 +14903,26 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("flatten"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_585"), symInfo);
-symInfo = listCons(stringValue("Function fn_585"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_586"), symInfo);
+symInfo = listCons(stringValue("Function fn_586"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("reverse"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&protoFn_404"), symInfo);
-symInfo = listCons(stringValue("Function protoFn_404"), symInfo);
+symInfo = listCons(stringValue("(Value *)&protoFn_405"), symInfo);
+symInfo = listCons(stringValue("Function protoFn_405"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("get"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_738"), symInfo);
-symInfo = listCons(stringValue("Function fn_738"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_741"), symInfo);
+symInfo = listCons(stringValue("Function fn_741"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("empty_impl"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_964"), symInfo);
-symInfo = listCons(stringValue("Function fn_964"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_967"), symInfo);
+symInfo = listCons(stringValue("Function fn_967"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("range*"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14955,14 +14933,14 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("apply"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_784"), symInfo);
-symInfo = listCons(stringValue("Function fn_784"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_787"), symInfo);
+symInfo = listCons(stringValue("Function fn_787"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("remove-nth"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_869"), symInfo);
-symInfo = listCons(stringValue("Function fn_869"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_872"), symInfo);
+symInfo = listCons(stringValue("Function fn_872"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("empty?_impl"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14973,14 +14951,14 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("number-str"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_513"), symInfo);
-symInfo = listCons(stringValue("Function fn_513"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_514"), symInfo);
+symInfo = listCons(stringValue("Function fn_514"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("type-args_impl"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_774"), symInfo);
-symInfo = listCons(stringValue("Function fn_774"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_777"), symInfo);
+symInfo = listCons(stringValue("Function fn_777"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("drop"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -14991,14 +14969,14 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("match*"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_939"), symInfo);
-symInfo = listCons(stringValue("Function fn_939"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_942"), symInfo);
+symInfo = listCons(stringValue("Function fn_942"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("string-list_impl"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_878"), symInfo);
-symInfo = listCons(stringValue("Function fn_878"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_881"), symInfo);
+symInfo = listCons(stringValue("Function fn_881"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("hash-seq_impl"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -15009,14 +14987,14 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("ValueType"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_781"), symInfo);
-symInfo = listCons(stringValue("Function fn_781"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_784"), symInfo);
+symInfo = listCons(stringValue("Function fn_784"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("replace-at-nth"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_790"), symInfo);
-symInfo = listCons(stringValue("Function fn_790"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_793"), symInfo);
+symInfo = listCons(stringValue("Function fn_793"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("partition-all"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -15027,8 +15005,8 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("empty-list"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_646"), symInfo);
-symInfo = listCons(stringValue("Function fn_646"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_648"), symInfo);
+symInfo = listCons(stringValue("Function fn_648"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("wrap_impl"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -15039,20 +15017,20 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("FnArity"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_571"), symInfo);
-symInfo = listCons(stringValue("Function fn_571"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_572"), symInfo);
+symInfo = listCons(stringValue("Function fn_572"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("list**"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_942"), symInfo);
-symInfo = listCons(stringValue("Function fn_942"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_945"), symInfo);
+symInfo = listCons(stringValue("Function fn_945"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("name_impl"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&protoFn_407"), symInfo);
-symInfo = listCons(stringValue("Function protoFn_407"), symInfo);
+symInfo = listCons(stringValue("(Value *)&protoFn_408"), symInfo);
+symInfo = listCons(stringValue("Function protoFn_408"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("keys"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -15063,8 +15041,8 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("seq?"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&protoFn_481"), symInfo);
-symInfo = listCons(stringValue("Function protoFn_481"), symInfo);
+symInfo = listCons(stringValue("(Value *)&protoFn_482"), symInfo);
+symInfo = listCons(stringValue("Function protoFn_482"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue(".v"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -15075,8 +15053,8 @@ symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("str-append"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
 symInfo = listCons(numberValue(3), empty_list);
-symInfo = listCons(stringValue("(Value *)&fn_644"), symInfo);
-symInfo = listCons(stringValue("Function fn_644"), symInfo);
+symInfo = listCons(stringValue("(Value *)&fn_646"), symInfo);
+symInfo = listCons(stringValue("Function fn_646"), symInfo);
 symInfo = listCons((Value *)symInfo, empty_list);
 symInfo = listCons(symbolValue("crush_impl"), symInfo);
 defSyms = listCons((Value *)symInfo, defSyms);
@@ -15143,7 +15121,7 @@ return((Value *)types);
 
 Value *counts() {
 List *cnts = empty_list;
-cnts = listCons(numberValue(987), cnts);
+cnts = listCons(numberValue(990), cnts);
 return((Value *)cnts);
 }
 

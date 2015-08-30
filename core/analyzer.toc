@@ -165,9 +165,7 @@
                          (not (variadic? x)))))
         file-name (sm/get-val :file-name "")
         body (traverse (nth expr 2 empty-list) analyze-expr)]
-    (ast/fixed-arity (map (nth expr 1 empty-list)
-                          (fn [sym]
-                            (ast/sym sym)))
+    (ast/fixed-arity (nth expr 1 empty-list)
                      body)))
 
 ;; TODO: let anonymous function closures reference themselves by name
@@ -306,9 +304,7 @@
         body (traverse (drop expr 2) analyze-expr)]
     (list (nth expr 0 'no-name)
           (ast/fn-expr (ast/sym (symbol (str (nth expr 0 'no-name) "_impl")))
-                       (list (ast/fixed-arity (map (rest (nth expr 1 empty-list))
-                                                   (fn [sym]
-                                                     (ast/sym sym)))
+                       (list (ast/fixed-arity (rest (nth expr 1 empty-list))
                                               body))))))
 
 (defn analyze-proto-impl []
