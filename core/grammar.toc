@@ -233,7 +233,7 @@
                             (comp args tail)))
                          (parser/ignore (parser/none-or-more (whitespace)))
                          (parser/ignore (parser/term "["))
-                         (parser/none-or-more (read-arg))
+                         (parser/none-or-more (read-sub-dest))
                          (comp (read-var-arg)
                                (parser/always (list :no-tail)))
                          (parser/ignore (parser/term "]")))))
@@ -325,7 +325,7 @@
   (parser/rule "let-binding"
                (apply-to list
                          (parser/ignore (parser/none-or-more (whitespace)))
-                         (read-symbol)
+                         (read-destructure)
                          (parser/ignore (parser/none-or-more (whitespace)))
                          (read-sub-form))))
 
@@ -377,9 +377,8 @@
                                  bindings (cons (list bound wrap-sym) bindings)]
                              (list 'let (list (list wrap-sym val))
                                    (reduce (reverse bindings) (list 'wrap wrap-sym body)
-                                           (fn [expr sym-val]
-                                             (let [sym (first sym-val)
-                                                   val (first (rest sym-val))]
+                                           (fn [expr [sym & val]]
+                                             (let [val (first val)]
                                                (cond
                                                 (= sym :let) (list 'let val expr)
                                                 (= sym :when) (list 'cond val expr (list 'zero wrap-sym))

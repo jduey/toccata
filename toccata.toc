@@ -1,11 +1,12 @@
 
 ;; TODO:
-;; pattern matching
-;; fn meta data; doc strings and ast
+;; pattern matching of deftypes
+;; pattern matching of lists, hash-maps
 ;; implement to-be-freed lists
 ;; test memory exhaustion handling
 ;; implements?
 ;; REPL
+;; fn meta data; doc strings and ast
 ;; macro system
 ;; destructuring of maps and deftypes
 ;; destructuring in let bindings
@@ -557,8 +558,7 @@
                           up-c (unpack-closures list-sym args)]
                       (c-code c-sym
                               (comp (list "List *" list-sym " = (List *)" c-sym ";\n")
-                                    up-c
-                                    (apply comp (map args .init)))
+                                    up-c)
                               ""
                               :no-type)))
 
@@ -848,7 +848,6 @@
           arity-fn-sym (gensym "arityImpl_")]
       (for [arity-sym (genlocal "arity_")
             fn-context (reset-fn-context arity-fn-sym arg-count)
-            ;; TODO: set the type for the last arg-sym to List
             arg-index (sm/get-val :arg-index 0)
             _ (sm/set-val :arg-index 0)
             arg-syms (gen-arg-syms (.args ast))
@@ -1203,9 +1202,9 @@
                  (comp (define-fwd-decl (.name ast) (.value ast))
                        (define-value (.name ast) (.value ast))))))))
 
-(defn eval-cond-clause [[clause & clauses] default cond-result]
+(defn eval-cond-clause [[[test-ast value-ast] & clauses] default cond-result]
   (for [_ (begin-scope)
-        test (fr/evaluate (first clause) emit-c)
+        test (fr/evaluate test-ast emit-c)
         :let [test-sym (str (.c-val test))
               test-stmts (.init test)]
         test-suffix (for [scope-locals (sm/get-val :scope-locals)]
@@ -1216,7 +1215,7 @@
                               local? (str "dec_and_free(" fn-sym-str ");\n")
                               ""))))
         _ (begin-scope)
-        clause-result (fr/evaluate (second clause) emit-c)
+        clause-result (fr/evaluate value-ast emit-c)
         :let [clause-sym (.c-val clause-result)
               clause-stmts (.init clause-result)]
         clause-suffix (for [scope-locals (sm/get-val :scope-locals)]

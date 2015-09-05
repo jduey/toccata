@@ -468,6 +468,21 @@ Value *count(Value* n);
     else
       return(numberValue(((List *)arg0)->len));"))
 
+(defn list-empty? [coll]
+(inline-text Number
+             "
+if (arg0->type != ListType)
+{
+  fprintf(stderr, \"*** 'list-empty?' given wrong type of value\\n\");
+  abort();
+}
+else if (((List *)arg0)->len == 0)
+  return((Value *)&trueVal);
+else
+  return((Value *)&falseVal);
+")
+)
+
 (defn car [l]
   (inline-text
    "List *lst = (List *)arg0;
@@ -907,7 +922,7 @@ Value *count(Value* n);
     (print-err "*** 'wrap' not implemented"))
   (apply* [fv args]
     (cond
-     (number= 0 (list-count args)) (flat-map fv (fn [f] (wrap fv (f))))
+     (list-empty? args) (flat-map fv (fn [f] (wrap fv (f))))
      (flat-map fv (fn [f] (comprehend f args))))))
 
 (defn list [& l]
@@ -931,21 +946,6 @@ Value *count(Value* n);
   (serialize [value]
     (print-err "'serialize' not implemented for type" (type-name value))
     (abort)))
-
-(defn list-empty? [coll]
-(inline-text Number
-             "
-if (arg0->type != ListType)
-{
-  fprintf(stderr, \"*** 'list-empty?' given wrong type of value\\n\");
-  abort();
-}
-else if (((List *)arg0)->len == 0)
-  return((Value *)&trueVal);
-else
-  return((Value *)&falseVal);
-")
-)
 
 (defprotocol Eq
   (=* [x y]
@@ -977,6 +977,7 @@ else
   (seq? [coll] false)
   (seq [coll])
   (first [coll])
+  (m-first [coll])
   (rest [coll]))
 
 (defn second [coll]
@@ -1041,13 +1042,12 @@ else
    (apply or (cdr b-vals))))
 
 (defn =
+  ([v] 1)
   ([x y] (=* x y))
   ([v & vs]
      (cond
-      (list-empty? vs) 1
-      (not (=* v (car vs))) 0
-      (number= 1 (list-count vs)) 1
-      (apply = vs))))
+      (=* v (car vs)) (apply = vs)
+      0)))
 
 (def maybe-val)
 
@@ -1083,6 +1083,10 @@ else
    (f (first coll)) (first coll)
    (some (rest coll) f)))
 
+(defn partial [f & args]
+  (fn [& more-args]
+    (apply f (comp args more-args))))
+
 (deftype maybe-val [v]
   Stringable
   (string-list [mv]
@@ -1102,8 +1106,7 @@ else
   (wrap [_ v] (maybe-val v))
   (apply* [fv args]
     (cond
-     (some args (fn [x]
-                  (= nothing x))) nothing
+     (some args (partial = nothing)) nothing
      (maybe-val (apply (.v fv) (map args .v)))))
 
   Monad
@@ -1293,10 +1296,6 @@ return((Value *)numberValue(shaVal));
 ;;        (cons (apply v cars)
 ;;              (apply* zv cdrs))))))
 
-(defn partial [f & args]
-  (fn [& more-args]
-    (apply f (comp args more-args))))
-
 (defn comprehend
   ([f]
      (f))
@@ -1369,6 +1368,9 @@ return((Value *)numberValue(shaVal));
   (seq? [l]
     true)
   (seq [l] l)
+  (m-first [l] (cond
+              (list-empty? l) nothing
+              (maybe (car l))))
   (first [l] (car l))
   (rest [l] (cdr l))
 
@@ -2352,6 +2354,12 @@ return(newNode);
           (fn [bmi pair]
             (apply assoc bmi pair))))
 
+(def not-found
+  (reify
+    Eq
+    (=* [x y]
+      (= (get-type x) (get-type y)))))
+
 (defn merge-with [merge-fn hm & ms]
   (cond
    (list-empty? ms) hm
@@ -2359,10 +2367,9 @@ return(newNode);
            (fn [hm m]
              (reduce (seq m) hm
                      (fn [hm [k v]]
-                       ;; TODO: replace :not-found with 'not-found' value
-                       (let [old-v (get hm k :not-found)]
+                       (let [old-v (get hm k not-found)]
                          (cond
-                          (= :not-found old-v) (assoc hm k v)
+                          (= not-found old-v) (assoc hm k v)
                           (assoc hm k (merge-fn old-v v))))))))))
 
 (defn get-in [m path nf]
@@ -2397,12 +2404,6 @@ return(newNode);
      (cond
       (= :assoc-in-nil curr-v) (assoc m k (assoc-in {} (rest path) v))
       (assoc m k (assoc-in curr-v (rest path) v))))))
-
-(def not-found
-  (reify
-    Eq
-    (=* [x y]
-      (= (get-type x) (get-type y)))))
 
 (extend-type Keyword
   Eq

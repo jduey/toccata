@@ -144,7 +144,7 @@
 
 (defn variadic? [expr]
   (let [args (nth expr 1 empty-list)]
-    (apply or (map args (fn [arg] (= "&" arg))))))
+    (any? (partial = "&") args)))
 
 (defn analyze-variadic []
   (for [expr (is-expr (fn [x]
@@ -317,10 +317,9 @@
         _ (sm/set-val :expr exts)
         proto-impls (sm/recur (analyze-proto-impl))
         _ (sm/set-val :expr curr-expr)]
-    (reduce proto-impls {} (fn [m kv]
-                             (let [k (first kv)
-                                   old-v (get m k empty-list)
-                                   new-v (comp old-v (second kv))]
+    (reduce proto-impls {} (fn [m [k v]]
+                             (let [old-v (get m k empty-list)
+                                   new-v (comp old-v v)]
                                (assoc m k new-v))))))
 
 
