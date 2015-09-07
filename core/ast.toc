@@ -65,8 +65,8 @@
 
 (deftype binding-ast [binding val])
 
-(defn binding [sym val]
-  (fr/free (binding-ast sym val)))
+(defn binding [binding val]
+  (fr/free (binding-ast binding val)))
 
 (deftype let-ast [bindings body])
 

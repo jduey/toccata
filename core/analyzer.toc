@@ -115,76 +115,67 @@
     (ast/strng str-val)))
 
 (defn analyze-call []
-  (for [expr (is-expr (fn [s] (not-empty? s)))
-        asts (traverse expr analyze-expr)]
-    (ast/call-expr (first asts) (rest asts))))
+  (for [expr (is-expr not-empty?)
+        [target & args] (traverse expr analyze-expr)]
+    (ast/call-expr target args)))
 
 (defn analyze-let-binding [binding-pair]
   (cond
    (not (= 2 (count binding-pair))) empty-list
-   (let [binding (first binding-pair)
-         expr (second binding-pair)]
+   (let [[binding expr] binding-pair]
      (for [curr-expr (sm/get-val :expr)
            _ (set-expr binding)
-           binding (is-expr symbol?)
            ast (analyze-expr expr)
            _ (sm/set-val :expr curr-expr)]
-       (ast/binding (ast/sym binding) ast)))))
+       (ast/binding binding ast)))))
 
 (defn analyze-let []
-  (for [expr (is-expr (fn [x]
-                        (cond
-                         (not (seq? x)) false
-                         (not (< 2 (count x))) false
-                         (= (nth x 0 :not-let) 'let))))
-        bindings (traverse (nth expr 1 empty-list)
-                           analyze-let-binding)
-        body (traverse (drop expr 2) analyze-expr)]
+  (for [[_ bindings & exprs] (is-expr (fn [x]
+                                        (cond
+                                         (not (seq? x)) false
+                                         (not (< 2 (count x))) false
+                                         (= (first x) 'let))))
+        bindings (traverse bindings analyze-let-binding)
+        body (traverse exprs analyze-expr)]
     (ast/let-expr bindings body)))
 
-(defn variadic? [expr]
-  (let [args (nth expr 1 empty-list)]
-    (any? (partial = "&") args)))
+(defn variadic? [[_ args]]
+  (any? (partial = "&") args))
 
 (defn analyze-variadic []
-  (for [expr (is-expr (fn [x]
-                        (cond
-                         (not (< 1 (count x))) false
-                         (not (= (first x) 'fn-arity)) false
-                         (variadic? x))))
-        body (traverse (nth expr 2 empty-list) analyze-expr)]
-    (ast/variadic-arity (remove (nth expr 1 empty-list) (fn [arg]
-                                                          (= "&" arg)))
-                        body)))
+  (for [[_ args exprs] (is-expr (fn [x]
+                                    (cond
+                                     (< (count x) 2) false
+                                     (not (= (first x) 'fn-arity)) false
+                                     (variadic? x))))
+        body (traverse exprs analyze-expr)]
+    (ast/variadic-arity (remove args (partial = "&")) body)))
 
 (defn analyze-fn-arity []
-  (for [expr (is-expr (fn [x]
-                        (cond
-                         (not (< 1 (count x))) false
-                         (not (= (first x) 'fn-arity)) false
-                         (not (variadic? x)))))
+  (for [[_ args exprs] (is-expr (fn [x]
+                                  (cond
+                                   (< (count x) 2) false
+                                   (not (= (first x) 'fn-arity)) false
+                                   (not (variadic? x)))))
         file-name (sm/get-val :file-name "")
-        body (traverse (nth expr 2 empty-list) analyze-expr)]
-    (ast/fixed-arity (nth expr 1 empty-list)
-                     body)))
+        body (traverse exprs analyze-expr)]
+    (ast/fixed-arity args body)))
 
 ;; TODO: let anonymous function closures reference themselves by name
 (defn analyze-fn []
-  (for [expr (is-expr (fn [x]
-                        (cond
-                         (not (seq? x)) false
-                         (not (< 1 (count x))) false
-                         (= (first x) 'fn))))
-        arities (traverse (nth expr 2 empty-list) analyze-expr)]
-    (ast/fn-expr (ast/sym (nth expr 1 'no-name))
-                 arities)))
+  (for [[_ name arities] (is-expr (fn [x]
+                                    (cond
+                                     (not (seq? x)) false
+                                     (< (count x) 2) false
+                                     (= (first x) 'fn))))
+        arities (traverse arities analyze-expr)]
+    (ast/fn-expr (ast/sym name) arities)))
 
 (defn analyze-proto-arity [args]
   (cond
    (< (count args) 2) empty-list
-   (let [fn-name (first args)
-         params (rest (second args))
-         body (drop args 2)
+   (let [[fn-name params & body] args
+         params (rest params)
          default-fn-expr (list 'fn-arity params body)]
      (cond
       (< 0 (count body)) (sm/new-sm
@@ -250,11 +241,11 @@
    (sm/state-maybe "")))
 
 (defn analyze-quoted []
-  (for [expr (is-expr (fn [x]
-                        (cond
-                         (not (= 2 (count x))) false
-                         (= (first x) 'quote))))
-        result (make-quoted (second expr))]
+  (for [[_ quoted] (is-expr (fn [x]
+                              (cond
+                               (not (= 2 (count x))) false
+                               (= (first x) 'quote))))
+        result (make-quoted quoted)]
     result))
 
 (defn analyze-def []
@@ -262,22 +253,22 @@
         expr (is-expr (fn [x]
                         (cond
                          (not (seq? x)) false
-                         (< 1 (count x)))))
-        :let [def (nth expr 0 :not-def)
-              name (nth expr 1 'no-name)
+                         (< (count x) 2) false
+                         (= (first x) 'def))))
+        :let [name (nth expr 1 'no-name)
               value (nth expr 2 :no-value)]
-        :when (and (= def 'def) (symbol? name))
         val-ast (cond
                  (= value :no-value) (sm/state-maybe :no-value)
                  (analyze-expr value))]
     (ast/def-expr name val-ast)))
 
 (defn analyze-cond []
-  (for [expr (is-expr seq?)
-        :when (cond
-               (empty? expr) false
-               (= (first expr) 'cond))
-        clause-pairs (traverse (rest expr) analyze-expr)]
+  (for [[_ & clause-pairs] (is-expr (fn [x]
+                                      (cond
+                                       (not (seq? x)) false
+                                       (empty? x) false
+                                       (= (first x) 'cond))))
+        clause-pairs (traverse clause-pairs analyze-expr)]
     (let [clauses (partition-all clause-pairs 2)
           default (last clauses empty-list)]
       (cond
@@ -285,27 +276,23 @@
                                             (first default))
        (print-err "cond must have a default clause")))))
 
-(defn next-form []
-  (for [expr (sm/get-val :expr empty-list)
-        _ (sm/set-val :expr (rest expr))
-        :when (< 0 (count expr))]
-    (first expr)))
-
 (defn is-form? [pred]
-  (for [frm (next-form)
-        :when (pred frm)]
+  (for [[frm & frms] (is-expr (fn [x]
+                                (cond
+                                 (empty? x) false
+                                 (pred (car x)))))
+        _ (sm/set-val :expr frms)]
     frm))
 
 (defn analyze-proto-fn []
-  (for [expr (is-form? (fn [x]
-                         (cond
-                          (not (seq? x)) false
-                          (< 2 (count x)))))
-        body (traverse (drop expr 2) analyze-expr)]
-    (list (nth expr 0 'no-name)
-          (ast/fn-expr (ast/sym (symbol (str (nth expr 0 'no-name) "_impl")))
-                       (list (ast/fixed-arity (rest (nth expr 1 empty-list))
-                                              body))))))
+  (for [[name [_ & args] & exprs] (is-form? (fn [x]
+                                              (cond
+                                               (not (seq? x)) false
+                                               (< 2 (count x)))))
+        body (traverse exprs analyze-expr)]
+    (list name
+          (ast/fn-expr (ast/sym (symbol (str name "_impl")))
+                       (list (ast/fixed-arity args body))))))
 
 (defn analyze-proto-impl []
   (for [name (is-form? symbol?)
@@ -324,33 +311,28 @@
 
 
 (defn analyze-extend-type []
-  (for [expr (is-expr (fn [x]
-                        (cond
-                         (not (seq? x)) false
-                         (not (< 1 (count x))) false
-                         (= 'extend-type (first x)))))
-        proto-specs (analyze-extensions (drop expr 2))]
-    (ast/type-extension (nth expr 1 :no-type) proto-specs)))
+  (for [[_ name & defs] (is-expr (fn [x]
+                                   (cond
+                                    (not (seq? x)) false
+                                    (not (< 1 (count x))) false
+                                    (= 'extend-type (first x)))))
+        proto-specs (analyze-extensions defs)]
+    (ast/type-extension name proto-specs)))
 
 (defn analyze-module []
-  (for [expr (is-expr (fn [x]
-                        (cond
-                         (not (seq? x)) false
-                         (not (= 2 (count x))) false
-                         (= 'module (first x)))))
+  (for [[_ module-name] (is-expr (fn [x]
+                                   (cond
+                                    (not (seq? x)) false
+                                    (not (= 2 (count x))) false
+                                    (= 'module (first x)))))
         module-ast (comp
-                    (for [_ (sm/get-in-val (list :modules (second expr) :syms))]
-                      (list (ast/strng (second expr))))
-                    (for [expr (is-expr (fn [x]
-                                          (cond
-                                           (not (seq? x)) false
-                                           (not (= 2 (count x))) false
-                                           (= 'module (first x)))))
-                          text (sm/get-val :text)
-                          :let [module-stream (slurp (second expr))]
+                    (for [_ (sm/get-in-val (list :modules module-name :syms))]
+                      (list (ast/strng module-name)))
+                    (for [text (sm/get-val :text)
+                          :let [module-stream (slurp module-name)]
                           _ (sm/set-val :text module-stream)
                           file-name (sm/get-val :file-name)
-                          _ (sm/set-val :file-name (second expr))
+                          _ (sm/set-val :file-name module-name)
                           parser (sm/get-val :parser)
                           asts (sm/recur (for [expr parser
                                                ast (analyze-expr expr)]
@@ -358,28 +340,28 @@
                           ;; :let [_ (fio/close-stream module-stream)]
                           _ (sm/set-val :file-name file-name)
                           _ (sm/set-val :text text)]
-                      (cons (ast/strng (second expr))
+                      (cons (ast/strng module-name)
                             asts))
-                    (sm/state-maybe (list (ast/strng (second expr)))))]
+                    (sm/state-maybe (list (ast/strng module-name))))]
     module-ast))
 
 (defn analyze-add-ns []
-  (for [expr (is-expr (fn [x]
-                        (cond
-                         (not (seq? x)) false
-                         (not (= 3 (count x))) false
-                         (and (= 'add-ns (first x))
-                              (symbol? (second x))))))
-        asts (analyze-expr (nth expr 2))]
-    (ast/ns-add (second expr) asts)))
+  (for [[_ ns-name defs] (is-expr (fn [x]
+                                    (cond
+                                     (not (seq? x)) false
+                                     (not (= 3 (count x))) false
+                                     (and (= 'add-ns (first x))
+                                          (symbol? (second x))))))
+        asts (analyze-expr defs)]
+    (ast/ns-add ns-name asts)))
 
 ;; TODO: handle multi-arity reified fns
 (defn analyze-reify []
-  (for [expr (is-expr (fn [x]
+  (for [[_ & defs] (is-expr (fn [x]
                         (cond
                          (not (seq? x)) false
                          (= 'reify (nth x 0 :not-reify)))))
-        proto-specs (analyze-extensions (rest expr))]
+        proto-specs (analyze-extensions defs)]
     (ast/reified proto-specs)))
 
 (defn analyze-protocol []
@@ -393,23 +375,21 @@
     (ast/proto (second expr) (apply merge-with comp arities))))
 
 (defn analyze-deftype []
-  (for [expr (is-expr (fn [x]
-                        (cond
-                         (not (seq? x)) false
-                         (< (count x) 3) false
-                         (= 'deftype (first x)))))]
-    (ast/type-expr (second expr) ;; name
-                   (nth expr 2) ;; fields
-                   (drop expr 3))))
+  (for [[_ name fields & defs] (is-expr (fn [x]
+                                          (cond
+                                           (not (seq? x)) false
+                                           (< (count x) 3) false
+                                           (= 'deftype (first x)))))]
+    (ast/type-expr name fields defs)))
 
 (defn analyze-main []
-  (for [expr (is-expr (fn [x]
-                        (cond
-                         (not (seq? x)) false
-                         (not (< 2 (count x))) false
-                         (= 'main (first x)))))
-        body (traverse (drop expr 2) analyze-expr)]
-    (ast/main-fn (nth expr 1 empty-list) body)))
+  (for [[_ args & exprs] (is-expr (fn [x]
+                                    (cond
+                                     (not (seq? x)) false
+                                     (not (< 2 (count x))) false
+                                     (= 'main (first x)))))
+        body (traverse exprs analyze-expr)]
+    (ast/main-fn args body)))
 
 (defn expr-to-ast []
   (comp (analyze-symbol)

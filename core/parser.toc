@@ -30,8 +30,8 @@
   (recursive-descent [_]
     (let [rule (fr/evaluate rule recursive-descent)]
       (flat-map (sm/recur rule)
-                (fn [v]
-                  (sm/state-maybe (list (comp* (car v) (cdr v)))))))))
+                (fn [[head & tail]]
+                  (sm/state-maybe (list (comp* head tail))))))))
 
 (defn one-or-more [rule]
   (fr/free (repeat-rule rule)))

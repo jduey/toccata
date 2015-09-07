@@ -36,9 +36,10 @@
 
   FreeEval
   (evaluate [free-val eval-free]
-    (comp* (evaluate (first alts) eval-free)
-           (map (rest alts) (fn [alt]
-                              (evaluate alt eval-free)))))
+    (let [[alt & alts] alts]
+      (comp* (evaluate alt eval-free)
+             (map alts (fn [alt]
+                         (evaluate alt eval-free))))))
 
   Applicative
   (wrap [_ v] (free v))

@@ -4,20 +4,23 @@
 (defn reduce-args [args s]
   (cond
    (list-empty? args) (list empty-list s)
-   (let [result-s ((first args) s)]
+   (let [[arg & args] args
+         result-s (arg s)]
      (cond
       (list-empty? result-s) empty-list
-      (let [results-s (reduce-args (rest args) (second result-s))]
+      (let [[result new-s] result-s
+            results-s (reduce-args args new-s)]
         (cond
          (list-empty? results-s) empty-list
-         (list (cons (first result-s) (first results-s))
-               (second results-s))))))))
+         (let [[results final-s] results-s]
+           (list (cons result results) final-s))))))))
 
 (defn -comp* [mv mvs s]
   (let [x (mv s)]
     (cond
      (list-empty? mvs) x
-     (list-empty? x) (-comp* (car mvs) (cdr mvs) s)
+     (list-empty? x) (let [[mv & mvs] mvs]
+                       (-comp* mv mvs s))
      x)))
 
 ;; TODO: deftypes don't get added to the importing ns correctly
@@ -38,10 +41,9 @@
                 (let [reduce-state (reduce-args args s)]
                   (cond
                    (list-empty? reduce-state) empty-list
-                   (let [results (first reduce-state)
-                         s (second reduce-state)
-                         f-s (fv s)]
-                     (list (apply (first f-s) results) (second f-s))))))))
+                   (let [[results s] reduce-state
+                         [f s] (fv s)]
+                     (list (apply f results) s)))))))
 
   Monad
   (flat-map [ev f]
@@ -49,8 +51,7 @@
               (let [v-ss (invoke-fn s)]
                 (cond
                  (list-empty? v-ss) v-ss
-                 (let [v (nth v-ss 0)
-                       ss (nth v-ss 1)]
+                 (let [[v ss] v-ss]
                    ((f v) ss)))))))
 
   Monoid
@@ -81,7 +82,7 @@
 
 (defn set-val [k v]
   (new-sm (fn [s]
-              (list (get s k :not-found) (assoc s k v)))))
+              (list (get s k nothing) (assoc s k v)))))
 
 (defn get-in-val
   ([path]
@@ -106,14 +107,16 @@
   (let [v-ss (f s)]
     (cond
      (list-empty? v-ss) (list as s)
-     (recur-fn f (cons (car v-ss) as) (car (cdr v-ss))))))
+     (let [[v ss] v-ss]
+       (recur-fn f (cons v as) ss)))))
 
 (defn recur [mv]
   (new-sm (fn [s]
             (let [v-ss (mv s)]
               (cond
                (list-empty? v-ss) empty-list
-               (let [x (recur-fn (.invoke-fn mv) (list (car v-ss)) (car (cdr v-ss)))]
+               (let [[v ss] v-ss
+                     x (recur-fn (.invoke-fn mv) (list v) ss)]
                  (cond
                   (list-empty? x) x
-                  (cons (reverse (car x)) (rest x)))))))))
+                  (cons (reverse (car x)) (cdr x)))))))))

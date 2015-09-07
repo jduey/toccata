@@ -1251,10 +1251,9 @@ else
   (apply* [f args]
     (cond
      (list-empty? args) (f)
-     (let [new-args (list** (first args) (rest args))]
-       ;; Remember, the last element of 'args' must be a list
-       ;; everything up to that must be prepended to it
-       (fn-apply f new-args)))))
+     ;; Remember, the last element of 'args' must be a list
+     ;; everything up to that must be prepended to it
+     (fn-apply f (list** (first args) (rest args))))))
 
 (extend-type Number
   Eq
@@ -1669,8 +1668,8 @@ return((Value *)numberValue(shaVal));
   (cond
    (empty? l) l
    (= 0 n) empty-list
-   (cons (first l)
-         (take (rest l) (dec n)))))
+   (let [[head & tail] l]
+     (cons head (take tail (dec n))))))
 
 (defn drop [coll n]
   (cond
@@ -1689,18 +1688,18 @@ return((Value *)numberValue(shaVal));
   (cond
    (empty? l) l
    (< (dec (count l)) n) l
-   (let [split-l (split l n)]
-     (comp (first split-l)
+   (let [[prefix suffix] (split l n)]
+     (comp prefix
            (list v)
-           (rest (second split-l))))))
+           (rest suffix)))))
 
 (defn remove-nth [l n]
   (cond
    (empty? l) l
    (< (dec (count l)) n) l
-   (let [split-l (split l n)]
-     (comp (first split-l)
-           (rest (second split-l))))))
+   (let [[prefix suffix] (split l n)]
+     (comp prefix
+           (rest suffix)))))
 
 (defn partition [coll n]
   (cond
@@ -2374,10 +2373,11 @@ return(newNode);
   (cond
    (= (count path) 0) nf
    (= (count path) 1) (get m (first path) nf)
-   (let [v (get m (first path) :get-in-not-found)]
+   (let [[curr-key & path] path
+         v (get m curr-key :get-in-not-found)]
      (cond
       (= :get-in-not-found v) nf
-      (get-in v (rest path) nf)))))
+      (get-in v path nf)))))
 
 (defn update-in [m path f]
   (cond
@@ -2387,21 +2387,21 @@ return(newNode);
                         (cond
                          (= :update-in-nil curr-v) m
                          (assoc m k (f curr-v))))
-   (let [k (first path)
+   (let [[k & path] path
          v (get m k :update-in-nil)]
      (cond
       (= :update-in-nil v) m
-      (assoc m k (update-in v (rest path) f))))))
+      (assoc m k (update-in v path f))))))
 
 (defn assoc-in [m path v]
   (cond
    (= (count path) 0) m
    (= (count path) 1) (assoc m (first path) v)
-   (let [k (first path)
+   (let [[k & path] path
          curr-v (get m k :assoc-in-nil)]
      (cond
-      (= :assoc-in-nil curr-v) (assoc m k (assoc-in {} (rest path) v))
-      (assoc m k (assoc-in curr-v (rest path) v))))))
+      (= :assoc-in-nil curr-v) (assoc m k (assoc-in {} path v))
+      (assoc m k (assoc-in curr-v path v))))))
 
 (extend-type Keyword
   Eq

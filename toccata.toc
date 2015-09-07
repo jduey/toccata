@@ -459,27 +459,23 @@
 (defn call-static-variadic [target [args arg-stmts]]
   (for [arity-sym (lookup-static-fn (.c-val target) :variadic)
         result-type (lookup-static-return-type (.c-val target) :variadic)
-        ;; _ (let [val-str (fr/evaluate target-ast rwr/pprint)]
-        ;;     (debug (fr/evaluate target-ast rwr/pprint) result-type)
-        ;;     )
         variadic-sym (genlocal "varArgs")
         result-sym (genlocal "rslt")
         _ (remember-local result-sym)]
-    (let [arg-syms (cons "empty_list" (map args .c-val))]
-      (c-code result-sym
-              (comp (.init target)
-                    arg-stmts
-                    (list "List *" variadic-sym " = empty_list;\n")
-                    (map (reverse (rest arg-syms))
-                         (fn [arg-sym]
+    (c-code result-sym
+            (comp (.init target)
+                  arg-stmts
+                  (list "List *" variadic-sym " = empty_list;\n")
+                  (map (reverse args)
+                       (fn [arg]
+                         (let [arg-sym (.c-val arg)]
                            (str "incRef((Value *)" arg-sym ");\n"
                                 variadic-sym " = (List *)listCons("
                                 "(Value *)" arg-sym
-                                ", " variadic-sym ");\n")))
-                    (list Value* result-sym " = " arity-sym "(" (first arg-syms) ", (Value *)"
-                          variadic-sym ");\n"
-                          "dec_and_free((Value *)" variadic-sym ");\n"))
-              "" result-type))))
+                                ", " variadic-sym ");\n"))))
+                  (list Value* result-sym " = " arity-sym "(empty_list, (Value *)" variadic-sym ");\n"
+                        "dec_and_free((Value *)" variadic-sym ");\n"))
+            "" result-type)))
 
 (defprotocol Emitter
   (emit-c [ast]
@@ -565,20 +561,16 @@
 
                   (instance? List arg)
                   (for [args (gen-arg-syms arg)
-                        arg-index (sm/get-val :arg-index 0)
-                        _ (sm/set-val :arg-index (+ 2 arg-index))]
-                    (let [c-sym (str "arg" arg-index)
-                          list-sym (str "arg" (inc arg-index))
-                          up-c (unpack-closures list-sym args)]
-                      (c-code c-sym
-                              (comp (list "List *" list-sym " = (List *)" c-sym ";\n")
-                                    up-c)
-                              ""
-                              :no-type)))
+                        c-sym (genlocal "arg")
+                        list-sym (genlocal "arg")]
+                    (c-code c-sym
+                            (comp (list "List *" list-sym " = (List *)" c-sym ";\n")
+                                  (unpack-closures list-sym args))
+                            ""
+                            :no-type))
 
-                  (for [arg-index (sm/get-val :arg-index 0)
-                        :let [c-sym (c-code (str "arg" arg-index) empty-list "" :no-type)]
-                        _ (sm/set-val :arg-index (inc arg-index))
+                  (for [arg-sym (genlocal "arg")
+                        :let [c-sym (c-code arg-sym empty-list "" :no-type)]
                         _ (sm/assoc-in-val (list :local-syms arg) c-sym)]
                     c-sym))))
 
@@ -719,10 +711,8 @@
                                     (fn [old-strs]
                                       (comp old-strs strs)))
                 _ (sm/assoc-in-val (list :new-strings) {})]
-            (for [str-const (seq strs)
-                  :let [str-val (first str-const)
-                        str-ptr (second str-const)
-                        str-len (count str-val)]
+            (for [[str-val str-ptr] (seq strs)
+                  :let [str-len (count str-val)]
                   x (list
                      "struct {int64_t type;\n int32_t refs;\n   int64_t len;\n   char buffer["
                      (inc str-len)
@@ -736,9 +726,7 @@
                                     (fn [old-nums]
                                       (comp old-nums nums)))
                 _ (sm/assoc-in-val (list :new-numbers) {})]
-            (for [num-sym (seq nums)
-                  :let [num (first num-sym)
-                        c-sym (second num-sym)]
+            (for [[num c-sym] (seq nums)
                   x (list "Number " c-sym " = {" number-type ", -1, " num "};\n")]
               (print x)))
 
@@ -851,10 +839,7 @@
           arity-fn-sym (gensym "arityImpl_")]
       (for [arity-sym (genlocal "arity_")
             fn-context (reset-fn-context arity-fn-sym arg-count)
-            arg-index (sm/get-val :arg-index 0)
-            _ (sm/set-val :arg-index 0)
             arg-syms (gen-arg-syms (.args ast))
-            _ (sm/set-val :arg-index arg-index)
             scope-info (begin-scope)
             body-exprs (eval-exprs (.body ast))
             _ (emit-externs)
@@ -905,10 +890,7 @@
                   arg-count (count args)
                   args (comp args (list :no-tail))]
             fn-context (reset-fn-context arity-fn-sym arg-count)
-            arg-index (sm/get-val :arg-index 0)
-            _ (sm/set-val :arg-index 0)
             arg-syms (gen-arg-syms args)
-            arg-index (sm/get-val :arg-index arg-index)
             :let [arg-syms (remove arg-syms (fn [arg] (= "" (.c-val arg))))]
             scope-info (begin-scope)
             body-exprs (eval-exprs (.body ast))
@@ -963,7 +945,6 @@
     (let [main-sym (gensym "main_")]
       (for [_ (static-values)
             _ (sm/set-val :main-sym main-sym)
-            _ (sm/set-val :arg-index 0)
             arg-syms (gen-arg-syms (.args ast))
             _ (sm/set-val :local-sym-count 0)
             scope-info (begin-scope)
@@ -995,8 +976,10 @@
   (cond
    (empty? l1) empty-list
    (empty? l2) empty-list
-   (cons (list (first l1) (first l2))
-         (zip-lists (rest l1) (rest l2)))))
+   (let [[l1-head & l1-tail] l1
+         [l2-head & l2-tail] l2]
+     (cons (list l1-head l2-head)
+           (zip-lists l1-tail l2-tail)))))
 
 (extend-type ast/call-ast
   Emitter
@@ -1023,9 +1006,21 @@
   Emitter
   (emit-c [ast]
     (for [evalled (fr/evaluate (.val ast) emit-c)
-          _ (sm/assoc-in-val (list :local-syms (.sym (.v (.binding ast))))
-                             (c-code (.c-val evalled) empty-list "" (.type-num evalled)))]
-      (c-code "" (.init evalled) "" :no-type))))
+          result (cond
+                  (instance? Symbol (.binding ast))
+                  (for [_ (sm/assoc-in-val (list :local-syms (.binding ast))
+                                           (c-code (.c-val evalled) empty-list "" (.type-num evalled)))]
+                    (c-code "" (.init evalled) "" :no-type))
+
+                  (for [arg-syms (gen-arg-syms (.binding ast))
+                        list-sym (genlocal "arg")]
+                    (c-code ""
+                            (comp (.init evalled)
+                                  (list "List *" list-sym " = (List *)" (.c-val evalled) ";\n")
+                                  (unpack-closures list-sym arg-syms))
+                            ""
+                            :no-type)))]
+      result)))
 
 (extend-type ast/let-ast
   Emitter
@@ -1358,9 +1353,9 @@
            reify-fn-index (sm/get-val :reify-fn-index 0)
            _ (sm/set-val :reify-fn-index 0)
            impl-fns (apply* (sm/state-maybe list)
-                            (for [impl (seq (.impls ast))
-                                  impl-fn (second impl)]
-                              (emit-reified-fn (first impl) type-num impl-fn)))
+                            (for [[proto-name impl-fns] (seq (.impls ast))
+                                  impl-fn impl-fns]
+                              (emit-reified-fn proto-name type-num impl-fn)))
            _ (sm/set-val :reify-fn-index reify-fn-index)
            reified-result (cond
                            (= 0 (count (crush impl-fns .init)))
@@ -1496,8 +1491,8 @@
                             (comp (sm/get-in-val (list :protocols (str "Getter/" getter-name)))
                                   (emit-proto-fn "Getter/"
                                                  (list getter-name (list (list 1 {})))))))))
-           proto-fn-info (comp (for [def (sm/get-in-val (list :defined-syms new-type-name))
-                                     info (forward-decl new-type-name (subs (first def) 7) (dec type-val-num))]
+           proto-fn-info (comp (for [[def] (sm/get-in-val (list :defined-syms new-type-name))
+                                     info (forward-decl new-type-name (subs def 7) (dec type-val-num))]
                                  info)
                                (forward-decl new-type-name (dec type-val-num)))
 
@@ -2185,17 +2180,15 @@
 (defn load-static-fns []
   (let [s-funs (static-fns)
         s-funs (map s-funs
-                    (fn [fn-info]
-                      (let [fn-name (first fn-info)
-                            arities (second fn-info)]
-                        (list fn-name (reduce arities
-                                              {}
-                                              (fn [arities arity]
-                                                (let [arg-count (nth arity 0)
-                                                      fn-sym (nth arity 1)
-                                                      return-type (nth arity 2 :no-type)]
-                                                  (assoc arities arg-count {:return-type return-type
-                                                                            :fn-sym fn-sym}))))))))]
+                    (fn [[fn-name arities]]
+                      (list fn-name (reduce arities
+                                            {}
+                                            (fn [arities arity]
+                                              (let [arg-count (nth arity 0)
+                                                    fn-sym (nth arity 1)
+                                                    return-type (nth arity 2 :no-type)]
+                                                (assoc arities arg-count {:return-type return-type
+                                                                          :fn-sym fn-sym})))))))]
     (sm/set-val :core-static-fns (reduce s-funs
                                          {}
                                          (fn [s-funs s-fun]
@@ -2208,35 +2201,32 @@
         _ (write "List *fnInfo;\n")
         _ (write "List *arityInfo;\n")
         _ (write-strs (flat-map (seq s-fns)
-                                (fn [static-fn]
-                                  (let [name (first static-fn)
-                                        arities (second static-fn)]
-                                    (comp
-                                     (list "fnInfo = empty_list;\n")
-                                     (flat-map (seq arities)
-                                               (fn [arity]
-                                                 (let [arg-count (first arity)
-                                                       arity-sym (get (second arity) :fn-sym "")
-                                                       return-type (get (second arity) :return-type :no-type)]
-                                                   (comp
-                                                    (list "arityInfo = listCons("
-                                                          (cond
-                                                           (= :no-type return-type) "keywordValue(\":no-type\""
-                                                           (str "numberValue(" return-type))
-                                                          "), empty_list);\n")
-                                                    (list "arityInfo = listCons(stringValue(\"" arity-sym
-                                                          "\"), arityInfo);\n")
-                                                    (cond
-                                                     (= :variadic arg-count)
-                                                     (list "arityInfo = listCons(keywordValue(\":variadic\")"
-                                                           ", arityInfo);\n")
+                                (fn [[name arities]]
+                                  (comp
+                                   (list "fnInfo = empty_list;\n")
+                                   (flat-map (seq arities)
+                                             (fn [[arg-count arity-info]]
+                                               (let [arity-sym (get arity-info :fn-sym "")
+                                                     return-type (get arity-info :return-type :no-type)]
+                                                 (comp
+                                                  (list "arityInfo = listCons("
+                                                        (cond
+                                                         (= :no-type return-type) "keywordValue(\":no-type\""
+                                                         (str "numberValue(" return-type))
+                                                        "), empty_list);\n")
+                                                  (list "arityInfo = listCons(stringValue(\"" arity-sym
+                                                        "\"), arityInfo);\n")
+                                                  (cond
+                                                   (= :variadic arg-count)
+                                                   (list "arityInfo = listCons(keywordValue(\":variadic\")"
+                                                         ", arityInfo);\n")
 
-                                                     (list "arityInfo = listCons(numberValue(" arg-count
-                                                           "), arityInfo);\n"))
-                                                    (list "fnInfo = listCons((Value *)arityInfo, fnInfo);\n")))))
-                                     (list "fnInfo = listCons((Value *)fnInfo, empty_list);\n"
-                                           "fnInfo = listCons(stringValue(\"" name "\"), fnInfo);\n"
-                                           "staticFns = listCons((Value *)fnInfo, staticFns);\n"))))))
+                                                   (list "arityInfo = listCons(numberValue(" arg-count
+                                                         "), arityInfo);\n"))
+                                                  (list "fnInfo = listCons((Value *)arityInfo, fnInfo);\n")))))
+                                   (list "fnInfo = listCons((Value *)fnInfo, empty_list);\n"
+                                         "fnInfo = listCons(stringValue(\"" name "\"), fnInfo);\n"
+                                         "staticFns = listCons((Value *)fnInfo, staticFns);\n")))))
         _ (write "return((Value *)staticFns);\n")
         _ (write "}\n\n")]
     ""))
@@ -2247,11 +2237,8 @@
 (defn load-defined-syms []
   (let [defined (reduce (defined-syms)
                         {}
-                        (fn [m kv]
-                          (let [k (first kv)
-                                v (second kv)
-                                ext (nth v 0)
-                                ref (nth v 1)
+                        (fn [m [k v]]
+                          (let [[ext ref] v
                                 type-num (nth v 2 :no-type)]
                             (assoc m k (list ext (c-code ref empty-list "" type-num))))))]
     (sm/set-val :core-defined-syms defined)))
@@ -2263,18 +2250,16 @@
         _ (write "List *symInfo;\n")
         _ (write-strs (flat-map (seq def-syms)
                                 (fn [def]
-                                  (let [sym (first def)
-                                        ext-ref (second def)
-                                        ext (first ext-ref)
-                                        ref (.c-val (second ext-ref))
-                                        type-num (.type-num (second ext-ref))]
+                                  (let [[sym [ext ref]] def
+                                        c-ref (.c-val ref)
+                                        type-num (.type-num ref)]
                                     (list
                                      "symInfo = listCons("
                                      (cond
                                       (= :no-type type-num) "keywordValue(\":no-type\""
                                       (str "numberValue(" type-num))
                                      "), empty_list);\n"
-                                     "symInfo = listCons(stringValue(\"" ref "\"), symInfo);\n"
+                                     "symInfo = listCons(stringValue(\"" c-ref "\"), symInfo);\n"
                                      "symInfo = listCons(stringValue(\"" ext "\"), symInfo);\n"
                                      "symInfo = listCons((Value *)symInfo, empty_list);\n"
                                      "symInfo = listCons(symbolValue(\"" sym "\"), symInfo);\n"
@@ -2301,12 +2286,10 @@
         _ (write "List *nums = empty_list;\n")
         _ (write "List *numInfo;\n")
         _ (write-strs (flat-map (seq nums)
-                                (fn [num-lit]
-                                  (let [num (first num-lit)
-                                        ref (second num-lit)]
-                                    (list "numInfo = listCons(stringValue(\"" ref "\"), empty_list);\n"
-                                          "numInfo = listCons(numberValue(" num "), numInfo);\n"
-                                          "nums = listCons((Value *)numInfo, nums);\n")))))
+                                (fn [[num ref]]
+                                  (list "numInfo = listCons(stringValue(\"" ref "\"), empty_list);\n"
+                                        "numInfo = listCons(numberValue(" num "), numInfo);\n"
+                                        "nums = listCons((Value *)numInfo, nums);\n"))))
         _ (write "return((Value *)nums);\n")
         _ (write "}\n\n")]
     ""))
@@ -2317,8 +2300,8 @@
 (defn load-string-literals []
   (let [strs (reduce (string-literals)
                      {}
-                     (fn [m kv]
-                       (apply assoc m kv)))]
+                     (fn [m [k v]]
+                       (assoc m k v)))]
     (apply-to list
               (sm/set-val :str-count (count strs))
               (sm/set-val :core-strings strs))))
@@ -2329,13 +2312,11 @@
         _ (write "List *strs = empty_list;\n")
         _ (write "List *strInfo;\n")
         _ (write-strs (flat-map (seq strs)
-                                (fn [str-lit]
-                                  (let [str-val (first str-lit)
-                                        ref (second str-lit)]
-                                    (list "strInfo = listCons(stringValue(\"" ref "\"), empty_list);\n"
-                                          "strInfo = listCons(stringValue(\"" (escape-chars str-val)
-                                          "\"), strInfo);\n"
-                                          "strs = listCons((Value *)strInfo, strs);\n")))))
+                                (fn [[str-val ref]]
+                                  (list "strInfo = listCons(stringValue(\"" ref "\"), empty_list);\n"
+                                        "strInfo = listCons(stringValue(\"" (escape-chars str-val)
+                                        "\"), strInfo);\n"
+                                        "strs = listCons((Value *)strInfo, strs);\n"))))
         _ (write "return((Value *)strs);\n")
         _ (write "}\n\n")]
     ""))
