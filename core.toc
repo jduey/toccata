@@ -1049,6 +1049,10 @@ else
       (=* v (car vs)) (apply = vs)
       0)))
 
+(defn partial [f & args]
+  (fn [& more-args]
+    (apply f (comp args more-args))))
+
 (def maybe-val)
 
 (def nothing
@@ -1077,15 +1081,11 @@ else
     (flatten [nv] nv)
     (flat-map [nv _] nv)))
 
-(defn some [coll f]
+(defn any? [pred coll]
   (cond
    (empty? coll) 0
-   (f (first coll)) (first coll)
-   (some (rest coll) f)))
-
-(defn partial [f & args]
-  (fn [& more-args]
-    (apply f (comp args more-args))))
+   (pred (first coll)) 1
+   (any? pred (rest coll))))
 
 (deftype maybe-val [v]
   Stringable
@@ -1106,7 +1106,7 @@ else
   (wrap [_ v] (maybe-val v))
   (apply* [fv args]
     (cond
-     (some args (partial = nothing)) nothing
+     (any? args (partial = nothing)) nothing
      (maybe-val (apply (.v fv) (map args .v)))))
 
   Monad
@@ -1124,20 +1124,24 @@ else
 
     Monoid
     (zero [_] nothing)
-    (comp* [_ _] :nothing-here)
     ))
 
 (defn m=
+  ([v] (maybe v))
   ([x y]
      (cond
       (=* x y) (maybe x)
       nothing))
   ([v & vs]
      (cond
-      (list-empty? vs) (maybe v)
-      (not (=* v (car vs))) nothing
-      (number= 1 (list-count vs)) (maybe v)
-      (apply = vs))))
+      (=* v (car vs)) (apply m= vs)
+      nothing)))
+
+(defn some [coll f]
+  (cond
+   (empty? coll) nothing
+   (f (first coll)) (maybe (first coll))
+   (some (rest coll) f)))
 
 (defn <
   ([x y] (<* x y))
@@ -1277,12 +1281,6 @@ Sha1Update(&context, (void *)&numVal->numVal, 8);
 Sha1Finalise(&context, (SHA1_HASH *)&shaVal);
 return((Value *)numberValue(shaVal));
 ")))
-
-(defn any? [pred coll]
-  (cond
-   (empty? coll) 0
-   (pred (first coll)) 1
-   (any? pred (rest coll))))
 
 ;; (deftype ZipList [v]
 ;;   Applicative
