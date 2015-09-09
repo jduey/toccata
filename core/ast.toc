@@ -4,7 +4,7 @@
 (deftype inline-ast [txt result-type])
 
 (defn inline-text [text return-type]
-   (fr/free (inline-ast text return-type)))
+  (fr/free (inline-ast text return-type)))
 
 (deftype symbol-ast [sym]
   Stringable
@@ -13,7 +13,10 @@
 (defn sym [s]
   (fr/free (symbol-ast s)))
 
-(deftype keyword-ast [kw])
+(deftype keyword-ast [kw]
+  Stringable
+  (string-list [_]
+    (list "<KeywordAST " (str kw) ">")))
 
 (defn kw [k]
   (fr/free (keyword-ast k)))
@@ -47,6 +50,18 @@
 (defn cond-expr [clauses default]
   (fr/free (cond-ast clauses default)))
 
+(deftype pattern-ast [type vals])
+
+(defn pattern-expr [type vals]
+  (fr/free (pattern-ast type vals)))
+
+(deftype match-ast [value clauses default]
+  Stringable
+  (string-list [_] (list "<MatchAST " (str value) ">")))
+
+(defn match-expr [value clauses default]
+  (fr/free (match-ast value clauses default)))
+
 (deftype reify-ast [impls])
 
 (defn reified [impls]
@@ -57,24 +72,36 @@
 (defn proto [name proto-fns]
   (fr/free (protocol-ast name proto-fns)))
 
-(deftype call-ast [callee params])
+(deftype call-ast [callee params]
+  Stringable
+  (string-list [_]
+    (list "<CallAST " (str callee) " " (str params) ">")))
 
 (defn call-expr [target params]
   (fr/free (call-ast target
                      (apply* (fr/free list) params))))
 
-(deftype binding-ast [binding val])
+(deftype binding-ast [binding val]
+  Stringable
+  (string-list [_]
+    (list "<BindingAST " (str binding) " " (str val) ">")))
 
 (defn binding [binding val]
   (fr/free (binding-ast binding val)))
 
-(deftype let-ast [bindings body])
+(deftype let-ast [bindings body]
+  Stringable
+  (string-list [_]
+    (list "<LetAST " (str bindings) "\n" (str body) ">")))
 
 (defn let-expr [bindings body]
   (fr/free (let-ast (apply* (fr/free list) bindings)
                     (apply* (fr/free list) body))))
 
-(deftype quoted-ast [q-val])
+(deftype quoted-ast [q-val]
+  Stringable
+  (string-list [_]
+    (list "<Quoted " (str q-val) ">")))
 
 (defn quoted [q-val]
   (fr/free (quoted-ast q-val)))

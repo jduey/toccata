@@ -1361,6 +1361,9 @@ return((Value *)numberValue(shaVal));
    (list=* (map ls rest))))
 
 (extend-type List
+  Getter
+  (type-args [l] l)
+
   Seqable
   (seq? [l]
     true)
@@ -1553,6 +1556,10 @@ return((Value *)numberValue(shaVal));
     (cond
      (= s "") empty-list
      (cons (subs s 0 1) (seq (subs s 1)))))
+  (m-first [s]
+    (cond
+     (= s "") nothing
+     (maybe (subs s 0 1))))
   (first [s]
     (cond
      (= s "") nothing
@@ -1616,6 +1623,10 @@ return((Value *)numberValue(shaVal));
     (cond
      (= s "") empty-list
      (cons (subs s 0 1) (seq (subs s 1)))))
+  (m-first [s]
+    (cond
+     (= s "") nothing
+     (maybe (subs s 0 1))))
   (first [s]
     (cond
      (= s "") nothing
@@ -1732,8 +1743,7 @@ return((Value *)numberValue(shaVal));
 (defn butlast [coll]
   (cond
    (empty? coll) coll
-   (= 1 (count coll)) empty-list
-   (cons (first coll) (butlast (rest coll)))))
+   (car (split coll (dec (count coll))))))
 
 (inline-text "
 BitmapIndexedNode emptyBMI = {BitmapIndexedType, -1, 0, 0};
@@ -2496,16 +2506,16 @@ else {
 ")))
 
 (defn symbol? [sym]
-  (= Symbol (get-type sym)))
+  (instance? Symbol sym))
 
 (defn keyword [kw-name]
   (new-keyword (str ":" kw-name)))
 
 (defn keyword? [kw]
-  (= Keyword (get-type kw)))
+  (instance? Keyword kw))
 
 (defn number? [n]
-  (= Number (get-type n)))
+  (instance? Number n))
 
 (defn string? [s]
   (or (= String (get-type s))

@@ -38,12 +38,12 @@
                 (list v s))))
   (apply* [fv args]
     (new-sm (fn [s]
-                (let [reduce-state (reduce-args args s)]
-                  (cond
-                   (list-empty? reduce-state) empty-list
-                   (let [[results s] reduce-state
-                         [f s] (fv s)]
-                     (list (apply f results) s)))))))
+              (let [reduce-state (reduce-args args s)]
+                (cond
+                 (list-empty? reduce-state) empty-list
+                 (let [[results s] reduce-state
+                       [f s] (fv s)]
+                   (list (apply f results) s)))))))
 
   Monad
   (flat-map [ev f]
@@ -61,9 +61,16 @@
   (comp* [mv mvs]
     (new-sm (partial -comp* mv mvs))))
 
-(defn state-maybe [v]
-  (new-sm (fn [s]
-              (list v s))))
+(def state-maybe
+  (reify
+    Function
+    (invoke [_ v]
+      (new-sm (fn [s]
+                (list v s))))
+
+    Monoid
+    (zero [_]
+      (new-sm (fn [s] empty-list)))))
 
 (defn update-state [f]
   (new-sm (fn [s]

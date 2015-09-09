@@ -12,15 +12,12 @@
 (deftype parser-terminal [term-str]
   Parser
   (recursive-descent [_]
-    (for [_ (traverse (seq term-str)
-                      (fn [term-c]
-                        (sm/new-sm (fn [s]
-                                     (let [c (first (:text s))]
-                                       (cond
-                                        (= nothing c) empty-list
-                                        (= term-c (.v c)) (list (list (.v c)) (update-in s (list :text) rest))
-                                        empty-list))))))]
-      (list term-str))))
+    (let [term-count (count term-str)]
+      (for [text (sm/get-val :text "")
+            :when (not (< (count text) term-count))
+            :when (= (subs text 0 term-count) term-str)
+            _ (sm/set-val :text (subs text term-count))]
+        (list term-str)))))
 
 (defn term [term-str]
   (fr/free (parser-terminal term-str)))
@@ -96,14 +93,12 @@
   (fr/free (recursive-parser-rule name grammar)))
 
 (defn char-test [pred]
-  (sm/new-sm (fn [s]
-               (let [text (:text s)]
-                 (cond
-                  (number= 0 (str-count text)) empty-list
-                  (let [c (subs text 0 1)]
-                    (cond
-                     (pred c) (list (list c) (assoc s :text (subs text 1)))
-                     empty-list)))))))
+  (for [text (sm/get-val :text "")
+        :when (not (= "" text))
+        :let [c (subs text 0 1)]
+        :when (pred c)
+        _ (sm/set-val :text (rest text))]
+    (list c)))
 
 (deftype parse-lower-alphas []
   Parser

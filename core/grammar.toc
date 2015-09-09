@@ -3,6 +3,17 @@
 (add-ns fr (module "core/free.toc"))
 (add-ns parser (module "core/parser.toc"))
 
+(deftype do-debug [tag]
+  Parser
+  (parser/recursive-descent [_]
+    (for [text (sm/get-val :text "")]
+      (print-err tag (subs text 0 10)))))
+
+(defn debug [tag]
+  (parser/ignore
+   (parser/rule "debug"
+                (fr/free (do-debug tag)))))
+
 (defn to-string [rule]
   (apply-to (fn [chars]
               (apply str chars))
@@ -87,13 +98,10 @@
 (deftype parse-not-backslash []
   Parser
   (parser/recursive-descent [_]
-    (sm/new-sm (fn [s]
-                 (let [c (first (:text s))]
-                   (cond
-                    (= nothing c) empty-list
-                    (= (.v c) (char 92)) empty-list
-                    (= (.v c) (char 34)) empty-list
-                    (list (list (.v c)) (update-in s (list :text) rest))))))))
+    (parser/char-test (fn [c]
+                        (not
+                         (or (= c (char 92))
+                             (= c (char 34))))))))
 
 (defn not-backslash []
   (parser/rule "not-backslash"
@@ -119,15 +127,9 @@
                           (fn [n c]
                             (+ (* n 10)
                                (cond
-                                (= c "1") 1
-                                (= c "2") 2
-                                (= c "3") 3
-                                (= c "4") 4
-                                (= c "5") 5
-                                (= c "6") 6
-                                (= c "7") 7
-                                (= c "8") 8
-                                (= c "9") 9
+                                (< (dec (char-code "0")) (char-code c) (inc (char-code "9")))
+                                (- (char-code c) (char-code "0"))
+
                                 0))))]
     (cond
      (= "-" negate?) (* -1 magnitude)
@@ -151,6 +153,13 @@
   (parser/rule "form"
                (fr/free (parse-sub-form))))
 
+(defn read-quoted []
+  (parser/rule "quoted"
+               (apply-to (fn [arg]
+                           (list 'quote arg))
+                         (parser/ignore (parser/term "'"))
+                         (read-sub-form))))
+
 (defn read-list []
   (parser/rule "list"
                (parser/all (parser/ignore (parser/term "("))
@@ -159,29 +168,23 @@
 
 (defn read-hash-map []
   (parser/rule "hash-map"
-               (apply-to cons
+               (apply-to (partial cons 'hash-map)
                          (parser/ignore (parser/term "{"))
-                         (parser/always 'hash-map)
                          (parser/none-or-more (read-sub-form))
                          (parser/ignore (parser/term "}")))))
 
 (defn read-vector []
   (parser/rule "vector"
-               (apply-to cons
+               (apply-to (partial cons 'vector)
                          (parser/ignore (parser/term "["))
-                         (parser/always 'vector)
                          (parser/none-or-more (read-sub-form))
                          (parser/ignore (parser/term "]")))))
 
 (deftype parse-not-eol []
   Parser
   (parser/recursive-descent [_]
-    (sm/new-sm (fn [s]
-                 (let [c (first (:text s))]
-                   (cond
-                    (= nothing c) empty-list
-                    (= (.v c) (char 10)) empty-list
-                    (list (list (.v c)) (update-in s (list :text) rest))))))))
+    (parser/char-test (fn [c]
+                        (not (= c (char 10)))))))
 
 (defn not-eol []
   (parser/rule "not-eol"
@@ -256,11 +259,10 @@
 
 (defn read-main []
   (parser/rule "main"
-               (apply-to list*
+               (apply-to (partial list* 'main)
                          (parser/ignore (parser/term "("))
                          (parser/ignore (parser/none-or-more (whitespace)))
                          (parser/ignore (parser/term "main"))
-                         (parser/always 'main)
                          (parser/ignore (parser/one-or-more (whitespace)))
                          (read-args)
                          (parser/one-or-more (read-sub-form))
@@ -270,18 +272,16 @@
 (defn read-single-arity []
   (parser/rule "single-arity"
                (apply-to (fn [& vs]
-                           (list vs))
-                         (parser/always 'fn-arity)
+                           (list (cons 'fn-arity vs)))
                          (read-args)
                          (parser/none-or-more (read-sub-form)))))
 
 (defn read-multi-arity []
   (parser/rule "multi-arity"
-               (apply-to list
+               (apply-to (partial list 'fn-arity)
                          (parser/ignore (parser/none-or-more (whitespace)))
                          (parser/ignore (parser/term "("))
                          (parser/ignore (parser/none-or-more (whitespace)))
-                         (parser/always 'fn-arity)
                          (read-args)
                          (parser/none-or-more (read-sub-form))
                          (parser/ignore (parser/none-or-more (whitespace)))
@@ -308,11 +308,10 @@
 
 (defn read-fn []
   (parser/rule "fn"
-               (apply-to list
+               (apply-to (partial list 'fn)
                          (parser/ignore (parser/term "("))
                          (parser/ignore (parser/none-or-more (whitespace)))
                          (parser/ignore (parser/term "fn"))
-                         (parser/always 'fn)
                          (parser/ignore (parser/one-or-more (whitespace)))
                          (comp (read-symbol)
                                (parser/always 'anon))
@@ -320,6 +319,32 @@
                          (read-arities)
                          (parser/ignore (parser/none-or-more (whitespace)))
                          (parser/ignore (parser/term ")")))))
+
+(defn read-fields []
+  (parser/rule "type-fields"
+               (apply-to (partial list* 'vector)
+                         (parser/ignore (parser/term "["))
+                         (parser/none-or-more (read-symbol))
+                         (parser/ignore (parser/term "]")))))
+
+;; (defn read-restricted-symbol []
+;;   (parser/rule "type-name"
+;;                (apply-to (fn [chars]
+;;                            (symbol (apply str chars)))
+;;                          (parser/one-or-more (parser/alpha)))))
+
+;; (defn read-deftype []
+;;   (parser/rule "deftype"
+;;                (apply-to (partial list* 'deftype)
+;;                          (parser/ignore (parser/term "("))
+;;                          (parser/ignore (parser/none-or-more (whitespace)))
+;;                          (parser/ignore (parser/term "deftype"))
+;;                          (parser/ignore (parser/one-or-more (whitespace)))
+;;                          (read-restricted-symbol)
+;;                          (parser/ignore (parser/one-or-more (whitespace)))
+;;                          (read-fields)
+;;                          (parser/none-or-more (read-sub-form))
+;;                          (parser/ignore (parser/term ")")))))
 
 (defn read-let-binding []
   (parser/rule "let-binding"
@@ -331,11 +356,10 @@
 
 (defn read-let []
   (parser/rule "let"
-               (apply-to list*
+               (apply-to (partial list* 'let)
                          (parser/ignore (parser/term "("))
                          (parser/ignore (parser/none-or-more (whitespace)))
                          (parser/ignore (parser/term "let"))
-                         (parser/always 'let)
                          (parser/ignore (parser/one-or-more (whitespace)))
                          (parser/ignore (parser/term "["))
                          (parser/none-or-more (read-let-binding))
@@ -346,10 +370,9 @@
 
 (defn read-for-let []
   (parser/rule "for-let"
-               (apply-to list
+               (apply-to (partial list :let)
                          (parser/ignore (parser/none-or-more (whitespace)))
                          (parser/ignore (parser/term ":let"))
-                         (parser/always :let)
                          (parser/ignore (parser/one-or-more (whitespace)))
                          (parser/ignore (parser/term "["))
                          (parser/none-or-more (read-let-binding))
@@ -357,10 +380,9 @@
 
 (defn read-for-when []
   (parser/rule "for-when"
-               (apply-to list
+               (apply-to (partial list :when)
                          (parser/ignore (parser/none-or-more (whitespace)))
                          (parser/ignore (parser/term ":when"))
-                         (parser/always :when)
                          (parser/ignore (parser/one-or-more (whitespace)))
                          (read-sub-form))))
 
@@ -449,18 +471,49 @@
                          (parser/ignore (parser/none-or-more (whitespace)))
                          (parser/ignore (parser/term ")")))))
 
-(defn read-quoted []
-  (parser/rule "quoted"
-               (apply-to (fn [arg]
-                           ;; (print-err :arg arg)
-                           (list 'quote arg))
-                         (parser/ignore (parser/term "'"))
-                         (read-sub-form))))
+(defn read-pattern []
+  (parser/rule "match-pattern"
+               (apply-to (fn [pattern-type args-head args-tail]
+                           (comp (cons pattern-type args-head)
+                                 args-tail))
+                         (parser/ignore (parser/term "|"))
+                         (parser/ignore (parser/none-or-more (whitespace)))
+                         (read-symbol)
+                         (parser/ignore (parser/none-or-more (whitespace)))
+                         (parser/none-or-more (parser/all
+                                               (comp (read-symbol)
+                                                     (read-keyword)
+                                                     (read-const-string)
+                                                     (read-number)
+                                                     (read-quoted))
+                                               (parser/ignore (parser/none-or-more (whitespace)))))
+                         (comp (read-var-arg)
+                               (parser/always empty-list))
+                         (parser/ignore (parser/term "|")))))
+
+(defn read-match []
+  (parser/rule "match"
+               (apply-to (fn [arg clauses default]
+                           (list* 'match arg
+                                  (comp
+                                   (apply comp clauses)
+                                   (list default))))
+                         (parser/ignore (parser/term "("))
+                         (parser/ignore (parser/none-or-more (whitespace)))
+                         (parser/ignore (parser/term "match"))
+                         (parser/ignore (parser/one-or-more (whitespace)))
+                         (read-sub-form)
+                         (parser/one-or-more (apply-to list
+                                                       (read-pattern)
+                                                       (read-sub-form)))
+                         (read-sub-form)
+                         (parser/ignore (parser/term ")")))))
 
 (defn read-form []
   (parser/recursive-rule "form"
        (parser/all (parser/ignore (parser/none-or-more (whitespace)))
              (comp (read-number)
+                   (read-match)
                    (read-keyword)
                    (read-symbol)
                    (read-quoted)
