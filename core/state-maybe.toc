@@ -1,26 +1,25 @@
 
 ;; state-maybe monad with lazy comp*
 
-(defn reduce-args [args s]
-  (cond
-   (list-empty? args) (list empty-list s)
-   (let [[arg & args] args
-         result-s (arg s)]
-     (cond
-      (list-empty? result-s) empty-list
-      (let [[result new-s] result-s
-            results-s (reduce-args args new-s)]
-        (cond
-         (list-empty? results-s) empty-list
-         (let [[results final-s] results-s]
-           (list (cons result results) final-s))))))))
+(defn reduce-args [[arg & args] s]
+  (let [result-s (arg s)]
+    (cond
+     (= nothing result-s) nothing
+     (let [[result new-s] result-s]
+       (cond
+        (list-empty? args) (list (list result) new-s)
+        (let [results-s (reduce-args args new-s)]
+          (cond
+           (= nothing results-s) nothing
+           (let [[results final-s] results-s]
+             (list (cons result results) final-s)))))))))
 
 (defn -comp* [mv mvs s]
   (let [x (mv s)]
     (cond
      (list-empty? mvs) x
-     (list-empty? x) (let [[mv & mvs] mvs]
-                       (-comp* mv mvs s))
+     (= nothing x) (let [[mv & mvs] mvs]
+                     (-comp* mv mvs s))
      x)))
 
 ;; TODO: deftypes don't get added to the importing ns correctly
@@ -40,7 +39,7 @@
     (new-sm (fn [s]
               (let [reduce-state (reduce-args args s)]
                 (cond
-                 (list-empty? reduce-state) empty-list
+                 (= nothing reduce-state) nothing
                  (let [[results s] reduce-state
                        [f s] (fv s)]
                    (list (apply f results) s)))))))
@@ -50,14 +49,12 @@
     (new-sm (fn [s]
               (let [v-ss (invoke-fn s)]
                 (cond
-                 (list-empty? v-ss) v-ss
+                 (= nothing v-ss) v-ss
                  (let [[v ss] v-ss]
                    ((f v) ss)))))))
 
   Monoid
-  (zero [_]
-    (new-sm (fn [s]
-                empty-list)))
+  (zero [_] nothing)
   (comp* [mv mvs]
     (new-sm (partial -comp* mv mvs))))
 
@@ -69,8 +66,7 @@
                 (list v s))))
 
     Monoid
-    (zero [_]
-      (new-sm (fn [s] empty-list)))))
+    (zero [_] nothing)))
 
 (defn update-state [f]
   (new-sm (fn [s]
@@ -81,7 +77,7 @@
      (new-sm (fn [s]
                  (let [v (get s k not-found)]
                    (cond
-                    (= not-found v) empty-list
+                    (= not-found v) nothing
                     (list v s))))))
   ([k nf]
      (new-sm (fn [s]
@@ -96,7 +92,7 @@
      (new-sm (fn [s]
                  (let [v (get-in s path not-found)]
                    (cond
-                    (= not-found v) empty-list
+                    (= not-found v) nothing
                     (list v s))))))
   ([path nf]
      (new-sm (fn [s]
@@ -113,7 +109,7 @@
 (defn recur-fn [f as s]
   (let [v-ss (f s)]
     (cond
-     (list-empty? v-ss) (list as s)
+     (= nothing v-ss) (list as s)
      (let [[v ss] v-ss]
        (recur-fn f (cons v as) ss)))))
 
@@ -121,9 +117,9 @@
   (new-sm (fn [s]
             (let [v-ss (mv s)]
               (cond
-               (list-empty? v-ss) empty-list
+               (= nothing v-ss) nothing
                (let [[v ss] v-ss
                      x (recur-fn (.invoke-fn mv) (list v) ss)]
                  (cond
-                  (list-empty? x) x
+                  (= nothing x) x
                   (cons (reverse (car x)) (cdr x)))))))))

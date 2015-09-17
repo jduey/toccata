@@ -897,6 +897,10 @@ else
 
 (defprotocol Type
   (instance? [type val]
+    ;; (match type
+    ;;        |Number _| (number= type (get-type val))
+    ;;        (let [_ (pr* "*** call to 'instance?' with unknown type parameter.")]
+    ;;          (abort)))
     (cond
      (number= Number (get-type type)) (number= type (get-type val))
      (let [_ (pr* "*** call to 'instance?' with unknown type parameter.")]
@@ -914,6 +918,11 @@ else
   (extend [wv f])
   (duplicate [wv]
     (print-err "'duplicate' not implemented: " (type-name wv))))
+
+(defprotocol Ord
+  (<* [value values]
+    (print-err "'<*' not implemented:" value)
+    (abort)))
 
 (def comprehend)
 
@@ -955,11 +964,6 @@ else
 
      0)))
 
-(defprotocol Ord
-  (<* [value values]
-    (print-err "'<*' not implemented:" value)
-    (abort)))
-
 (defprotocol Collection
   (empty? [coll])
   (empty [coll])
@@ -967,11 +971,6 @@ else
   (count [coll])
   (conj [coll value])
   (reduce [l result f]))
-
-(defn not-empty? [coll]
-  (cond
-   (empty? coll) false
-   true))
 
 (defprotocol Seqable
   (seq? [coll] false)
@@ -1002,10 +1001,9 @@ else
   ([f & args]
      (apply* (wrap (car args) f) args)))
 
-(defn comp [coll & colls]
-  (cond
-   (list-empty? colls) coll
-   (comp* coll colls)))
+(defn comp
+  ([x] x)
+  ([x & xs] (comp* x xs)))
 
 (defprotocol HashMapNode
   (hash-seq [n s])
@@ -1029,17 +1027,19 @@ else
    b-val 0
    1))
 
-(defn and [& b-vals]
-  (cond
-   (list-empty? b-vals) 1
-   (car b-vals) (apply and (cdr b-vals))
-   0))
+(defn and
+  ([b-val] b-val)
+  ([b-val & b-vals]
+     (cond
+      b-val (apply and b-vals)
+      0)))
 
-(defn or [& b-vals]
-  (cond
-   (list-empty? b-vals) 0
-   (car b-vals) 1
-   (apply or (cdr b-vals))))
+(defn or
+  ([b-val] b-val)
+  ([b-val & b-vals]
+     (cond
+      b-val 1
+      (apply or b-vals))))
 
 (defn =
   ([v] 1)
@@ -1060,15 +1060,19 @@ else
     Stringable
     (string-list [_] (list "<nothing>"))
 
+    Function
+    (invoke [n f]
+      n)
+
     Eq
     (=* [nv x] (type= nv x))
 
     Monoid
     (zero [nv] nv)
-    (comp* [nv mvs]
-      (cond
-       (list-empty? mvs) nv
-       (comp* (first mvs) (rest mvs))))
+    (comp* [nothing mvs]
+      (match mvs
+             |List mv & mvs| (comp* mv mvs)
+             nothing))
 
     Functor
     (map [nv f] nv)
@@ -1104,10 +1108,10 @@ else
 
   Applicative
   (wrap [_ v] (maybe-val v))
-  (apply* [fv args]
+  (apply* [_ args]
     (cond
      (any? args (partial = nothing)) nothing
-     (maybe-val (apply (.v fv) (map args .v)))))
+     (maybe-val (apply v (map args .v)))))
 
   Monad
   (flatten [_] v)
@@ -1360,6 +1364,11 @@ return((Value *)numberValue(shaVal));
    (not (apply = (map ls (fn [l] (car l))))) 0
    (list=* (map ls rest))))
 
+(defn reduce-list [[h & t] result f]
+  (match t
+         |List _| (reduce-list t (f result h) f)
+         (f result h)))
+
 (extend-type List
   Getter
   (type-args [l] l)
@@ -1368,9 +1377,10 @@ return((Value *)numberValue(shaVal));
   (seq? [l]
     true)
   (seq [l] l)
-  (m-first [l] (cond
-              (list-empty? l) nothing
-              (maybe (car l))))
+  (m-first [l]
+    (match l
+           |List first| (maybe first)
+           nothing))
   (first [l] (car l))
   (rest [l] (cdr l))
 
@@ -1381,14 +1391,9 @@ return((Value *)numberValue(shaVal));
   (conj [l v] (cons v l))
   (count [l] (list-count l))
   (reduce [l result f]
-    (cond
-     (list-empty? l) result
-     (let [head (car l)
-           tail (cdr l)
-           mapped-val (f result head)]
-       (cond
-        (list-empty? tail) mapped-val
-        (reduce tail mapped-val f)))))
+    (match l
+           |List _| (reduce-list l result f)
+           result))
 
   Crushable
   (crush [l f]
@@ -1397,8 +1402,9 @@ return((Value *)numberValue(shaVal));
 
   Traversable
   (traverse [l f]
-    (let [vs (map l f)]
-      (apply* (wrap (car vs) list) vs)))
+    (match (map l f)
+           |List v & vs| (apply* (wrap v list) (cons v vs))
+           nothing))
 
   Eq
   (=* [x y]
@@ -1472,10 +1478,9 @@ return((Value *)numberValue(shaVal));
 
   Monad
   (flat-map [mv mf]
-    (let [l (map mv mf)]
-      (cond
-       (list-empty? l) empty-list
-       (comp* (car l) (cdr l))))))
+    (match (map mv mf)
+           |List h & t| (comp* h t)
+           empty-list)))
 
 (defn interpose [coll sep]
   (cond
@@ -1513,26 +1518,23 @@ return((Value *)numberValue(shaVal));
 (defn inc [x]
   (add-numbers x 1))
 
-(defn + [& xs]
-  (cond
-   (list-empty? xs) 0
-   (reduce xs 0 add-numbers)))
+(defn +
+  ([] 0)
+  ([x y] (add-numbers x y))
+  ([& xs] (reduce xs 0 add-numbers)))
 
-(defn * [& xs]
-  (cond
-   (list-empty? xs) 1
-   (reduce xs 1 mult-numbers)))
+(defn *
+  ([] 0)
+  ([x y] (mult-numbers x y))
+  ([& xs] (reduce xs 0 mult-numbers)))
 
 (defn dec [x]
   (subtract-numbers x 1))
 
 (defn -
-  ([]
-     0)
-  ([x & xs]
-     (cond
-      (list-empty? xs) x
-      (reduce xs x subtract-numbers))))
+  ([] 0)
+  ([x] x)
+  ([x & xs] (reduce xs x subtract-numbers)))
 
 (extend-type String
   Eq
@@ -1561,9 +1563,7 @@ return((Value *)numberValue(shaVal));
      (= s "") nothing
      (maybe (subs s 0 1))))
   (first [s]
-    (cond
-     (= s "") nothing
-     (maybe (subs s 0 1))))
+    (subs s 0 1))
   (rest [s]
     (subs s 1))
 
@@ -1628,9 +1628,7 @@ return((Value *)numberValue(shaVal));
      (= s "") nothing
      (maybe (subs s 0 1))))
   (first [s]
-    (cond
-     (= s "") nothing
-     (maybe (subs s 0 1))))
+    (subs s 0 1))
   (rest [s]
     (subs s 1))
 

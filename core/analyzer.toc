@@ -117,7 +117,7 @@
     (ast/strng str-val)))
 
 (defn analyze-call []
-  (for [expr (is-expr not-empty?)
+  (for [expr (sm/get-val :expr)
         [target & args] (traverse expr analyze-expr)]
     (ast/call-expr target args)))
 
