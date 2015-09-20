@@ -15,12 +15,13 @@
              (list (cons result results) final-s)))))))))
 
 (defn -comp* [mv mvs s]
-  (let [x (mv s)]
-    (cond
-     (list-empty? mvs) x
-     (= nothing x) (let [[mv & mvs] mvs]
-                     (-comp* mv mvs s))
-     x)))
+  (cond
+   (list-empty? mvs) (mv s)
+   (let [x (mv s)]
+     (cond
+      (= nothing x) (let [[mv & mvs] mvs]
+                      (-comp* mv mvs s))
+      x))))
 
 ;; TODO: deftypes don't get added to the importing ns correctly
 (deftype new-sm [invoke-fn]

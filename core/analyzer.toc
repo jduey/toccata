@@ -26,7 +26,7 @@
     result))
 
 (defn analyze-symbol []
-  (for [sym (is-expr symbol?)]
+  (for [sym (is-expr (partial instance? Symbol))]
     (ast/sym sym)))
 
 (defn keyword-already-defined? [kw]
@@ -51,7 +51,7 @@
     ""))
 
 (defn analyze-keyword []
-  (for [kw (is-expr keyword?)
+  (for [kw (is-expr (partial instance? Keyword))
         _ (comp (keyword-already-defined? kw)
                 (keyword-recently-defined? kw)
                 (keyword-defined-in-core kw)
@@ -80,7 +80,7 @@
     ""))
 
 (defn analyze-number []
-  (for [num (is-expr number?)
+  (for [num (is-expr (partial instance? Number))
         _ (comp (number-already-defined? num)
                 (number-recently-defined? num)
                 (number-defined-in-core num)
@@ -142,20 +142,16 @@
                       (zero sm/state-maybe))]
     result))
 
-(defn variadic? [[_ args]]
-  (any? (partial = "&") args))
-
 (defn analyze-fn-arity []
   (for [expr (sm/get-val :expr)
         result (match expr
                       |List 'fn-arity args exprs|
                       (for [body (traverse exprs analyze-expr)]
-                        (cond
-                         (any? (partial = "&") args)
-                         (ast/variadic-arity (remove args (partial = "&")) body)
+                        (match (filter args (partial = "&"))
+                               |List _|
+                               (ast/variadic-arity (remove args (partial = "&")) body)
 
-                         (ast/fixed-arity args body)))
-
+                               (ast/fixed-arity args body)))
                       (zero sm/state-maybe))]
     result))
 
@@ -206,7 +202,7 @@
 
 (defn make-quoted [quoted-form]
   (cond
-   (symbol? quoted-form)
+   (instance? Symbol quoted-form)
    (for [_ (comp (sym-already-defined? quoted-form)
                  (sym-recently-defined? quoted-form)
                  (sym-defined-in-core quoted-form)
@@ -320,7 +316,7 @@
                                  (cond
                                   (not (seq? x)) false
                                   (empty? x) false
-                                  (symbol? (car x)))))
+                                  (instance? Symbol (car x)))))
         _ (sm/set-val :expr frms)
         fn-impls (sm/recur (analyze-proto-fn))]
     (list name fn-impls)))

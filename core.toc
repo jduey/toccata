@@ -869,304 +869,6 @@ else
       } else
         abort();\n "))
 
-(defn pr* [str]
-  (inline-text Number
-   "if (arg0->type == StringType)
-      fprintf(outStream, \"%-.*s\", (int)((String *)arg0)->len, ((String *)arg0)->buffer);
-    else if (arg0->type == SubStringType)
-      fprintf(outStream, \"%-.*s\", (int)((SubString *)arg0)->len, ((SubString *)arg0)->buffer);
-    else {
-      fprintf(outStream, \"\\ninvalid type for 'pr*'\\n\");
-      abort();
-    }
-    return(true);\n"))
-
-;; @jneen_
-(defprotocol Variant ;; is CoProduct or Tagged Union
-  (bippity [_])
-  (match* [_]
-    (pr* ":match*-one-arg"))
-  (match* [_ match-targets]
-    (pr* ":match*-two-args")))
-
-(defn alert [flag msg]
-  (cond
-   flag true
-   (let [_ (print-err msg)]
-     (abort))))
-
-(defprotocol Type
-  (instance? [type val]
-    ;; (match type
-    ;;        |Number _| (number= type (get-type val))
-    ;;        (let [_ (pr* "*** call to 'instance?' with unknown type parameter.")]
-    ;;          (abort)))
-    (cond
-     (number= Number (get-type type)) (number= type (get-type val))
-     (let [_ (pr* "*** call to 'instance?' with unknown type parameter.")]
-       (abort)))))
-
-(defprotocol Monad
-  (flat-map [mval func]
-    (print-err "'flat-map' not implemented: " (type-name mval))
-    (abort))
-  (flatten [mval]
-    (flat-map mval (fn [x] x))))
-
-(defprotocol Comonad
-  (extract [wv])
-  (extend [wv f])
-  (duplicate [wv]
-    (print-err "'duplicate' not implemented: " (type-name wv))))
-
-(defprotocol Ord
-  (<* [value values]
-    (print-err "'<*' not implemented:" value)
-    (abort)))
-
-(def comprehend)
-
-(defprotocol Applicative
-  (wrap [x v]
-    (print-err "*** 'wrap' not implemented"))
-  (apply* [fv args]
-    (cond
-     (list-empty? args) (flat-map fv (fn [f] (wrap fv (f))))
-     (flat-map fv (fn [f] (comprehend f args))))))
-
-(defn list [& l]
-  l)
-
-(defprotocol Functor
-  (map [v f]
-    (flat-map v (fn [x] (wrap v (f x))))))
-
-(defprotocol Named
-  (name [value]
-    (print-err "'name' not implemented for type " (type-name value))
-    (abort)))
-
-(defprotocol Stringable
-  (string-list [value]
-    (print-err "'string-list' not implemented for type" (type-name value))
-    (abort)))
-
-(defprotocol Serializable
-  (serialize [value]
-    (print-err "'serialize' not implemented for type" (type-name value))
-    (abort)))
-
-(defprotocol Eq
-  (=* [x y]
-    (cond
-     (type= x y)
-     (=* (type-args x) (type-args y))
-
-     0)))
-
-(defprotocol Collection
-  (empty? [coll])
-  (empty [coll])
-  (destruct [coll target])
-  (count [coll])
-  (conj [coll value])
-  (reduce [l result f]))
-
-(defprotocol Seqable
-  (seq? [coll] false)
-  (seq [coll])
-  (first [coll])
-  (m-first [coll])
-  (rest [coll]))
-
-(defn second [coll]
-  (first (rest coll)))
-
-(defprotocol Traversable
-  (traverse [coll f]))
-
-(defprotocol Crushable
-  (crush [coll f]))
-
-(defprotocol Monoid
-  (zero [_])
-  (comp* [mval mvals]))
-
-(defn apply [fv & args]
-  (apply* fv args))
-
-(defn apply-to
-  ([f]
-     (f))
-  ([f & args]
-     (apply* (wrap (car args) f) args)))
-
-(defn comp
-  ([x] x)
-  ([x & xs] (comp* x xs)))
-
-(defprotocol HashMapNode
-  (hash-seq [n s])
-  (get* [n k v hash shift])
-  (assoc* [n k v hash shift]))
-
-(defprotocol Associative
-  (assoc [m k v])
-  (get [m k not-found]
-    (print-err "'get' not implemented for" (type-name m) ": " :m m :k k)
-    (abort))
-  (keys [m])
-  (vals [m])
-  (dissoc [m k]))
-
-(defprotocol Hash
-  (sha1 [_]))
-
-(defn not [b-val]
-  (cond
-   b-val 0
-   1))
-
-(defn and
-  ([b-val] b-val)
-  ([b-val & b-vals]
-     (cond
-      b-val (apply and b-vals)
-      0)))
-
-(defn or
-  ([b-val] b-val)
-  ([b-val & b-vals]
-     (cond
-      b-val 1
-      (apply or b-vals))))
-
-(defn =
-  ([v] 1)
-  ([x y] (=* x y))
-  ([v & vs]
-     (cond
-      (=* v (car vs)) (apply = vs)
-      0)))
-
-(defn partial [f & args]
-  (fn [& more-args]
-    (apply f (comp args more-args))))
-
-(def maybe-val)
-
-(def nothing
-  (reify
-    Getter
-    (type-args [_] empty-list)
-
-    Stringable
-    (string-list [_] (list "<nothing>"))
-
-    Function
-    (invoke [n f]
-      n)
-
-    Eq
-    (=* [nv x] (type= nv x))
-
-    Monoid
-    (zero [nv] nv)
-    (comp* [nothing mvs]
-      (match mvs
-             |List mv & mvs| (comp* mv mvs)
-             nothing))
-
-    Functor
-    (map [nv f] nv)
-
-    Applicative
-    (wrap [_ x] (maybe-val x))
-    (apply* [nv _] nv)
-
-    Monad
-    (flatten [nv] nv)
-    (flat-map [nv _] nv)))
-
-(defn any? [pred coll]
-  (cond
-   (empty? coll) 0
-   (pred (first coll)) 1
-   (any? pred (rest coll))))
-
-(deftype maybe-val [v]
-  Stringable
-  (string-list [mv]
-    (comp (list "<maybe ")
-          (string-list (.v mv))
-          (list ">")))
-
-  Monoid
-  (zero [_] nothing)
-  (comp* [mv _] mv)
-
-  Functor
-  (map [_ f]
-    (maybe-val (f v)))
-
-  Applicative
-  (wrap [_ v] (maybe-val v))
-  (apply* [_ args]
-    (cond
-     (any? args (partial = nothing)) nothing
-     (maybe-val (apply v (map args .v)))))
-
-  Monad
-  (flatten [_] v)
-  (flat-map [_ f]
-    (f v)))
-
-(def maybe
-  (reify
-    Function
-    (invoke [_ v] (maybe-val v))
-
-    Type
-    (instance? [_ mv] (instance? maybe-val mv))
-
-    Monoid
-    (zero [_] nothing)
-    ))
-
-(defn m=
-  ([v] (maybe v))
-  ([x y]
-     (cond
-      (=* x y) (maybe x)
-      nothing))
-  ([v & vs]
-     (cond
-      (=* v (car vs)) (apply m= vs)
-      nothing)))
-
-(defn some [coll f]
-  (cond
-   (empty? coll) nothing
-   (f (first coll)) (maybe (first coll))
-   (some (rest coll) f)))
-
-(defn <
-  ([x y] (<* x y))
-  ([v & vs]
-     (cond
-      (list-empty? vs) 1
-      (not (<* v (car vs))) 0
-      (number= 1 (list-count vs)) 1
-      (apply < vs))))
-
-(defn list** [arg args]
-  (cond
-   (list-empty? args) arg
-   (cons arg (list** (car args) (cdr args)))))
-
-(defn list* [arg & args]
-  (list** arg args))
-
 (defn filter [l f]
   (inline-text List
      "List *l = (List *)arg0;
@@ -1233,36 +935,67 @@ else
         return((Value *)head);
       }\n"))
 
+(defn pr* [str]
+  (inline-text Number
+   "if (arg0->type == StringType)
+      fprintf(outStream, \"%-.*s\", (int)((String *)arg0)->len, ((String *)arg0)->buffer);
+    else if (arg0->type == SubStringType)
+      fprintf(outStream, \"%-.*s\", (int)((SubString *)arg0)->len, ((SubString *)arg0)->buffer);
+    else {
+      fprintf(outStream, \"\\ninvalid type for 'pr*'\\n\");
+      abort();
+    }
+    return(true);\n"))
+
+(defn list [& l]
+  l)
+
+;; TODO: delete this
+(defn not [b-val]
+  (cond
+   b-val 0
+   1))
+
 (defn remove [l f]
   (filter l (fn [v] (not (f v)))))
+
+(defprotocol Ord
+  (<* [value values]
+    (print-err "'<*' not implemented:" value)
+    (abort)))
+
+(defprotocol Collection
+  (empty? [coll])
+  (empty [coll])
+  (destruct [coll target])
+  (count [coll])
+  (conj [coll value])
+  (reduce [l result f]))
 
 (defn reverse [l]
   (reduce l (empty l) conj))
 
-(defn identity [x]
-  x)
+(defprotocol Stringable
+  (string-list [value]
+    (print-err "'string-list' not implemented for type" (type-name value))
+    (abort)))
 
-(extend-type Function
-  Stringable
-  (string-list [f] (list "<Fn: " (fn-name f) ">"))
-
-  Monoid
-  (zero [_] identity)
-  (comp* [f fs]
-    (fn [& args]
-      (reduce fs (apply f args)
-              (fn [x f]
-                (f x)))))
-
-  Applicative
-  (apply* [f args]
+(defprotocol Eq
+  (=* [x y]
+    ;; =* is used in 'match' so cond must be used here
     (cond
-     (list-empty? args) (f)
-     ;; Remember, the last element of 'args' must be a list
-     ;; everything up to that must be prepended to it
-     (fn-apply f (list** (first args) (rest args))))))
+     (type= x y)
+     (=* (type-args x) (type-args y))
+
+     0)))
+
+(defprotocol Hash
+  (sha1 [_]))
 
 (extend-type Number
+  Getter
+  (type-args [n] (list n))
+
   Eq
   (=* [x y]
     (number= x y))
@@ -1288,32 +1021,278 @@ Sha1Finalise(&context, (SHA1_HASH *)&shaVal);
 return((Value *)numberValue(shaVal));
 ")))
 
-;; (deftype ZipList [v]
-;;   Applicative
-;;   (apply* [zv arg-lists]
-;;     (cond
-;;      (any? empty? arg-lists) empty-list
-;;      (let [cars (map arg-lists (fn [l] (cond
-;;                                         (empty? l) :nil
-;;                                         (first l))))
-;;            cdrs (map arg-lists rest)]
-;;        (cons (apply v cars)
-;;              (apply* zv cdrs))))))
+(defprotocol Type
+  ;; 'instance?' is used in 'match' so requires use of 'cond'
+  (instance? [type val]
+    (cond
+     (number= Number (get-type type)) (number= type (get-type val))
+     (let [_ (pr* "*** call to 'instance?' with unknown type parameter.")]
+       (abort)))))
 
-(defn comprehend
+(defprotocol Monad
+  (flat-map [mval func]
+    (print-err "'flat-map' not implemented: " (type-name mval))
+    (abort))
+  (flatten [mval]
+    (flat-map mval (fn [x] x))))
+
+(defprotocol Comonad
+  (extract [wv])
+  (extend [wv f])
+  (duplicate [wv]
+    (print-err "'duplicate' not implemented: " (type-name wv))))
+
+(def comprehend)
+
+(defprotocol Applicative
+  (wrap [x v]
+    (print-err "*** 'wrap' not implemented"))
+  (apply* [fv args]
+    (match args
+           |List _| (flat-map fv (fn [f] (comprehend f args)))
+           (flat-map fv (fn [f] (wrap fv (f)))))))
+
+(defn comprehend [f [mv & mvs]]
+  (let [rest-steps (reduce (reverse mvs)
+                           (fn [acc x]
+                             (wrap mv (apply f (reverse (cons x acc)))))
+                           (fn [steps new-mv]
+                             (fn [acc x]
+                               (flat-map new-mv (fn [v]
+                                                  (steps (cons x acc)) v)))))]
+    (flat-map mv (fn [v]
+                   (rest-steps empty-list v)))))
+
+(defprotocol Functor
+  (map [v f]
+    (flat-map v (fn [x] (wrap v (f x))))))
+
+(defprotocol Named
+  (name [value]
+    (print-err "'name' not implemented for type " (type-name value))
+    (abort)))
+
+(defprotocol Serializable
+  (serialize [value]
+    (print-err "'serialize' not implemented for type" (type-name value))
+    (abort)))
+
+(defprotocol Seqable
+  (seq? [coll] false)
+  (seq [coll])
+  (first [coll])
+  (m-first [coll])
+  (rest [coll]))
+
+(defn second [coll]
+  (first (rest coll)))
+
+(defprotocol Traversable
+  (traverse [coll f]))
+
+(defprotocol Crushable
+  (crush [coll f]))
+
+(defprotocol Monoid
+  (zero [_])
+  (comp* [mval mvals]))
+
+(defn apply [fv & args]
+  (apply* fv args))
+
+(defn apply-to
   ([f]
      (f))
-  ([f [mv & mvs]]
-     (let [rest-steps (reduce (reverse mvs)
-                              (fn [acc x]
-                                (wrap mv (apply f (reverse (cons x acc)))))
-                              (fn [steps new-mv]
-                                (fn [acc x]
-                                  (flat-map new-mv (partial steps (cons x acc))))))]
-       (cond
-        (number= 1 (list-count mvs)) (flat-map mv (fn [x]
-                                                    (wrap mv (f x))))
-        (flat-map mv (partial rest-steps empty-list))))))
+  ([f & args]
+     (apply* (wrap (car args) f) args)))
+
+(defn comp
+  ([x] x)
+  ([x & xs] (comp* x xs)))
+
+(defprotocol HashMapNode
+  (hash-seq [n s])
+  (get* [n k v hash shift])
+  (assoc* [n k v hash shift]))
+
+(defprotocol Associative
+  (assoc [m k v])
+  (get [m k not-found]
+    (print-err "'get' not implemented for" (type-name m) ": " :m m :k k)
+    (abort))
+  (keys [m])
+  (vals [m])
+  (dissoc [m k]))
+
+;; TODO: delete this
+(defn and
+  ([b-val] b-val)
+  ([b-val & b-vals]
+     (cond
+      b-val (apply and b-vals)
+      0)))
+
+;; TODO: delete this
+(defn or
+  ([b-val] b-val)
+  ([b-val & b-vals]
+     (cond
+      b-val 1
+      (apply or b-vals))))
+
+;; TODO: replace all uses with m=
+(defn =
+  ([v] 1)
+  ([x y] (=* x y))
+  ([v & vs]
+     (cond
+      (=* v (car vs)) (apply = vs)
+      0)))
+
+(defn partial [f & args]
+  (fn [& more-args]
+    (apply f (comp args more-args))))
+
+(def maybe-val)
+
+(def nothing
+  (reify
+    Getter
+    (type-name [_] "nothing")
+    (type-args [_] empty-list)
+
+    Stringable
+    (string-list [_] (list "<nothing>"))
+
+    Function
+    (invoke [n f]
+      n)
+
+    Eq
+    (=* [nv x] (type= nv x))
+
+    Monoid
+    (zero [nv] nv)
+    (comp* [nothing mvs]
+      (match mvs
+             |List mv & mvs| (comp* mv mvs)
+             nothing))
+
+    Functor
+    (map [nv f] nv)
+
+    Applicative
+    (wrap [_ x] (maybe-val x))
+    (apply* [nv _] nv)
+
+    Monad
+    (flatten [nv] nv)
+    (flat-map [nv _] nv)))
+
+(deftype maybe-val [v]
+  Stringable
+  (string-list [mv]
+    (comp (list "<maybe ")
+          (string-list (.v mv))
+          (list ">")))
+
+  Monoid
+  (zero [_] nothing)
+  (comp* [mv _] mv)
+
+  Functor
+  (map [_ f]
+    (maybe-val (f v)))
+
+  Applicative
+  (wrap [_ v] (maybe-val v))
+  (apply* [_ args]
+    (match (filter args (partial = nothing))
+           |List _| (maybe-val (apply v (map args .v)))
+           nothing))
+
+  Monad
+  (flatten [_] v)
+  (flat-map [_ f]
+    (f v)))
+
+(def maybe
+  (reify
+    Function
+    (invoke [_ v] (maybe-val v))
+
+    Type
+    (instance? [_ mv] (instance? maybe-val mv))
+
+    Monoid
+    (zero [_] nothing)
+    ))
+
+(defn m=
+  ([v] (maybe v))
+  ([x y] (cond
+          (=* x y) (maybe x)
+          nothing))
+  ;; TODO: test this. not sure it works
+  ([x & ys]
+     (match ys
+            |List _| ((fn recur [y & ys]
+                        (for [_ (m= x y)
+                              _ (recur ys)]
+                          x))
+                      ys)
+            (maybe x))))
+
+(defn some [coll f]
+  (comp* nothing (map coll f)))
+
+;; TODO: replace all uses with m<
+(defn <
+  ([x y] (<* x y))
+  ([v & vs]
+     (cond
+      (list-empty? vs) 1
+      (not (<* v (car vs))) 0
+      (number= 1 (list-count vs)) 1
+      (apply < vs))))
+
+(defn list** [arg args]
+  (match args
+         |List next-arg & args| (cons arg (list** next-arg args))
+         arg))
+
+(defn list* [arg & args]
+  (list** arg args))
+
+(defn identity [x]
+  x)
+
+(extend-type Function
+  Stringable
+  (string-list [f] (list "<Fn: " (fn-name f) ">"))
+
+  Monoid
+  (zero [_] identity)
+  (comp* [f fs]
+    (fn [& args]
+      (reduce fs (apply f args)
+              (fn [x f]
+                (f x)))))
+
+  Applicative
+  (apply* [f args]
+    ;; TODO: didn't work immediately. find out why
+    ;; Remember, the last element of 'args' must be a list
+    ;; everything up to that must be prepended to it
+    ;; (match args
+    ;;        |List arg & args| (fn-apply f (list** arg args))
+    ;;        (f)))
+    (cond
+     (list-empty? args) (f)
+     ;; Remember, the last element of 'args' must be a list
+     ;; everything up to that must be prepended to it
+     (let [[arg & args] args]
+       (fn-apply f (list** arg args))))))
 
 (defn list-concat [l1]
   (inline-text List
@@ -1360,12 +1339,12 @@ return((Value *)numberValue(shaVal));
     return((Value *)head);
     }\n"))
 
-(defn list=* [ls]
+(defn list=* [[h1 & t1] [h2 & t2]]
+  ;; used only in implementing '=*' for List
   (cond
-   (list-empty? ls) 1
-   (list-empty? (car ls)) 1
-   (not (apply = (map ls (fn [l] (car l))))) 0
-   (list=* (map ls rest))))
+   (list-empty? t1) 1
+   (=* h1 h2) (list=* t1 t2)
+   0))
 
 (defn reduce-list [[h & t] result f]
   (match t
@@ -1411,10 +1390,13 @@ return((Value *)numberValue(shaVal));
 
   Eq
   (=* [x y]
+    ;; permissable to use 'cond' in definitions for
+    ;; primitive types
     (cond
      (not (number= (get-type x) (get-type y))) 0
+     (list-empty? x) (list-empty? y)
      (not (number= (count x) (count y))) 0
-     (list=* (list x y))))
+     (list=* x y)))
 
   Monoid
   (zero [_] empty-list)
@@ -1486,12 +1468,10 @@ return((Value *)numberValue(shaVal));
            empty-list)))
 
 (defn interpose [coll sep]
-  (cond
-   (list-empty? coll) empty-list
-   (cons (car coll)
-         (flat-map (cdr coll)
-                   (fn [x]
-                     (list sep x))))))
+  (match coll
+         |List h & t| (cons h (flat-map t (fn [x]
+                                            (list sep x))))
+         empty-list))
 
 (extend-type List
   Stringable
@@ -1558,10 +1538,12 @@ return((Value *)numberValue(shaVal));
 
   Seqable
   (seq [s]
+    ;; TODO: replace when you can match literals
     (cond
      (= s "") empty-list
      (cons (subs s 0 1) (seq (subs s 1)))))
   (m-first [s]
+    ;; TODO: replace when you can match literals
     (cond
      (= s "") nothing
      (maybe (subs s 0 1))))
@@ -1575,17 +1557,13 @@ return((Value *)numberValue(shaVal));
 
   Monoid
   (comp* [s ss]
-    (cond
-     (list-empty? ss) s
-     (let [ss-list (flat-map (cons s ss) string-list)
-           new-len (reduce ss-list 0
-                           (fn [len s]
-                             (add-numbers len (str-count s))))
-           new-str (str-malloc new-len)]
-       (map ss-list (fn [s]
-                      (str-append new-str s)
-                      0))
-       new-str)))
+    (match ss
+           |List _|
+           (let [ss-list (cons s ss)
+                 new-len (apply + (map ss-list str-count))]
+             (car (map ss-list (partial str-append (str-malloc new-len)))))
+
+           s))
 
   Hash
   (sha1 [_]
@@ -1623,10 +1601,12 @@ return((Value *)numberValue(shaVal));
 
   Seqable
   (seq [s]
+    ;; TODO: replace when you can match literals
     (cond
      (= s "") empty-list
      (cons (subs s 0 1) (seq (subs s 1)))))
   (m-first [s]
+    ;; TODO: replace when you can match literals
     (cond
      (= s "") nothing
      (maybe (subs s 0 1))))
@@ -1637,17 +1617,13 @@ return((Value *)numberValue(shaVal));
 
   Monoid
   (comp* [s ss]
-    (cond
-     (list-empty? ss) s
-     (let [ss-list (flat-map (cons s ss) string-list)
-           new-len (reduce ss-list 0
-                           (fn [len s]
-                             (add-numbers len (str-count s))))
-           new-str (str-malloc new-len)]
-       (map ss-list (fn [s]
-                      (str-append new-str s)
-                      0))
-       new-str)))
+    (match ss
+           |List _|
+           (let [ss-list (cons s ss)
+                 new-len (apply + (map ss-list str-count))]
+             (car (map ss-list (partial str-append (str-malloc new-len)))))
+
+           s))
 
   Hash
   (sha1 [_]
@@ -1664,24 +1640,20 @@ return((Value *)numberValue(shaVal));
 ")))
 
 (defn str [& vs]
-  (cond
-   (list-empty? vs) ""
-   (let [ss-list (flat-map vs string-list)
-         new-len (reduce ss-list 0
-                         (fn [len s]
-                           (add-numbers len (str-count s))))
-         new-str (str-malloc new-len)]
-     (map ss-list (fn [s]
-                    (str-append new-str s)
-                    0))
-     new-str)))
+  (match vs
+         |List _|
+         (let [ss-list (flat-map vs string-list)
+               new-len (apply + (map ss-list str-count))]
+           (car (map ss-list (partial str-append (str-malloc new-len)))))
+
+         ""))
 
 (defn take [l n]
   (cond
-   (empty? l) l
-   (= 0 n) empty-list
-   (let [[head & tail] l]
-     (cons head (take tail (dec n))))))
+   (< n 1) empty-list
+   (match l
+          |List head & tail| (cons head (take tail (dec n)))
+          empty-list)))
 
 (defn drop [coll n]
   (cond
@@ -1691,27 +1663,11 @@ return((Value *)numberValue(shaVal));
 (defn split
   ([l n prefix]
      (cond
-      (or (empty? l) (< n 1)) (list (reverse prefix) l)
+      (< n 1) (list (reverse prefix) l)
+      (empty? l) (list (reverse prefix) l)
       (split (rest l) (dec n) (cons (first l) prefix))))
   ([l n]
      (split l n empty-list)))
-
-(defn replace-at-nth [l n v]
-  (cond
-   (empty? l) l
-   (< (dec (count l)) n) l
-   (let [[prefix suffix] (split l n)]
-     (comp prefix
-           (list v)
-           (rest suffix)))))
-
-(defn remove-nth [l n]
-  (cond
-   (empty? l) l
-   (< (dec (count l)) n) l
-   (let [[prefix suffix] (split l n)]
-     (comp prefix
-           (rest suffix)))))
 
 (defn partition [coll n]
   (cond
@@ -1727,24 +1683,28 @@ return((Value *)numberValue(shaVal));
 
 (defn nth
   ([coll n]
-     (cond
-      (empty? coll) (let [_ (print-err "'nth' from empty seq")]
-                      (abort))
-      (= n 0) (first (seq coll))
-      (nth (rest (seq coll)) (dec n))))
+     (match (seq coll)
+            |List h & t| (cond
+                          (= n 0) h
+                          (nth (rest (seq coll)) (dec n)))
+            (let [_ (print-err "'nth' from empty seq")]
+              (abort))))
   ([coll n not-found]
-     (cond
-      (empty? coll) not-found
-      (= n 0) (first (seq coll))
-      (nth (rest (seq coll)) (dec n) not-found))))
+     (match (seq coll)
+            |List h & t| (cond
+                          (= n 0) h
+                          (nth (rest (seq coll)) (dec n)))
+            not-found)))
 
 (defn last [coll last-val]
   (nth coll (dec (count coll))))
 
 (defn butlast [coll]
-  (cond
-   (empty? coll) coll
-   (car (split coll (dec (count coll))))))
+  (match coll
+         |List _|
+         (car (split coll (dec (count coll))))
+
+         coll))
 
 (inline-text "
 BitmapIndexedNode emptyBMI = {BitmapIndexedType, -1, 0, 0};
@@ -1855,18 +1815,16 @@ else
   Stringable
   (string-list [n]
     (let [a-list (seq n)]
-      (cond
-       (list-empty? a-list) (list "{}")
-       (let [kv-strs (map a-list
-                          (fn [kv]
-                            (let [strs (interpose (map kv string-list)
-                                                  (list " "))]
-                              (comp* (car strs) (cdr strs)))))
-             body-list (let [strs (interpose kv-strs (list ", "))]
-                         (comp* (car strs) (cdr strs)))]
-         (comp (list "{")
-               body-list
-               (list "}"))))))
+      (match a-list
+             |List _|
+             (let [kv-strs (map a-list
+                                (fn [[k v]]
+                                  (comp (string-list k) (list " ") (string-list v))))]
+               (comp (list "{")
+                     (apply comp (interpose kv-strs (list ", ")))
+                     (list "}")))
+
+             (list "{}"))))
 
   HashMapNode
   (hash-seq [n s]
@@ -2096,18 +2054,16 @@ return(numberValue(accum));
   Stringable
   (string-list [n]
     (let [a-list (seq n)]
-      (cond
-       (list-empty? a-list) (list "{}")
-       (let [kv-strs (map a-list
-                          (fn [kv]
-                            (let [strs (interpose (map kv string-list)
-                                                   (list " "))]
-                              (comp* (car strs) (cdr strs)))))
-             body-list (let [strs (interpose kv-strs (list ", "))]
-                         (comp* (car strs) (cdr strs)))]
-         (comp (list "{")
-               body-list
-               (list "}"))))))
+      (match a-list
+             |List _|
+             (let [kv-strs (map a-list
+                                (fn [[k v]]
+                                  (comp (string-list k) (list " ") (string-list v))))]
+               (comp (list "{")
+                     (apply comp (interpose kv-strs (list ", ")))
+                     (list "}")))
+
+             (list "{}"))))
 
   HashMapNode
   (hash-seq [n s]
@@ -2237,18 +2193,16 @@ return(numberValue(((HashCollisionNode *) arg0)->count / 2));
   Stringable
   (string-list [n]
     (let [a-list (seq n)]
-      (cond
-       (list-empty? a-list) (list "{}")
-       (let [kv-strs (map a-list
-                          (fn [kv]
-                            (let [strs (interpose (map kv string-list)
-                                                   (list " "))]
-                              (comp* (car strs) (cdr strs)))))
-             body-list (let [strs (interpose kv-strs (list ", "))]
-                         (comp* (car strs) (cdr strs)))]
-         (comp (list "{")
-               body-list
-               (list "}"))))))
+      (match a-list
+             |List _|
+             (let [kv-strs (map a-list
+                                (fn [[k v]]
+                                  (comp (string-list k) (list " ") (string-list v))))]
+               (comp (list "{")
+                     (apply comp (interpose kv-strs (list ", ")))
+                     (list "}")))
+
+             (list "{}"))))
 
   HashMapNode
   (hash-seq [n s]
@@ -2369,50 +2323,63 @@ return(newNode);
       (= (get-type x) (get-type y)))))
 
 (defn merge-with [merge-fn hm & ms]
-  (cond
-   (list-empty? ms) hm
-   (reduce ms hm
-           (fn [hm m]
-             (reduce (seq m) hm
-                     (fn [hm [k v]]
-                       (let [old-v (get hm k not-found)]
-                         (cond
-                          (= not-found old-v) (assoc hm k v)
-                          (assoc hm k (merge-fn old-v v))))))))))
+  (match ms
+         |List _|
+         (reduce ms hm
+                 (fn [hm m]
+                   (reduce (seq m) hm
+                           (fn [hm [k v]]
+                             (let [old-v (get hm k not-found)]
+                               (cond
+                                (= not-found old-v) (assoc hm k v)
+                                (assoc hm k (merge-fn old-v v))))))))
+
+         hm))
 
 (defn get-in [m path nf]
-  (cond
-   (= (count path) 0) nf
-   (= (count path) 1) (get m (first path) nf)
-   (let [[curr-key & path] path
-         v (get m curr-key :get-in-not-found)]
-     (cond
-      (= :get-in-not-found v) nf
-      (get-in v path nf)))))
+  (match path
+         |List curr-key _|
+         (let [v (get m curr-key :get-in-not-found)]
+           ;; TODO: replace when 'get' return maybe/nothing
+           (cond
+            (= :get-in-not-found v) nf
+            (get-in v (rest path) nf)))
+
+         |List curr-key|
+         (get m curr-key nf)
+
+         nf))
 
 (defn update-in [m path f]
-  (cond
-   (= (count path) 0) m
-   (= (count path) 1) (let [k (first path)
-                            curr-v (get m k :update-in-nil)]
-                        (cond
-                         (= :update-in-nil curr-v) m
-                         (assoc m k (f curr-v))))
-   (let [[k & path] path
-         v (get m k :update-in-nil)]
-     (cond
-      (= :update-in-nil v) m
-      (assoc m k (update-in v path f))))))
+  (match path
+         |List k _|
+         ;; TODO: replace when 'get' return maybe/nothing
+         (let [v (get m k :update-in-nil)]
+           (cond
+            (= :update-in-nil v) m
+            (assoc m k (update-in v (rest path) f))))
+
+         |List k|
+         (let [curr-v (get m k :update-in-nil)]
+           (cond
+            (= :update-in-nil curr-v) m
+            (assoc m k (f curr-v))))
+
+         m))
 
 (defn assoc-in [m path v]
-  (cond
-   (= (count path) 0) m
-   (= (count path) 1) (assoc m (first path) v)
-   (let [[k & path] path
-         curr-v (get m k :assoc-in-nil)]
-     (cond
-      (= :assoc-in-nil curr-v) (assoc m k (assoc-in {} path v))
-      (assoc m k (assoc-in curr-v path v))))))
+  (match path
+         |List k _|
+         ;; TODO: replace when 'get' return maybe/nothing
+         (let [curr-v (get m k :assoc-in-nil)]
+           (cond
+            (= :assoc-in-nil curr-v) (assoc m k (assoc-in {} (rest path) v))
+            (assoc m k (assoc-in curr-v (rest path) v))))
+
+         |List k|
+         (assoc m k v)
+
+         m))
 
 (extend-type Keyword
   Eq
@@ -2506,17 +2473,8 @@ else {
 }
 ")))
 
-(defn symbol? [sym]
-  (instance? Symbol sym))
-
 (defn keyword [kw-name]
   (new-keyword (str ":" kw-name)))
-
-(defn keyword? [kw]
-  (instance? Keyword kw))
-
-(defn number? [n]
-  (instance? Number n))
 
 (defn string? [s]
   (or (= String (get-type s))
@@ -2534,6 +2492,18 @@ else {
   (cond
    (< n 1) empty-list
    (map (range* (dec n)) (fn [_] v))))
+
+;; (deftype ZipList [v]
+;;   Applicative
+;;   (apply* [zv arg-lists]
+;;     (cond
+;;      (any? empty? arg-lists) empty-list
+;;      (let [cars (map arg-lists (fn [l] (cond
+;;                                         (empty? l) :nil
+;;                                         (first l))))
+;;            cdrs (map arg-lists rest)]
+;;        (cons (apply v cars)
+;;              (apply* zv cdrs))))))
 
 (inline-text "
  int64_t sym_counter = 0;

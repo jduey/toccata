@@ -90,7 +90,7 @@
         closed-over (sm/get-val :closed-over empty-list)
         :let [closure-sym (.v (comp
                                (for [closure-sym (some closed-over (fn [[sym-literal _]]
-                                                                     (= sym sym-literal)))]
+                                                                     (m= sym sym-literal)))]
                                  (second closure-sym))
                                (maybe :not-found)))]
         closure-sym (cond
@@ -1313,8 +1313,10 @@
                             (an/analyze-expr
                              (list 'cond
                                    (list 'instance? pattern-type match-val-sym)
-                                   (list 'not (list '<* (list 'count type-args-sym)
-                                                    (dec (count binding-syms))))
+                                   (list 'cond (list '<* (list 'count type-args-sym)
+                                                     (dec (count binding-syms)))
+                                         'false
+                                         'true)
 
                                    'false))
                             (for [b (an/analyze-let-binding (list binding-syms
@@ -1328,7 +1330,7 @@
                                                    (fn [[_ literal]]
                                                      (= literal dont-care)))
                                   lit-checks (map lit-args (partial cons '=))]
-                              (an/analyze-expr (list 'and
+                              (an/analyze-expr (list 'cond
                                                      (list 'instance? pattern-type match-val-sym)
                                                      (list 'cond
                                                            (list '<* (list 'count type-args-sym)
@@ -1340,7 +1342,9 @@
                                                                   (= 1 (count lit-checks))
                                                                   (first lit-checks)
 
-                                                                  (cons 'and lit-checks)))))))
+                                                                  (cons 'and lit-checks))))
+
+                                                     'false)))
                             (for [b (an/analyze-let-binding (list binding-syms
                                                                   type-args-sym))]
                               (ast/let-expr (list b) (list expr))))))))

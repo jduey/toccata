@@ -50,10 +50,10 @@
 
   Applicative
   (wrap [_ v] (maybe-val v))
-  (apply* [fv args]
-    (cond
-     (some args (partial = nothing)) nothing
-     (maybe-val (apply (.v fv) (map args .v)))))
+  ;; (apply* [fv args]
+  ;;   (cond
+  ;;    (some args (partial = nothing)) nothing
+  ;;    (maybe-val (apply (.v fv) (map args .v)))))
 
   Monad
   (flatten [_] v)
