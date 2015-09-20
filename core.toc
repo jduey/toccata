@@ -1057,6 +1057,9 @@ else
 
 (def nothing
   (reify
+    Getter
+    (type-args [_] empty-list)
+
     Stringable
     (string-list [_] (list "<nothing>"))
 

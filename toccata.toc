@@ -1,5 +1,6 @@
 
 ;; TODO:
+;; match constant values
 ;; implement to-be-freed lists
 ;; problem in multi-arity defn when one arity has no args
 ;; test memory exhaustion handling
@@ -64,7 +65,7 @@
 (deftype c-code [c-val init decl type-num]
   Stringable
   (string-list [_]
-    (list "<C-Code " (str c-val) ">")))
+    (list "<C-Code " (str c-val) ", " (str type-num) ">")))
 
 (defn write [str]
   (map (sm/state-maybe str) print))
@@ -550,56 +551,37 @@
               (comp (.init arg-sym)
                     results))))))
 
-(def gen-arg-syms)
-
-(defn gen-arg [arg]
-  (cond
-   (instance? Keyword arg)
-   (sm/state-maybe (c-code "" empty-list "" :no-type))
-
-   (instance? List arg)
-   (for [args (gen-arg-syms arg)
-         c-sym (genlocal "arg")
-         list-sym (genlocal "arg")]
-     (c-code c-sym
-             (comp (list "List *" list-sym " = (List *)" c-sym ";\n")
-                   (unpack-closures list-sym args))
-             ""
-             List))
-
-   (for [arg-sym (genlocal "arg")
-         :let [c-sym (c-code arg-sym empty-list "" :no-type)]
-         _ (sm/assoc-in-val (list :local-syms arg) c-sym)]
-     c-sym)))
-
 (defn gen-arg-syms [args]
-  (let [arg-count (count args)]
-    (cond
-     (< 0 (count args))
-     (let [args (map args gen-arg)]
-       (apply* (sm/state-maybe list) args))
-     ;; (traverse args
-     ;;           (fn [arg]
-     ;;             (cond
-     ;;              (instance? Keyword arg)
-     ;;              (sm/state-maybe (c-code "" empty-list "" :no-type))
+  (cond
+   (< 0 (count args))
+   (let [last-arg (last args :bogus)
+         gen-arg (fn [arg]
+                   (cond
+                    (instance? Keyword arg)
+                    (sm/state-maybe (c-code "" empty-list "" :no-type))
 
-     ;;              (instance? List arg)
-     ;;              (for [args (gen-arg-syms arg)
-     ;;                    c-sym (genlocal "arg")
-     ;;                    list-sym (genlocal "arg")]
-     ;;                (c-code c-sym
-     ;;                        (comp (list "List *" list-sym " = (List *)" c-sym ";\n")
-     ;;                              (unpack-closures list-sym args))
-     ;;                        ""
-     ;;                        List))
+                    (instance? List arg)
+                    (for [args (gen-arg-syms arg)
+                          c-sym (genlocal "arg")
+                          list-sym (genlocal "arg")]
+                      (c-code c-sym
+                              (comp (list "List *" list-sym " = (List *)" c-sym ";\n")
+                                    (unpack-closures list-sym args))
+                              ""
+                              List))
 
-     ;;              (for [arg-sym (genlocal "arg")
-     ;;                    :let [c-sym (c-code arg-sym empty-list "" :no-type)]
-     ;;                    _ (sm/assoc-in-val (list :local-syms arg) c-sym)]
-     ;;                c-sym))))
+                    (for [arg-sym (genlocal "arg")
+                          :let [c-sym (cond
+                                       (= arg last-arg) (c-code arg-sym empty-list "" List)
+                                       (c-code arg-sym empty-list "" :no-type))]
+                          _ (sm/assoc-in-val (list :local-syms arg) c-sym)]
+                      c-sym)))
+         args (map args gen-arg)]
 
-     (sm/state-maybe empty-list))))
+     (apply* (sm/state-maybe list)
+             args))
+
+   (sm/state-maybe empty-list)))
 
 (defn base-types []
   (for [types (sm/get-val :types {})
@@ -1005,12 +987,29 @@
      (cons (list l1-head l2-head)
            (zip-lists l1-tail l2-tail)))))
 
+(defn call-instance? [ast args]
+  (let [num-args (count (.args (.params ast)))
+        target-ast (.callee ast)]
+    (cond
+     (not (= 2 num-args)) (zero sm/state-maybe)
+     (not (instance? fr/free target-ast)) (zero sm/state-maybe)
+     (not (instance? ast/symbol-ast (.v target-ast))) (zero sm/state-maybe)
+     (not (= 'instance? (.sym (.v target-ast)))) (zero sm/state-maybe)
+     (let [type-sym (.sym (.v (first (.args (.params ast)))))
+           type-val (.type-num (second args))]
+       (for [instance-type (sm/get-in-val (list :types type-sym))
+             :when (= instance-type type-val)
+             _ (debug :calling-instance? type-sym instance-type type-val)
+             ]
+         (c-code "(Value *)&trueVal", empty-list, "", Number))))))
+
 (extend-type ast/call-ast
   Emitter
   (emit-c [ast]
     (for [target (fr/evaluate (.callee ast) emit-c)
           [args arg-stmts] (eval-args (.args (.params ast)))
-          result (comp (call-proto-impl (.callee ast) args arg-stmts)
+          result (comp (call-instance? ast args)
+                       (call-proto-impl (.callee ast) args arg-stmts)
                        (call-invoke target args arg-stmts)
                        (call-static-fixed target args arg-stmts)
                        (call-static-variadic target args arg-stmts)
