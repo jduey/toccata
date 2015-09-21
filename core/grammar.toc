@@ -6,7 +6,7 @@
 (deftype do-debug [tag]
   Parser
   (parser/recursive-descent [_]
-    (for [text (sm/get-val :text "")]
+    (for [text (parser/read-text)]
       (print-err tag (subs text 0 10)))))
 
 (defn debug [tag]

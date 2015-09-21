@@ -1117,7 +1117,7 @@ return((Value *)numberValue(shaVal));
 
 (defprotocol Associative
   (assoc [m k v])
-  (get [m k not-found]
+  (get [m k _]
     (print-err "'get' not implemented for" (type-name m) ": " :m m :k k)
     (abort))
   (keys [m])
@@ -1689,12 +1689,12 @@ return((Value *)numberValue(shaVal));
                           (nth (rest (seq coll)) (dec n)))
             (let [_ (print-err "'nth' from empty seq")]
               (abort))))
-  ([coll n not-found]
+  ([coll n nth-nf]
      (match (seq coll)
             |List h & t| (cond
                           (= n 0) h
                           (nth (rest (seq coll)) (dec n)))
-            not-found)))
+            nth-nf)))
 
 (defn last [coll last-val]
   (nth coll (dec (count coll))))
@@ -1995,7 +1995,7 @@ if (node->bitmap & bit) {
 "))
 
   Associative
-  (get [m k not-found]
+  (get [m k _]
     (inline-text "
 Value *hash = sha1(arg1);
 Value *shift = numberValue(0);
@@ -2142,7 +2142,7 @@ return((Value *)found);
 "))
 
   Associative
-  (get [m k not-found]
+  (get [m k _]
     (inline-text "
 Value *hash = sha1(arg1);
 Value *shift = numberValue(0);
@@ -2286,7 +2286,7 @@ return(arg2);
 "))
 
   Associative
-  (get [m k not-found]
+  (get [m k _]
     (inline-text "
 Value *hash = sha1(arg1);
 Value *shift = numberValue(0);
@@ -2316,14 +2316,12 @@ return(newNode);
           (fn [bmi pair]
             (apply assoc bmi pair))))
 
-(def not-found
-  (reify
-    Eq
-    (=* [x y]
-      (= (get-type x) (get-type y)))))
-
 (defn m-get [m k]
-  (let [v? (get m k not-found)]
+  (let [not-found (reify
+                    Eq
+                    (=* [x y]
+                      (= (get-type x) (get-type y))))
+        v? (get m k not-found)]
     (cond
      (= not-found v?) nothing
      (maybe v?))))
@@ -2335,10 +2333,10 @@ return(newNode);
                  (fn [hm m]
                    (reduce (seq m) hm
                            (fn [hm [k v]]
-                             (let [old-v (get hm k not-found)]
-                               (cond
-                                (= not-found old-v) (assoc hm k v)
-                                (assoc hm k (merge-fn old-v v))))))))
+                             (let [new-v (match (m-get hm k)
+                                                |maybe old-v| (merge-fn old-v v)
+                                                v)]
+                               (assoc hm k new-v))))))
 
          hm))
 
@@ -2357,28 +2355,23 @@ return(newNode);
 (defn update-in [m path f]
   (match path
          |List k _|
-         ;; TODO: replace when 'get' return maybe/nothing
-         (let [v (get m k :update-in-nil)]
-           (cond
-            (= :update-in-nil v) m
-            (assoc m k (update-in v (rest path) f))))
+         (match (m-get m k)
+                |maybe v| (assoc m k (update-in v (rest path) f))
+                m)
 
          |List k|
-         (let [curr-v (get m k :update-in-nil)]
-           (cond
-            (= :update-in-nil curr-v) m
-            (assoc m k (f curr-v))))
+         (match (m-get m k)
+                |maybe v| (assoc m k (f v))
+                m)
 
          m))
 
 (defn assoc-in [m path v]
   (match path
          |List k _|
-         ;; TODO: replace when 'get' return maybe/nothing
-         (let [curr-v (get m k :assoc-in-nil)]
-           (cond
-            (= :assoc-in-nil curr-v) (assoc m k (assoc-in {} (rest path) v))
-            (assoc m k (assoc-in curr-v (rest path) v))))
+         (match (m-get m k)
+                |maybe sub-map| (assoc m k (assoc-in sub-map (rest path) v))
+                (assoc m k (assoc-in {} (rest path) v)))
 
          |List k|
          (assoc m k v)
@@ -2399,11 +2392,8 @@ return(newNode);
 
   Function
   (invoke [kw hm]
-    (let [v (get hm kw not-found)]
-      (cond
-       (= not-found v) (let [_ (print-err "Could not look up " kw)]
-                         (abort))
-       v)))
+    ;; TODO: make this return maybe/nothing
+    (get hm kw :bogus))
 
   Hash
   (sha1 [_]
@@ -2427,9 +2417,6 @@ else {
   return((Value *)hashVal);
 }
 "))
-
-  ;; (invoke [kw hm not-found]
-  ;;   (get hm kw not-found))
   )
 
 (extend-type Symbol
@@ -2446,13 +2433,10 @@ else {
 
   Function
   (invoke [sym-lit hm]
-    (let [v (get hm sym-lit not-found)]
-      (cond
-       (= not-found v) (let [_ (print-err "Could not look up " sym-lit)]
-                         (abort))
-       v)))
-  (invoke [sym-lit hm not-found]
-    (get hm sym-lit not-found))
+    ;; TODO: make this return maybe/nothing
+    (get hm sym-lit :bogus))
+  (invoke [sym-lit hm sym-nf]
+    (get hm sym-lit sym-nf))
 
   Hash
 (sha1 [_]

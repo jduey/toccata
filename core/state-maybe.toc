@@ -73,20 +73,15 @@
   (new-sm (fn [s]
               (list s (f s)))))
 
-(defn get-val
-  ([k]
-     (new-sm (fn [s]
-                 (let [v (get s k not-found)]
-                   (cond
-                    (= not-found v) nothing
-                    (list v s))))))
-  ([k nf]
-     (new-sm (fn [s]
-                 (list (get s k nf) s)))))
+(defn get-val [k]
+  (new-sm (fn [s]
+            (match (m-get s k)
+                   |maybe v| (list v s)
+                   nothing))))
 
 (defn set-val [k v]
   (new-sm (fn [s]
-              (list (get s k nothing) (assoc s k v)))))
+            (list nothing (assoc s k v)))))
 
 (defn get-in-val
   ([path]

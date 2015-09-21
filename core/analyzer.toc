@@ -44,7 +44,7 @@
     ext-kw))
 
 (defn make-static-keyword [kw]
-  (for [kw-idx (sm/get-val :kw-count 0)
+  (for [kw-idx (sm/get-val :kw-count)
         _ (sm/set-val :kw-count (inc kw-idx))
         _ (sm/assoc-in-val (list :new-keywords kw)
                            (str "_kw_" kw-idx))]
@@ -73,7 +73,7 @@
     ext-num))
 
 (defn make-static-number [num]
-  (for [num-idx (sm/get-val :num-count 0)
+  (for [num-idx (sm/get-val :num-count)
         _ (sm/set-val :num-count (inc num-idx))
         _ (sm/assoc-in-val (list :new-numbers num)
                            (str "_num_" num-idx))]
@@ -102,7 +102,7 @@
     ext-str))
 
 (defn make-static-string [str-val]
-  (for [str-idx (sm/get-val :str-count 0)
+  (for [str-idx (sm/get-val :str-count)
         _ (sm/set-val :str-count (inc str-idx))
         _ (sm/assoc-in-val (list :new-strings str-val)
                            (str "_str_" str-idx))]
@@ -194,7 +194,7 @@
     ext-sym))
 
 (defn make-static-symbol [sym]
-  (for [sym-idx (sm/get-val :sym-count 0)
+  (for [sym-idx (sm/get-val :sym-count)
         _ (sm/set-val :sym-count (inc sym-idx))
         _ (sm/assoc-in-val (list :new-symbols sym)
                            (str "_sym_" sym-idx))]
@@ -322,14 +322,15 @@
     (list name fn-impls)))
 
 (defn analyze-extensions [exts]
-  (for [curr-expr (sm/get-val :expr empty-list)
+  (for [curr-expr (sm/get-val :expr)
         _ (sm/set-val :expr exts)
         proto-impls (sm/recur (analyze-proto-impl))
         _ (sm/set-val :expr curr-expr)]
     (reduce proto-impls {} (fn [m [k v]]
-                             (let [old-v (get m k empty-list)
-                                   new-v (comp old-v v)]
-                               (assoc m k new-v))))))
+                             (assoc m k
+                                    (match (m-get m k)
+                                           |maybe old-v| (comp old-v v)
+                                           v))))))
 
 
 (defn analyze-extend-type []
@@ -440,13 +441,13 @@
         (analyze-let)
         (analyze-quoted)
         (analyze-call)
-        (flat-map (sm/get-val :expr :expr-nil)
+        (flat-map (sm/get-val :expr)
                   (fn [e]
                     (print-err "could not analyze" e)
                     empty-list))))
 
 (defn analyze-expr [expr]
-  (for [curr-expr (sm/get-val :expr :no-expr)
+  (for [curr-expr (sm/get-val :expr)
         _ (set-expr expr)
         ast (expr-to-ast)
         _ (set-expr curr-expr)]

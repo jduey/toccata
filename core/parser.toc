@@ -3,6 +3,11 @@
 (add-ns fr (module "core/free.toc"))
 (add-ns st (module "core/state.toc"))
 
+;; this function gets caled A LOT so needs to be super fast
+(defn read-text []
+  (sm/new-sm (fn [s]
+               (list (get* s :text "" (sha1 :text) 0) s))))
+
 (defprotocol Parser
   (recursive-descent [f]
     (sm/state-maybe (fn [& args]
@@ -13,7 +18,7 @@
   Parser
   (recursive-descent [_]
     (let [term-count (count term-str)]
-      (for [text (sm/get-val :text "")
+      (for [text (read-text)
             :when (not (< (count text) term-count))
             :when (= (subs text 0 term-count) term-str)
             _ (sm/set-val :text (subs text term-count))]
@@ -93,7 +98,7 @@
   (fr/free (recursive-parser-rule name grammar)))
 
 (defn char-test [pred]
-  (for [text (sm/get-val :text "")
+  (for [text (read-text)
         :when (not (= "" text))
         :let [c (subs text 0 1)]
         :when (pred c)

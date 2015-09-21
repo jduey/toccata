@@ -38,7 +38,7 @@
 ;; (add-ns rwr (module "core/ast-rewrite.toc"))
 
 (defn debug [& args]
-  (comp (for [debugging (sm/get-val :debug-on false)
+  (comp (for [debugging (sm/get-val :debug-on)
               :when debugging]
           (apply print-err args))
         (sm/state-maybe "")))
@@ -76,7 +76,7 @@
          (map str-list print))))
 
 (defn genlocal [pre]
-  (for [sym-count (sm/get-val :local-sym-count 0)
+  (for [sym-count (sm/get-val :local-sym-count)
         _ (sm/set-val :local-sym-count (inc sym-count))]
     (symbol (str pre sym-count))))
 
@@ -87,7 +87,7 @@
   (for [;; fails if 'sym' is not in the context
         sym-val (sm/get-in-val (list :context sym))
 
-        closed-over (sm/get-val :closed-over empty-list)
+        closed-over (sm/get-val :closed-over)
         :let [closure-sym (.v (comp
                                (for [closure-sym (some closed-over (fn [[sym-literal _]]
                                                                      (m= sym sym-literal)))]
@@ -125,23 +125,23 @@
 
 (defn lookup-sym [sym]
   (comp (lookup-sym* sym)
-        (for [file-name (sm/get-val :file-name "")
-              line-num (sm/get-val :line-num "")]
+        (for [file-name (sm/get-val :file-name)
+              line-num (sm/get-val :line-num)]
           (let [_ (print-err "Undefined symbol:" sym "at" file-name ":" line-num)]
             (abort)))))
 
 (defn reset-fn-context [arity-fn-sym num-args]
-  (for [locals (sm/get-val :local-syms {})
+  (for [locals (sm/get-val :local-syms)
         _ (sm/set-val :local-syms {})
-        local-sym-count (sm/get-val :local-sym-count 0)
+        local-sym-count (sm/get-val :local-sym-count)
         _ (sm/set-val :local-sym-count 0)
-        context (sm/get-val :context {})
+        context (sm/get-val :context)
         _ (sm/set-val :context (comp context locals))
-        closed-over (sm/get-val :closed-over empty-list)
+        closed-over (sm/get-val :closed-over)
         _ (sm/set-val :closed-over empty-list)
-        curr-arity-fn-sym (sm/get-val :curr-arity-fn-sym "")
+        curr-arity-fn-sym (sm/get-val :curr-arity-fn-sym)
         _ (sm/set-val :curr-arity-fn-sym arity-fn-sym)
-        curr-arg-count (sm/get-val :curr-arg-count 0)
+        curr-arg-count (sm/get-val :curr-arg-count)
         _ (sm/set-val :curr-arg-count num-args)]
     (list locals local-sym-count context closed-over
           curr-arity-fn-sym curr-arg-count)))
@@ -156,7 +156,7 @@
             (sm/set-val :curr-arg-count curr-arg-count)))
 
 (defn begin-scope []
-  (for [scope-locals (sm/get-val :scope-locals {})
+  (for [scope-locals (sm/get-val :scope-locals)
         _ (sm/set-val :scope-locals {})]
     scope-locals))
 
@@ -167,7 +167,7 @@
   (sm/assoc-in-val (list :scope-locals (str sym)) true))
 
 (defn emit-closures []
-  (for [closures (sm/get-val :closed-over empty-list)]
+  (for [closures (sm/get-val :closed-over)]
     (map (reverse closures)
          (fn [[closure]]
            (print "Value *" closure
@@ -238,11 +238,11 @@
     result))
 
 (defn emit-externs []
-  (for [externs (sm/get-val :new-externs empty-list)
+  (for [externs (sm/get-val :new-externs)
         _ (write-strs (map externs (fn [ext] (str "extern " ext ";\n"))))
         _ (sm/set-val :new-externs empty-list)
 
-        static-fns (sm/get-val :new-static-fns empty-list)
+        static-fns (sm/get-val :new-static-fns)
         _ (write-strs static-fns)
         _ (sm/set-val :new-static-fns empty-list)]
     ""))
@@ -376,7 +376,7 @@
 (defn call-recursive [target args arg-stmts]
   (let [args (map args .c-val)]
     (for [curr-fn-sym (sm/get-val :curr-fn-sym)
-          curr-num-args (sm/get-val :curr-arg-count -1)
+          curr-num-args (sm/get-val :curr-arg-count)
           :when (and (= (str "(Value *)&" curr-fn-sym) (.c-val target))
                      (= (count args) curr-num-args))
           curr-arity-fn-sym (sm/get-val :curr-arity-fn-sym)
@@ -583,8 +583,13 @@
 
    (sm/state-maybe empty-list)))
 
+(defn type-str [types type]
+  (match (m-get types type)
+         |maybe v| (str v)
+         ":no-type"))
+
 (defn base-types []
-  (for [types (sm/get-val :types {})
+  (for [types (sm/get-val :types)
         result (write-strs (list
                             "#include <sys/types.h>\n"
                             "#include <stdio.h>\n"
@@ -605,18 +610,18 @@
                             HashCollisionVal
                             "List *listCons(Value *x, List *l);\n"
                             "Value *stringValue(char *s);\n"
-                            "#define NumberType " (str (get types 'Number :no-type)) "\n"
-                            "#define KeywordType " (str (get types 'Keyword :no-type)) "\n"
-                            "#define SymbolType " (str (get types 'Symbol :no-type)) "\n"
-                            "#define StringType " (str (get types 'String :no-type)) "\n"
-                            "#define SubStringType " (str (get types 'SubStr :no-type)) "\n"
-                            "#define ListType " (str (get types 'List :no-type)) "\n"
-                            "#define FunctionType " (str (get types 'Function :no-type)) "\n"
-                            "#define FnArityType " (str (get types 'FnArity :no-type)) "\n"
-                            "#define OpaqueType " (str (get types 'Opaque :no-type)) "\n"
-                            "#define BitmapIndexedType " (str (get types 'BitmapIndexedNode :no-type)) "\n"
-                            "#define ArrayNodeType " (str (get types 'ArrayNode :no-type)) "\n"
-                            "#define HashCollisionNodeType " (str (get types 'HashCollisionNode :no-type)) "\n"
+                            "#define NumberType " (type-str types 'Number) "\n"
+                            "#define KeywordType " (type-str types 'Keyword) "\n"
+                            "#define SymbolType " (type-str types 'Symbol) "\n"
+                            "#define StringType " (type-str types 'String) "\n"
+                            "#define SubStringType " (type-str types 'SubStr) "\n"
+                            "#define ListType " (type-str types 'List) "\n"
+                            "#define FunctionType " (type-str types 'Function) "\n"
+                            "#define FnArityType " (type-str types 'FnArity) "\n"
+                            "#define OpaqueType " (type-str types 'Opaque) "\n"
+                            "#define BitmapIndexedType " (type-str types 'BitmapIndexedNode) "\n"
+                            "#define ArrayNodeType " (type-str types 'ArrayNode) "\n"
+                            "#define HashCollisionNodeType " (type-str types 'HashCollisionNode) "\n"
                             "List *empty_list;\n"
                             "Value *number_literals();\n"
                             "Value *counts();\n"
@@ -631,7 +636,7 @@
     result))
 
 (defn extern-base-types []
-  (for [types (sm/get-val :types {})
+  (for [types (sm/get-val :types)
         result (write-strs (list
                             "#include <sys/types.h>\n"
                             "#include <stdio.h>\n"
@@ -652,18 +657,18 @@
                             HashCollisionVal
                             "extern List *listCons(Value *x, List *l);\n"
                             "extern Value *stringValue(char *s);\n"
-                            "#define NumberType " (str (get types 'Number :no-type)) "\n"
-                            "#define KeywordType " (str (get types 'Keyword :no-type)) "\n"
-                            "#define SymbolType " (str (get types 'Symbol :no-type)) "\n"
-                            "#define StringType " (str (get types 'String :no-type)) "\n"
-                            "#define SubStringType " (str (get types 'SubStr :no-type)) "\n"
-                            "#define ListType " (str (get types 'List :no-type)) "\n"
-                            "#define FunctionType " (str (get types 'Function :no-type)) "\n"
-                            "#define FnArityType " (str (get types 'FnArity :no-type)) "\n"
-                            "#define OpaqueType " (str (get types 'Opaque :no-type)) "\n"
-                            "#define BitmapIndexedType " (str (get types 'BitmapIndexedNode :no-type)) "\n"
-                            "#define ArrayNodeType " (str (get types 'ArrayNode :no-type)) "\n"
-                            "#define HashCollisionNodeType " (str (get types 'HashCollisionNode :no-type)) "\n"
+                            "#define NumberType " (type-str types 'Number) "\n"
+                            "#define KeywordType " (type-str types 'Keyword) "\n"
+                            "#define SymbolType " (type-str types 'Symbol) "\n"
+                            "#define StringType " (type-str types 'String) "\n"
+                            "#define SubStringType " (type-str types 'SubStr) "\n"
+                            "#define ListType " (type-str types 'List) "\n"
+                            "#define FunctionType " (type-str types 'Function) "\n"
+                            "#define FnArityType " (type-str types 'FnArity) "\n"
+                            "#define OpaqueType " (type-str types 'Opaque) "\n"
+                            "#define BitmapIndexedType " (type-str types 'BitmapIndexedNode) "\n"
+                            "#define ArrayNodeType " (type-str types 'ArrayNode) "\n"
+                            "#define HashCollisionNodeType " (type-str types 'HashCollisionNode) "\n"
                             "extern List *empty_list;\n"
                             "extern Value *number_literals();\n"
                             "extern Value *counts();\n"
@@ -712,7 +717,7 @@
 
 (defn static-values []
   (for [string-type (sm/get-in-val (list :types 'String) "no_String_type")
-        _ (for [strs (sm/get-val :new-strings {})
+        _ (for [strs (sm/get-val :new-strings)
                 _ (sm/update-in-val (list :strings)
                                     (fn [old-strs]
                                       (comp old-strs strs)))
@@ -727,7 +732,7 @@
               (print x)))
 
         number-type (sm/get-in-val (list :types 'Number) "no_Number_type")
-        _ (for [nums (sm/get-in-val (list :new-numbers) {})
+        _ (for [nums (sm/get-val :new-numbers)
                 _ (sm/update-in-val (list :numbers)
                                     (fn [old-nums]
                                       (comp old-nums nums)))
@@ -807,13 +812,13 @@
     (let [module-name (.const-str (.v (first (.asts ast))))]
       (comp
        (add-module-info (.ns-sym ast) module-name)
-       (for [syms (sm/get-val :defined-syms {})
+       (for [syms (sm/get-val :defined-syms)
              _ (sm/set-val :defined-syms {})
 
-             types (sm/get-val :defined-types {})
+             types (sm/get-val :defined-types)
              _ (sm/set-val :defined-types {})
 
-             protos (sm/get-val :defined-protos {})
+             protos (sm/get-val :defined-protos)
              core-protos (sm/get-in-val (list :modules "core" :protos) {})
              _ (sm/set-val :defined-protos (reduce (filter (seq protos)
                                                            (fn [[name]]
@@ -879,7 +884,7 @@
                          (= result-sym "") (sm/state-maybe "")
                          (write-strs (list "return(" result-sym ");\n")))
                         (write "};\n"))
-            closures (sm/get-val :closed-over empty-list)
+            closures (sm/get-val :closed-over)
             _ (restore-fn-context fn-context)
             result (variadic-arity arity-sym arity-fn-sym
                                    (count c-args) closures
@@ -937,7 +942,7 @@
                          (= result-sym "") (sm/state-maybe "")
                          (write-strs (list "return(" result-sym ");\n")))
                         (write "};\n\n"))
-            closures (sm/get-val :closed-over empty-list)
+            closures (sm/get-val :closed-over)
             _ (restore-fn-context fn-context)
             result (fixed-arity arity-sym arity-fn-sym
                                 arg-count closures
@@ -1049,7 +1054,7 @@
 (extend-type ast/let-ast
   Emitter
   (emit-c [ast]
-    (for [locals (sm/get-val :local-syms {})
+    (for [locals (sm/get-val :local-syms)
           bindings (fr/evaluate (.bindings ast) emit-c)
           body-exprs (eval-exprs (.body ast))
           _ (sm/set-val :local-syms locals)]
@@ -1066,7 +1071,7 @@
           fn-name (.sym (.v (.fn-name ast)))]
       (for [_ (static-values)
             fn-type (sm/get-in-val (list :types 'Function) :no-type)
-            curr-fn-sym (sm/get-val :curr-fn-sym "")
+            curr-fn-sym (sm/get-val :curr-fn-sym)
             :let [fn-sym-str (str "(Value *)" fn-sym)]
             _ (sm/set-val :curr-fn-sym fn-sym)
             _ (write-strs (list "\n// --------- " fn-name " --------------\n"
@@ -1401,7 +1406,7 @@
                                                       (map args (fn [arg] (str "Value *" arg))))
                                                 ", "))
                 args (apply str (interpose (cons "closures" args) ", "))]
-          reify-fn-index (sm/get-val :reify-fn-index 0)
+          reify-fn-index (sm/get-val :reify-fn-index)
 
           proto-fn-name (sm/get-in-val (list :protocols (str protocol-name "/" name) :impls type-num :fn-sym)
                                        :not-defined)
@@ -1460,10 +1465,10 @@
      (empty? (.impls ast)) (let [_ (print-err :no-impls)]
                              (sm/state-maybe (c-code "" empty-list "" :no-type)))
 
-     (for [types (sm/get-val :types {})
+     (for [types (sm/get-val :types)
            :let [type-num (inc (count types))]
            _ (sm/assoc-in-val (list :types type-num) type-num)
-           reify-fn-index (sm/get-val :reify-fn-index 0)
+           reify-fn-index (sm/get-val :reify-fn-index)
            _ (sm/set-val :reify-fn-index 0)
            impl-fns (apply* (sm/state-maybe list)
                             (for [[proto-name impl-fns] (seq (.impls ast))
@@ -1569,7 +1574,7 @@
   Emitter
   (emit-c [ast]
     (for [_ (static-values)
-          file-name (sm/get-val :file-name "")
+          file-name (sm/get-val :file-name)
           :let [qualified-proto-name (str file-name "/" (.protocol-name ast) "/")]
           result (traverse (seq (.prototypes ast)) (partial emit-proto-fn qualified-proto-name))]
       (c-code "" empty-list "" :no-type))))
@@ -1590,7 +1595,7 @@
        (let [_ (print-err (str "Trying to re-define type name: '" (.name ast) "' in module '"
                                file-name "'"))]
          (abort)))
-     (for [types (sm/get-val :types {})
+     (for [types (sm/get-val :types)
            :let [new-type-name (.name ast)
                  type-val-num (+ 2 (count (seq types)))]
 
@@ -2147,7 +2152,7 @@
               (write "}};\n"))))
 
 (defn finalize-protocols []
-  (for [protocols (sm/get-val :protocols {})
+  (for [protocols (sm/get-val :protocols)
         result (comp
                 (traverse (seq protocols)
                           (fn [proto]
@@ -2172,8 +2177,7 @@
 
 (defn emit-main []
   (for [_ (sm/set-val :local-sym-count 0)
-        main-sym (sm/get-val :main-sym :no-main)
-        :when (not (= :no-main main-sym))
+        main-sym (sm/get-val :main-sym)
         proto-syms (finalize-protocols)
         _ (write-strs (list "\nint main(int argc, char *argv[]) {\n"))
         _ (traverse proto-syms
@@ -2243,7 +2247,7 @@
                              (sm/state-maybe ""))))))))
 
 (defn serialize-protocols []
-  (for [protos (sm/get-val :protocols {})
+  (for [protos (sm/get-val :protocols)
         _ (write "Value *protocols() {\n")
         _ (write "List *protos = empty_list;\n")
         _ (write "List *protoInfo;\n")
@@ -2306,7 +2310,7 @@
                                            (apply assoc s-funs s-fun))))))
 
 (defn serialize-static-fns []
-  (for [s-fns (sm/get-val :static-fns {})
+  (for [s-fns (sm/get-val :static-fns)
         _ (write "Value *static_fns() {\n")
         _ (write "List *staticFns = empty_list;\n")
         _ (write "List *fnInfo;\n")
@@ -2355,7 +2359,7 @@
     (sm/set-val :core-defined-syms defined)))
 
 (defn serialize-defined-syms []
-  (for [def-syms (sm/get-val :defined-syms {})
+  (for [def-syms (sm/get-val :defined-syms)
         _ (write "Value *defined_syms() {\n")
         _ (write "List *defSyms = empty_list;\n")
         _ (write "List *symInfo;\n")
@@ -2392,7 +2396,7 @@
               (sm/set-val :core-numbers nums))))
 
 (defn serialize-number-literals []
-  (for [nums (sm/get-val :numbers {})
+  (for [nums (sm/get-val :numbers)
         _ (write "Value *number_literals() {\n")
         _ (write "List *nums = empty_list;\n")
         _ (write "List *numInfo;\n")
@@ -2418,7 +2422,7 @@
               (sm/set-val :core-strings strs))))
 
 (defn serialize-string-literals []
-  (for [strs (sm/get-val :strings {})
+  (for [strs (sm/get-val :strings)
         _ (write "Value *string_literals() {\n")
         _ (write "List *strs = empty_list;\n")
         _ (write "List *strInfo;\n")
@@ -2445,7 +2449,7 @@
               (sm/set-val :core-keywords kws))))
 
 (defn serialize-keyword-literals []
-  (for [kws (sm/get-val :keywords {})
+  (for [kws (sm/get-val :keywords)
         _ (write "Value *keyword_literals() {\n")
         _ (write "List *kws = empty_list;\n")
         _ (write "List *kwInfo;\n")
@@ -2474,7 +2478,7 @@
               (sm/set-val :core-symbols syms))))
 
 (defn serialize-symbol-literals []
-  (for [syms (sm/get-val :symbols {})
+  (for [syms (sm/get-val :symbols)
         _ (write "Value *symbol_literals() {\n")
         _ (write "List *syms = empty_list;\n")
         _ (cond
@@ -2520,7 +2524,7 @@
     (sm/set-val :types types)))
 
 (defn serialize-types []
-  (for [types (sm/get-val :types {})
+  (for [types (sm/get-val :types)
         _ (write "Value *types() {\n")
         _ (write "List *types = empty_list;\n")
         _ (write "List *typeInfo;\n")
@@ -2562,7 +2566,7 @@
       "")))
 
 (defn compile-core [parser text]
-  (for [types (sm/get-val :types {})
+  (for [types (sm/get-val :types)
         result (apply-to list
                          (sm/set-val :text text)
                          (sm/assoc-in-val (list :new-numbers)
@@ -2663,27 +2667,27 @@
                        :let [;; _ (fio/close-stream core)
                              _ (standard-output)]
 
-                       syms (sm/get-val :symbols {})
+                       syms (sm/get-val :symbols)
                        _ (sm/set-val :core-symbols syms)
                        _ (sm/set-val :symbols {})
 
-                       kws (sm/get-val :keywords {})
+                       kws (sm/get-val :keywords)
                        _ (sm/set-val :core-keywords kws)
                        _ (sm/set-val :keywords {})
 
-                       strs (sm/get-val :strings {})
+                       strs (sm/get-val :strings)
                        _ (sm/set-val :core-strings strs)
                        _ (sm/set-val :strings {})
 
-                       nums (sm/get-val :numbers {})
+                       nums (sm/get-val :numbers)
                        _ (sm/set-val :core-numbers nums)
                        _ (sm/set-val :numbers {})
 
-                       def-syms (sm/get-val :defined-syms {})
+                       def-syms (sm/get-val :defined-syms)
                        _ (sm/set-val :core-defined-syms def-syms)
                        _ (sm/set-val :defined-syms {})
 
-                       s-funs (sm/get-val :static-fns {})
+                       s-funs (sm/get-val :static-fns)
                        _ (sm/set-val :core-static-fns s-funs)
                        _ (sm/set-val :static-fns {})
 
@@ -2763,6 +2767,7 @@
         types (types)
         number-type (get types 'Number :no-type)]
     (compiling-fn {:file-name (first src-files)
+                   :line-num ""
                    :debug-on true
                    :line-num 0
                    :types types
@@ -2770,9 +2775,29 @@
                    :keywords {}
                    :numbers {}
                    :strings {}
-                   :new-externs empty-list
+                   :new-strings {}
+                   :new-numbers {}
                    :new-static-fns empty-list
                    :defined-protos {}
+                   :local-syms {}
+                   :local-sym-count 0
+                   :context {}
+                   :closed-over empty-list
+                   :curr-arity-fn-sym ""
+                   :curr-arg-count 0
+                   :scope-locals {}
+                   :new-externs empty-list
+                   :static-fns {}
+                   :defined-types {}
+                   :defined-protos {}
+                   :curr-fn-sym ""
+                   :reify-fn-index 0
+                   :protocols {}
+                   :kw-count 0
+                   :num-count 0
+                   :str-count 0
+                   :sym-count 0
+                   :expr empty-list
                    :defined-syms (reduce (seq types) {}
                                          (fn [m type]
                                            (assoc m
