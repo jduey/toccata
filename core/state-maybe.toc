@@ -91,13 +91,14 @@
 (defn get-in-val
   ([path]
      (new-sm (fn [s]
-                 (let [v (get-in s path not-found)]
-                   (cond
-                    (= not-found v) nothing
-                    (list v s))))))
+               (match (get-in s path)
+                      |maybe v| (list v s)
+                      nothing))))
   ([path nf]
      (new-sm (fn [s]
-                 (list (get-in s path nf) s)))))
+               (match (get-in s path)
+                      |maybe v| (list v s)
+                      (list nf s))))))
 
 (defn assoc-in-val [path v]
   (new-sm (fn [s]
@@ -105,7 +106,9 @@
 
 (defn update-in-val [path f]
   (new-sm (fn [s]
-              (list (get-in s path :not-found) (update-in s path f)))))
+            (match (get-in s path)
+                   |maybe v| (list v (update-in s path f))
+                   nothing))))
 
 (defn recur-fn [f as s]
   (let [v-ss (f s)]

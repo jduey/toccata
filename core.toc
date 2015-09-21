@@ -2322,6 +2322,12 @@ return(newNode);
     (=* [x y]
       (= (get-type x) (get-type y)))))
 
+(defn m-get [m k]
+  (let [v? (get m k not-found)]
+    (cond
+     (= not-found v?) nothing
+     (maybe v?))))
+
 (defn merge-with [merge-fn hm & ms]
   (match ms
          |List _|
@@ -2336,19 +2342,17 @@ return(newNode);
 
          hm))
 
-(defn get-in [m path nf]
+(defn get-in [m path]
   (match path
          |List curr-key _|
-         (let [v (get m curr-key :get-in-not-found)]
-           ;; TODO: replace when 'get' return maybe/nothing
-           (cond
-            (= :get-in-not-found v) nf
-            (get-in v (rest path) nf)))
+         (for [sub-m (m-get m curr-key)
+               v (get-in sub-m (rest path))]
+           v)
 
          |List curr-key|
-         (get m curr-key nf)
+         (m-get m curr-key)
 
-         nf))
+         nothing))
 
 (defn update-in [m path f]
   (match path
