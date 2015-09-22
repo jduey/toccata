@@ -201,40 +201,39 @@
     sym))
 
 (defn make-quoted [quoted-form]
-  (cond
-   (instance? Symbol quoted-form)
-   (for [_ (comp (sym-already-defined? quoted-form)
-                 (sym-recently-defined? quoted-form)
-                 (sym-defined-in-core quoted-form)
-                 (make-static-symbol quoted-form))]
-     (ast/quoted quoted-form))
+  (match quoted-form
+         |Symbol|
+         (for [_ (comp (sym-already-defined? quoted-form)
+                       (sym-recently-defined? quoted-form)
+                       (sym-defined-in-core quoted-form)
+                       (make-static-symbol quoted-form))]
+           (ast/quoted quoted-form))
 
-   (match quoted-form
-          |String|
-          (analyze-expr quoted-form)
+         |String|
+         (analyze-expr quoted-form)
 
-          |Keyword|
-          (analyze-expr quoted-form)
+         |Keyword|
+         (analyze-expr quoted-form)
 
-          |Number|
-          (analyze-expr quoted-form)
+         |Number|
+         (analyze-expr quoted-form)
 
-          |List 'quote|
-          (make-quoted (car (cdr quoted-form)))
+         |List 'quote|
+         (make-quoted (car (cdr quoted-form)))
 
-          |List 'hash-map|
-          (for [contents (traverse (cdr quoted-form) make-quoted)]
-            (ast/call-expr (ast/sym 'hash-map) contents))
+         |List 'hash-map|
+         (for [contents (traverse (cdr quoted-form) make-quoted)]
+           (ast/call-expr (ast/sym 'hash-map) contents))
 
-          |List 'vector|
-          (for [contents (traverse (cdr quoted-form) make-quoted)]
-            (ast/call-expr (ast/sym 'vector) contents))
+         |List 'vector|
+         (for [contents (traverse (cdr quoted-form) make-quoted)]
+           (ast/call-expr (ast/sym 'vector) contents))
 
-          |List|
-          (for [qs (traverse quoted-form make-quoted)]
-            (ast/call-expr (ast/sym 'list) qs))
+         |List|
+         (for [qs (traverse quoted-form make-quoted)]
+           (ast/call-expr (ast/sym 'list) qs))
 
-          (sm/state-maybe ""))))
+         (sm/state-maybe "")))
 
 (defn analyze-quoted []
   (for [expr (sm/get-val :expr)
@@ -265,35 +264,27 @@
                             (traverse clause-pairs analyze-expr)
 
                             (zero sm/state-maybe))]
-    (let [clauses (partition-all clause-pairs 2)
-          default (last clauses empty-list)]
-      (cond
-       (= 1 (count default)) (ast/cond-expr (butlast clauses)
-                                            (first default))
-       (let [_ (print-err "'cond' must have a default clause")]
-         (abort))))))
+    (let [clauses (partition-all clause-pairs 2)]
+      (match (last clauses empty-list)
+             |List default| (ast/cond-expr (butlast clauses) default)
+             (let [_ (print-err "'cond' must have a default clause")]
+               (abort))))))
 
 (defn analyze-match []
   (for [expr (sm/get-val :expr)
         match-ast (match expr
-                         |List 'match value & clause-pairs|
-                         (let [clauses (partition-all clause-pairs 2)
-                               default (last clauses empty-list)
-                               clauses (butlast clauses)]
-                           (apply-to ast/match-expr
-                                     (analyze-expr value)
-                                     (cond
-                                      (empty? clauses) (sm/state-maybe empty-list)
-                                      (traverse clauses
-                                                (fn [[pattern result]]
-                                                  (apply-to list
-                                                            (for [_ (analyze-expr pattern)]
-                                                              pattern)
-                                                            (analyze-expr result)))))
-                                     (cond
-                                      (empty? default) (let [_ (print-err "'match' must have a default clause")]
-                                                         (abort))
-                                      (analyze-expr (car default)))))
+                         |List 'match value clauses default|
+                         (apply-to ast/match-expr
+                                   (analyze-expr value)
+                                   (comp
+                                    (traverse clauses
+                                              (fn [[pattern result]]
+                                                (apply-to list
+                                                          (for [_ (analyze-expr pattern)]
+                                                            pattern)
+                                                          (analyze-expr result))))
+                                    (sm/state-maybe empty-list))
+                                   (analyze-expr default))
 
                          (zero sm/state-maybe))]
     match-ast))
@@ -312,14 +303,16 @@
                        (list (ast/fixed-arity args body))))))
 
 (defn analyze-proto-impl []
-  (for [[name & frms] (is-expr (fn [x]
-                                 (cond
-                                  (not (seq? x)) false
-                                  (empty? x) false
-                                  (instance? Symbol (car x)))))
-        _ (sm/set-val :expr frms)
-        fn-impls (sm/recur (analyze-proto-fn))]
-    (list name fn-impls)))
+  (for [expr (sm/get-val :expr)
+        result (match expr
+                      |List name & frms|
+                      (for [_ (sm/set-val :expr frms)
+                            :when (instance? Symbol name)
+                            fn-impls (sm/recur (analyze-proto-fn))]
+                        (list name fn-impls))
+
+                      (zero sm/state-maybe))]
+    result))
 
 (defn analyze-extensions [exts]
   (for [curr-expr (sm/get-val :expr)

@@ -1520,6 +1520,9 @@ return((Value *)numberValue(shaVal));
   ([x & xs] (reduce xs x subtract-numbers)))
 
 (extend-type String
+  Getter
+  (type-args [s] (list s))
+
   Eq
   (=* [x y] (str= x y))
 
@@ -1538,12 +1541,12 @@ return((Value *)numberValue(shaVal));
 
   Seqable
   (seq [s]
-    ;; TODO: replace when you can match literals
+    ;; permissable for defining fn's for primitive data types
     (cond
      (= s "") empty-list
      (cons (subs s 0 1) (seq (subs s 1)))))
   (m-first [s]
-    ;; TODO: replace when you can match literals
+    ;; permissable for defining fn's for primitive data types
     (cond
      (= s "") nothing
      (maybe (subs s 0 1))))
@@ -1601,12 +1604,12 @@ return((Value *)numberValue(shaVal));
 
   Seqable
   (seq [s]
-    ;; TODO: replace when you can match literals
+    ;; permissable for defining fn's for primitive data types
     (cond
      (= s "") empty-list
      (cons (subs s 0 1) (seq (subs s 1)))))
   (m-first [s]
-    ;; TODO: replace when you can match literals
+    ;; permissable for defining fn's for primitive data types
     (cond
      (= s "") nothing
      (maybe (subs s 0 1))))
@@ -2420,6 +2423,9 @@ else {
   )
 
 (extend-type Symbol
+  Getter
+  (type-args [s] (list s))
+
   Eq
   (=* [x y]
     (symkey= x y))
@@ -2433,10 +2439,7 @@ else {
 
   Function
   (invoke [sym-lit hm]
-    ;; TODO: make this return maybe/nothing
-    (get hm sym-lit :bogus))
-  (invoke [sym-lit hm sym-nf]
-    (get hm sym-lit sym-nf))
+    (m-get hm sym-lit))
 
   Hash
 (sha1 [_]

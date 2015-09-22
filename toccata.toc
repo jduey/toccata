@@ -2144,8 +2144,9 @@
 
 (defn emit-impl [default-sym impls]
   (let [impls-strs (map impls (fn [[type-num type-info]]
-                                (let [fn-sym (:fn-sym type-info)]
-                                  (str "{" type-num ", " fn-sym "}"))))]
+                                (match (m-get type-info :fn-sym)
+                                       |maybe fn-sym| (str "{" type-num ", " fn-sym "}")
+                                       "")))]
     (apply-to list
               (write-strs (list "{" (count impls-strs) ", " default-sym ", {"))
               (write-strs (interpose impls-strs ", "))
@@ -2225,7 +2226,9 @@
                                           :impls impls}))))
         proto-map (reduce (map protos
                                (fn [[qualified-name proto-info]]
-                                 (list (:name proto-info) qualified-name)))
+                                 (match (m-get proto-info :name)
+                                        |maybe name| (list name qualified-name)
+                                        empty-list)))
                           {}
                           (fn [m [k v]]
                             (assoc m k v)))]
@@ -2242,8 +2245,11 @@
                             (comp
                              (traverse (seq impls)
                                        (fn [[_ fn-info]]
-                                         (write-strs (list "extern Function "
-                                                           (subs (:fn-sym fn-info) 10) ";\n"))))
+                                         (match (m-get fn-info :fn-sym)
+                                                |maybe fn-sym| (write-strs (list "extern Function "
+                                                                                 (subs fn-sym 10)
+                                                                                 ";\n"))
+                                                (sm/state-maybe ""))))
                              (sm/state-maybe ""))))))))
 
 (defn serialize-protocols []

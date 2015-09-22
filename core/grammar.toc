@@ -493,11 +493,7 @@
 
 (defn read-match []
   (parser/rule "match"
-               (apply-to (fn [arg clauses default]
-                           (list* 'match arg
-                                  (comp
-                                   (apply comp clauses)
-                                   (list default))))
+               (apply-to (partial list 'match)
                          (parser/ignore (parser/term "("))
                          (parser/ignore (parser/none-or-more (whitespace)))
                          (parser/ignore (parser/term "match"))
@@ -506,7 +502,8 @@
                          (parser/one-or-more (apply-to list
                                                        (read-pattern)
                                                        (read-sub-form)))
-                         (read-sub-form)
+                         (comp (read-sub-form)
+                               (parser/always 'nothing))
                          (parser/ignore (parser/term ")")))))
 
 (defn read-form []
