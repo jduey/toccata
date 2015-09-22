@@ -6,7 +6,7 @@
 ;; this function gets caled A LOT so needs to be super fast
 (defn read-text []
   (sm/new-sm (fn [s]
-               (list (get* s :text "" (sha1 :text) 0) s))))
+               (sm/sm-info (get* s :text "" (sha1 :text) 0) s))))
 
 (defprotocol Parser
   (recursive-descent [f]
