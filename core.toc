@@ -1253,8 +1253,17 @@ return((Value *)numberValue(shaVal));
      (cond
       (list-empty? vs) 1
       (not (<* v (car vs))) 0
-      (number= 1 (list-count vs)) 1
       (apply < vs))))
+
+(defn m<
+  ([x y] (cond
+          (<* x y) (maybe x)
+          nothing))
+  ([v & vs]
+     (cond
+      (list-empty? vs) (maybe v)
+      (not (<* v (car vs))) nothing
+      (apply m< vs))))
 
 (defn list** [arg args]
   (match args

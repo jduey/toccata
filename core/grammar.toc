@@ -122,25 +122,21 @@
                                    (read-string-newline))))
                            (parser/ignore (parser/term (char 34))))))
 
-(defn str-to-int [negate? int-str]
-  (let [magnitude (reduce int-str 0
-                          (fn [n c]
-                            (+ (* n 10)
-                               (cond
-                                (< (dec (char-code "0")) (char-code c) (inc (char-code "9")))
-                                (- (char-code c) (char-code "0"))
-
-                                0))))]
-    (cond
-     (= "-" negate?) (* -1 magnitude)
-     magnitude)))
+(defn str-to-int [int-str]
+  (reduce int-str 0
+          (fn [n c]
+            (+ (* n 10) (- (char-code c) (char-code "0"))))))
 
 ;; only reads integers
 (defn read-number []
   (parser/rule "number"
-               (apply-to str-to-int
-                         (parser/optional (parser/term "-"))
-                         (parser/one-or-more (parser/digit)))))
+               (comp
+                (apply-to str-to-int
+                          (parser/one-or-more (parser/digit)))
+                (apply-to (fn [digits]
+                            (* -1 (str-to-int digits)))
+                          (parser/ignore (parser/term "-"))
+                          (parser/one-or-more (parser/digit))))))
 
 (deftype parse-sub-form []
   Parser
@@ -231,9 +227,7 @@
 (defn read-list-destructure []
   (parser/rule "list-destructure"
                (apply-to (fn [args tail]
-                           (cond
-                            (= "&" (car tail)) (comp args (cdr tail))
-                            (comp args tail)))
+                           (comp args (remove tail (partial = "&"))))
                          (parser/ignore (parser/none-or-more (whitespace)))
                          (parser/ignore (parser/term "["))
                          (parser/none-or-more (read-sub-dest))
@@ -399,14 +393,15 @@
                                  bindings (cons (list bound wrap-sym) bindings)]
                              (list 'let (list (list wrap-sym val))
                                    (reduce (reverse bindings) (list 'wrap wrap-sym body)
-                                           (fn [expr [sym & val]]
-                                             (let [val (first val)]
-                                               (cond
-                                                (= sym :let) (list 'let val expr)
-                                                (= sym :when) (list 'cond val expr (list 'zero wrap-sym))
-                                                (list 'flat-map val
-                                                      (list 'fn 'anon
-                                                            (list (list 'fn-arity (list sym) (list expr))))))))))))
+                                           (fn [expr for-clause]
+                                             (match for-clause
+                                                    |List :let val| (list 'let val expr)
+                                                    |List :when val| (list 'cond val expr (list 'zero wrap-sym))
+                                                    (list 'flat-map (second for-clause)
+                                                          (list 'fn 'anon
+                                                                (list (list 'fn-arity
+                                                                            (list (first for-clause))
+                                                                            (list expr)))))))))))
                          (parser/ignore (parser/term "("))
                          (parser/ignore (parser/none-or-more (whitespace)))
                          (parser/ignore (parser/term "for"))
@@ -459,9 +454,7 @@
 (defn read-comp []
   (parser/rule "comp"
                (apply-to (fn [arg args]
-                           (cond
-                            (list-empty? args) arg
-                            (list 'comp* arg (cons 'list args))))
+                           (list 'comp* arg (cons 'list args)))
                          (parser/ignore (parser/term "("))
                          (parser/ignore (parser/none-or-more (whitespace)))
                          (parser/ignore (parser/term "comp"))

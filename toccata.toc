@@ -717,47 +717,45 @@
 
 (defn static-values []
   (for [string-type (sm/get-in-val (list :types 'String) "no_String_type")
-        _ (for [strs (sm/get-val :new-strings)
-                _ (sm/update-in-val (list :strings)
-                                    (fn [old-strs]
-                                      (comp old-strs strs)))
-                _ (sm/assoc-in-val (list :new-strings) {})]
-            (for [[str-val str-ptr] (seq strs)
-                  :let [str-len (count str-val)]
-                  x (list
-                     "struct {int64_t type;\n int32_t refs;\n   int64_t len;\n   char buffer["
-                     (inc str-len)
-                     "];} " str-ptr " = {" string-type ", -1, "
-                     str-len ",\"" (escape-chars str-val) "\"};\n")]
-              (print x)))
+        strs (sm/get-val :new-strings)
+        _ (sm/update-in-val (list :strings)
+                            (fn [old-strs]
+                              (comp old-strs strs)))
+        _ (sm/assoc-in-val (list :new-strings) {})
+        _ (write-strs (for [[str-val str-ptr] (seq strs)
+                            :let [str-len (count str-val)]
+                            x (list
+                               "struct {int64_t type;\n int32_t refs;\n   int64_t len;\n   char buffer["
+                               (inc str-len)
+                               "];} " str-ptr " = {" string-type ", -1, "
+                               str-len ",\"" (escape-chars str-val) "\"};\n")]
+                        x))
 
         number-type (sm/get-in-val (list :types 'Number) "no_Number_type")
-        _ (for [nums (sm/get-val :new-numbers)
-                _ (sm/update-in-val (list :numbers)
-                                    (fn [old-nums]
-                                      (comp old-nums nums)))
-                _ (sm/assoc-in-val (list :new-numbers) {})]
-            (for [[num c-sym] (seq nums)
-                  x (list "Number " c-sym " = {" number-type ", -1, " num "};\n")]
-              (print x)))
+        nums (sm/get-val :new-numbers)
+        _ (sm/update-in-val (list :numbers)
+                            (fn [old-nums]
+                              (comp old-nums nums)))
+        _ (sm/assoc-in-val (list :new-numbers) {})
+        _ (write-strs (for [[num c-sym] (seq nums)
+                            x (list "Number " c-sym " = {" number-type ", -1, " num "};\n")]
+                        x))
 
         syms (sm/get-in-val (list :new-symbols) {})
         symbol-type (sm/get-in-val (list :types 'Symbol) "no_Symbol_type")
-        _ (apply-to list
-                    (static-syms syms symbol-type)
-                    (sm/update-in-val (list :symbols)
-                                      (fn [old-sys]
-                                        (comp old-sys syms)))
-                    (sm/assoc-in-val (list :new-symbols) {}))
+        _ (static-syms syms symbol-type)
+        _ (sm/update-in-val (list :symbols)
+                            (fn [old-sys]
+                              (comp old-sys syms)))
+        _ (sm/assoc-in-val (list :new-symbols) {})
 
         kws (sm/get-in-val (list :new-keywords) {})
         keyword-type (sm/get-in-val (list :types 'Keyword) "no_Keyword_type")
-        _ (apply-to list
-                    (static-syms kws keyword-type)
-                    (sm/update-in-val (list :keywords)
-                                      (fn [old-kws]
-                                        (comp old-kws kws)))
-                    (sm/assoc-in-val (list :new-keywords) {}))]
+        _ (static-syms kws keyword-type)
+        _ (sm/update-in-val (list :keywords)
+                            (fn [old-kws]
+                              (comp old-kws kws)))
+        _ (sm/assoc-in-val (list :new-keywords) {})]
     ""))
 
 

@@ -81,6 +81,12 @@
   (new-sm (fn [s]
               (sm-info s (f s)))))
 
+(defn lift-maybe [mv]
+  (new-sm (fn [s]
+            (match mv
+                   |maybe v|
+                   (sm-info v s)))))
+
 (defn get-val [k]
   (new-sm (fn [s]
             (match (m-get s k)

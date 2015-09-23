@@ -273,17 +273,17 @@
     match-ast))
 
 (defn analyze-proto-fn []
-  (for [[[name [_ & args] & exprs] & frms] (is-expr (fn [x]
-                                                      (cond
-                                                       (not (seq? x)) false
-                                                       (empty? x) false
-                                                       (not (seq? (car x))) false
-                                                       (< 2 (count (car x))))))
-        _ (sm/set-val :expr frms)
-        body (traverse exprs analyze-expr)]
-    (list name
-          (ast/fn-expr (ast/sym (symbol (str name "_impl")))
-                       (list (ast/fixed-arity args body))))))
+  (for [expr (sm/get-val :expr)
+        result (match expr
+                      |List frm & frms|
+                      (match frm
+                             |List name args & exprs|
+                             (for [body (traverse exprs analyze-expr)
+                                   _ (sm/set-val :expr frms)]
+                               (list name
+                                     (ast/fn-expr (ast/sym (symbol (str name "_impl")))
+                                                  (list (ast/fixed-arity (rest args) body)))))))]
+    result))
 
 (defn analyze-proto-impl []
   (for [expr (sm/get-val :expr)
