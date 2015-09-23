@@ -84,8 +84,8 @@
 (defn get-val [k]
   (new-sm (fn [s]
             (match (m-get s k)
-                   |maybe v| (sm-info v s)
-                   nothing))))
+                   |maybe v|
+                   (sm-info v s)))))
 
 (defn set-val [k v]
   (new-sm (fn [s]
@@ -95,8 +95,8 @@
   ([path]
      (new-sm (fn [s]
                (match (get-in s path)
-                      |maybe v| (sm-info v s)
-                      nothing))))
+                      |maybe v|
+                      (sm-info v s)))))
   ([path nf]
      (new-sm (fn [s]
                (match (get-in s path)
@@ -110,8 +110,8 @@
 (defn update-in-val [path f]
   (new-sm (fn [s]
             (match (get-in s path)
-                   |maybe v| (sm-info v (update-in s path f))
-                   nothing))))
+                   |maybe v|
+                   (sm-info v (update-in s path f))))))
 
 (defn recur-fn [f as s]
   (comp (flat-map (f s)

@@ -1175,8 +1175,8 @@ return((Value *)numberValue(shaVal));
     (zero [nv] nv)
     (comp* [nothing mvs]
       (match mvs
-             |List mv & mvs| (comp* mv mvs)
-             nothing))
+             |List mv & mvs|
+             (comp* mv mvs)))
 
     Functor
     (map [nv f] nv)
@@ -1208,8 +1208,8 @@ return((Value *)numberValue(shaVal));
   (wrap [_ v] (maybe-val v))
   (apply* [_ args]
     (match (filter args (partial = nothing))
-           |List _| (maybe-val (apply v (map args .v)))
-           nothing))
+           |List _|
+           (maybe-val (apply v (map args .v)))))
 
   Monad
   (flatten [_] v)
@@ -1361,8 +1361,8 @@ return((Value *)numberValue(shaVal));
   (seq [l] l)
   (m-first [l]
     (match l
-           |List first| (maybe first)
-           nothing))
+           |List first|
+           (maybe first)))
   (first [l] (car l))
   (rest [l] (cdr l))
 
@@ -1385,8 +1385,8 @@ return((Value *)numberValue(shaVal));
   Traversable
   (traverse [l f]
     (match (map l f)
-           |List v & vs| (apply* (wrap v list) (cons v vs))
-           nothing))
+           |List v & vs|
+           (apply* (wrap v list) (cons v vs))))
 
   Eq
   (=* [x y]
