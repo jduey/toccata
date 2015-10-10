@@ -1,58 +1,554 @@
 
-(def print-err)
-
-(def VoidT "void")
-(def Int8 "char")
-(def Int8* "char *")
-(def Int32 "int")
-(def Int64 "int64_t")
-(def ValueType Int64)  ;; type of boxed values
-(def Value "typedef struct {int64_t type; int32_t refs;} Value;\n")
-(def Value* "Value *")
-(def NumberVal "typedef struct {int64_t type; int32_t refs; int64_t numVal;} Number;\n")
-(def StringVal "typedef struct {int64_t type; int32_t refs; int64_t len; char buffer[0];} String;\n")
-(def SubStringVal "typedef struct {int64_t type; int32_t refs; int64_t len; Number *hash; Value *source; char *buffer;} SubString;\n")
-(def ListVal "typedef struct List {int64_t type; int32_t refs; int64_t len; Value* head; struct List *tail;} List;\n")
-(def FnArityVal "typedef struct {int64_t type; int32_t refs; int count; List *closures; int variadic; void *fn;} FnArity;\n")
-(def FunctionVal "typedef struct {int64_t type; int32_t refs; char *name; int64_t arityCount; FnArity *arities[];} Function;\n")
-(def ProtoImpl "typedef struct {int64_t type; Value *implFn;} ProtoImpl;\n")
-(def ProtoImpls "typedef struct {int64_t implCount; Value *defaultImpl; ProtoImpl impls[];} ProtoImpls;\n")
-(def ReifiedVal "typedef struct {int64_t type; int32_t refs; int implCount; Value* impls[];} ReifiedVal;\n")
-(def OpaqueVal "typedef struct {int64_t type; int32_t refs; void *ptr;} Opaque;\n")
-(def BitmapIndexedVal "typedef struct {int64_t type; int32_t refs; int32_t bitmap; Value *array[];} BitmapIndexedNode;\n")
-(def ArrayNodeVal "typedef struct {int64_t type; int32_t refs; Value *array[32];} ArrayNode;\n")
-(def HashCollisionVal "typedef struct {int64_t type; int32_t refs; int16_t count; Value *array[];} HashCollisionNode;\n")
-
-(def true (inline-text "(Value *)&trueVal;"))
-(def false (inline-text "(Value *)&falseVal;"))
-
-;; SHA1 implementation courtesy of: Steve Reid <sreid@sea-to-sky.net>
-;; and others.
-;; from http://waterjuice.org/c-source-code-for-sha1/
 (inline-text "
+#include <sys/types.h>
+#include <stdio.h>
+#include <string.h>
+
+typedef struct {int64_t type; int32_t refs;} Value;
+typedef struct {int64_t type; int32_t refs; int64_t numVal;} Number;
+typedef struct {int64_t type; int32_t refs; int64_t len; char buffer[0];} String;
+typedef struct {int64_t type; int32_t refs; int64_t len; Number *hash; Value *source; char *buffer;} SubString;
+typedef struct List {int64_t type; int32_t refs; int64_t len; Value* head; struct List *tail;} List;
+typedef struct {int64_t type; int32_t refs; int count; List *closures; int variadic; void *fn;} FnArity;
+typedef struct {int64_t type; int32_t refs; char *name; int64_t arityCount; FnArity *arities[];} Function;
+typedef struct {int64_t type; Value *implFn;} ProtoImpl;
+typedef struct {int64_t implCount; ProtoImpl impls[];} ProtoImpls;
+typedef struct {int64_t type; int32_t refs; int implCount; Value* impls[];} ReifiedVal;
+typedef struct {int64_t type; int32_t refs; void *ptr;} Opaque;
+typedef struct {int64_t type; int32_t refs; int32_t bitmap; Value *array[];} BitmapIndexedNode;
+typedef struct {int64_t type; int32_t refs; Value *array[32];} ArrayNode;
+typedef struct {int64_t type; int32_t refs; int16_t count; Value *array[];} HashCollisionNode;
+
+// 0 is reserved for default protocol implementations
+// all type numbers must be positive integers
+#define StringType 1
+#define NumberType 2
+#define FunctionType 3
+#define ListType 4
+#define KeywordType 5
+#define SubStringType 6
+#define SymbolType 7
+#define FnArityType 8
+#define OpaqueType 9
+#define BitmapIndexedType 10
+#define ArrayNodeType 11
+#define HashCollisionNodeType 12
+Value *StringTypeNum = (Value *)&(Number){NumberType, -1, StringType};
+Value *NumberTypeNum = (Value *)&(Number){NumberType, -1, NumberType};
+Value *FunctionTypeNum = (Value *)&(Number){NumberType, -1, FunctionType};
+Value *ListTypeNum = (Value *)&(Number){NumberType, -1, ListType};
+Value *KeywordTypeNum = (Value *)&(Number){NumberType, -1, KeywordType};
+Value *SubStrTypeNum = (Value *)&(Number){NumberType, -1, SubStringType};
+Value *SymbolTypeNum = (Value *)&(Number){NumberType, -1, SymbolType};
+Value *FnArityTypeNum = (Value *)&(Number){NumberType, -1, FnArityType};
+Value *OpaqueTypeNum = (Value *)&(Number){NumberType, -1, OpaqueType};
+Value *BitmapIndexedTypeNum = (Value *)&(Number){NumberType, -1, BitmapIndexedType};
+Value *ArrayNodeTypeNum = (Value *)&(Number){NumberType, -1, ArrayNodeType};
+Value *HashCollisionNodeTypeNum = (Value *)&(Number){NumberType, -1, HashCollisionNodeType};
+
+")
+
+(inline-text "
+extern void abort();
+extern void free(void *);
+extern void *malloc(unsigned long);
+
+typedef Value *(FnType0)(List *);
+typedef Value *(FnType1)(List *, Value *);
+typedef Value *(FnType2)(List *, Value *, Value *);
+typedef Value *(FnType3)(List *, Value *, Value *, Value *);
+typedef Value *(FnType4)(List *, Value *, Value *, Value *, Value *);
+typedef Value *(FnType5)(List *, Value *, Value *, Value *, Value *, Value *);
+typedef Value *(FnType6)(List *, Value *, Value *, Value *, Value *, Value *, Value *);
+typedef Value *(FnType7)(List *, Value *, Value *, Value *, Value *, Value *, Value *, Value *);
+typedef Value *(FnType8)(List *, Value *, Value *, Value *, Value *, Value *, Value *, Value *, Value *);
+typedef Value *(FnType9)(List *, Value *, Value *, Value *, Value *, Value *, Value *, Value *, Value *, Value *);
+List *empty_list = &(List){4,-1,0,0,0};
+
+Number const0 = {NumberType, -1, 0};
+Value *const0Ptr = (Value *)&const0;
+
+FILE *outStream;
+Number trueVal = {NumberType, -1, 1};
+Value* true = (Value *)&trueVal;
+Number falseVal = {NumberType, -1, 0};
+Value* false = (Value *)&falseVal;
+long long malloc_count = 0;
+long long free_count = 0;
+
+int mask(int64_t hash, int shift) {
+  return (hash >> shift) & 0x1f;
+}
+
+int bitpos(int64_t hash, int shift) {
+  return 1 << mask(hash, shift);
+}
+
+void incRef(Value *v) {
+  if (v == (Value *)0) {
+    fprintf(stderr, \"why are you incRefing 'null'\\n\");
+    abort();
+  } else if (v->refs < -1) {
+    fprintf(stderr, \"incRefing: %p\\n\", v);
+    abort();
+  } else if (v->refs >= 0)
+    v->refs++;
+  return;
+}
+
+")
+
+(inline-text "
+void decRef(Value *v) {
+  if (v == (Value *)0) {
+    fprintf(stderr, \"why are you decRefing 'null'\\n\");
+    abort();
+  } else if (v->refs < -1) {
+    fprintf(stderr, \"decRefing: %p\\n\", v);
+  } else if (v->refs == -1) {
+    return;
+  } else if (v->refs == 0) {
+    fprintf(stderr, \"decRef already at 0: %p\\n\", v);
+    return;
+  } else {
+    v->refs--;
+    return;
+  }
+}
+Value *my_malloc(int64_t sz) {
+  malloc_count++;
+  Value *val = malloc(sz);
+  if (sz > sizeof(Value))
+    val->refs = 1;
+  return(val);
+}
+
+typedef struct DirectLL {int64_t type; struct DirectLL *next;} DirectLL;
+
+DirectLL *freeSubStrings = (DirectLL *)0;
+SubString *malloc_substring() {
+  if (freeSubStrings == (DirectLL *)0) {
+    SubString *subStr = (SubString *)my_malloc(sizeof(SubString));
+    subStr->hash = (Number *)0;
+    return(subStr);
+  } else {
+    DirectLL *subStr = freeSubStrings;
+    freeSubStrings = subStr->next;
+    ((SubString *)subStr)->refs = 1;
+    ((SubString *)subStr)->hash = (Number *)0;
+    return((SubString *)subStr);
+  }
+}
+
+int recycledReified = 0;
+DirectLL *freeReified[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+ReifiedVal *malloc_reified(int implCount) {
+  if (implCount > 19 || freeReified[implCount] == (DirectLL *)0) {
+    return((ReifiedVal *)my_malloc(sizeof(ReifiedVal) + sizeof(Function *) * implCount));
+  } else {
+    recycledReified++;
+    DirectLL *newReifiedVal = freeReified[implCount];
+    freeReified[implCount] = newReifiedVal->next;
+    ((ReifiedVal *)newReifiedVal)->refs = 1;
+    return((ReifiedVal *)newReifiedVal);
+  }
+}
+
+")
+
+(inline-text "
+int recycledFunction = 0;
+DirectLL *freeFunctions[10] = {0,0,0,0,0,0,0,0,0,0};
+Function *malloc_function(int arityCount) {
+  if (arityCount > 9 || freeFunctions[arityCount] == (DirectLL *)0) {
+    return((Function *)my_malloc(sizeof(Function) + sizeof(FnArity *) * arityCount));
+  } else {
+    recycledFunction++;
+    DirectLL *newFunction = freeFunctions[arityCount];
+    freeFunctions[arityCount] = newFunction->next;
+    ((Function *)newFunction)->refs = 1;
+    return((Function *)newFunction);
+  }
+}
+
+DirectLL *freeNumbers = (DirectLL *)0;
+Number *malloc_number() {
+  if (freeNumbers == (DirectLL *)0) {
+    malloc_count += 99;
+    Number *numberStructs = (Number *)my_malloc(sizeof(Number) * 100);
+    ((DirectLL *)&numberStructs[99])->next = (DirectLL *)0;
+    for (int i = 99; i > 0; i--) {
+      ((DirectLL *)&numberStructs[i])->next = freeNumbers;
+      freeNumbers = (DirectLL *)&numberStructs[i];
+    }
+    return(&numberStructs[0]);
+  } else {
+    DirectLL *newNumber = freeNumbers;
+    freeNumbers = newNumber->next;
+    ((Number *)newNumber)->refs = 1;
+    return((Number *)newNumber);
+  }
+}
+
+DirectLL *freeLists = (DirectLL *)0;
+List *malloc_list() {
+  if (freeLists == (DirectLL *)0) {
+    malloc_count += 499;
+    List *listStructs = (List *)my_malloc(sizeof(List) * 500);
+    for (int i = 499; i > 0; i--) {
+      ((DirectLL *)&listStructs[i])->next = freeLists;
+      freeLists = (DirectLL *)&listStructs[i];
+    }
+    return(listStructs);
+  } else {
+    DirectLL *newList = freeLists;
+    freeLists = newList->next;
+    ((List *)newList)->refs = 1;
+    return((List *)newList);
+  }
+}
+
+")
+
+(inline-text "
+DirectLL *freeFnArities = (DirectLL *)0;
+FnArity *malloc_fnArity() {
+  if (freeFnArities == (DirectLL *)0) {
+    return((FnArity *)my_malloc(sizeof(FnArity)));
+  } else {
+    DirectLL *newFnArity = freeFnArities;
+    freeFnArities = newFnArity->next;
+    ((FnArity *)newFnArity)->refs = 1;
+    return((FnArity *)newFnArity);
+  }
+}
+
+DirectLL *freeBMINodes[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+BitmapIndexedNode *malloc_bmiNode(int itemCount) {
+  int nodeSize = sizeof(BitmapIndexedNode) + sizeof(Value *) * (itemCount * 2);
+  BitmapIndexedNode *bmiNode;
+  if (freeBMINodes[itemCount] == (DirectLL *)0) {
+    bmiNode = (BitmapIndexedNode *)my_malloc(nodeSize);
+  } else {
+    bmiNode = (BitmapIndexedNode *)freeBMINodes[itemCount];
+    freeBMINodes[itemCount] = ((DirectLL *)bmiNode)->next;
+  }
+  memset(bmiNode, 0, nodeSize);
+  bmiNode->type = BitmapIndexedType;
+  bmiNode->refs = 1;
+  return(bmiNode);
+}
+
+HashCollisionNode *malloc_hashCollisionNode(int itemCount) {
+  if (itemCount > 30000) {
+    fprintf(stderr, \"Catastrophic failure: Too many hash collisions\\n\");     abort();
+  }
+  int nodeSize = sizeof(HashCollisionNode) + sizeof(Value *) * (itemCount * 2);
+  HashCollisionNode *collisionNode;
+  collisionNode = (HashCollisionNode *)my_malloc(nodeSize);
+  memset(collisionNode, 0, nodeSize);
+  collisionNode->type = HashCollisionNodeType;
+  collisionNode->count = itemCount * 2;
+  collisionNode->refs = 1;
+  return(collisionNode);
+}
+
+")
+
+(inline-text "
+DirectLL *freeArrayNodes = (DirectLL *)0;
+ArrayNode *malloc_arrayNode() {
+  ArrayNode *arrayNode;
+  if (freeArrayNodes == (DirectLL *)0) {
+    arrayNode = (ArrayNode *)my_malloc(sizeof(ArrayNode));
+  } else {
+    arrayNode = (ArrayNode *)freeArrayNodes;
+    freeArrayNodes = ((DirectLL *)arrayNode)->next;
+  }
+  memset(arrayNode, 0, sizeof(ArrayNode));
+  arrayNode->type = ArrayNodeType;
+  arrayNode->refs = 1;
+  return(arrayNode);}
+
+void dec_and_free(Value *v) {
+  if (v == (Value *)0) {
+    fprintf(stderr, \"why are you freeing 'null'\\n\");
+    abort();
+  } else if (v->refs == -10) {
+    fprintf(stderr, \"freeing already freed struct\\n\");
+    abort();
+  } else if (v->refs == -1) {
+    return;
+  } else if (v->refs > 1) {
+    v->refs--;
+    return;
+  } else if (v->type == 0) {
+    fprintf(stderr, \"freeing invalid type\\n\");
+    abort();
+  } else if (v->type == StringType) {
+    v->refs = -10;
+    free_count++;
+    free(v);
+  } else if (v->type == NumberType) {
+    v->refs = -10;
+    ((DirectLL *)v)->next = freeNumbers;
+    freeNumbers = (DirectLL *)v;
+  } else if (v->type == FunctionType) {
+    Function *f = (Function *)v;
+    for (int i = 0; i < f->arityCount; i++) {
+      dec_and_free((Value *)f->arities[i]);
+    }
+    v->refs = -10;
+    if (f->arityCount < 10) {
+      DirectLL *freedList = freeFunctions[f->arityCount];
+      freeFunctions[f->arityCount] = (DirectLL *)v;
+      ((DirectLL *)v)->next = freedList;
+    } else {
+      free_count++;
+      free(v);
+    }
+  } else if (v->type == ListType) {
+    Value *head = ((List *)v)->head;
+    List *tail = ((List *)v)->tail;
+    v->refs = -10;
+    if (head != (Value *)0) {
+      dec_and_free(head);
+    }
+    if (tail != (List *)0) {
+      dec_and_free((Value *)tail);
+    }
+    ((DirectLL *)v)->next = freeLists;
+    freeLists = (DirectLL *)v;
+  } else if (v->type == KeywordType ||
+             v->type == SubStringType ||
+             v->type == SymbolType) {
+    Value *src = ((SubString *)v)->source;
+    Number *hash = ((SubString *)v)->hash;
+    v->refs = -10;
+    if (src != (Value *)0) {
+      dec_and_free(src);
+    }
+    if (hash != (Number *)0) {
+      dec_and_free((Value *)hash);
+    }
+    ((DirectLL *)v)->next = freeSubStrings;
+    freeSubStrings = (DirectLL *)v;
+  } else if (v->type == FnArityType) {
+    FnArity *arity = (FnArity *)v;
+    dec_and_free((Value *)arity->closures);
+    v->refs = -10;
+    ((DirectLL *)v)->next = freeFnArities;
+    freeFnArities = (DirectLL *)v;
+  } else if (v->type == OpaqueType) {
+    v->refs = -10;
+  } else if (v->type == BitmapIndexedType) {
+    // fprintf(stderr, \"%p free bmi node\\n\", v);
+    BitmapIndexedNode *node = (BitmapIndexedNode *)v;
+    int cnt = __builtin_popcount(node->bitmap);
+    for (int i = 0; i < (2 * cnt); i++) {
+      if (node->array[i] != (Value *)0) {
+        dec_and_free(node->array[i]);
+      }
+    }
+    v->refs = -10;
+    ((DirectLL *)v)->next = freeBMINodes[cnt];
+    freeBMINodes[cnt] = (DirectLL *)v;
+  } else if (v->type == ArrayNodeType) {
+    ArrayNode *node = (ArrayNode *)v;
+    for (int i = 0; i < 32; i++) {
+      if (node->array[i] != (Value *)0) {
+        dec_and_free(node->array[i]);
+      }
+    }
+    v->refs = -10;
+    ((DirectLL *)v)->next = freeArrayNodes;
+    freeArrayNodes = (DirectLL *)v;
+  } else if (v->type == HashCollisionNodeType) {
+    HashCollisionNode *node = (HashCollisionNode *)v;
+    for (int i = 0; i < node->count; i++) {
+      if (node->array[i] != (Value *)0) {
+        dec_and_free(node->array[i]);
+      }
+    }
+    v->refs = -10;
+    free_count++;
+    free(v);
+  } else {
+    ReifiedVal *rv = (ReifiedVal *)v;
+    for (int i = 0; i < rv->implCount; i++) {
+      dec_and_free(rv->impls[i]);
+    }
+    v->refs = -10;
+    if (rv->implCount < 20) {
+      DirectLL *freedList = freeReified[rv->implCount];
+      freeReified[rv->implCount] = (DirectLL *)v;
+      ((DirectLL *)v)->next = freedList;
+    } else {
+      free_count++;
+      free(v);
+    }
+  }
+  // fprintf(stderr, \"malloc_count: %lld free_count: %lld\\r\", malloc_count, free_count);
+};
+
+")
+
+(inline-text "
+char *extractStr(Value *v) {
+  String *newStr = (String *)my_malloc(sizeof(String) + ((String *)v)->len + 5);
+  if (v->type == StringType)
+    snprintf(newStr->buffer, ((String *)v)->len + 1, \"%s\", ((String *)v)->buffer);
+  else if (v->type == SubStringType)
+    snprintf(newStr->buffer, ((String *)v)->len + 1, \"%s\", ((SubString *)v)->buffer);
+  else {
+    fprintf(stderr, \"\\ninvalid type for 'extractStr'\\n\");
+    abort();
+  }
+  return(newStr->buffer);
+}
+
+int64_t isTrue(Value *boolVal) {
+  if (boolVal->type != NumberType) {
+    fprintf(outStream, \"Invalid boolean value\\n\");
+    abort();
+  }
+  else
+    return(((Number *)boolVal)->numVal);
+}
+
+Value *findProtoImpl(int64_t type, ProtoImpls *impls) {
+  int64_t implIndex = 0;
+  Value *defaultImpl = (Value *)0;
+  while(implIndex < impls->implCount) {
+    if (impls->impls[implIndex].type == 0) {
+       defaultImpl = impls->impls[implIndex].implFn;
+    }
+
+    if (type != impls->impls[implIndex].type) {
+      implIndex++;
+    } else
+      return(impls->impls[implIndex].implFn);
+  }
+  return(defaultImpl);
+};
+
+FnArity *findFnArity(Value *fnVal, int64_t argCount) {
+  Function *fn = (Function *)fnVal;
+  int arityIndex = 0;
+  FnArity *arity = (FnArity *)fn->arities[arityIndex];
+  FnArity *variadic = (FnArity *)0;
+  while(arityIndex < fn->arityCount) {
+    arity = (FnArity *)fn->arities[arityIndex];
+    if (arity->variadic) {
+      variadic = arity;
+      arityIndex++;
+    } else if (arity->count != argCount) {
+      arityIndex++;
+    } else
+      return(arity);
+  }
+  return(variadic);
+};
+
+")
+
+(inline-text "
+Value *stringValue(char *s) {
+  int64_t len = strlen(s);
+  String *strVal = (String *)my_malloc(sizeof(String) + len + 4);
+  strVal->type = StringType;
+  strVal->len = strlen(s);
+  strncpy(strVal->buffer, s, len);
+  return((Value *)strVal);
+};
+
+Value *symbolValue(char *s) {
+  SubString *sym = malloc_substring();
+  sym->type = SymbolType;
+  sym->buffer = s;
+  sym->len = strlen(s);
+  sym->source = (Value *)0;
+  sym->hash = (Number *)0;
+  return((Value *)sym);
+};
+
+Value *keywordValue(char *s) {
+  SubString *kw = malloc_substring();
+  kw->type = KeywordType;
+  kw->buffer = s;
+  kw->hash = (Number *)0;
+  kw->len = strlen(s);
+  kw->source = (Value *)0;
+  return((Value *)kw);
+};
+
+Value *makeSubstr(int64_t len, Value *str, char *subsStart) {
+  SubString *subStr = malloc_substring();
+  subStr->type = SubStringType;
+  subStr->len = len;
+  subStr->source = str;
+  subStr->hash = (Number *)0;
+  incRef(str);
+  subStr->buffer = subsStart;
+  return((Value *)subStr);}
+
+Value *numberValue(int64_t n) {
+  Number *numVal = malloc_number();
+  numVal->type = NumberType;
+  numVal->numVal = n;
+  return((Value *)numVal);
+};
+
+List *listCons(Value *x, List *l) {
+  if (l->type != ListType) {
+    fprintf(stderr, \"'cons' requires a list\\n\");
+    abort();
+  }
+  List *newList = malloc_list();
+  newList->type = ListType;
+  newList->len = l->len + 1;
+  newList->head = (Value *)x;
+  newList->tail = l;
+  return(newList);
+};
+")
+
+(inline-text "
+Value *(*equal)(List *closures, Value *, Value *);
+Value *(*assoc)(List *closures, Value *, Value *, Value *, Value *, Value *);
+Value *(*get)(List *, Value *, Value *, Value *, Value *, Value *);
+Value *(*sha1)(List *, Value *);
+Value *(*hashSeq)(List *, Value* n, Value *s);
+Value *(*count)(List *, Value* n);
+Value *(*invoke1Arg)(List *closures, Value *f, Value* arg);
+Value *(*type_name)(List *closures, Value *t);
+
+// SHA1 implementation courtesy of: Steve Reid <sreid@sea-to-sky.net>
+// and others.
+// from http://waterjuice.org/c-source-code-for-sha1/
 #include <stdint.h>
 #include <memory.h>
 #include <pthread.h>
 
 typedef struct
 {
-    uint32_t        State[5];
-    uint32_t        Count[2];
-    uint8_t         Buffer[64];
-} Sha1Context;
+ uint32_t        State[5];
+ uint32_t        Count[2];
+ uint8_t         Buffer[64];
+ } Sha1Context;
 
 #define SHA1_HASH_SIZE           ( 64 / 8 )
 
 typedef struct
 {
-    uint8_t      bytes [SHA1_HASH_SIZE];
-} SHA1_HASH;
+ uint8_t      bytes [SHA1_HASH_SIZE];
+ } SHA1_HASH;
 
 typedef union
 {
-    uint8_t     c [64];
-    uint32_t    l [16];
-} CHAR64LONG16;
+ uint8_t     c [64];
+ uint32_t    l [16];
+ } CHAR64LONG16;
 
 #define rol(value, bits) (((value) << (bits)) | ((value) >> (32 - (bits))))
 #define blk0(i) (block->l[i] = (rol(block->l[i],24)&0xFF00FF00) |(rol(block->l[i],8)&0x00FF00FF))
@@ -63,143 +559,292 @@ typedef union
 #define R2(v,w,x,y,z,i)  z += (w^x^y)           + blk(i) + 0x6ED9EBA1 + rol(v,5); w=rol(w,30);
 #define R3(v,w,x,y,z,i)  z += (((w|x)&y)|(w&x)) + blk(i) + 0x8F1BBCDC + rol(v,5); w=rol(w,30);
 #define R4(v,w,x,y,z,i)  z += (w^x^y)           + blk(i) + 0xCA62C1D6 + rol(v,5); w=rol(w,30);
+")
 
-
+(inline-text "
 static void TransformFunction(uint32_t state[5], const uint8_t buffer[64]) {
-    uint32_t            a;
-    uint32_t            b;
-    uint32_t            c;
-    uint32_t            d;
-    uint32_t            e;
-    uint8_t             workspace[64];
-    CHAR64LONG16*       block = (CHAR64LONG16*) workspace;
+   uint32_t            a;
+   uint32_t            b;
+   uint32_t            c;
+   uint32_t            d;
+   uint32_t            e;
+   uint8_t             workspace[64];
+   CHAR64LONG16*       block = (CHAR64LONG16*) workspace;
 
-    memcpy( block, buffer, 64 );
+   memcpy( block, buffer, 64 );
 
-    // Copy context->state[] to working vars
-    a = state[0];
-    b = state[1];
-    c = state[2];
-    d = state[3];
-    e = state[4];
+   // Copy context->state[] to working vars
+   a = state[0];
+   b = state[1];
+   c = state[2];
+   d = state[3];
+   e = state[4];
 
-    // 4 rounds of 20 operations each. Loop unrolled.
-    R0(a,b,c,d,e, 0); R0(e,a,b,c,d, 1); R0(d,e,a,b,c, 2); R0(c,d,e,a,b, 3);
-    R0(b,c,d,e,a, 4); R0(a,b,c,d,e, 5); R0(e,a,b,c,d, 6); R0(d,e,a,b,c, 7);
-    R0(c,d,e,a,b, 8); R0(b,c,d,e,a, 9); R0(a,b,c,d,e,10); R0(e,a,b,c,d,11);
-    R0(d,e,a,b,c,12); R0(c,d,e,a,b,13); R0(b,c,d,e,a,14); R0(a,b,c,d,e,15);
-    R1(e,a,b,c,d,16); R1(d,e,a,b,c,17); R1(c,d,e,a,b,18); R1(b,c,d,e,a,19);
-    R2(a,b,c,d,e,20); R2(e,a,b,c,d,21); R2(d,e,a,b,c,22); R2(c,d,e,a,b,23);
-    R2(b,c,d,e,a,24); R2(a,b,c,d,e,25); R2(e,a,b,c,d,26); R2(d,e,a,b,c,27);
-    R2(c,d,e,a,b,28); R2(b,c,d,e,a,29); R2(a,b,c,d,e,30); R2(e,a,b,c,d,31);
-    R2(d,e,a,b,c,32); R2(c,d,e,a,b,33); R2(b,c,d,e,a,34); R2(a,b,c,d,e,35);
-    R2(e,a,b,c,d,36); R2(d,e,a,b,c,37); R2(c,d,e,a,b,38); R2(b,c,d,e,a,39);
-    R3(a,b,c,d,e,40); R3(e,a,b,c,d,41); R3(d,e,a,b,c,42); R3(c,d,e,a,b,43);
-    R3(b,c,d,e,a,44); R3(a,b,c,d,e,45); R3(e,a,b,c,d,46); R3(d,e,a,b,c,47);
-    R3(c,d,e,a,b,48); R3(b,c,d,e,a,49); R3(a,b,c,d,e,50); R3(e,a,b,c,d,51);
-    R3(d,e,a,b,c,52); R3(c,d,e,a,b,53); R3(b,c,d,e,a,54); R3(a,b,c,d,e,55);
-    R3(e,a,b,c,d,56); R3(d,e,a,b,c,57); R3(c,d,e,a,b,58); R3(b,c,d,e,a,59);
-    R4(a,b,c,d,e,60); R4(e,a,b,c,d,61); R4(d,e,a,b,c,62); R4(c,d,e,a,b,63);
-    R4(b,c,d,e,a,64); R4(a,b,c,d,e,65); R4(e,a,b,c,d,66); R4(d,e,a,b,c,67);
-    R4(c,d,e,a,b,68); R4(b,c,d,e,a,69); R4(a,b,c,d,e,70); R4(e,a,b,c,d,71);
-    R4(d,e,a,b,c,72); R4(c,d,e,a,b,73); R4(b,c,d,e,a,74); R4(a,b,c,d,e,75);
-    R4(e,a,b,c,d,76); R4(d,e,a,b,c,77); R4(c,d,e,a,b,78); R4(b,c,d,e,a,79);
+   // 4 rounds of 20 operations each. Loop unrolled.
+   R0(a,b,c,d,e, 0); R0(e,a,b,c,d, 1); R0(d,e,a,b,c, 2); R0(c,d,e,a,b, 3);
+   R0(b,c,d,e,a, 4); R0(a,b,c,d,e, 5); R0(e,a,b,c,d, 6); R0(d,e,a,b,c, 7);
+   R0(c,d,e,a,b, 8); R0(b,c,d,e,a, 9); R0(a,b,c,d,e,10); R0(e,a,b,c,d,11);
+   R0(d,e,a,b,c,12); R0(c,d,e,a,b,13); R0(b,c,d,e,a,14); R0(a,b,c,d,e,15);
+   R1(e,a,b,c,d,16); R1(d,e,a,b,c,17); R1(c,d,e,a,b,18); R1(b,c,d,e,a,19);
+   R2(a,b,c,d,e,20); R2(e,a,b,c,d,21); R2(d,e,a,b,c,22); R2(c,d,e,a,b,23);
+   R2(b,c,d,e,a,24); R2(a,b,c,d,e,25); R2(e,a,b,c,d,26); R2(d,e,a,b,c,27);
+   R2(c,d,e,a,b,28); R2(b,c,d,e,a,29); R2(a,b,c,d,e,30); R2(e,a,b,c,d,31);
+   R2(d,e,a,b,c,32); R2(c,d,e,a,b,33); R2(b,c,d,e,a,34); R2(a,b,c,d,e,35);
+   R2(e,a,b,c,d,36); R2(d,e,a,b,c,37); R2(c,d,e,a,b,38); R2(b,c,d,e,a,39);
+   R3(a,b,c,d,e,40); R3(e,a,b,c,d,41); R3(d,e,a,b,c,42); R3(c,d,e,a,b,43);
+   R3(b,c,d,e,a,44); R3(a,b,c,d,e,45); R3(e,a,b,c,d,46); R3(d,e,a,b,c,47);
+   R3(c,d,e,a,b,48); R3(b,c,d,e,a,49); R3(a,b,c,d,e,50); R3(e,a,b,c,d,51);
+   R3(d,e,a,b,c,52); R3(c,d,e,a,b,53); R3(b,c,d,e,a,54); R3(a,b,c,d,e,55);
+   R3(e,a,b,c,d,56); R3(d,e,a,b,c,57); R3(c,d,e,a,b,58); R3(b,c,d,e,a,59);
+   R4(a,b,c,d,e,60); R4(e,a,b,c,d,61); R4(d,e,a,b,c,62); R4(c,d,e,a,b,63);
+   R4(b,c,d,e,a,64); R4(a,b,c,d,e,65); R4(e,a,b,c,d,66); R4(d,e,a,b,c,67);
+   R4(c,d,e,a,b,68); R4(b,c,d,e,a,69); R4(a,b,c,d,e,70); R4(e,a,b,c,d,71);
+   R4(d,e,a,b,c,72); R4(c,d,e,a,b,73); R4(b,c,d,e,a,74); R4(a,b,c,d,e,75);
+   R4(e,a,b,c,d,76); R4(d,e,a,b,c,77); R4(c,d,e,a,b,78); R4(b,c,d,e,a,79);
 
-    // Add the working vars back into context.state[]
-    state[0] += a;
-    state[1] += b;
-    state[2] += c;
-    state[3] += d;
-    state[4] += e;
-}
+   // Add the working vars back into context.state[]
+   state[0] += a;
+   state[1] += b;
+   state[2] += c;
+   state[3] += d;
+   state[4] += e;
+   }
 
 void Sha1Initialise (Sha1Context* Context) {
-    // SHA1 initialization constants
-    Context->State[0] = 0x67452301;
-    Context->State[1] = 0xEFCDAB89;
-    Context->State[2] = 0x98BADCFE;
-    Context->State[3] = 0x10325476;
-    Context->State[4] = 0xC3D2E1F0;
-    Context->Count[0] = 0;
-    Context->Count[1] = 0;
-}
+   // SHA1 initialization constants
+   Context->State[0] = 0x67452301;
+   Context->State[1] = 0xEFCDAB89;
+   Context->State[2] = 0x98BADCFE;
+   Context->State[3] = 0x10325476;
+   Context->State[4] = 0xC3D2E1F0;
+   Context->Count[0] = 0;
+   Context->Count[1] = 0;
+   }
 
+")
+
+(inline-text "
 void Sha1Update (Sha1Context* Context, void* Buffer, int64_t BufferSize) {
-    uint32_t    i;
-    uint32_t    j;
+   uint32_t    i;
+   uint32_t    j;
 
-    j = (Context->Count[0] >> 3) & 63;
-    if( (Context->Count[0] += BufferSize << 3) < (BufferSize << 3) )
-    {
-        Context->Count[1]++;
-    }
+   j = (Context->Count[0] >> 3) & 63;
+   if( (Context->Count[0] += BufferSize << 3) < (BufferSize << 3) )
+   {
+      Context->Count[1]++;
+   }
 
-    Context->Count[1] += (BufferSize >> 29);
-    if( (j + BufferSize) > 63 )
-    {
-        i = 64 - j;
-        memcpy( &Context->Buffer[j], Buffer, i );
-        TransformFunction(Context->State, Context->Buffer);
-        for( ; i + 63 < BufferSize; i += 64 )
-        {
-            TransformFunction(Context->State, (uint8_t*)Buffer + i);
-        }
-        j = 0;
-    }
-    else
-    {
-        i = 0;
-    }
+   Context->Count[1] += (BufferSize >> 29);
+   if( (j + BufferSize) > 63 )
+   {
+      i = 64 - j;
+      memcpy( &Context->Buffer[j], Buffer, i );
+      TransformFunction(Context->State, Context->Buffer);
+      for( ; i + 63 < BufferSize; i += 64 )
+      {
+         TransformFunction(Context->State, (uint8_t*)Buffer + i);
+      }
+      j = 0;
+   }
+   else
+   {
+      i = 0;
+   }
 
-    memcpy( &Context->Buffer[j], &((uint8_t*)Buffer)[i], BufferSize - i );
+   memcpy( &Context->Buffer[j], &((uint8_t*)Buffer)[i], BufferSize - i );
 }
 
 void Sha1Finalise (Sha1Context* Context, SHA1_HASH* Digest) {
-    uint32_t    i;
-    uint8_t     finalcount[8];
+   uint32_t    i;
+   uint8_t     finalcount[8];
 
-    for( i=0; i<8; i++ )
-    {
-        finalcount[i] = (unsigned char)((Context->Count[(i >= 4 ? 0 : 1)]
+   for( i=0; i<8; i++ )
+   {
+      finalcount[i] = (unsigned char)((Context->Count[(i >= 4 ? 0 : 1)]
          >> ((3-(i & 3)) * 8) ) & 255);  // Endian independent
-    }
-    Sha1Update( Context, (uint8_t*)\"\\x80\", 1 );
-    while( (Context->Count[0] & 504) != 448 )
-    {
-        Sha1Update( Context, (uint8_t*)\"\\0\", 1 );
-    }
+   }
+   Sha1Update( Context, (uint8_t*)\"\\x80\", 1 );
+   while( (Context->Count[0] & 504) != 448 )
+   {
+      Sha1Update( Context, (uint8_t*)\"\\0\", 1 );
+   }
 
-    Sha1Update( Context, finalcount, 8 );  // Should cause a Sha1TransformFunction()
-    for( i=0; i<SHA1_HASH_SIZE; i++ )
-    {
-        Digest->bytes[i] = (uint8_t)((Context->State[i>>2] >> ((3-(i & 3)) * 8) ) & 255);
-    }
+Sha1Update( Context, finalcount, 8 );  // Should cause a Sha1TransformFunction()
+   for( i=0; i<SHA1_HASH_SIZE; i++ )
+   {
+      Digest->bytes[i] = (uint8_t)((Context->State[i>>2] >> ((3-(i & 3)) * 8) ) & 255);
+   }
 }
 ")
 
 (inline-text "
-Value *valsEqual(List *, Value *, Value *);
+// Immutable hash-map ported from Clojure
+BitmapIndexedNode emptyBMI = {BitmapIndexedType, -1, 0, 0};
 
-int64_t equal(Value *v1, Value *v2) {
-  return (isTrue(valsEqual((List *)0, v1, v2)));
+BitmapIndexedNode *clone_BitmapIndexedNode(BitmapIndexedNode *node, int idx,
+                                           Value *key, Value* val)
+{
+  int itemCount = __builtin_popcount(node->bitmap);
+  BitmapIndexedNode *newNode = malloc_bmiNode(itemCount);
+  newNode->type = BitmapIndexedType;
+  newNode->refs = 1;
+  newNode->bitmap = node->bitmap;
+  for (int i = 0; i < itemCount; i++) {
+    if (i == idx) {
+      newNode->array[i * 2] = key;
+      newNode->array[i * 2 + 1] = val;
+    } else {
+      if (node->array[i * 2] != (Value *)0)
+        incRef(node->array[i * 2]);
+      if (node->array[i * 2 + 1] != (Value *)0)
+        incRef(node->array[i * 2 + 1]);
+      newNode->array[i * 2] = node->array[i * 2];
+      newNode->array[i * 2 + 1] = node->array[i * 2 + 1];
+    }
+  }
+  return(newNode);
+}
+
+Value *createNode(int shift,
+                  int64_t key1hash, Value *key1, Value *val1,
+                  int64_t key2hash, Value *key2, Value *val2)
+{
+  if (shift > 60) {
+    fprintf(stderr, \"Ran out of shift!!!!!!\");
+    abort();
+  }
+  BitmapIndexedNode *newNode = malloc_bmiNode(2);
+  newNode->type = BitmapIndexedType;
+  newNode->refs = 1;
+  int key1bit = bitpos(key1hash, shift);
+  int key2bit = bitpos(key2hash, shift);
+  newNode->bitmap = key1bit | key2bit;
+  int key1idx = __builtin_popcount(newNode->bitmap & (key1bit - 1));
+  int key2idx = __builtin_popcount(newNode->bitmap & (key2bit - 1));
+  if (key1bit == key2bit) {
+    newNode->array[0] = (Value *)0;
+    newNode->array [1] = createNode(shift + 5, key1hash, key1, val1,
+                                               key2hash, key2, val2);
+  } else {
+    incRef(key1);
+    incRef(val1);
+    incRef(key2);
+    incRef(val2);
+    newNode->array[key1idx * 2] = key1;
+    newNode->array[key1idx * 2 + 1] = val1;
+    newNode->array[key2idx * 2] = key2;
+    newNode->array[key2idx * 2 + 1] = val2;
+  }
+  return((Value *)newNode);
 }
 ")
 
 (inline-text "
-Value *assoc(Value *, Value *, Value *, Value *, Value *);
-Value *get(Value *, Value *, Value *, Value *, Value *);
-")
 
-(inline-text "
-Value *sha1(Value *);
-")
+Value *proto1Arg(ProtoImpls *protoImpls, char *name, Value *arg0) {
+  FnArity *_arity = (FnArity *)findProtoImpl(arg0->type, protoImpls);
+  if(_arity == (FnArity *)0) {
+    fprintf(stderr, \"\\n*** Could not find impl of '%s' for type: %s\\n\",
+            name, extractStr(type_name(empty_list, arg0)));
+    abort();
+  }
+  FnType1 *_fn = (FnType1 *)_arity->fn;
+  return(_fn(_arity->closures, arg0));
+}
 
-(inline-text "
-Value *hashSeq(Value* n, Value *s);
-")
+Value *proto2Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1) {
+  FnArity *_arity = (FnArity *)findProtoImpl(arg0->type, protoImpls);
+  if(_arity == (FnArity *)0) {
+    fprintf(stderr, \"\\n*** Could not find impl of '%s' for type: %s\\n\",
+                    name, extractStr(type_name(empty_list, arg0)));
+    abort();
+  }
+  FnType2 *_fn = (FnType2 *)_arity->fn;
+  return(_fn(_arity->closures, arg0, arg1));
+}
 
-(inline-text "
-Value *count(Value* n);
+Value *proto3Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, Value *arg2) {
+  FnArity *_arity = (FnArity *)findProtoImpl(arg0->type, protoImpls);
+  if(_arity == (FnArity *)0) {
+    fprintf(stderr, \"\\n*** Could not find impl of '%s' for type: %s\\n\",
+            name, extractStr(type_name(empty_list, arg0)));
+    abort();
+  }
+  FnType3 *_fn = (FnType3 *)_arity->fn;
+  return(_fn(_arity->closures, arg0, arg1, arg2));
+}
+
+Value *proto4Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1,
+                                Value *arg2, Value *arg3) {
+  FnArity *_arity = (FnArity *)findProtoImpl(arg0->type, protoImpls);
+  if(_arity == (FnArity *)0) {
+    fprintf(stderr, \"\\n*** Could not find impl of '%s' for type: %s\\n\",
+            name, extractStr(type_name(empty_list, arg0)));
+    abort();
+  }
+  FnType4 *_fn = (FnType4 *)_arity->fn;
+  return(_fn(_arity->closures, arg0, arg1, arg2, arg3));
+}
+
+Value *proto5Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1,
+                                Value *arg2, Value *arg3, Value *arg4) {
+  FnArity *_arity = (FnArity *)findProtoImpl(arg0->type, protoImpls);
+  if(_arity == (FnArity *)0) {
+    fprintf(stderr, \"\\n*** Could not find impl of '%s' for type: %s\\n\",
+            name, extractStr(type_name(empty_list, arg0)));
+    abort();
+  }
+  FnType5 *_fn = (FnType5 *)_arity->fn;
+  return(_fn(_arity->closures, arg0, arg1, arg2, arg3, arg4));
+}
+
+Value *proto6Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1,
+                                Value *arg2, Value *arg3, Value *arg4, Value *arg5) {
+  FnArity *_arity = (FnArity *)findProtoImpl(arg0->type, protoImpls);
+  if(_arity == (FnArity *)0) {
+    fprintf(stderr, \"\\n*** Could not find impl of '%s' for type: %s\\n\",
+            name, extractStr(type_name(empty_list, arg0)));
+    abort();
+  }
+  FnType6 *_fn = (FnType6 *)_arity->fn;
+  return(_fn(_arity->closures, arg0, arg1, arg2, arg3, arg4, arg5));
+}
+
+Value *proto7Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, Value *arg2,
+                 Value *arg3, Value *arg4, Value *arg5, Value *arg6) {
+  FnArity *_arity = (FnArity *)findProtoImpl(arg0->type, protoImpls);
+  if(_arity == (FnArity *)0) {
+    fprintf(stderr, \"\\n*** Could not find impl of '%s' for type: %s\\n\",
+            name, extractStr(type_name(empty_list, arg0)));
+    abort();
+  }
+  FnType7 *_fn = (FnType7 *)_arity->fn;
+  return(_fn(_arity->closures, arg0, arg1, arg2, arg3, arg4, arg5, arg6));
+}
+
+Value *proto8Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, Value *arg2,
+                 Value *arg3, Value *arg4, Value *arg5, Value *arg6, Value *arg7) {
+  FnArity *_arity = (FnArity *)findProtoImpl(arg0->type, protoImpls);
+  if(_arity == (FnArity *)0) {
+    fprintf(stderr, \"\\n*** Could not find impl of '%s' for type: %s\\n\",
+            name, extractStr(type_name(empty_list, arg0)));
+    abort();
+  }
+  FnType8 *_fn = (FnType8 *)_arity->fn;
+  return(_fn(_arity->closures, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
+}
+
+Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, Value *arg2,
+                 Value *arg3, Value *arg4, Value *arg5, Value *arg6, Value *arg7, Value *arg8) {
+  FnArity *_arity = (FnArity *)findProtoImpl(arg0->type, protoImpls);
+  if(_arity == (FnArity *)0) {
+    fprintf(stderr, \"\\n*** Could not find impl of '%s' for type: %s\\n\",
+            name, extractStr(type_name(empty_list, arg0)));
+    abort();
+  }
+  FnType9 *_fn = (FnType9 *)_arity->fn;
+  return(_fn(_arity->closures, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8));
+}
 ")
 
 (defn output-to-file [file-path]
@@ -306,6 +951,18 @@ Value *count(Value* n);
       return(true);
     else
       return(false);\n"))
+
+(defn pr* [str]
+  (inline-text Number
+   "if (arg0->type == StringType)
+      fprintf(outStream, \"%-.*s\", (int)((String *)arg0)->len, ((String *)arg0)->buffer);
+    else if (arg0->type == SubStringType)
+      fprintf(outStream, \"%-.*s\", (int)((SubString *)arg0)->len, ((SubString *)arg0)->buffer);
+    else {
+      fprintf(outStream, \"\\ninvalid type for 'pr*'\\n\");
+      abort();
+    }
+    return(true);\n"))
 
 (defn subs
   ([src index]
@@ -449,9 +1106,8 @@ Value *count(Value* n);
     } else
       return(numberValue(((Number *)arg0)->numVal %
                          ((Number *)arg1)->numVal));\n"))
-
 (def empty-list
-  (inline-text List "(Value *)&(List){4,-1,0,0,0};"))
+  (inline-text List "(Value *)&(List){4,-1,0,0,0}"))
 
 (defn cons
   ([x]
@@ -469,19 +1125,16 @@ Value *count(Value* n);
       return(numberValue(((List *)arg0)->len));"))
 
 (defn list-empty? [coll]
-(inline-text Number
-             "
-if (arg0->type != ListType)
-{
-  fprintf(stderr, \"*** 'list-empty?' given wrong type of value\\n\");
-  abort();
-}
-else if (((List *)arg0)->len == 0)
-  return((Value *)&trueVal);
-else
-  return((Value *)&falseVal);
-")
-)
+  (inline-text Number
+    "if (arg0->type != ListType)
+     {
+        fprintf(stderr, \"*** 'list-empty?' given wrong type of value\\n\");
+        abort();
+     }
+     else if (((List *)arg0)->len == 0)
+        return((Value *)&trueVal);
+     else
+        return((Value *)&falseVal);"))
 
 (defn car [l]
   (inline-text
@@ -511,6 +1164,73 @@ else
        incRef((Value *)tail);
        return((Value *)tail);
     }\n"))
+
+;; TODO: check for return value of 'maybe' from predicate 'f'
+(defn filter [l f]
+  (inline-text List
+     "List *l = (List *)arg0;
+      if (arg0->type != ListType) {
+         fprintf(stderr, \"'filter' is only defined for 'List' values\\n\");
+         abort();
+      }
+
+      if (l->len == 0)
+        return((Value *)empty_list);
+      else {
+        List *head = empty_list;
+        List *tail = empty_list;
+        for(Value *x = l->head; x != (Value *)0; l = l->tail, x = l->head) {
+          Value *y;
+          if(arg1->type != 3) {
+            y = invoke1Arg(empty_list, arg1, x);
+          } else {
+            FnArity *arity2 = findFnArity(arg1, 1);
+            if(arity2 != (FnArity *)0 && !arity2->variadic) {
+              FnType1 *fn4 = (FnType1 *)arity2->fn;
+              y = fn4(arity2->closures, x);
+            } else if(arity2 != (FnArity *)0 && arity2->variadic) {
+              FnType1 *fn4 = (FnType1 *)arity2->fn;
+              List *varArgs3 = empty_list;
+              incRef(x);
+              varArgs3 = (List *)listCons(x, varArgs3);
+              y = fn4(arity2->closures, (Value *)varArgs3);
+              incRef(y);
+              dec_and_free((Value *)varArgs3);
+              decRef(y);
+            } else {
+              fprintf(stderr, \"\\n*** no arity found for '%s'.\\n\", ((Function *)arg1)->name);
+              abort();
+            }
+          }
+
+          // 'y' is the filter boolean value
+
+          if (isTrue(y)) {
+            if (head == empty_list) {
+              // if we haven't started the new list yet
+              head = malloc_list();
+              head->type = ListType;
+              head->len = 1;
+              head->head = x;
+              incRef(x);
+              head->tail = empty_list;
+              tail = head;
+            } else {
+              // otherwise, append to tail of list
+              List *new_tail = malloc_list();
+              new_tail->type = ListType;
+              new_tail->len = 1;
+              new_tail->head = x;
+              incRef(x);
+              new_tail->tail = empty_list;
+              tail->tail = new_tail;
+              tail = new_tail;
+              head->len++;
+            }
+          }
+        }
+        return((Value *)head);
+      }\n"))
 
 (defn fn-name [f]
   (inline-text String
@@ -793,7 +1513,53 @@ else
                        fprintf(outStream, \"error in 'fn-apply'\\n\");
                        abort();
                      }
-                   "))
+"))
+
+(defn list-concat [l1]
+  (inline-text List
+   " List *ls = (List *)arg0;
+
+  if (ls->len == 0) {
+    return((Value *)empty_list);
+  }
+  else if (ls->len == 1) {
+    incRef(ls->head);
+    return(ls->head);
+  }
+  else {
+    List *head = empty_list;
+    List *tail = empty_list;
+    for (; ls != (List *)0; ls = ls->tail) {
+      List *l = (List *)ls->head;
+      Value *x;
+      for(; l != (List *)0 && l->head != (Value *)0; l = l->tail) {
+        x = l->head;
+        if (head == empty_list) {
+          // if we haven't started the new list yet
+          head = malloc_list();
+          head->type = ListType;
+          head->len = 1;
+          head->head = x;
+          incRef(x);
+          head->tail = empty_list;
+          tail = head;
+        } else {
+          // otherwise, append to tail of list
+          List *new_tail = malloc_list();
+          new_tail->type = ListType;
+          new_tail->len = 1;
+          new_tail->head = x;
+          incRef(x);
+          new_tail->tail = empty_list;
+          tail->tail = new_tail;
+          tail = new_tail;
+          head->len++;
+        }
+      }
+    }
+    return((Value *)head);
+    }
+"))
 
 (defn escape-chars [c]
   ;; does not allocate a Value
@@ -869,83 +1635,29 @@ else
       } else
         abort();\n "))
 
-(defn filter [l f]
-  (inline-text List
-     "List *l = (List *)arg0;
-      if (arg0->type != ListType) {
-         fprintf(stderr, \"'filter' is only defined for 'List' values\\n\");
-         abort();
-      }
+(defprotocol Function
+  (invoke [_])
+  (invoke [_ _])
+  (invoke [_ _ _])
+  (invoke [_ _ _ _])
+  (invoke [_ _ _ _ _])
+  (invoke [_ _ _ _ _ _])
+  (invoke [_ _ _ _ _ _ _])
+  (invoke [_ _ _ _ _ _ _ _])
+  (invoke [_ _ _ _ _ _ _ _ _])
+  )
 
-      if (l->len == 0)
-        return((Value *)empty_list);
-      else {
-        List *head = empty_list;
-        List *tail = empty_list;
-        for(Value *x = l->head; x != (Value *)0; l = l->tail, x = l->head) {
-          Value *y;
-          if(arg1->type != 3) {
-            y = protoFnImpl_11(empty_list, arg1, x);
-          } else {
-            FnArity *arity2 = findFnArity(arg1, 1);
-            if(arity2 != (FnArity *)0 && !arity2->variadic) {
-              FnType1 *fn4 = (FnType1 *)arity2->fn;
-              y = fn4(arity2->closures, x);
-            } else if(arity2 != (FnArity *)0 && arity2->variadic) {
-              FnType1 *fn4 = (FnType1 *)arity2->fn;
-              List *varArgs3 = empty_list;
-              incRef(x);
-              varArgs3 = (List *)listCons(x, varArgs3);
-              y = fn4(arity2->closures, (Value *)varArgs3);
-              incRef(y);
-              dec_and_free((Value *)varArgs3);
-              decRef(y);
-            } else {
-              fprintf(stderr, \"\\n*** no arity found for '%s'.\\n\", ((Function *)arg1)->name);
-              abort();
-            }
-          }
+(defprotocol Getter
+  (type-name [_]
+    (number-str (get-type _)))
+  (type-args [_]))
 
-          // 'y' is the filter boolean value
-
-          if (isTrue(y)) {
-            if (head == empty_list) {
-              // if we haven't started the new list yet
-              head = malloc_list();
-              head->type = ListType;
-              head->len = 1;
-              head->head = x;
-              incRef(x);
-              head->tail = empty_list;
-              tail = head;
-            } else {
-              // otherwise, append to tail of list
-              List *new_tail = malloc_list();
-              new_tail->type = ListType;
-              new_tail->len = 1;
-              new_tail->head = x;
-              incRef(x);
-              new_tail->tail = empty_list;
-              tail->tail = new_tail;
-              tail = new_tail;
-              head->len++;
-            }
-          }
-        }
-        return((Value *)head);
-      }\n"))
-
-(defn pr* [str]
-  (inline-text Number
-   "if (arg0->type == StringType)
-      fprintf(outStream, \"%-.*s\", (int)((String *)arg0)->len, ((String *)arg0)->buffer);
-    else if (arg0->type == SubStringType)
-      fprintf(outStream, \"%-.*s\", (int)((SubString *)arg0)->len, ((SubString *)arg0)->buffer);
-    else {
-      fprintf(outStream, \"\\ninvalid type for 'pr*'\\n\");
-      abort();
-    }
-    return(true);\n"))
+(defprotocol Type
+  (instance? [type val]
+    (cond
+     (number= Number (get-type type)) (number= type (get-type val))
+     (let [_ (pr* "*** call to 'instance?' with unknown type parameter.")]
+       (abort)))))
 
 (defn list [& l]
   l)
@@ -959,26 +1671,100 @@ else
 (defn remove [l f]
   (filter l (fn [v] (not (f v)))))
 
-(defprotocol Ord
-  (<* [value values]
-    (print-err "'<*' not implemented:" value)
-    (abort)))
-
 (defprotocol Collection
+  ;; TODO: remove 'empty?'
   (empty? [coll])
   (empty [coll])
-  (destruct [coll target])
   (count [coll])
   (conj [coll value])
-  (reduce [l result f]))
+  (reduce [coll result f]))
 
 (defn reverse [l]
   (reduce l (empty l) conj))
 
+(defprotocol Ord
+  (<* [value values]))
+
+;; Algebraic structures
+(defprotocol Monoid
+  (zero [_])
+  (comp* [mval mvals]))
+
+(defn comp
+  ([x] x)
+  ([x & xs] (comp* x xs)))
+
+(defprotocol Ring
+  (unit [_])
+  (dist* [mval mvals]))
+
+(defn dist
+  ([x] x)
+  ([x & xs] (dist* x xs)))
+
+;; Categorical structures
+
+(defprotocol Monad
+  (flat-map [mval func])
+  (flatten [mval]
+    (flat-map mval (fn [x] x))))
+
+(defprotocol Comonad
+  (extract [wv])
+  (extend [wv f])
+  (duplicate [wv]))
+
+(def comprehend)
+
+(defprotocol Applicative
+  (wrap [x v])
+  (apply* [fv args]
+    (match args
+           |List _| (flat-map fv (fn [f] (comprehend f args)))
+           (flat-map fv (fn [f] (wrap fv (f)))))))
+
+(defn comprehend [f [mv & mvs]]
+  (let [rest-steps (reduce (reverse mvs)
+                           (fn [acc x]
+                             (wrap mv (apply f (reverse (cons x acc)))))
+                           (fn [steps new-mv]
+                             (fn [acc x]
+                               (flat-map new-mv (fn [v]
+                                                  (steps (cons x acc)) v)))))]
+    (flat-map mv (fn [v]
+                   (rest-steps empty-list v)))))
+
+(defn apply [fv & args]
+  (apply* fv args))
+
+(defn apply-to
+  ([f]
+     (f))
+  ([f & args]
+     (apply* (wrap (car args) f) args)))
+
+(defprotocol Functor
+  (map [v f]
+    ;; TODO: needs 'implements?' so can also use 'apply*'
+    (flat-map v (fn [x] (wrap v (f x))))))
+
+(defprotocol Named
+  (name [value]))
+
+(defn partial [f & args]
+  (fn [& more-args]
+    (apply f (comp args more-args))))
+
+(defprotocol Seqable
+  (seq [coll])
+  (first [coll])
+  (rest [coll]))
+
+(defprotocol Hash
+  (sha1 [_]))
+
 (defprotocol Stringable
-  (string-list [value]
-    (print-err "'string-list' not implemented for type" (type-name value))
-    (abort)))
+  (string-list [value]))
 
 (defprotocol Eq
   (=* [x y]
@@ -989,12 +1775,104 @@ else
 
      0)))
 
-(defprotocol Hash
-  (sha1 [_]))
+(defn =
+  ([v] 1)
+  ([x y] (=* x y))
+  ([v & vs]
+     (cond
+      (=* v (car vs)) (apply = vs)
+      0)))
+
+(def maybe)
+
+(def nothing
+  (reify
+    Getter
+    (type-name [_] "nothing")
+    (type-args [_] empty-list)
+
+    Stringable
+    (string-list [_]
+      (list "<nothing>"))
+
+    Function
+    (invoke [n] n)
+    (invoke [n _] n)
+    (invoke [n _ _] n)
+    (invoke [n _ _ _] n)
+    (invoke [n _ _ _ _] n)
+    (invoke [n _ _ _ _ _] n)
+    (invoke [n _ _ _ _ _ _] n)
+    (invoke [n _ _ _ _ _ _ _] n)
+    (invoke [n _ _ _ _ _ _ _ _] n)
+
+    Eq
+    (=* [nv x] (type= nv x))
+
+    Monoid
+    (zero [nv] nv)
+    (comp* [nothing mvs]
+      (match mvs
+             |List mv & mvs|
+             (comp* mv mvs)))
+
+    Functor
+    (map [nv f] nv)
+
+    Applicative
+    (wrap [_ x] (maybe x))
+    (apply* [nv _] nv)
+
+    Monad
+    (flatten [nv] nv)
+    (flat-map [nv _] nv)))
+
+(deftype maybe [v]
+  Stringable
+  (string-list [_]
+    (comp (list "<maybe ")
+          (string-list v)
+          (list ">")))
+
+  Monoid
+  (zero [_] nothing)
+  (comp* [mv _] mv)
+
+  Functor
+  (map [_ f]
+    (maybe (f v)))
+
+  Applicative
+  (wrap [_ v] (maybe v))
+  (apply* [_ args]
+    (match (filter args (partial =* nothing))
+           |List _|
+           (maybe (apply v (map args .v)))))
+
+  Monad
+  (flatten [_] v)
+  (flat-map [_ f]
+    (f v)))
+
+;; TODO: replace all uses with m<
+(defn <
+  ([x y] (<* x y))
+  ([v & vs]
+     (cond
+      (list-empty? vs) 1
+      (not (<* v (car vs))) 0
+      (apply < vs))))
+
+(defn m=
+  ([v] (maybe v))
+  ([x y] (cond
+          (=* x y) (maybe x)
+          nothing)))
 
 (extend-type Number
   Getter
   (type-args [n] (list n))
+  (type-name [_] "Number")
 
   Eq
   (=* [x y]
@@ -1021,68 +1899,32 @@ Sha1Finalise(&context, (SHA1_HASH *)&shaVal);
 return((Value *)numberValue(shaVal));
 ")))
 
-(defprotocol Type
-  ;; 'instance?' is used in 'match' so requires use of 'cond'
-  (instance? [type val]
-    (cond
-     (number= Number (get-type type)) (number= type (get-type val))
-     (let [_ (pr* "*** call to 'instance?' with unknown type parameter.")]
-       (abort)))))
+(defn inc [x]
+  (add-numbers x 1))
 
-(defprotocol Monad
-  (flat-map [mval func]
-    (print-err "'flat-map' not implemented: " (type-name mval))
-    (abort))
-  (flatten [mval]
-    (flat-map mval (fn [x] x))))
+(defn +
+  ([] 0)
+  ([x y] (add-numbers x y))
+  ([& xs] (reduce xs 0 add-numbers)))
 
-(defprotocol Comonad
-  (extract [wv])
-  (extend [wv f])
-  (duplicate [wv]
-    (print-err "'duplicate' not implemented: " (type-name wv))))
+(defn *
+  ([] 1)
+  ([x y] (mult-numbers x y))
+  ([& xs] (reduce xs 1 mult-numbers)))
 
-(def comprehend)
+(defn dec [x]
+  (subtract-numbers x 1))
 
-(defprotocol Applicative
-  (wrap [x v]
-    (print-err "*** 'wrap' not implemented"))
-  (apply* [fv args]
-    (match args
-           |List _| (flat-map fv (fn [f] (comprehend f args)))
-           (flat-map fv (fn [f] (wrap fv (f)))))))
+(defn -
+  ([] 0)
+  ([x] x)
+  ([x & xs] (reduce xs x subtract-numbers)))
 
-(defn comprehend [f [mv & mvs]]
-  (let [rest-steps (reduce (reverse mvs)
-                           (fn [acc x]
-                             (wrap mv (apply f (reverse (cons x acc)))))
-                           (fn [steps new-mv]
-                             (fn [acc x]
-                               (flat-map new-mv (fn [v]
-                                                  (steps (cons x acc)) v)))))]
-    (flat-map mv (fn [v]
-                   (rest-steps empty-list v)))))
-
-(defprotocol Functor
-  (map [v f]
-    (flat-map v (fn [x] (wrap v (f x))))))
-
-(defprotocol Named
-  (name [value]
-    (print-err "'name' not implemented for type " (type-name value))
-    (abort)))
-
-(defprotocol Serializable
-  (serialize [value]
-    (print-err "'serialize' not implemented for type" (type-name value))
-    (abort)))
-
-(defprotocol Seqable
-  (seq? [coll] false)
-  (seq [coll])
-  (first [coll])
-  (m-first [coll])
-  (rest [coll]))
+;; TODO: remove
+(defn m-first [coll]
+  (match coll
+         |List item|
+         (maybe item)))
 
 (defn second [coll]
   (first (rest coll)))
@@ -1093,23 +1935,6 @@ return((Value *)numberValue(shaVal));
 (defprotocol Crushable
   (crush [coll f]))
 
-(defprotocol Monoid
-  (zero [_])
-  (comp* [mval mvals]))
-
-(defn apply [fv & args]
-  (apply* fv args))
-
-(defn apply-to
-  ([f]
-     (f))
-  ([f & args]
-     (apply* (wrap (car args) f) args)))
-
-(defn comp
-  ([x] x)
-  ([x & xs] (comp* x xs)))
-
 (defprotocol HashMapNode
   (hash-seq [n s])
   (get* [n k v hash shift])
@@ -1117,239 +1942,31 @@ return((Value *)numberValue(shaVal));
 
 (defprotocol Associative
   (assoc [m k v])
-  (get [m k _]
-    (print-err "'get' not implemented for" (type-name m) ": " :m m :k k)
-    (abort))
+  (get [m k _])
   (keys [m])
   (vals [m])
   (dissoc [m k]))
 
-;; TODO: delete this
-(defn and
-  ([b-val] b-val)
-  ([b-val & b-vals]
-     (cond
-      b-val (apply and b-vals)
-      0)))
+(defn interpose [coll sep]
+  (match coll
+         |List h & t| (cons h (flat-map t (fn [x]
+                                            (list sep x))))
+         empty-list))
 
-;; TODO: delete this
-(defn or
-  ([b-val] b-val)
-  ([b-val & b-vals]
-     (cond
-      b-val 1
-      (apply or b-vals))))
+(defn print [& vs]
+  (map (flat-map (interpose vs " ") string-list)
+       pr*))
 
-;; TODO: replace all uses with m=
-(defn =
-  ([v] 1)
-  ([x y] (=* x y))
-  ([v & vs]
-     (cond
-      (=* v (car vs)) (apply = vs)
-      0)))
+(defn println [& vs]
+  (map (flat-map (interpose vs " ") string-list) pr*)
+  (pr* "\n"))
 
-(defn partial [f & args]
-  (fn [& more-args]
-    (apply f (comp args more-args))))
-
-(def maybe-val)
-
-(def nothing
-  (reify
-    Getter
-    (type-name [_] "nothing")
-    (type-args [_] empty-list)
-
-    Stringable
-    (string-list [_] (list "<nothing>"))
-
-    Function
-    (invoke [n f]
-      n)
-
-    Eq
-    (=* [nv x] (type= nv x))
-
-    Monoid
-    (zero [nv] nv)
-    (comp* [nothing mvs]
-      (match mvs
-             |List mv & mvs|
-             (comp* mv mvs)))
-
-    Functor
-    (map [nv f] nv)
-
-    Applicative
-    (wrap [_ x] (maybe-val x))
-    (apply* [nv _] nv)
-
-    Monad
-    (flatten [nv] nv)
-    (flat-map [nv _] nv)))
-
-(deftype maybe-val [v]
-  Stringable
-  (string-list [mv]
-    (comp (list "<maybe ")
-          (string-list (.v mv))
-          (list ">")))
-
-  Monoid
-  (zero [_] nothing)
-  (comp* [mv _] mv)
-
-  Functor
-  (map [_ f]
-    (maybe-val (f v)))
-
-  Applicative
-  (wrap [_ v] (maybe-val v))
-  (apply* [_ args]
-    (match (filter args (partial = nothing))
-           |List _|
-           (maybe-val (apply v (map args .v)))))
-
-  Monad
-  (flatten [_] v)
-  (flat-map [_ f]
-    (f v)))
-
-(def maybe
-  (reify
-    Function
-    (invoke [_ v] (maybe-val v))
-
-    Type
-    (instance? [_ mv] (instance? maybe-val mv))
-
-    Monoid
-    (zero [_] nothing)
-    ))
-
-(defn m=
-  ([v] (maybe v))
-  ([x y] (cond
-          (=* x y) (maybe x)
-          nothing))
-  ;; TODO: test this. not sure it works
-  ([x & ys]
-     (match ys
-            |List _| ((fn recur [y & ys]
-                        (for [_ (m= x y)
-                              _ (recur ys)]
-                          x))
-                      ys)
-            (maybe x))))
-
-(defn some [coll f]
-  (comp* nothing (map coll f)))
-
-;; TODO: replace all uses with m<
-(defn <
-  ([x y] (<* x y))
-  ([v & vs]
-     (cond
-      (list-empty? vs) 1
-      (not (<* v (car vs))) 0
-      (apply < vs))))
-
-(defn m<
-  ([x y] (cond
-          (<* x y) (maybe x)
-          nothing))
-  ([v & vs]
-     (cond
-      (list-empty? vs) (maybe v)
-      (not (<* v (car vs))) nothing
-      (apply m< vs))))
-
-(defn list** [arg args]
-  (match args
-         |List next-arg & args| (cons arg (list** next-arg args))
-         arg))
-
-(defn list* [arg & args]
-  (list** arg args))
-
-(defn identity [x]
-  x)
-
-(extend-type Function
-  Stringable
-  (string-list [f] (list "<Fn: " (fn-name f) ">"))
-
-  Monoid
-  (zero [_] identity)
-  (comp* [f fs]
-    (fn [& args]
-      (reduce fs (apply f args)
-              (fn [x f]
-                (f x)))))
-
-  Applicative
-  (apply* [f args]
-    ;; TODO: didn't work immediately. find out why
-    ;; Remember, the last element of 'args' must be a list
-    ;; everything up to that must be prepended to it
-    ;; (match args
-    ;;        |List arg & args| (fn-apply f (list** arg args))
-    ;;        (f)))
-    (cond
-     (list-empty? args) (f)
-     ;; Remember, the last element of 'args' must be a list
-     ;; everything up to that must be prepended to it
-     (let [[arg & args] args]
-       (fn-apply f (list** arg args))))))
-
-(defn list-concat [l1]
-  (inline-text List
-   " List *ls = (List *)arg0;
-
-  if (ls->len == 0) {
-    return((Value *)empty_list);
-  }
-  else if (ls->len == 1) {
-    incRef(ls->head);
-    return(ls->head);
-  }
-  else {
-    List *head = empty_list;
-    List *tail = empty_list;
-    for (; ls != (List *)0; ls = ls->tail) {
-      List *l = (List *)ls->head;
-      Value *x;
-      for(; l != (List *)0 && l->head != (Value *)0; l = l->tail) {
-        x = l->head;
-        if (head == empty_list) {
-          // if we haven't started the new list yet
-          head = malloc_list();
-          head->type = ListType;
-          head->len = 1;
-          head->head = x;
-          incRef(x);
-          head->tail = empty_list;
-          tail = head;
-        } else {
-          // otherwise, append to tail of list
-          List *new_tail = malloc_list();
-          new_tail->type = ListType;
-          new_tail->len = 1;
-          new_tail->head = x;
-          incRef(x);
-          new_tail->tail = empty_list;
-          tail->tail = new_tail;
-          tail = new_tail;
-          head->len++;
-        }
-      }
-    }
-    return((Value *)head);
-    }\n"))
+(defn print-err [& vs]
+  (pr-err* "\n*** ")
+  (map (flat-map (interpose vs " ") string-list) pr-err*)
+  (pr-err* "\n"))
 
 (defn list=* [[h1 & t1] [h2 & t2]]
-  ;; used only in implementing '=*' for List
   (cond
    (list-empty? t1) 1
    (=* h1 h2) (list=* t1 t2)
@@ -1360,18 +1977,29 @@ return((Value *)numberValue(shaVal));
          |List _| (reduce-list t (f result h) f)
          (f result h)))
 
+(defn list** [arg args]
+  (match args
+         |List next-arg & args| (cons arg (list** next-arg args))
+         arg))
+
+(defn list* [arg & args]
+  (list** arg args))
+
 (extend-type List
+  Getter
+  (type-name [_] "List")
+
+  Stringable
+  (string-list [l]
+    (list-concat (list (list "(")
+                       (flat-map (interpose l ", ") string-list)
+                       (list ")"))))
+
   Getter
   (type-args [l] l)
 
   Seqable
-  (seq? [l]
-    true)
   (seq [l] l)
-  (m-first [l]
-    (match l
-           |List first|
-           (maybe first)))
   (first [l] (car l))
   (rest [l] (cdr l))
 
@@ -1424,7 +2052,7 @@ return((Value *)numberValue(shaVal));
         for(Value *x = l->head; x != (Value *)0; l = l->tail, x = l->head) {
           Value *y;
           if(arg1->type != 3) {
-            y = protoFnImpl_11(empty_list, arg1, x);
+            y = invoke1Arg(empty_list, arg1, x);
           } else {
             FnArity *arity2 = findFnArity(arg1, 1);
             if(arity2 != (FnArity *)0 && !arity2->variadic) {
@@ -1474,191 +2102,7 @@ return((Value *)numberValue(shaVal));
   (flat-map [mv mf]
     (match (map mv mf)
            |List h & t| (comp* h t)
-           empty-list)))
-
-(defn interpose [coll sep]
-  (match coll
-         |List h & t| (cons h (flat-map t (fn [x]
-                                            (list sep x))))
-         empty-list))
-
-(extend-type List
-  Stringable
-  (string-list [l]
-    (list-concat (list (list "(")
-                       (flat-map (interpose l ", ") string-list)
-                       (list ")")))))
-
-(defn prn [& vs]
-  (map (interpose (flat-map vs serialize) " ")
-       pr*)
-  (pr* "\n"))
-
-(defn print [& vs]
-  (map (flat-map (interpose vs " ") string-list)
-       pr*))
-
-(defn println [& vs]
-  (map (flat-map (interpose vs " ") string-list) pr*)
-  (pr* "\n"))
-
-(defn print-err [& vs]
-  (pr-err* "\n*** ")
-  (map (flat-map (interpose vs " ") string-list) pr-err*)
-  (pr-err* "\n"))
-
-(defn inc [x]
-  (add-numbers x 1))
-
-(defn +
-  ([] 0)
-  ([x y] (add-numbers x y))
-  ([& xs] (reduce xs 0 add-numbers)))
-
-(defn *
-  ([] 0)
-  ([x y] (mult-numbers x y))
-  ([& xs] (reduce xs 0 mult-numbers)))
-
-(defn dec [x]
-  (subtract-numbers x 1))
-
-(defn -
-  ([] 0)
-  ([x] x)
-  ([x & xs] (reduce xs x subtract-numbers)))
-
-(extend-type String
-  Getter
-  (type-args [s] (list s))
-
-  Eq
-  (=* [x y] (str= x y))
-
-  Collection
-  (empty? [s]
-    (= 0 (str-count s)))
-  (empty [s]
-    "")
-  (count [s]
-    (str-count s))
-  (conj [s value]
-    (let [strs (flat-map (list s value) string-list)]
-      (comp* (car strs) (cdr strs))))
-  (reduce [s result f]
-    (reduce (seq s) result f))
-
-  Seqable
-  (seq [s]
-    ;; permissable for defining fn's for primitive data types
-    (cond
-     (= s "") empty-list
-     (cons (subs s 0 1) (seq (subs s 1)))))
-  (m-first [s]
-    ;; permissable for defining fn's for primitive data types
-    (cond
-     (= s "") nothing
-     (maybe (subs s 0 1))))
-  (first [s]
-    (subs s 0 1))
-  (rest [s]
-    (subs s 1))
-
-  Stringable
-  (string-list [v] (list v))
-
-  Monoid
-  (comp* [s ss]
-    (match ss
-           |List _|
-           (let [ss-list (cons s ss)
-                 new-len (apply + (map ss-list str-count))]
-             (car (map ss-list (partial str-append (str-malloc new-len)))))
-
-           s))
-
-  Hash
-  (sha1 [_]
-    (inline-text Number
-     "
-int64_t shaVal;
-Sha1Context context;
-String *strVal = (String *)arg0;
-
-Sha1Initialise(&context);
-Sha1Update(&context, (void *)strVal->buffer, strVal->len);
-Sha1Finalise(&context, (SHA1_HASH *)&shaVal);
-return((Value *)numberValue(shaVal));
-")))
-
-(extend-type SubStr
-  Stringable
-  (string-list [v] (list v))
-
-  Eq
-  (=* [x y] (str= x y))
-
-  Collection
-  (empty? [s]
-    (= 0 (str-count s)))
-  (empty [s]
-    "")
-  (count [s]
-    (str-count s))
-  (conj [s value]
-    (let [strs (flat-map (list s value) string-list)]
-      (comp* (car strs) (cdr strs))))
-  (reduce [s result f]
-    (reduce (seq s) result f))
-
-  Seqable
-  (seq [s]
-    ;; permissable for defining fn's for primitive data types
-    (cond
-     (= s "") empty-list
-     (cons (subs s 0 1) (seq (subs s 1)))))
-  (m-first [s]
-    ;; permissable for defining fn's for primitive data types
-    (cond
-     (= s "") nothing
-     (maybe (subs s 0 1))))
-  (first [s]
-    (subs s 0 1))
-  (rest [s]
-    (subs s 1))
-
-  Monoid
-  (comp* [s ss]
-    (match ss
-           |List _|
-           (let [ss-list (cons s ss)
-                 new-len (apply + (map ss-list str-count))]
-             (car (map ss-list (partial str-append (str-malloc new-len)))))
-
-           s))
-
-  Hash
-  (sha1 [_]
-    (inline-text Number
-     "
-int64_t shaVal;
-Sha1Context context;
-SubString *subStrVal = (SubString *)arg0;
-
-Sha1Initialise(&context);
-Sha1Update(&context, (void *)subStrVal->buffer, subStrVal->len);
-Sha1Finalise(&context, (SHA1_HASH *)&shaVal);
-return((Value *)numberValue(shaVal));
-")))
-
-(defn str [& vs]
-  (match vs
-         |List _|
-         (let [ss-list (flat-map vs string-list)
-               new-len (apply + (map ss-list str-count))]
-           (car (map ss-list (partial str-append (str-malloc new-len)))))
-
-         ""))
+           mv)))
 
 (defn take [l n]
   (cond
@@ -1699,14 +2143,23 @@ return((Value *)numberValue(shaVal));
             |List h & t| (cond
                           (= n 0) h
                           (nth (rest (seq coll)) (dec n)))
-            (let [_ (print-err "'nth' from empty seq")]
-              (abort))))
+            ;; TODO: print-err causes problems
+            ;; (let [_ (print-err "'nth' from empty seq")]
+            ;;   (abort))
+            (abort)))
   ([coll n nth-nf]
      (match (seq coll)
             |List h & t| (cond
                           (= n 0) h
                           (nth (rest (seq coll)) (dec n)))
             nth-nf)))
+
+(defn m-nth [coll n]
+  (match (seq coll)
+         |List h & t|
+         (comp (for [_ (m= n 0)]
+                 h)
+               (m-nth t (dec n)))))
 
 (defn last [coll last-val]
   (nth coll (dec (count coll))))
@@ -1718,71 +2171,13 @@ return((Value *)numberValue(shaVal));
 
          coll))
 
-(inline-text "
-BitmapIndexedNode emptyBMI = {BitmapIndexedType, -1, 0, 0};
-
-BitmapIndexedNode *clone_BitmapIndexedNode(BitmapIndexedNode *node, int idx,
-                                           Value *key, Value* val)
-{
-  int itemCount = __builtin_popcount(node->bitmap);
-  BitmapIndexedNode *newNode = malloc_bmiNode(itemCount);
-  newNode->type = BitmapIndexedType;
-  newNode->refs = 1;
-  newNode->bitmap = node->bitmap;
-  for (int i = 0; i < itemCount; i++) {
-    if (i == idx) {
-      newNode->array[i * 2] = key;
-      newNode->array[i * 2 + 1] = val;
-    } else {
-      if (node->array[i * 2] != (Value *)0)
-        incRef(node->array[i * 2]);
-      if (node->array[i * 2 + 1] != (Value *)0)
-        incRef(node->array[i * 2 + 1]);
-      newNode->array[i * 2] = node->array[i * 2];
-      newNode->array[i * 2 + 1] = node->array[i * 2 + 1];
-    }
-  }
-  return(newNode);
-}
-
-Value *createNode(int shift,
-                  int64_t key1hash, Value *key1, Value *val1,
-                  int64_t key2hash, Value *key2, Value *val2)
-{
-  if (shift > 60) {
-    fprintf(stderr, \"Ran out of shift!!!!!!\");
-    abort();
-  }
-  BitmapIndexedNode *newNode = malloc_bmiNode(2);
-  newNode->type = BitmapIndexedType;
-  newNode->refs = 1;
-  int key1bit = bitpos(key1hash, shift);
-  int key2bit = bitpos(key2hash, shift);
-  newNode->bitmap = key1bit | key2bit;
-  int key1idx = __builtin_popcount(newNode->bitmap & (key1bit - 1));
-  int key2idx = __builtin_popcount(newNode->bitmap & (key2bit - 1));
-  if (key1bit == key2bit) {
-    newNode->array[0] = (Value *)0;
-    newNode->array [1] = createNode(shift + 5, key1hash, key1, val1,
-                                               key2hash, key2, val2);
-  } else {
-    incRef(key1);
-    incRef(val1);
-    incRef(key2);
-    incRef(val2);
-    newNode->array[key1idx * 2] = key1;
-    newNode->array[key1idx * 2 + 1] = val1;
-    newNode->array[key2idx * 2] = key2;
-    newNode->array[key2idx * 2 + 1] = val2;
-  }
-  return((Value *)newNode);
-}
-")
-
 (def emptyBMI
   (inline-text "(Value *)&emptyBMI"))
 
 (extend-type BitmapIndexedNode
+  Getter
+  (type-name [_] "HashMap (BitmapIndexedNode)")
+
   Collection
   (count [x]
     (inline-text Number
@@ -1791,7 +2186,7 @@ int cnt = __builtin_popcount(((BitmapIndexedNode *)arg0)->bitmap);
 int accum = 0;
 for(int i = 0; i < cnt; i++) {
   if (((BitmapIndexedNode *)arg0)->array[i * 2] == (Value *)0) {
-    Number *subCnt = (Number *)count(((BitmapIndexedNode *)arg0)->array[i * 2 + 1]);
+    Number *subCnt = (Number *)count((List *)0, ((BitmapIndexedNode *)arg0)->array[i * 2 + 1]);
     accum += subCnt->numVal;
     dec_and_free((Value *)subCnt);
   } else {
@@ -1847,7 +2242,7 @@ int cnt = __builtin_popcount(node->bitmap);
 List *seq = (List *)arg1;
 for (int i = 0; i < cnt; i++) {
    if (node->array[2 * i] == (Value *)0) {
-     seq = (List *)hashSeq(node->array[2 * i + 1], (Value *)seq);
+     seq = (List *)hashSeq((List *)0, node->array[2 * i + 1], (Value *)seq);
    } else {
      List *pair = listCons(node->array[2 * i], listCons(node->array[2 * i + 1], empty_list));
      incRef(node->array[2 * i]);
@@ -1875,7 +2270,7 @@ if (node->bitmap & bit) {
     // There is no key in the position, so valOrNode is
     // pointer to a node.
     Value *newShift = (Value *)numberValue(shift + 5);
-    Value *n = assoc(valOrNode, key, val, arg3, newShift);
+    Value *n = assoc((List *)0, valOrNode, key, val, arg3, newShift);
     dec_and_free(newShift);
     if (n == valOrNode) {
       // the key was already associated with the value
@@ -1888,7 +2283,7 @@ if (node->bitmap & bit) {
       BitmapIndexedNode *newNode = clone_BitmapIndexedNode(node, idx, (Value *)0, n);
       return((Value *)newNode);
     }
-  } else if (equal(key, keyOrNull)) {
+  } else if (isTrue(equal((List *)0, key, keyOrNull))) {
     // if the keyOrNull points to a value that is equal to key
     // create new hash-map with valOrNode replaced by val
     // clone node and add val to it
@@ -1899,7 +2294,7 @@ if (node->bitmap & bit) {
   } else {
     // there is already a key/val pair at the position where key
     // would be placed. Extend tree a level
-    Value *hashValue = sha1(keyOrNull);
+    Value *hashValue = sha1((List *)0, keyOrNull);
     int64_t existingKeyHash = ((Number *)hashValue)->numVal;
     if (existingKeyHash == hash) {
       // make & return HashCollisionNode
@@ -1932,15 +2327,15 @@ if (node->bitmap & bit) {
     ArrayNode *newNode = (ArrayNode *)malloc_arrayNode();
     int jdx = mask(hash, shift);
     Value *newShift = (Value *)numberValue(shift + 5);
-    newNode->array[jdx] = assoc((Value *)&emptyBMI, key, val, arg3, newShift);
+    newNode->array[jdx] = assoc((List *)0, (Value *)&emptyBMI, key, val, arg3, newShift);
     for (int i = 0, j = 0; i < 32; i++) {
       if ((node->bitmap >> i) & 1) {
         if (node->array[j] == (Value *)0) {
           newNode->array[i] = node->array[j + 1];
           incRef(newNode->array[i]);
         } else {
-          Value *hash = sha1(node->array[j]);
-          newNode->array[i] = assoc((Value *)&emptyBMI, node->array[j], node->array[j + 1], hash, newShift);
+          Value *hash = sha1((List *)0, node->array[j]);
+          newNode->array[i] = assoc((List *)0, (Value *)&emptyBMI, node->array[j], node->array[j + 1], hash, newShift);
           dec_and_free(hash);
         }
         j += 2;
@@ -1987,11 +2382,11 @@ if (node->bitmap & bit) {
     // There is no key in the position, so valOrNode is
     // pointer to a node.
     Value *newShift = (Value *)numberValue(shift + 5);
-    Value *v = get(valOrNode, key, arg2, arg3, newShift);
+    Value *v = get((List *)0, valOrNode, key, arg2, arg3, newShift);
     dec_and_free(newShift);
     return(v);
   } else {
-    if (equal(key, keyOrNull)) {
+    if (isTrue(equal((List *)0, key, keyOrNull))) {
       // fprintf(stderr, \"Found at: %d\\n\", idx);
       incRef(valOrNode);
       return(valOrNode);
@@ -2009,9 +2404,9 @@ if (node->bitmap & bit) {
   Associative
   (get [m k _]
     (inline-text "
-Value *hash = sha1(arg1);
-Value *shift = numberValue(0);
-Value *found = get(arg0, arg1, arg2, hash, shift);
+Value *hash = sha1((List *)0, arg1);
+Value *shift = const0Ptr;
+Value *found = get((List *)0, arg0, arg1, arg2, hash, shift);
 dec_and_free(shift);
 dec_and_free(hash);
 return(found);
@@ -2022,31 +2417,34 @@ return(found);
     (map (seq m) second))
   (assoc [_ k v]
     (inline-text "
-Value *hash = sha1(arg1);
-Value *shift = numberValue(0);
-Value *newNode = assoc(arg0, arg1, arg2, hash, shift);
+Value *hash = sha1((List *)0, arg1);
+Value *shift = const0Ptr;
+Value *newNode = assoc((List *)0, arg0, arg1, arg2, hash, shift);
 dec_and_free(shift);
 dec_and_free(hash);
 return(newNode);
 ")))
 
 (extend-type ArrayNode
+  Getter
+  (type-name [_] "HashMap (ArrayNode)")
+
   Collection
   (count [x]
     (inline-text Number "
 int accum = 0;
 for(int i = 0; i < 32; i++){
   if (((ArrayNode *)arg0)->array[i] != (Value *)0) {
-    Number *subCnt = (Number *)count(((ArrayNode *)arg0)->array[i]);
+    Number *subCnt = (Number *)count((List *)0, ((ArrayNode *)arg0)->array[i]);
     accum += subCnt->numVal;
     dec_and_free((Value *)subCnt);
   }
 }
 return(numberValue(accum));
 "))
-  (empty? [m]
-    ;; TODO: make sure this holds when 'dissoc' is implemented
-    false)
+  ;; (empty? [m]
+  ;;   ;; TODO: make sure this holds when 'dissoc' is implemented
+  ;;   false)
 
   Monoid
   (zero [_] emptyBMI)
@@ -2084,7 +2482,7 @@ ArrayNode *node = (ArrayNode *)arg0;
 List *seq = (List *)arg1;
 for (int i = 0; i < 32; i++) {
    if (node->array[i] != (Value *)0)
-     seq = (List *)hashSeq(node->array[i], (Value *)seq);
+     seq = (List *)hashSeq((List *)0, node->array[i], (Value *)seq);
 }
 return((Value *)seq);
 "))
@@ -2109,14 +2507,14 @@ if (subNode == (Value *)0) {
       incRef(newNode->array[i]);
     }
   }
-  Value *hash = sha1(key);
+  Value *hash = sha1((List *)0, key);
   if (newNode->array[idx] != (Value *)0)
     decRef(newNode->array[idx]);
-  newNode->array[idx] = assoc((Value *)&emptyBMI, key, val, hash, newShift);
+  newNode->array[idx] = assoc((List *)0, (Value *)&emptyBMI, key, val, hash, newShift);
   dec_and_free(hash);
 } else {
-    Value *hash = sha1(key);
-    Value *n = assoc(subNode, key, val, hash, newShift);
+    Value *hash = sha1((List *)0, key);
+    Value *n = assoc((List *)0, subNode, key, val, hash, newShift);
     newNode = (ArrayNode *)malloc_arrayNode();
     for (int i = 0; i < 32; i++) {
       if (i != idx && node->array[i] != (Value *)0) {
@@ -2147,7 +2545,7 @@ Value *subNode = node->array[idx];
 if (subNode == (Value *)0) {
   found = val;
 } else {
-  found = get(subNode, key, val, arg3, newShift);
+  found = get((List *)0, subNode, key, val, arg3, newShift);
 }
 dec_and_free(newShift);
 return((Value *)found);
@@ -2156,9 +2554,9 @@ return((Value *)found);
   Associative
   (get [m k _]
     (inline-text "
-Value *hash = sha1(arg1);
-Value *shift = numberValue(0);
-Value *found = get(arg0, arg1, arg2, hash, shift);
+Value *hash = sha1((List *)0, arg1);
+Value *shift = const0Ptr;
+Value *found = get((List *)0, arg0, arg1, arg2, hash, shift);
 dec_and_free(shift);
 dec_and_free(hash);
 return(found);
@@ -2169,23 +2567,26 @@ return(found);
     (map (seq m) second))
   (assoc [_ k v]
     (inline-text "
-Value *hash = sha1(arg1);
-Value *shift = numberValue(0);
-Value *newNode = assoc(arg0, arg1, arg2, hash, shift);
+Value *hash = sha1((List *)0, arg1);
+Value *shift = const0Ptr;
+Value *newNode = assoc((List *)0, arg0, arg1, arg2, hash, shift);
 dec_and_free(shift);
 dec_and_free(hash);
 return(newNode);
 ")))
 
 (extend-type HashCollisionNode
+  Getter
+  (type-name [_] "HashMap (HashCollisionNode)")
+
   Collection
   (count [x]
     (inline-text Number "
 return(numberValue(((HashCollisionNode *) arg0)->count / 2));
 "))
-  (empty? [m]
-    ;; TODO: make sure this holds when 'dissoc' is implemented
-    false)
+  ;; (empty? [m]
+  ;;   ;; TODO: make sure this holds when 'dissoc' is implemented
+  ;;   false)
 
   Monoid
   (zero [_] emptyBMI)
@@ -2242,10 +2643,10 @@ int shift = (int)((Number *)arg4)->numVal;
 HashCollisionNode *newNode;
 int itemCount = node->count / 2;
 
-if(equal(sha1(node->array[0]), arg3)) {
+if(isTrue(equal((List *)0, sha1((List *)0, node->array[0]), arg3))) {
    newNode = malloc_hashCollisionNode(itemCount + 1);
    for (int i = 0; i < itemCount; i++) {
-      if (equal(node->array[2 * i], key)) {
+      if (isTrue(equal((List *)0, node->array[2 * i], key))) {
          newNode->array[2 * i] = key;
          incRef(key);
          newNode->array[2 * i + 1] = val;
@@ -2269,10 +2670,10 @@ if(equal(sha1(node->array[0]), arg3)) {
    BitmapIndexedNode *bmi = &emptyBMI;
    Number newShift = {NumberType, -1, 0};
 
-   bmi = (BitmapIndexedNode *)assoc((Value *)bmi, key, val, arg3, (Value *)&newShift);
+   bmi = (BitmapIndexedNode *)assoc((List *)0, (Value *)bmi, key, val, arg3, (Value *)&newShift);
    for (int i = 0; i < itemCount; i++) {
-      bmi = (BitmapIndexedNode *)assoc((Value *)bmi, node->array[2 * i], node->array[2 * i + 1],
-                                       sha1(node->array[i]), (Value *)&newShift);
+      bmi = (BitmapIndexedNode *)assoc((List *)0, (Value *)bmi, node->array[2 * i], node->array[2 * i + 1],
+                                       sha1((List *)0, node->array[i]), (Value *)&newShift);
    }
    return((Value *)bmi);
 }
@@ -2283,7 +2684,7 @@ if(equal(sha1(node->array[0]), arg3)) {
 HashCollisionNode *node = (HashCollisionNode *)arg0;
 List *seq = (List *)arg1;
 for (int i = 0; i < node->count / 2; i++) {
-   if (node->array[2 * i] != (Value *)0 && equal(arg1, node->array[2 * i])) {
+   if (node->array[2 * i] != (Value *)0 && equal((List *)0, arg1, node->array[2 * i])) {
       if (node->array[2 * i + 1] != (Value *)0) {
         incRef(node->array[2 * i + 1]);
         return(node->array[2 * i + 1]);
@@ -2300,9 +2701,9 @@ return(arg2);
   Associative
   (get [m k _]
     (inline-text "
-Value *hash = sha1(arg1);
-Value *shift = numberValue(0);
-Value *found = get(arg0, arg1, arg2, hash, shift);
+Value *hash = sha1((List *)0, arg1);
+Value *shift = const0Ptr;
+Value *found = get((List *)0, arg0, arg1, arg2, hash, shift);
 dec_and_free(shift);
 dec_and_free(hash);
 return(found);
@@ -2313,20 +2714,19 @@ return(found);
     (map (seq m) second))
   (assoc [_ k v]
     (inline-text "
-Value *hash = sha1(arg1);
-Value *shift = numberValue(0);
-Value *newNode = assoc(arg0, arg1, arg2, hash, shift);
+Value *hash = sha1((List *)0, arg1);
+Value *shift = const0Ptr;
+Value *newNode = assoc((List *)0, arg0, arg1, arg2, hash, shift);
 dec_and_free(shift);
 dec_and_free(hash);
 return(newNode);
-"))
-  )
+")))
 
 (defn hash-map [& kv-pairs]
   (reduce (partition kv-pairs 2)
           emptyBMI
-          (fn [bmi pair]
-            (apply assoc bmi pair))))
+          (fn [bmi [k v]]
+            (assoc bmi k v))))
 
 (defn m-get [m k]
   (let [not-found (reify
@@ -2390,7 +2790,174 @@ return(newNode);
 
          m))
 
+(defn identity [x]
+  x)
+
+(extend-type Function
+  Getter
+  (type-name [_] "Function")
+
+  Stringable
+  (string-list [f] (list "<Fn: " (fn-name f) ">"))
+
+  Monoid
+  (zero [_] identity)
+  (comp* [f fs]
+    (fn [& args]
+      (reduce fs (apply f args)
+              (fn [x f]
+                (f x)))))
+
+  Applicative
+  (apply* [f args]
+    ;; TODO: didn't work immediately. find out why
+    ;; Remember, the last element of 'args' must be a list
+    ;; everything up to that must be prepended to it
+    ;; (match args
+    ;;        |List arg & args| (fn-apply f (list** arg args))
+    ;;        (f)))
+    (cond
+     (list-empty? args) (f)
+     ;; Remember, the last element of 'args' must be a list
+     ;; everything up to that must be prepended to it
+     (let [[arg & args] args]
+       (fn-apply f (list** arg args))))))
+
+(extend-type String
+  Getter
+  (type-args [s] (list s))
+  (type-name [_] "String")
+
+  Eq
+  (=* [x y] (str= x y))
+
+  Collection
+  (empty? [s]
+    (= 0 (str-count s)))
+  (empty [s]
+    "")
+  (count [s]
+    (str-count s))
+  (conj [s value]
+    (let [strs (flat-map (list s value) string-list)]
+      (comp* (car strs) (cdr strs))))
+  (reduce [s result f]
+    (reduce (seq s) result f))
+
+  Seqable
+  (seq [s]
+    ;; permissable for defining fn's for primitive data types
+    (cond
+     (= s "") empty-list
+     (cons (subs s 0 1) (seq (subs s 1)))))
+  (first [s]
+    (subs s 0 1))
+  (rest [s]
+    (subs s 1))
+
+  Stringable
+  (string-list [v] (list v))
+
+  Monoid
+  (comp* [s ss]
+    (match ss
+           |List _|
+           (let [ss-list (cons s ss)
+                 new-len (apply + (map ss-list str-count))]
+             (car (map ss-list (partial str-append (str-malloc new-len)))))
+
+           s))
+
+  Hash
+  (sha1 [_]
+    ;; TODO: cache the sha1 value
+    (inline-text Number
+     "
+int64_t shaVal;
+Sha1Context context;
+String *strVal = (String *)arg0;
+
+Sha1Initialise(&context);
+Sha1Update(&context, (void *)strVal->buffer, strVal->len);
+Sha1Finalise(&context, (SHA1_HASH *)&shaVal);
+return((Value *)numberValue(shaVal));
+")))
+
+(extend-type SubStr
+  Getter
+  (type-name [_] "String (SubStr)")
+
+  Stringable
+  (string-list [v] (list v))
+
+  Eq
+  (=* [x y] (str= x y))
+
+  Collection
+  (empty? [s]
+    (= 0 (str-count s)))
+  (empty [s]
+    "")
+  (count [s]
+    (str-count s))
+  (conj [s value]
+    (let [strs (flat-map (list s value) string-list)]
+      (comp* (car strs) (cdr strs))))
+  (reduce [s result f]
+    (reduce (seq s) result f))
+
+  Seqable
+  (seq [s]
+    ;; permissable for defining fn's for primitive data types
+    (cond
+     (= s "") empty-list
+     (cons (subs s 0 1) (seq (subs s 1)))))
+  (first [s]
+    (subs s 0 1))
+  (rest [s]
+    (subs s 1))
+
+  Monoid
+  (comp* [s ss]
+    (match ss
+           |List _|
+           (let [ss-list (cons s ss)
+                 new-len (apply + (map ss-list str-count))]
+             (car (map ss-list (partial str-append (str-malloc new-len)))))
+
+           s))
+
+  Hash
+  (sha1 [_]
+    (inline-text Number
+     "
+int64_t shaVal;
+Sha1Context context;
+SubString *subStrVal = (SubString *)arg0;
+
+if (subStrVal->hash != (Number *)0) {
+  incRef((Value *)subStrVal->hash);
+  return((Value *)subStrVal->hash);
+}
+else {
+  Sha1Initialise(&context);
+  Sha1Update(&context, (void *)&subStrVal->type, 8);
+  Sha1Update(&context, (void *)subStrVal->buffer, subStrVal->len);
+  Sha1Finalise(&context, (SHA1_HASH *)&shaVal);
+  Number *hashVal = (Number *)numberValue(shaVal);
+  if (subStrVal->refs == -1)
+    malloc_count--;
+  subStrVal->hash = (Number *)hashVal;
+  incRef((Value *)hashVal);
+  return((Value *)hashVal);
+}
+")))
+
 (extend-type Keyword
+  Getter
+  (type-args [kw] (list kw))
+  (type-name [_] "Keyword")
+
   Eq
   (=* [x y]
     (symkey= x y))
@@ -2424,6 +2991,8 @@ else {
   Sha1Update(&context, (void *)subStrVal->buffer, subStrVal->len);
   Sha1Finalise(&context, (SHA1_HASH *)&shaVal);
   Number *hashVal = (Number *)numberValue(shaVal);
+  if (subStrVal->refs == -1)
+    malloc_count--;
   subStrVal->hash = (Number *)hashVal;
   incRef((Value *)hashVal);
   return((Value *)hashVal);
@@ -2434,6 +3003,7 @@ else {
 (extend-type Symbol
   Getter
   (type-args [s] (list s))
+  (type-name [_] "Symbol")
 
   Eq
   (=* [x y]
@@ -2446,12 +3016,8 @@ else {
   Stringable
   (string-list [v] (list (name v)))
 
-  Function
-  (invoke [sym-lit hm]
-    (m-get hm sym-lit))
-
   Hash
-(sha1 [_]
+  (sha1 [_]
     (inline-text Number "
 int64_t shaVal;
 Sha1Context context;
@@ -2467,18 +3033,59 @@ else {
   Sha1Update(&context, (void *)subStrVal->buffer, subStrVal->len);
   Sha1Finalise(&context, (SHA1_HASH *)&shaVal);
   Number *hashVal = (Number *)numberValue(shaVal);
+  if (subStrVal->refs == -1)
+    malloc_count--;
   subStrVal->hash = (Number *)hashVal;
   incRef((Value *)hashVal);
   return((Value *)hashVal);
 }
 ")))
 
+;; TODO: delete this
+(defn and
+  ([b-val] b-val)
+  ([b-val & b-vals]
+     (cond
+      b-val (apply and b-vals)
+      0)))
+
+;; TODO: delete this
+(defn or
+  ([b-val] b-val)
+  ([b-val & b-vals]
+     (cond
+      b-val 1
+      (apply or b-vals))))
+
+;; TODO: This is wrong. Doesn't short circuit. Doesn't return orig element
+(defn some [coll f]
+  (comp* nothing (map coll f)))
+
+(defn m<
+  ([x y] (cond
+          (<* x y) (maybe x)
+          nothing))
+  ([v & vs]
+     (cond
+      (list-empty? vs) (maybe v)
+      (not (<* v (car vs))) nothing
+      (apply m< vs))))
+
+(defn str [& vs]
+  (match vs
+         |List _|
+         (let [ss-list (flat-map vs string-list)
+               new-len (apply + (map ss-list str-count))]
+           (car (map ss-list (partial str-append (str-malloc new-len)))))
+
+         ""))
+
 (defn keyword [kw-name]
   (new-keyword (str ":" kw-name)))
 
 (defn string? [s]
-  (or (= String (get-type s))
-      (= SubStr (get-type s))))
+  (or (instance? String s)
+      (instance? SubStr s)))
 
 (defn range* [n]
   (cond
@@ -2492,18 +3099,6 @@ else {
   (cond
    (< n 1) empty-list
    (map (range* (dec n)) (fn [_] v))))
-
-;; (deftype ZipList [v]
-;;   Applicative
-;;   (apply* [zv arg-lists]
-;;     (cond
-;;      (any? empty? arg-lists) empty-list
-;;      (let [cars (map arg-lists (fn [l] (cond
-;;                                         (empty? l) :nil
-;;                                         (first l))))
-;;            cdrs (map arg-lists rest)]
-;;        (cons (apply v cars)
-;;              (apply* zv cdrs))))))
 
 (inline-text "
  int64_t sym_counter = 0;

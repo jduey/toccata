@@ -27,48 +27,9 @@
   (for [sym (is-expr (partial instance? Symbol))]
     (ast/sym sym)))
 
-(defn keyword-already-defined? [kw]
-  (sm/get-in-val (list :keywords kw)))
-
-(defn keyword-recently-defined? [kw]
-  (sm/get-in-val (list :new-keywords kw)))
-
-(defn keyword-defined-in-core [kw]
-  (for [ext-kw (sm/get-in-val (list :core-keywords kw))
-        _ (sm/assoc-in-val (list :keywords kw) ext-kw)
-        _ (sm/update-in-val (list :new-externs)
-                            (fn [externs]
-                              (cons (str "SubString " ext-kw) externs)))]
-    ext-kw))
-
-(defn make-static-keyword [kw]
-  (for [kw-idx (sm/get-val :kw-count)
-        _ (sm/set-val :kw-count (inc kw-idx))
-        _ (sm/assoc-in-val (list :new-keywords kw)
-                           (str "_kw_" kw-idx))]
-    ""))
-
 (defn analyze-keyword []
-  (for [kw (is-expr (partial instance? Keyword))
-        _ (comp (keyword-already-defined? kw)
-                (keyword-recently-defined? kw)
-                (keyword-defined-in-core kw)
-                (make-static-keyword kw))]
+  (for [kw (is-expr (partial instance? Keyword))]
     (ast/kw kw)))
-
-(defn number-already-defined? [num]
-  (sm/get-in-val (list :numbers num)))
-
-(defn number-recently-defined? [num]
-  (sm/get-in-val (list :new-numbers num)))
-
-(defn number-defined-in-core [num]
-  (for [ext-num (sm/get-in-val (list :core-numbers num))
-        _ (sm/assoc-in-val (list :numbers num) ext-num)
-        _ (sm/update-in-val (list :new-externs)
-                            (fn [externs]
-                              (cons (str "Number " ext-num) externs)))]
-    ext-num))
 
 (defn make-static-number [num]
   (for [num-idx (sm/get-val :num-count)
@@ -78,40 +39,11 @@
     ""))
 
 (defn analyze-number []
-  (for [num (is-expr (partial instance? Number))
-        _ (comp (number-already-defined? num)
-                (number-recently-defined? num)
-                (number-defined-in-core num)
-                (make-static-number num))]
+  (for [num (is-expr (partial instance? Number))]
     (ast/number num)))
 
-(defn string-already-defined? [str-val]
-  (sm/get-in-val (list :strings str-val)))
-
-(defn string-recently-defined? [str-val]
-  (sm/get-in-val (list :new-strings str-val)))
-
-(defn string-defined-in-core [str-val]
-  (for [ext-str (sm/get-in-val (list :core-strings str-val))
-        _ (sm/assoc-in-val (list :strings str-val) ext-str)
-        _ (sm/update-in-val (list :new-externs)
-                            (fn [externs]
-                              (cons (str "String " ext-str) externs)))]
-    ext-str))
-
-(defn make-static-string [str-val]
-  (for [str-idx (sm/get-val :str-count)
-        _ (sm/set-val :str-count (inc str-idx))
-        _ (sm/assoc-in-val (list :new-strings str-val)
-                           (str "_str_" str-idx))]
-    ""))
-
 (defn analyze-string []
-  (for [str-val (is-expr string?)
-        _ (comp (string-already-defined? str-val)
-                (string-recently-defined? str-val)
-                (string-defined-in-core str-val)
-                (make-static-string str-val))]
+  (for [str-val (is-expr string?)]
     (ast/strng str-val)))
 
 (defn analyze-call []
@@ -159,46 +91,30 @@
                         (ast/fn-expr (ast/sym name) arities)))]
     result))
 
-(defn analyze-proto-arity [args]
-  (match args
-         |List fn-name params first-body & body|
-         (let [params (rest params)
-               default-fn-expr (list 'fn-arity params (cons first-body body))]
-           (for [ast (analyze-expr default-fn-expr)]
-             {fn-name {(count params) {:default ast}}}))
+(defn analyze-proto-arity [[fn-name params & body]]
+  (match (filter params (partial = "&"))
+         |List _|
+         (zero sm/state-maybe)
 
-         |List fn-name params|
-         (sm/state-maybe {fn-name {(dec (count params)) {}}})))
+         (match body
+                |List _|
+                (for [ast (analyze-expr (list 'fn-arity (rest params) body))]
+                  {fn-name {(dec (count params)) {:default ast}}})
 
-(defn sym-already-defined? [sym]
-  (sm/get-in-val (list :symbols sym)))
+                (sm/state-maybe {fn-name {(dec (count params)) {}}}))))
 
-(defn sym-recently-defined? [sym]
-  (sm/get-in-val (list :new-symbols sym)))
-
-(defn sym-defined-in-core [sym]
-  (for [ext-sym (sm/get-in-val (list :core-symbols sym))
-        _ (sm/assoc-in-val (list :symbols sym) ext-sym)
-        _ (sm/update-in-val (list :new-externs)
-                            (fn [externs]
-                              (cons (str "SubString " ext-sym) externs)))]
-    ext-sym))
-
-(defn make-static-symbol [sym]
-  (for [sym-idx (sm/get-val :sym-count)
-        _ (sm/set-val :sym-count (inc sym-idx))
-        _ (sm/assoc-in-val (list :new-symbols sym)
-                           (str "_sym_" sym-idx))]
-    sym))
+(defn analyze-protocol []
+  (for [expr (sm/get-val :expr)
+        result (match expr
+                      |List 'defprotocol name & defs|
+                      (for [proto-fns (traverse defs analyze-proto-arity)]
+                        (ast/proto name (apply merge-with comp proto-fns))))]
+    result))
 
 (defn make-quoted [quoted-form]
   (match quoted-form
          |Symbol|
-         (for [_ (comp (sym-already-defined? quoted-form)
-                       (sym-recently-defined? quoted-form)
-                       (sym-defined-in-core quoted-form)
-                       (make-static-symbol quoted-form))]
-           (ast/quoted quoted-form))
+         (sm/state-maybe (ast/quoted quoted-form))
 
          |String|
          (analyze-expr quoted-form)
@@ -241,7 +157,7 @@
                         (ast/def-expr name val-ast))
 
                       |List 'def name|
-                      (sm/state-maybe (ast/def-expr name :no-value)))]
+                      (sm/state-maybe (ast/declare name)))]
     result))
 
 (defn analyze-cond []
@@ -280,9 +196,7 @@
                              |List name args & exprs|
                              (for [body (traverse exprs analyze-expr)
                                    _ (sm/set-val :expr frms)]
-                               (list name
-                                     (ast/fn-expr (ast/sym (symbol (str name "_impl")))
-                                                  (list (ast/fixed-arity (rest args) body)))))))]
+                               {name (list (ast/fixed-arity (rest args) body))})))]
     result))
 
 (defn analyze-proto-impl []
@@ -292,7 +206,7 @@
                       (for [_ (sm/set-val :expr frms)
                             :when (instance? Symbol name)
                             fn-impls (sm/recur (analyze-proto-fn))]
-                        (list name fn-impls)))]
+                        {name (apply merge-with comp fn-impls)}))]
     result))
 
 (defn analyze-extensions [exts]
@@ -300,12 +214,7 @@
         _ (sm/set-val :expr exts)
         proto-impls (sm/recur (analyze-proto-impl))
         _ (sm/set-val :expr curr-expr)]
-    (reduce proto-impls {} (fn [m [k v]]
-                             (assoc m k
-                                    (match (m-get m k)
-                                           |maybe old-v| (comp old-v v)
-                                           v))))))
-
+    (apply merge-with comp proto-impls)))
 
 (defn analyze-extend-type []
   (for [expr (sm/get-val :expr)
@@ -315,16 +224,38 @@
                         (ast/type-extension name proto-specs)))]
     result))
 
+(defn analyze-add-ns []
+  (for [expr (sm/get-val :expr)
+        result (match expr
+                      |List 'add-ns ns-name defs|
+                      (for [asts (analyze-expr defs)]
+                        (ast/ns-add ns-name asts)))]
+    result))
+
+(defn analyze-reify []
+  (for [expr (sm/get-val :expr)
+        result (match expr
+                      |List 'reify & defs|
+                      (for [proto-specs (analyze-extensions defs)]
+                        (ast/reified proto-specs)))]
+    result))
+
+(defn analyze-deftype []
+  (for [expr (sm/get-val :expr)
+        result (match expr
+                      |List 'deftype name fields & defs|
+                      (sm/state-maybe (ast/type-expr name fields defs)))]
+    result))
+
 (defn analyze-module []
   (for [expr (sm/get-val :expr)
         module-ast (match expr
                           |List 'module module-name|
                           (comp
-                           (for [_ (sm/get-in-val (list :modules module-name :syms))]
+                           (for [_ (sm/get-in-val (list :modules module-name))]
                              (list (ast/strng module-name)))
                            (for [text (sm/get-val :text)
-                                 :let [module-stream (slurp module-name)]
-                                 _ (sm/set-val :text module-stream)
+                                 _ (sm/set-val :text (slurp module-name))
                                  file-name (sm/get-val :file-name)
                                  _ (sm/set-val :file-name module-name)
                                  parser (sm/get-val :parser)
@@ -335,42 +266,8 @@
                                  _ (sm/set-val :file-name file-name)
                                  _ (sm/set-val :text text)]
                              (cons (ast/strng module-name)
-                                   asts))
-                           (sm/state-maybe (list (ast/strng module-name)))))]
+                                   asts))))]
     module-ast))
-
-(defn analyze-add-ns []
-  (for [expr (sm/get-val :expr)
-        result (match expr
-                      |List 'add-ns ns-name defs|
-                      (for [asts (analyze-expr defs)]
-                        (ast/ns-add ns-name asts)))]
-    result))
-
-;; TODO: handle multi-arity reified fns
-(defn analyze-reify []
-  (for [expr (sm/get-val :expr)
-        result (match expr
-                      |List 'reify & defs|
-                      (for [proto-specs (analyze-extensions defs)]
-                        (ast/reified proto-specs)))]
-    result))
-
-(defn analyze-protocol []
-  (for [expr (sm/get-val :expr)
-        result (match expr
-                      |List 'defprotocol name & defs|
-                      (for [;; TODO: make this only accept fixed arities
-                            arities (traverse defs analyze-proto-arity)]
-                        (ast/proto name (apply merge-with comp arities))))]
-    result))
-
-(defn analyze-deftype []
-  (for [expr (sm/get-val :expr)
-        result (match expr
-                      |List 'deftype name fields & defs|
-                      (sm/state-maybe (ast/type-expr name fields defs)))]
-    result))
 
 (defn analyze-main []
   (for [expr (sm/get-val :expr)

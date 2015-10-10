@@ -1,7 +1,6 @@
 #!/bin/bash
 
-clang -g -c -o core.a core.c &&
-clang core.a -g -o toccata toccata.c &&
+clang -g -o toccata toccata.c &&
 scripts/build &&
 time ./toccata toccata.toc > toccata.c &&
 scripts/build

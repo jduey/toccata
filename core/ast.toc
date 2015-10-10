@@ -126,6 +126,11 @@
 (defn fn-expr [name arities]
   (fr/free (fn-ast name (apply* (fr/free list) arities))))
 
+(deftype declaration-ast [name])
+
+(defn declare [name]
+  (fr/free (declaration-ast name)))
+
 (deftype definition-ast [name value])
 
 (defn def-expr [name value]
@@ -134,13 +139,4 @@
 (deftype type-ast [name fields impls])
 
 (defn type-expr [name fields impls]
-  (let [fields (rest fields)
-        impls (comp
-               (cons 'reify impls)
-               (cons 'Getter
-                     (cons (list 'type-name (list 'vector '_) (str name))
-                           (map fields
-                                (fn [field]
-                                  (list (symbol (str "." field)) (list 'vector '_)
-                                        field))))))]
-    (fr/free (type-ast name fields impls))))
+  (fr/free (type-ast name (rest fields) impls)))

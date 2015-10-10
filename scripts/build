@@ -1,7 +1,6 @@
 #!/bin/bash
 
-clang -fno-objc-arc -g -c -o core.a core.c &&
-clang core.a -fno-objc-arc -lpthread -g -o toccata toccata.c &&
+clang -fno-objc-arc -lpthread -g -o toccata toccata.c &&
 ./toccata examples/hello.toc > hello.c &&
-clang core.a -fno-objc-arc -g -o hello hello.c &&
+clang -fno-objc-arc -g -o hello hello.c &&
 ./hello Universe

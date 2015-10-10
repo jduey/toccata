@@ -123,9 +123,10 @@
                            (parser/ignore (parser/term (char 34))))))
 
 (defn str-to-int [int-str]
-  (reduce int-str 0
-          (fn [n c]
-            (+ (* n 10) (- (char-code c) (char-code "0"))))))
+  (let [code-0 (char-code "0")]
+    (reduce int-str 0
+            (fn [n c]
+              (+ (* n 10) (- (char-code c) code-0))))))
 
 ;; only reads integers
 (defn read-number []
@@ -493,7 +494,13 @@
                          (parser/ignore (parser/one-or-more (whitespace)))
                          (read-sub-form)
                          (parser/one-or-more (apply-to list
-                                                       (read-pattern)
+                                                       (comp
+                                                        (read-pattern)
+                                                        (read-const-string)
+                                                        (read-symbol)
+                                                        (read-keyword)
+                                                        (read-quoted)
+                                                        (read-number))
                                                        (read-sub-form)))
                          (comp (read-sub-form)
                                (parser/always 'nothing))
