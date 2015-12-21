@@ -1,86 +1,10 @@
 
-(def maybe-val)
-
-(def nothing
-  (reify
-    Stringable
-    (string-list [_] (list "<nothing>"))
-
-    Eq
-    (=* [nv x] (type= nv x))
-
-    Monoid
-    (zero [nv] nv)
-    (comp* [nv mvs]
-      (cond
-       (empty? mvs) nv
-       (comp* (first mvs) (rest mvs))))
-
-    Functor
-    (map [nv f] nv)
-
-    Applicative
-    (wrap [_ x] (maybe-val x))
-    (apply* [nv _] nv)
-
-    Monad
-    (flatten [nv] nv)
-    (flat-map [nv _] nv)))
-
-(deftype maybe-val [v]
-  Stringable
-  (string-list [mv]
-    (comp (list "<maybe ")
-          (string-list (.v mv))
-          (list ">")))
-
-  Eq
-  (=* [x y]
-    (cond
-     (not (type= x y)) false
-     (= v (.v y))))
-
-  Monoid
-  (zero [_] nothing)
-  (comp* [_ _] v)
-
-  Functor
-  (map [_ f]
-    (maybe-val (f v)))
-
-  Applicative
-  (wrap [_ v] (maybe-val v))
-  ;; (apply* [fv args]
-  ;;   (cond
-  ;;    (some args (partial = nothing)) nothing
-  ;;    (maybe-val (apply (.v fv) (map args .v)))))
-
-  Monad
-  (flatten [_] v)
-  (flat-map [_ f]
-    (f v)))
-
-(def maybe
-  (reify
-    Function
-    (invoke [_ v] (maybe-val v))
-
-    Type
-    (instance? [_ mv] (instance? maybe-val mv))
-
-    Monoid
-    (zero [_] nothing)
-    (comp* [_ _] :nothing-here)
-    ))
-
-
 (main [_]
       (let [double (fn [x]
                      (* 2 x))
             check-int (fn [x]
-                        (cond
-                         (= 0 (rem x 2)) (maybe x)
-                         nothing))]
+                        (match (rem x 2)
+                               0 (maybe x)))]
         ;; check the functor and applicative laws for maybe
         (println :maybe)
         (println :functor-1 (= (map (maybe 5) identity) (maybe 5)))

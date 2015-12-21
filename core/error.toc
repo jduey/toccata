@@ -12,10 +12,9 @@
   Applicative
   (wrap [_ x] (error-value x))
   (apply* [fv args]
-    (let [errors (filter args (fn [arg] (instance? error-value arg)))]
-      (cond
-       (empty? errors) fv
-       (first errors))))
+    (match (filter args (fn [arg] (instance? error-value arg)))
+           |List error| error
+           fv))
 
   Monad
   (flat-map [ev _]
@@ -45,10 +44,9 @@
   Applicative
   (wrap [_ x] (valid-value x))
   (apply* [fv args]
-    (let [errors (filter args (fn [arg] (instance? error-value arg)))]
-      (cond
-       (empty? errors) (valid-value (apply v (map args .v)))
-       (first errors))))
+    (match (filter args (fn [arg] (instance? error-value arg)))
+           |List error| error
+           (valid-value (apply v (map args .v)))))
 
   Monad
   (flat-map [_ f]
@@ -68,9 +66,9 @@
   (* 2 x))
 
 (defn check-int [x]
-  (cond
-   (= 0 (rem x 2)) (valid x)
-   (error (str "Found odd int: " x))))
+  (match (rem x 2)
+         0 (valid x)
+         (error (str "Found odd int: " x))))
 
 (main [_]
       ;; check the functor and applicative laws for valid-value

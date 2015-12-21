@@ -50,10 +50,7 @@
 (defn file-stream [frdr]
   (st/stream (list frdr 0)
              (fn [strm-info]
-               (let [byte (read-byte frdr (second strm-info))]
-                 (cond
-                  (= 0 (count byte)) nothing
-                  (maybe byte))))
+               (m-first (read-byte frdr (second strm-info))))
              (fn [strm-info]
                (list frdr (inc (second strm-info))))))
 

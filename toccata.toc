@@ -1,15 +1,18 @@
 
 ;; TODO:
+;; remove booleans and 'cond'
 ;; use #line directive
+;; remove 'invoke' implementations for 'nothing'
 ;; make 'match' efficient
+;; implement dissoc
 ;; implement definitions that require initialization at start time.
 ;; change the implementation of reified values
 ;; implement lazy 'or'
+;; refactor calls to 'match'
 ;; better error messages
 ;; implement to-be-freed lists
 ;; problem in multi-arity defn when one arity has no args
 ;; test memory exhaustion handling
-;; remove booleans and 'cond'
 ;; implements?
 ;; REPL
 ;; fn meta data; doc strings and ast
@@ -52,19 +55,8 @@
 
 (defn debug [& args]
   (comp (for [debugging (sm/get-val :debug-on)]
-          (cond
-           debugging (apply print-err args)
-           0))
+          (apply print-err args))
         (sm/state-maybe "")))
-
-(defn zip-lists [l1 l2]
-  (cond
-   (empty? l1) empty-list
-   (empty? l2) empty-list
-   (let [[l1-head & l1-tail] l1
-         [l2-head & l2-tail] l2]
-     (cons (list l1-head l2-head)
-           (zip-lists l1-tail l2-tail)))))
 
 (defn index [coll]
   (let [coll (seq coll)]
@@ -114,19 +106,17 @@
 
         ;; if 'sym' is in the context, it should be in :closed-over
         closed-over (sm/get-val :closed-over)
-        closure-sym (let [found? (some closed-over (fn [[c-sym sym-literal]]
-                                                     (for [_ (m= sym sym-literal)]
-                                                       c-sym)))]
-                      (cond
-                       (= found? nothing)
-                       ;; otherwise, create new 'closure-sym' and add it
-                       (for [closure-sym (genlocal "val")
-                             _ (sm/update-in-val (list :closed-over)
-                                                 (partial cons (list closure-sym sym)))]
-                         closure-sym)
+        closure-sym (match (some closed-over (fn [[c-sym sym-literal]]
+                                               (for [_ (m= sym sym-literal)]
+                                                 c-sym)))
+                           ;; just return it if already in :closed-over
+                           |maybe found| (sm/state-maybe found)
 
-                       ;; just return it if already in :closed-over
-                       (sm/state-maybe (.v found?))))]
+                           ;; otherwise, create new 'closure-sym' and add it
+                           (for [closure-sym (genlocal "val")
+                                 _ (sm/update-in-val (list :closed-over)
+                                                     (partial cons (list closure-sym sym)))]
+                             closure-sym))]
     (c-code closure-sym empty-list empty-list (.type-num sym-val))))
 
 (defn lookup-static-arity [target-sym num-args]
@@ -261,32 +251,27 @@
         initialization (.init evalled-expr)
         expr-type (.type-num evalled-expr)]
     (for [def (sm/get-in-val (list :defined-syms name))
-          value (cond
-                 (= result-sym "")
-                 (for [_ (write-strs (list "Value *" (.c-val def) " = "
-                                           (first initialization) ";\n"))]
-                   (c-code (.c-val def) empty-list empty-list expr-type))
+          ;; TODO: there is almost certainly a better way
+          _ (.v (comp (for [_ (m= result-sym "")]
+                        (write-strs (list "Value *" (.c-val def) " = "
+                                          (first initialization) ";\n")))
 
-                 (let [initialization (match (m= (.c-val def) result-sym)
-                                             |maybe _|
-                                             initialization
+                      (for [_ (m= (.c-val def) result-sym)]
+                        (update-startup-init initialization))
 
-                                             (comp initialization
-                                                   (list (.c-val def) " = "
-                                                         result-sym ";\n")))]
-                   (for [_ (update-startup-init initialization)]
-                     (c-code result-sym empty-list empty-list expr-type))))]
-      value)))
+                      (maybe (update-startup-init (comp initialization
+                                                        (list (.c-val def) " = "
+                                                              result-sym ";\n"))))))]
+      (c-code (.c-val def) empty-list empty-list expr-type))))
 
 (defn define-value [evalled-expr]
-  (cond
-   (= (.c-val evalled-expr) "")
-   (for [c-name (sm/state-maybe (gensym "var_"))
-         _ (write-strs (list "Value *" c-name " = " (first (.init evalled-expr)) ";\n"))]
-     (c-code c-name empty-list empty-list (.type-num evalled-expr)))
+  (match (.c-val evalled-expr)
+         "" (for [c-name (sm/state-maybe (gensym "var_"))
+                  _ (write-strs (list "Value *" c-name " = " (first (.init evalled-expr)) ";\n"))]
+              (c-code c-name empty-list empty-list (.type-num evalled-expr)))
 
-   (for [_ (update-startup-init (.init evalled-expr))]
-     (c-code (.c-val evalled-expr) empty-list empty-list (.type-num evalled-expr)))))
+         (for [_ (update-startup-init (.init evalled-expr))]
+           (c-code (.c-val evalled-expr) empty-list empty-list (.type-num evalled-expr)))))
 
 (extend-type ast/definition-ast
   Emitter
@@ -345,9 +330,9 @@
   Emitter
   (emit-c [ast]
     (for [file-name (sm/get-val :file-name)
-          :let [protocol-name (cond
-                               (= "" file-name) (str (.protocol-name ast) "/")
-                               (str file-name "/" (.protocol-name ast) "/"))]
+          :let [protocol-name (match file-name
+                                     "" (str (.protocol-name ast) "/")
+                                     (str file-name "/" (.protocol-name ast) "/"))]
           curr-fn-sym (sm/get-val :curr-fn-sym)
           curr-fn-ptr (sm/get-val :curr-fn-ptr)
           _ (sm/set-val :curr-fn-sym :no-fn)
@@ -390,21 +375,21 @@
 
 (defn free-scope-locals [result-sym]
   (for [scope-locals (sm/get-val :scope-locals)]
-    (let [locals (map (filter (seq scope-locals) second) first)
-          only-result? (cond
-                        (< 1 (count locals)) 0
-                        (empty? locals) 0
-                        (= (str result-sym) (car locals)))
-          locals (cond
-                  only-result? empty-list
-                  locals)]
-      (comp (cond
-             only-result? empty-list
-             (= result-sym "") empty-list
-             (list "incRef(" result-sym ");\n"))
-            (map locals
-                 (fn [local]
-                   (str "dec_and_free(" local ");\n")))))))
+    (let [locals (map (filter (seq scope-locals) second) first)]
+      ;; TODO: getting closer. Still needs work
+      (match (comp (for [_ (m= result-sym "")]
+                     locals)
+                   (for [local (m-first locals)
+                         _ (m= (str result-sym) local)
+                         _ (m= 1 (count locals))]
+                     empty-list))
+             |maybe locals| (map locals
+                                 (fn [local]
+                                   (str "dec_and_free(" local ");\n")))
+             (list* "incRef(" result-sym ");\n"
+                    (map locals
+                         (fn [local]
+                           (str "dec_and_free(" local ");\n"))))))))
 
 (defn emit-reified-fn [protocol-name type-num [name ast]]
   (let [fn-ptr (gensym "protoFnPtr_")
@@ -481,21 +466,9 @@
            _ (sm/set-val :curr-fn-sym curr-fn-sym)
            _ (sm/set-val :reify-fn-index reify-fn-index)
            reified-result (let [inits (crush impl-fns .init)]
-                            (cond
-                             (empty? inits)
-                             (let [reified-sym (gensym "reifiedStatic_")
-                                   reified-ptr (gensym "reifiedPtr_")
-                                   impl-count (count impl-fns)]
-                               (sm/state-maybe
-                                (c-code reified-ptr
-                                        empty-list
-                                        (comp
-                                         (crush impl-fns .decl)
-                                         (list "ReifiedVal " reified-sym " = {" type-num ", -1, 0, {}};\n"
-                                               "Value *" reified-ptr " = (Value *)&" reified-sym ";\n"))
-                                        type-num)))
-
+                            (comp
                              (for [reified-sym (genlocal "reifiedDyn_")
+                                   :when (< 0 (count inits))
                                    _ (remember-local reified-sym)]
                                (let [impls-syms (map impl-fns .c-val)]
                                  (c-code reified-sym
@@ -510,18 +483,23 @@
                                                            (list "((ReifiedVal *)" reified-sym
                                                                  ")->impls[" index "] = (Value *)" sym ";\n"))))
                                          (crush impl-fns .decl)
-                                         type-num)))))]
+                                         type-num)))
+
+                             (let [reified-sym (gensym "reifiedStatic_")
+                                   reified-ptr (gensym "reifiedPtr_")
+                                   impl-count (count impl-fns)]
+                               (sm/state-maybe
+                                (c-code reified-ptr
+                                        empty-list
+                                        (comp
+                                         (crush impl-fns .decl)
+                                         (list "ReifiedVal " reified-sym " = {" type-num ", -1, 0, {}};\n"
+                                               "Value *" reified-ptr " = (Value *)&" reified-sym ";\n"))
+                                        type-num)))))]
        reified-result)
      (flat-map (debug :booom)
                (fn [_]
                  (abort))))))
-
-(defn replace-type [types type-val-num name]
-  (cond
-   (empty? types) (list (list name type-val-num))
-   (= (first (first types)) type-val-num) (cons (list name type-val-num)
-                                                (rest types))
-   (cons (first types) (replace-type (rest types) type-val-num name))))
 
 (extend-type ast/type-ast
   Emitter
@@ -587,7 +565,7 @@
                                                          (apply str (interpose fields ", ")) "]>"))
                                              'Type
                                              (list 'instance? (list 'vector '_ 'v)
-                                                   (list '= type-val-num (list 'get-type 'v)))
+                                                   (list '=* type-val-num (list 'get-type 'v)))
                                              'Applicative
                                              (list 'apply* (list 'vector '_ 'args)
                                                    (list 'apply 'invoke '_ 'args))
@@ -616,10 +594,12 @@
 
              _ (sm/update-in-val (list :types)
                                  (fn [types]
-                                   (reduce (replace-type (seq types) type-val-num new-type-name)
+                                   (reduce (seq types)
                                            {}
-                                           (fn [m kv]
-                                             (apply assoc m kv)))))]
+                                           (fn [m [name type-num]]
+                                             (match (m= type-num type-val-num)
+                                                    |maybe| (assoc m new-type-name type-num)
+                                                    (assoc m name type-num))))))]
          result)))))
 
 (extend-type ast/extend-ast
@@ -648,20 +628,17 @@
 
 (defn unpack-arg-list [list-sym [arg-sym & arg-syms]]
   (let [arg (.c-val arg-sym)]
-    (cond
-     (= arg "")
-     (list "")
-
-     (empty? arg-syms)
-     (list "Value *" arg " = (Value *) " list-sym ";\n")
-
-     (let [results (unpack-arg-list list-sym arg-syms)]
-       (list* "Value *" arg
-              " = " list-sym "->head;\n"
-              "if (" list-sym "->tail) " list-sym "->tail->len = " list-sym "->len - 1;\n"
-              list-sym " = " list-sym "->tail;\n"
-              (comp (.init arg-sym)
-                    results))))))
+    (match (comp (for [_ (m= arg "")]
+                   (list ""))
+                 (for [_ (m= empty-list arg-syms)]
+                   (list "Value *" arg " = (Value *) " list-sym ";\n")))
+           |maybe v| v
+           (comp (list "Value *" arg
+                       " = " list-sym "->head;\n"
+                       "if (" list-sym "->tail) " list-sym "->tail->len = " list-sym "->len - 1;\n"
+                       list-sym " = " list-sym "->tail;\n")
+                 (.init arg-sym)
+                 (unpack-arg-list list-sym arg-syms)))))
 
 (defn gen-arg-syms [args]
   (let [last-arg (last args :bogus)]
@@ -676,8 +653,8 @@
                                c-sym (genlocal "arg")
                                list-sym (genlocal "arg")]
                            (c-code c-sym
-                                   (comp (list "List *" list-sym " = (List *)" c-sym ";\n")
-                                         (unpack-arg-list list-sym args))
+                                   (list* "List *" list-sym " = (List *)" c-sym ";\n"
+                                          (unpack-arg-list list-sym args))
                                    empty-list
                                    ListType))
 
@@ -692,20 +669,21 @@
   Emitter
   (emit-c [ast]
     (for [evalled (fr/evaluate (.val ast) emit-c)
-          result (cond
-                  (instance? Symbol (.binding ast))
-                  (for [_ (sm/assoc-in-val (list :local-syms (.binding ast))
-                                           (c-code (.c-val evalled) empty-list empty-list (.type-num evalled)))]
-                    evalled)
+          result (match (.binding ast)
+                        |Symbol|
+                        (for [_ (sm/assoc-in-val (list :local-syms (.binding ast))
+                                                 (c-code (.c-val evalled) empty-list empty-list
+                                                         (.type-num evalled)))]
+                          evalled)
 
-                  (for [arg-syms (gen-arg-syms (.binding ast))
-                        list-sym (genlocal "arg")]
-                    (c-code ""
-                            (comp (.init evalled)
-                                  (list "List *" list-sym " = (List *)" (.c-val evalled) ";\n")
-                                  (unpack-arg-list list-sym arg-syms))
-                            (.decl evalled)
-                            :no-type)))]
+                        (for [arg-syms (gen-arg-syms (.binding ast))
+                              list-sym (genlocal "arg")]
+                          (c-code ""
+                                  (comp (.init evalled)
+                                        (list "List *" list-sym " = (List *)" (.c-val evalled) ";\n")
+                                        (unpack-arg-list list-sym arg-syms))
+                                  (.decl evalled)
+                                  :no-type)))]
       result)))
 
 (extend-type ast/let-ast
@@ -807,9 +785,9 @@
           evalled-clauses (eval-cond-clause (.clauses ast) default-stmts cond-result)
           _ (end-scope scope-info)
           _ (remember-local cond-result)]
-      (let [result-type (cond
-                         (= (.type-num evalled-clauses) default-type) default-type
-                         :no-type)]
+      (let [result-type (match (m= (.type-num evalled-clauses) default-type)
+                               |maybe| default-type
+                               :no-type)]
         (c-code cond-result
                 (comp (list "Value *" cond-result ";\n")
                       (.init evalled-clauses))
@@ -820,70 +798,64 @@
 (defn expand-match-clauses [match-val-sym type-args-sym clauses]
   (sm/traverse clauses
                (fn [[pattern expr]]
-                 (cond
-                  (instance? List pattern)
-                  (let [dont-care (gensym "dont_care_")
-                        [[pattern-type & symbols] [_ & literals]] (reduce (reverse pattern)
-                                                                          (list empty-list empty-list)
-                                                                          (fn [[symbols literals] x]
-                                                                            (cond
-                                                                             (= x "&")
-                                                                             (list (cons x symbols)
-                                                                                   literals)
+                 (match pattern
+                        |List|
+                        (let [dont-care (gensym "dont_care_")
+                              [[pattern-type & symbols] [_ & literals]] (reduce (reverse pattern)
+                                                                                (list empty-list empty-list)
+                                                                                (fn [[symbols literals] x]
+                                                                                  (match x
+                                                                                         "&" (list (cons x symbols)
+                                                                                                   literals)
 
-                                                                             (instance? Symbol x)
-                                                                             (list (cons x symbols)
-                                                                                   (cons dont-care literals))
-
-                                                                             (list (cons dont-care symbols)
-                                                                                   (cons x literals)))))
-                        binding-syms (remove symbols (partial = "&"))
-                        binding-syms (cond
-                                      (= (count symbols) (count binding-syms))
-                                      (comp symbols (list dont-care))
-
-                                      binding-syms)]
-                    (cond
-                     (empty? (remove literals (partial = dont-care)))
-                     (apply-to list
-                               (an/analyze-expr
-                                (list 'cond
-                                      (list 'instance? pattern-type match-val-sym)
-                                      (list 'cond (list '<* (list 'count type-args-sym)
-                                                        (dec (count binding-syms)))
-                                            0
-                                            1)
-
-                                      0))
-                               (for [b (an/analyze-let-binding (list binding-syms
-                                                                     type-args-sym))]
-                                 (ast/let-expr (list b) (list expr))))
-
-                     (apply-to list
-                               (let [temp-args (cons (gensym "t-")
-                                                     (map literals (fn [_] (gensym "t-"))))
-                                     lit-args (remove (zip-lists temp-args literals)
-                                                      (fn [[_ literal]]
-                                                        (= literal dont-care)))
-                                     lit-checks (map lit-args (partial cons '=))]
-                                 (an/analyze-expr (list 'cond
-                                                        (list 'instance? pattern-type match-val-sym)
-                                                        (list 'cond
-                                                              (list '<* (list 'count type-args-sym)
+                                                                                         |Symbol| (list (cons x symbols)
+                                                                                                        (cons dont-care literals))
+                                                                                         (list (cons dont-care symbols)
+                                                                                               (cons x literals)))))
+                              binding-syms (remove symbols (partial = "&"))
+                              binding-syms (match (m= (count symbols) (count binding-syms))
+                                            |maybe| (comp symbols (list dont-care))
+                                            binding-syms)]
+                          ;; TODO: could probably use 'some' here
+                          (match (remove literals (partial = dont-care))
+                                 empty-list
+                                 (apply-to list
+                                           (an/analyze-expr
+                                            (list 'cond
+                                                  (list 'instance? pattern-type match-val-sym)
+                                                  (list 'cond (list '<* (list 'count type-args-sym)
                                                                     (dec (count binding-syms)))
-                                                              '0
+                                                        0
+                                                        1)
 
-                                                              (list 'let (list (list temp-args type-args-sym))
-                                                                    (cond
-                                                                     (= 1 (count lit-checks))
-                                                                     (first lit-checks)
+                                                  0))
+                                           (for [b (an/analyze-let-binding (list binding-syms
+                                                                                 type-args-sym))]
+                                             (ast/let-expr (list b) (list expr))))
 
-                                                                     (cons 'and lit-checks))))
+                                 (apply-to list
+                                           (let [temp-args (cons (gensym "t-")
+                                                                 (map literals (fn [_] (gensym "t-"))))
+                                                 lit-args (remove (zip-lists temp-args literals)
+                                                                  (fn [[_ literal]]
+                                                                    (= literal dont-care)))
+                                                 lit-checks (map lit-args (partial cons '=*))]
+                                             (an/analyze-expr (list 'cond
+                                                                    (list 'instance? pattern-type match-val-sym)
+                                                                    (list 'cond
+                                                                          (list '<* (list 'count type-args-sym)
+                                                                                (dec (count binding-syms)))
+                                                                          '0
 
-                                                        '0)))
-                               (for [b (an/analyze-let-binding (list binding-syms
-                                                                     type-args-sym))]
-                                 (ast/let-expr (list b) (list expr))))))
+                                                                          (list 'let (list (list temp-args type-args-sym))
+                                                                                (match (count lit-checks)
+                                                                                       1 (first lit-checks)
+                                                                                       (cons 'and lit-checks))))
+
+                                                                    '0)))
+                                           (for [b (an/analyze-let-binding (list binding-syms
+                                                                                 type-args-sym))]
+                                             (ast/let-expr (list b) (list expr))))))
 
                   (apply-to list
                             (an/analyze-expr (list '=* pattern match-val-sym))
@@ -1005,10 +977,7 @@
                                 "Value *" fn-ptr-sym ";\n"))
             _ (remember-local fn-ptr-sym)
             _ (comp (for [def (sm/get-in-val (list :defined-syms fn-name))
-                          ;; TODO; obviously have to figure out a
-                          ;; better way than this
-                          :when (and (not (= 'traverse fn-name))
-                                     (not (= 'anon fn-name)))
+                          :when (not (= 'anon fn-name))
                           _ (update-startup-init (list (.c-val def) " = " fn-ptr-sym ";\n"))]
                       "")
                     (sm/state-maybe ""))
@@ -1088,10 +1057,10 @@
 
 (defn closures-init [arity-sym closures]
   (for [closure-syms (traverse (map closures second) lookup-sym)
-        _ (cond
-           (empty? closures) (for [_ (debug :bad-traverse)]
-                               (abort))
-           (sm/state-maybe ""))
+        _ (match closures
+                 empty-list (for [_ (debug :bad-traverse)]
+                              (abort))
+                 (sm/state-maybe ""))
         :when (not (empty? closures))]
     (reduce (reverse closure-syms) empty-list
             (fn [closed-over sym]
@@ -1217,21 +1186,21 @@
 
 (defn call-instance? [ast args]
   (let [type-val (.type-num (second args))]
-    (cond
-     (= type-val :no-type) (zero sm/state-maybe)
-     (match ast
-            |ast/call-ast callee args|
-            (match callee
-                   |fr/free target-ast|
-                   (match target-ast
-                          |ast/symbol-ast 'instance?|
-                          (match args
-                                 |fr/free-app _ arg-asts|
-                                 ;; TODO: 'type-sym' is not general enough.
-                                 (let [type-sym (.sym (.v (first arg-asts)))]
-                                   (for [instance-type (sm/get-in-val (list :types type-sym))
-                                         :when (= instance-type type-val)]
-                                     (c-code "(Value *)&trueVal", empty-list, empty-list, Number))))))))))
+    (match type-val
+           :no-type (zero sm/state-maybe)
+           (match ast
+                  |ast/call-ast callee args|
+                  (match callee
+                         |fr/free target-ast|
+                         (match target-ast
+                                |ast/symbol-ast 'instance?|
+                                (match args
+                                       |fr/free-app _ arg-asts|
+                                       ;; TODO: 'type-sym' is not general enough.
+                                       (let [type-sym (.sym (.v (first arg-asts)))]
+                                         (for [instance-type (sm/get-in-val (list :types type-sym))
+                                               :when (= instance-type type-val)]
+                                           (c-code "(Value *)&trueVal", empty-list, empty-list, Number))))))))))
 
 (defn call-invoke [target args]
   (for [arity-info (lookup-proto-arity 'invoke (inc (count args)) (.type-num target))
@@ -1256,15 +1225,17 @@
                               result-sym (genlocal "rslt")
                               _ (remember-local result-sym)]
                           (let [return-type (.type-num arity-info)
-                                return-type (cond
-                                             (not (= :no-type return-type)) return-type
-                                             ;; TODO: these should be the result of
-                                             ;; asserts on the protocol fn defs
-                                             (= 'map name) (.type-num dispatch-val)
-                                             (= 'comp* name) (.type-num dispatch-val)
-                                             (= 'comp name) (.type-num dispatch-val)
-                                             (= 'flat-map name) (.type-num dispatch-val)
-                                             :no-type)
+                                return-type (match return-type
+                                                   ;; TODO: these should be the result of
+                                                   ;; asserts on the protocol fn defs
+                                                   :no-type (match name
+                                                                   |Symbol 'map| (.type-num dispatch-val)
+                                                                   |Symbol 'map| (.type-num dispatch-val)
+                                                                   |Symbol 'comp*| (.type-num dispatch-val)
+                                                                   |Symbol 'comp| (.type-num dispatch-val)
+                                                                   |Symbol 'flat-map| (.type-num dispatch-val)
+                                                                   :no-type)
+                                                   return-type)
                                 arg-syms (cons "empty_list" (map args .c-val))]
                             (c-code result-sym
                                     (comp (list "Value *" result-sym " = " (.c-val arity-info) "(")
@@ -1315,49 +1286,50 @@
             (.type-num arity-info))))
 
 (defn call-dyn-fn-value [target args]
-  (cond
-   (not (= FunctionType (.type-num target))) (zero sm/state-maybe)
-
-   (let [num-args (count args)]
-     (for [arity-sym (genlocal "arity")
-           variadic-sym (genlocal "varArgs")
-           fn-sym (genlocal "fn")
-           result-sym (genlocal "rslt")
-           _ (remember-local result-sym)]
-       (let [args (map args .c-val)
-             arg-syms (cons (str arity-sym "->closures") args)]
-         (c-code result-sym
-                 (comp (list "Value *" result-sym ";\n"
-                             "FnArity *" arity-sym " = findFnArity(" (.c-val target)
-                             ", " num-args ");\n"
-                             "if(" arity-sym " != (FnArity *)0 && !" arity-sym "->variadic) {\n"
-                             "FnType" num-args " *" fn-sym " = (FnType" num-args " *)"
-                             arity-sym "->fn;\n"
-                             result-sym " = " fn-sym "(" (apply str (interpose arg-syms ", ")) ");\n"
-                             "} else if(" arity-sym " != (FnArity *)0 && " arity-sym "->variadic) {\n"
-                             "FnType1 *" fn-sym " = (FnType1 *)" arity-sym "->fn;\n"
-                             "List *" variadic-sym " = empty_list;\n")
-                       (map (reverse (cdr arg-syms))
-                            (fn [arg-sym]
-                              (str "incRef(" arg-sym ");\n"
-                                   variadic-sym " = (List *)listCons("
-                                   arg-sym ", " variadic-sym ");\n")))
-                       (list result-sym " = " fn-sym "(" (car arg-syms) ", (Value *)"
-                             variadic-sym ");\n"
-                             "dec_and_free((Value *)" variadic-sym ");\n"
-                             "} else {\nfprintf(stderr, \"\\n*** no arity found for '%s'.\\n\", "
-                             "((Function *)" (.c-val target) ")->name"
-                             ");\n  abort();\n}\n"))
-                 empty-list
-                 :no-type))))))
+  (for [arity-sym (genlocal "arity")
+        :when (= FunctionType (.type-num target))
+        variadic-sym (genlocal "varArgs")
+        fn-sym (genlocal "fn")
+        result-sym (genlocal "rslt")
+        _ (remember-local result-sym)]
+    (let [args (map args .c-val)
+          arg-syms (cons (str arity-sym "->closures") args)
+          num-args (count args)]
+      (c-code result-sym
+              (comp (list "Value *" result-sym ";\n"
+                          "FnArity *" arity-sym " = findFnArity(" (.c-val target)
+                          ", " num-args ");\n"
+                          "if(" arity-sym " != (FnArity *)0 && !" arity-sym "->variadic) {\n"
+                          "FnType" num-args " *" fn-sym " = (FnType" num-args " *)"
+                          arity-sym "->fn;\n"
+                          result-sym " = " fn-sym "(" (apply str (interpose arg-syms ", ")) ");\n"
+                          "} else if(" arity-sym " != (FnArity *)0 && " arity-sym "->variadic) {\n"
+                          "FnType1 *" fn-sym " = (FnType1 *)" arity-sym "->fn;\n"
+                          "List *" variadic-sym " = empty_list;\n")
+                    (map (reverse (cdr arg-syms))
+                         (fn [arg-sym]
+                           (str "incRef(" arg-sym ");\n"
+                                variadic-sym " = (List *)listCons("
+                                arg-sym ", " variadic-sym ");\n")))
+                    (list result-sym " = " fn-sym "(" (car arg-syms) ", (Value *)"
+                          variadic-sym ");\n"
+                          "dec_and_free((Value *)" variadic-sym ");\n"
+                          "} else {\nfprintf(stderr, \"\\n*** no arity found for '%s'.\\n\", "
+                          "((Function *)" (.c-val target) ")->name"
+                          ");\n  abort();\n}\n"))
+              empty-list
+              :no-type))))
 
 (defn call-dyn-unknown-type [target args target-ast]
   (let [num-args (count args)
-        call-target (cond
-                     (not (instance? fr/free target-ast)) ""
-                     (not (instance? ast/symbol-ast (.v target-ast))) ""
-                     (empty? args) ""
-                     (str (.sym (.v target-ast))))]
+        call-target (match args
+                           empty-list ""
+                           (match target-ast
+                                  |fr/free target|
+                                  (match target
+                                         |ast/symbol-ast target-sym| (str target-sym)
+                                         "")
+                                  ""))]
     (for [arity-sym (genlocal "arity")
           variadic-sym (genlocal "varArgs")
           fn-sym (genlocal "fn")
@@ -1653,7 +1625,7 @@
                     BitmapIndexedType "BitmapIndexedNode"
                     ArrayNodeType "ArrayNode"
                     HashCollisionNodeType "HashCollisionNode"}
-        init-state {:debug-on 1
+        init-state {:debug-on :any-value
                     :parser parser
                     :abort? 1
                     :expr empty-list

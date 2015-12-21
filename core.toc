@@ -1775,14 +1775,6 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
 
      0)))
 
-(defn =
-  ([v] 1)
-  ([x y] (=* x y))
-  ([v & vs]
-     (cond
-      (=* v (car vs)) (apply = vs)
-      0)))
-
 (def maybe)
 
 (def nothing
@@ -1845,14 +1837,30 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
   Applicative
   (wrap [_ v] (maybe v))
   (apply* [_ args]
-    (match (filter args (partial =* nothing))
-           |List _|
-           (maybe (apply v (map args .v)))))
+    (let [nothing-args (filter args (partial =* nothing))]
+      (match nothing-args
+             empty-list (maybe (apply v (map args .v)))
+             nothing)))
 
   Monad
   (flatten [_] v)
   (flat-map [_ f]
     (f v)))
+
+;; TODO: delete this and replace with 'm='
+(defn =
+  ([v] 1)
+  ([x y] (=* x y))
+  ([v & vs]
+     (cond
+      (=* v (car vs)) (apply = vs)
+      0)))
+
+(defn m=
+  ([v] (maybe v))
+  ([x y] (cond
+          (=* x y) (maybe x)
+          nothing)))
 
 ;; TODO: replace all uses with m<
 (defn <
@@ -1863,11 +1871,15 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
       (not (<* v (car vs))) 0
       (apply < vs))))
 
-(defn m=
-  ([v] (maybe v))
+(defn m<
   ([x y] (cond
-          (=* x y) (maybe x)
-          nothing)))
+          (<* x y) (maybe x)
+          nothing))
+  ([v & vs]
+     (cond
+      (list-empty? vs) (maybe v)
+      (not (<* v (car vs))) nothing
+      (apply m< vs))))
 
 (extend-type Number
   Getter
@@ -1966,11 +1978,19 @@ return((Value *)numberValue(shaVal));
   (map (flat-map (interpose vs " ") string-list) pr-err*)
   (pr-err* "\n"))
 
+;; TODO: rewrite later when 'm=' becomes '='
 (defn list=* [[h1 & t1] [h2 & t2]]
   (cond
    (list-empty? t1) 1
    (=* h1 h2) (list=* t1 t2)
    0))
+
+(defn zip-lists [l1 l2]
+  (match (apply-to list (m-first l1) (m-first l2))
+         |maybe heads| (let [[l1-head l2-head] heads]
+                         (cons (list l1-head l2-head)
+                               (zip-lists (rest l1) (rest l2))))
+         empty-list))
 
 (defn reduce-list [[h & t] result f]
   (match t
@@ -2027,8 +2047,7 @@ return((Value *)numberValue(shaVal));
 
   Eq
   (=* [x y]
-    ;; permissable to use 'cond' in definitions for
-    ;; primitive types
+    ;; TODO: rewrite when 'm=' becomes '='
     (cond
      (not (number= (get-type x) (get-type y))) 0
      (list-empty? x) (list-empty? y)
@@ -2104,54 +2123,54 @@ return((Value *)numberValue(shaVal));
            |List h & t| (comp* h t)
            mv)))
 
-(defn take [l n]
-  (cond
-   (< n 1) empty-list
-   (match l
-          |List head & tail| (cons head (take tail (dec n)))
-          empty-list)))
+(defn take [coll n]
+  (match (apply-to list (m< 0 n) (m-first coll))
+         ;; TODO: would be nice to be able to destructure 'v'
+         |maybe v| (let [[_ head] v]
+                     (cons head (take (rest coll) (dec n))))
+         empty-list))
 
 (defn drop [coll n]
-  (cond
-   (< n 1) coll
-   (drop (rest coll) (dec n))))
+  (match (apply-to list (m< 0 n) (m-first coll))
+         |maybe| (drop (rest coll) (dec n))
+         coll))
 
-(defn split
-  ([l n prefix]
-     (cond
-      (< n 1) (list (reverse prefix) l)
-      (empty? l) (list (reverse prefix) l)
-      (split (rest l) (dec n) (cons (first l) prefix))))
-  ([l n]
-     (split l n empty-list)))
+(defn split [l n]
+  ;; This could be written with 'take' and 'drop' but would require
+  ;; two iterations over the prefix
+  (match (apply-to list (m< 0 n) (m-first l))
+         ;; TODO: would be nice to be able to destructure 'v'
+         |maybe v| (let [[_ head] v
+                         [prefix suffix] (split (rest l) (dec n))]
+                     (list (cons head prefix) suffix))
+         (list empty-list l)))
 
 (defn partition [coll n]
-  (cond
-   (< (count coll) n) empty-list
-   (cons (take coll n)
-         (partition (drop coll n) n))))
+  (match (m< (count coll) n)
+         |maybe| empty-list
+         (cons (take coll n)
+               (partition (drop coll n) n))))
 
 (defn partition-all [coll n]
-  (cond
-   (< (count coll) n) (list coll)
-   (cons (take coll n)
-         (partition-all (drop coll n) n))))
+  (match (m< (count coll) n)
+         |maybe| (list coll)
+         (cons (take coll n)
+               (partition-all (drop coll n) n))))
 
+;; TODO: eliminate
 (defn nth
   ([coll n]
      (match (seq coll)
-            |List h & t| (cond
-                          (= n 0) h
-                          (nth (rest (seq coll)) (dec n)))
-            ;; TODO: print-err causes problems
-            ;; (let [_ (print-err "'nth' from empty seq")]
-            ;;   (abort))
-            (abort)))
+            |List h & t| (match (m< n 1)
+                                |maybe| h
+                                (nth (rest (seq coll)) (dec n)))
+            (let [_ (print-err "'nth' from empty seq")]
+              (abort))))
   ([coll n nth-nf]
      (match (seq coll)
-            |List h & t| (cond
-                          (= n 0) h
-                          (nth (rest (seq coll)) (dec n)))
+            |List h & t| (match (m< n 1)
+                                |maybe| h
+                                (nth (rest (seq coll)) (dec n)))
             nth-nf)))
 
 (defn m-nth [coll n]
@@ -2810,18 +2829,13 @@ return(newNode);
 
   Applicative
   (apply* [f args]
-    ;; TODO: didn't work immediately. find out why
-    ;; Remember, the last element of 'args' must be a list
-    ;; everything up to that must be prepended to it
-    ;; (match args
-    ;;        |List arg & args| (fn-apply f (list** arg args))
-    ;;        (f)))
-    (cond
-     (list-empty? args) (f)
-     ;; Remember, the last element of 'args' must be a list
-     ;; everything up to that must be prepended to it
-     (let [[arg & args] args]
-       (fn-apply f (list** arg args))))))
+    ;; TODO: really, really need to destructure in match patterns
+    (match args
+           empty-list (f)
+           ;; Remember, the last element of 'args' must be a list
+           ;; everything up to that must be prepended to it
+           (let [[arg & args] args]
+             (fn-apply f (list** arg args))))))
 
 (extend-type String
   Getter
@@ -2846,10 +2860,9 @@ return(newNode);
 
   Seqable
   (seq [s]
-    ;; permissable for defining fn's for primitive data types
-    (cond
-     (= s "") empty-list
-     (cons (subs s 0 1) (seq (subs s 1)))))
+    (match s
+           "" empty-list
+           (cons (subs s 0 1) (seq (subs s 1)))))
   (first [s]
     (subs s 0 1))
   (rest [s]
@@ -2886,6 +2899,7 @@ return((Value *)numberValue(shaVal));
 (extend-type SubStr
   Getter
   (type-name [_] "String (SubStr)")
+  (type-args [s] (list s))
 
   Stringable
   (string-list [v] (list v))
@@ -2908,10 +2922,9 @@ return((Value *)numberValue(shaVal));
 
   Seqable
   (seq [s]
-    ;; permissable for defining fn's for primitive data types
-    (cond
-     (= s "") empty-list
-     (cons (subs s 0 1) (seq (subs s 1)))))
+    (match s
+           "" empty-list
+           (cons (subs s 0 1) (seq (subs s 1)))))
   (first [s]
     (subs s 0 1))
   (rest [s]
@@ -3061,16 +3074,6 @@ else {
 (defn some [coll f]
   (comp* nothing (map coll f)))
 
-(defn m<
-  ([x y] (cond
-          (<* x y) (maybe x)
-          nothing))
-  ([v & vs]
-     (cond
-      (list-empty? vs) (maybe v)
-      (not (<* v (car vs))) nothing
-      (apply m< vs))))
-
 (defn str [& vs]
   (match vs
          |List _|
@@ -3088,17 +3091,15 @@ else {
       (instance? SubStr s)))
 
 (defn range* [n]
-  (cond
-   (= 0 n) (list 0)
-   (cons n (range* (dec n)))))
+  (match (m< n 1)
+         |maybe| (list 0)
+         (cons n (range* (dec n)))))
 
 (defn range [n]
   (reverse (range* (dec n))))
 
 (defn repeat [n v]
-  (cond
-   (< n 1) empty-list
-   (map (range* (dec n)) (fn [_] v))))
+  (map (range* (dec n)) (fn [_] v)))
 
 (inline-text "
  int64_t sym_counter = 0;
