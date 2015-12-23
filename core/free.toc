@@ -163,25 +163,25 @@
 ;;                      (* 2 x))]
 ;;         ;; check the functor and applicative laws for free
 ;;         (println :free)
-;;         (println :functor-1 (= (map (free 5) identity) (free 5)))
-;;         (println :functor-2 (= (map (map (free 2) inc) double)
+;;         (println :functor-1 (m= (map (free 5) identity) (free 5)))
+;;         (println :functor-2 (m= (map (map (free 2) inc) double)
 ;;                                (map (free 2) (comp inc double))))
-;;         (println :apply-1 (= (evaluate (map (free 5) inc) id/id-m)
+;;         (println :apply-1 (m= (evaluate (map (free 5) inc) id/id-m)
 ;;                              (evaluate (apply-to inc (free 5)) id/id-m)))
-;;         (println :apply-2 (= (evaluate (free 5) id/id-m)
+;;         (println :apply-2 (m= (evaluate (free 5) id/id-m)
 ;;                              (evaluate (apply-to identity (free 5)) id/id-m)))
 ;;         (let [v1 (free "first ")
 ;;               v2 (free "second ")
 ;;               v3 (free "third")]
-;;           (println :apply-3 (= (evaluate (apply-to comp (apply-to comp v1 v2) v3) id/id-m)
+;;           (println :apply-3 (m= (evaluate (apply-to comp (apply-to comp v1 v2) v3) id/id-m)
 ;;                                (evaluate (apply-to comp v1 (apply-to comp v2 v3)) id/id-m)
 ;;                                (evaluate (apply-to comp v1 v2 v3) id/id-m))))
 
 ;;         (let [f-inc (fn [x] (free (inc x)))
 ;;               f-dbl (fn [x] (free (double x)))]
-;;           (println :flat-map-1 (= (evaluate (flat-map (free 4) f-inc) id/id-m)
+;;           (println :flat-map-1 (m= (evaluate (flat-map (free 4) f-inc) id/id-m)
 ;;                                   (evaluate (f-inc 4) id/id-m)))
-;;           (println :flat-map-2 (= (evaluate (flat-map (free 4) free) id/id-m)
+;;           (println :flat-map-2 (m= (evaluate (flat-map (free 4) free) id/id-m)
 ;;                                   (evaluate (free 4) id/id-m)))
-;;           (println :flat-map-3 (= (evaluate (flat-map (flat-map (free 4) f-inc) f-dbl) id/id-m)
+;;           (println :flat-map-3 (m= (evaluate (flat-map (flat-map (free 4) f-inc) f-dbl) id/id-m)
 ;;                                   (evaluate (flat-map (free 4) (fn [x] (flat-map (f-inc x) f-dbl))) id/id-m))))))

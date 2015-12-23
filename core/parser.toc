@@ -99,17 +99,17 @@
 
 (defn char-test [pred]
   (for [text (read-text)
-        :when (m= 0 (= "" text))
-        :let [c (subs text 0 1)]
-        :when (m= 1 (pred c))
+        :when (match text
+                     "" nothing
+                     (pred (subs text 0 1)))
         _ (sm/set-val :text (rest text))]
-    (list c)))
+    (list (subs text 0 1))))
 
 (deftype parse-lower-alphas []
   Parser
   (recursive-descent [_]
     (char-test (fn [c]
-                 (< (dec (char-code "a")) (char-code c) (inc (char-code "z")))))))
+                 (m< (dec (char-code "a")) (char-code c) (inc (char-code "z")))))))
 
 (defn lower-alpha []
   (fr/free (parse-lower-alphas)))
@@ -118,7 +118,7 @@
   Parser
   (recursive-descent [_]
     (char-test (fn [c]
-                 (< (dec (char-code "A")) (char-code c) (inc (char-code "Z")))))))
+                 (m< (dec (char-code "A")) (char-code c) (inc (char-code "Z")))))))
 
 (defn upper-alpha []
   (fr/free (parse-upper-alphas)))
@@ -131,7 +131,7 @@
   Parser
   (recursive-descent [_]
     (char-test (fn [c]
-                 (< (dec (char-code "0")) (char-code c) (inc (char-code "9")))))))
+                 (m< (dec (char-code "0")) (char-code c) (inc (char-code "9")))))))
 
 (defn digit []
   (fr/free (parse-digit)))

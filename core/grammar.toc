@@ -99,9 +99,10 @@
   Parser
   (parser/recursive-descent [_]
     (parser/char-test (fn [c]
-                        (not
-                         (or (= c (char 92))
-                             (= c (char 34))))))))
+                        (match (comp (m= c (char 92))
+                                     (m= c (char 34)))
+                               nothing (maybe c)
+                               nothing)))))
 
 (defn not-backslash []
   (parser/rule "not-backslash"
@@ -181,7 +182,9 @@
   Parser
   (parser/recursive-descent [_]
     (parser/char-test (fn [c]
-                        (not (= c (char 10)))))))
+                        (match (m= c (char 10))
+                               nothing (maybe c)
+                               nothing)))))
 
 (defn not-eol []
   (parser/rule "not-eol"
