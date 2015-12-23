@@ -397,7 +397,8 @@
                                            (fn [expr for-clause]
                                              (match for-clause
                                                     |List :let val| (list 'let val expr)
-                                                    |List :when val| (list 'cond val expr (list 'zero wrap-sym))
+                                                    |List :when val| (list 'cond (list 'instance? 'maybe val)
+                                                                             expr (list 'zero wrap-sym))
                                                     (list 'flat-map (second for-clause)
                                                           (list 'fn 'anon
                                                                 (list (list 'fn-arity

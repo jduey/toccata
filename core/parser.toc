@@ -19,8 +19,8 @@
   (recursive-descent [_]
     (let [term-count (count term-str)]
       (for [text (read-text)
-            :when (not (< (count text) term-count))
-            :when (= (subs text 0 term-count) term-str)
+            :when (m= 0 (< (count text) term-count))
+            :when (m= (subs text 0 term-count) term-str)
             _ (sm/set-val :text (subs text term-count))]
         (list term-str)))))
 
@@ -99,9 +99,9 @@
 
 (defn char-test [pred]
   (for [text (read-text)
-        :when (not (= "" text))
+        :when (m= 0 (= "" text))
         :let [c (subs text 0 1)]
-        :when (pred c)
+        :when (m= 1 (pred c))
         _ (sm/set-val :text (rest text))]
     (list c)))
 

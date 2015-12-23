@@ -2,7 +2,6 @@
 ;; TODO:
 ;; remove booleans and 'cond'
 ;; use #line directive
-;; remove 'invoke' implementations for 'nothing'
 ;; make 'match' efficient
 ;; implement dissoc
 ;; implement definitions that require initialization at start time.
@@ -468,7 +467,7 @@
            reified-result (let [inits (crush impl-fns .init)]
                             (comp
                              (for [reified-sym (genlocal "reifiedDyn_")
-                                   :when (< 0 (count inits))
+                                   :when (m< 0 (count inits))
                                    _ (remember-local reified-sym)]
                                (let [impls-syms (map impl-fns .c-val)]
                                  (c-code reified-sym
@@ -978,7 +977,9 @@
                                 "Value *" fn-ptr-sym ";\n"))
             _ (remember-local fn-ptr-sym)
             _ (comp (for [def (sm/get-in-val (list :defined-syms fn-name))
-                          :when (not (= 'anon fn-name))
+                          :when (match (m= 'anon fn-name)
+                                         |maybe| nothing
+                                         (maybe fn-name))
                           _ (update-startup-init (list (.c-val def) " = " fn-ptr-sym ";\n"))]
                       "")
                     (sm/state-maybe ""))
@@ -1058,7 +1059,7 @@
 
 (defn closures-init [arity-sym closures]
   (for [closure-syms (sm/traverse (map closures second) lookup-sym)
-        :when (not (empty? closures))]
+        :when (m-first closures)]
     (reduce (reverse closure-syms) empty-list
             (fn [closed-over sym]
               (let [c-sym (.c-val sym)]
@@ -1196,7 +1197,7 @@
                                        ;; TODO: 'type-sym' is not general enough.
                                        (let [type-sym (.sym (.v (first arg-asts)))]
                                          (for [instance-type (sm/get-in-val (list :types type-sym))
-                                               :when (= instance-type type-val)]
+                                               :when (m= instance-type type-val)]
                                            (c-code "(Value *)&trueVal", empty-list, empty-list, Number)))
                                        (zero sm/state-maybe))
                                 (zero sm/state-maybe))
@@ -1291,7 +1292,7 @@
 
 (defn call-dyn-fn-value [target args]
   (for [arity-sym (genlocal "arity")
-        :when (= FunctionType (.type-num target))
+        :when (m= FunctionType (.type-num target))
         variadic-sym (genlocal "varArgs")
         fn-sym (genlocal "fn")
         result-sym (genlocal "rslt")

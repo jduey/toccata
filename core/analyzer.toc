@@ -8,7 +8,7 @@
 
 (defn is-expr [pred]
   (for [expr (sm/get-val :expr)
-        :when (pred expr)]
+        :when (m= 1 (pred expr))]
     expr))
 
 (def analyze-expr)
@@ -214,7 +214,7 @@
         result (match expr
                       |List name & frms|
                       (for [_ (sm/set-val :expr frms)
-                            :when (instance? Symbol name)
+                            :when (m= 1 (instance? Symbol name))
                             fn-impls (sm/recur (analyze-proto-fn))]
                         {name (apply merge-with comp fn-impls)})
                       (zero sm/state-maybe))]
