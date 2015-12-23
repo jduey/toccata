@@ -699,6 +699,11 @@
               (.type-num body-exprs)))))
 
 ;; TODO: Lot of refactoring and re-design to be done here
+(defn b= [x y]
+  (match (m= x y)
+         nothing 0
+         1))
+
 (defn eval-cond-clause [[[test-ast value-ast] & clauses] default-stmts cond-result]
   (for [_ (begin-scope)
         test (fr/evaluate test-ast emit-c)
@@ -708,7 +713,7 @@
                       (map (seq scope-locals)
                            (fn [[fn-sym-str local?]]
                              (cond
-                              (= test-sym fn-sym-str) ""
+                              (b= test-sym fn-sym-str) ""
                               local? (str "dec_and_free(" fn-sym-str ");\n")
                               ""))))
         _ (begin-scope)
@@ -720,7 +725,7 @@
                              (fn [[fn-sym-str]]
                                (str "dec_and_free(" fn-sym-str ");\n"))))
         cond-rest (cond
-                   (= test-sym "(Value *)&trueVal")
+                   (b= test-sym "(Value *)&trueVal")
                    (sm/state-maybe clause-result)
 
                    (empty? clauses)
@@ -731,10 +736,10 @@
 
                    (eval-cond-clause clauses default-stmts cond-result))]
     (let [result-type (cond
-                       (= (.type-num cond-rest) (.type-num clause-result)) (.type-num clause-result)
+                       (b= (.type-num cond-rest) (.type-num clause-result)) (.type-num clause-result)
                        :no-type)]
       (cond
-       (= test-sym "(Value *)&trueVal")
+       (b= test-sym "(Value *)&trueVal")
        (c-code cond-result
                (comp test-stmts
                      test-suffix
@@ -837,7 +842,7 @@
                                                                  (map literals (fn [_] (gensym "t-"))))
                                                  lit-args (remove (zip-lists temp-args literals)
                                                                   (fn [[_ literal]]
-                                                                    (= literal dont-care)))
+                                                                    (b= literal dont-care)))
                                                  lit-checks (map lit-args (partial cons '=*))]
                                              (an/analyze-expr (list 'cond
                                                                     (list 'instance? pattern-type match-val-sym)
@@ -1132,7 +1137,7 @@
           arg-count (count args)]
       (for [fn-context (reset-fn-context arity-fn-sym arg-count)
             arg-syms (gen-arg-syms (comp args (list :no-tail)))
-            :let [arg-syms (remove arg-syms (fn [arg] (= "" (.c-val arg))))]
+            :let [arg-syms (remove arg-syms (fn [arg] (b= "" (.c-val arg))))]
             scope-info (begin-scope)
             body-exprs (eval-exprs (.body ast))
             closures (emit-closures)

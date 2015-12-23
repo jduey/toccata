@@ -2740,11 +2740,13 @@ return(newNode);
   (let [not-found (reify
                     Eq
                     (=* [x y]
-                      (= (get-type x) (get-type y))))
+                      (match (m= (get-type x) (get-type y))
+                             nothing 0
+                             1)))
         v? (get m k not-found)]
-    (cond
-     (= not-found v?) nothing
-     (maybe v?))))
+    (match (m= not-found v?)
+           nothing (maybe v?)
+           nothing)))
 
 (defn merge-with [merge-fn hm & ms]
   (match ms
@@ -2836,7 +2838,9 @@ return(newNode);
 
   Collection
   (empty? [s]
-    (= 0 (str-count s)))
+    (match (str-count s)
+           0 0
+           1))
   (empty [s]
     "")
   (count [s]
@@ -2898,7 +2902,9 @@ return((Value *)numberValue(shaVal));
 
   Collection
   (empty? [s]
-    (= 0 (str-count s)))
+    (match (str-count s)
+           0 0
+           1))
   (empty [s]
     "")
   (count [s]
