@@ -896,7 +896,8 @@
                _ (sm/set-val :defined-types types)
                _ (sm/set-val :defined-protos protos)
                _ (sm/set-val :file-name file-name)]
-           current-defs)))
+           current-defs)
+         (zero sm/state-maybe)))
 
 (defn add-module-info [ns-sym module-name]
   (apply-to (fn [& _]
@@ -1056,11 +1057,7 @@
                                         "closures = closures->tail;\n")))))
 
 (defn closures-init [arity-sym closures]
-  (for [closure-syms (traverse (map closures second) lookup-sym)
-        _ (match closures
-                 empty-list (for [_ (debug :bad-traverse)]
-                              (abort))
-                 (sm/state-maybe ""))
+  (for [closure-syms (sm/traverse (map closures second) lookup-sym)
         :when (not (empty? closures))]
     (reduce (reverse closure-syms) empty-list
             (fn [closed-over sym]
@@ -1200,7 +1197,11 @@
                                        (let [type-sym (.sym (.v (first arg-asts)))]
                                          (for [instance-type (sm/get-in-val (list :types type-sym))
                                                :when (= instance-type type-val)]
-                                           (c-code "(Value *)&trueVal", empty-list, empty-list, Number))))))))))
+                                           (c-code "(Value *)&trueVal", empty-list, empty-list, Number)))
+                                       (zero sm/state-maybe))
+                                (zero sm/state-maybe))
+                         (zero sm/state-maybe))
+                  (zero sm/state-maybe)))))
 
 (defn call-invoke [target args]
   (for [arity-info (lookup-proto-arity 'invoke (inc (count args)) (.type-num target))
@@ -1253,7 +1254,10 @@
                                         (interpose (map args .c-val) ", ")
                                         (list ");\n"))
                                   empty-list
-                                  :no-type)))))))
+                                  :no-type)))
+                       (zero sm/state-maybe))
+                (zero sm/state-maybe))
+         (zero sm/state-maybe)))
 
 (defn call-static-fixed [target arg-syms]
   (for [arity-info (lookup-static-arity (.c-val target) (count arg-syms))
@@ -1378,8 +1382,8 @@
                       (sm/state-maybe empty-list))
           _ (sm/update-in-val (list :call-site-count :total) inc)
           call-site (comp (match args
-                                 |List _ _|
-                                 (call-instance? ast args))
+                                 |List _ _| (call-instance? ast args)
+                                 (zero sm/state-maybe))
                           (call-proto-impl (.callee ast) args)
                           (call-static-fixed target (map args .c-val))
                           (call-static-variadic target args)
@@ -1441,13 +1445,15 @@
                                               |maybe impls-map|
                                               (sm/traverse (seq impls-map)
                                                            (partial emit-proto-arity proto-name
-                                                                    dispatch-fn-sym proto-impls)))
+                                                                    dispatch-fn-sym proto-impls))
+                                              (zero sm/state-maybe))
                             _ (write-strs (list "Function " fn-sym " = {FunctionType, -1, \""
                                                 proto-name "\", " (count arity-syms) ", {"))
                             _ (write-strs (interpose arity-syms ", "))
                             _ (write-strs (list "}};\n" "Value *" dispatch-fn-sym
                                                 " = (Value *)&" fn-sym ";\n\n"))]
-                        "")))))]
+                        ""))
+                    (zero sm/state-maybe))))]
     ""))
 
 (defn emit-main []

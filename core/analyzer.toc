@@ -20,7 +20,9 @@
                       (sm/state-maybe (ast/inline-text text type))
 
                       |List 'inline-text text|
-                      (sm/state-maybe (ast/inline-text text :no-type)))]
+                      (sm/state-maybe (ast/inline-text text :no-type))
+
+                      (zero sm/state-maybe))]
     result))
 
 (defn analyze-symbol []
@@ -59,7 +61,7 @@
                _ (sm/set-val :expr curr-expr)]
            (ast/binding binding ast))
 
-         empty-list))
+         (zero sm/state-maybe)))
 
 (defn analyze-let []
   (for [expr (sm/get-val :expr)
@@ -67,7 +69,8 @@
                       |List 'let bindings & exprs|
                       (for [bindings (traverse bindings analyze-let-binding)
                             body (traverse exprs analyze-expr)]
-                        (ast/let-expr bindings body)))]
+                        (ast/let-expr bindings body))
+                      (zero sm/state-maybe))]
     result))
 
 (defn analyze-fn-arity []
@@ -79,7 +82,8 @@
                                |List _|
                                (ast/variadic-arity (remove args (partial = "&")) body)
 
-                               (ast/fixed-arity args body))))]
+                               (ast/fixed-arity args body)))
+                      (zero sm/state-maybe))]
     result))
 
 ;; TODO: let anonymous function closures reference themselves by name
@@ -88,7 +92,8 @@
         result (match expr
                       |List 'fn name arities|
                       (for [arities (traverse arities analyze-expr)]
-                        (ast/fn-expr (ast/sym name) arities)))]
+                        (ast/fn-expr (ast/sym name) arities))
+                      (zero sm/state-maybe))]
     result))
 
 (defn analyze-proto-arity [[fn-name params & body]]
@@ -108,7 +113,8 @@
         result (match expr
                       |List 'defprotocol name & defs|
                       (for [proto-fns (traverse defs analyze-proto-arity)]
-                        (ast/proto name (apply merge-with comp proto-fns))))]
+                        (ast/proto name (apply merge-with comp proto-fns)))
+                      (zero sm/state-maybe))]
     result))
 
 (defn make-quoted [quoted-form]
@@ -145,8 +151,8 @@
 (defn analyze-quoted []
   (for [expr (sm/get-val :expr)
         result (match expr
-                      |List 'quote quoted|
-                      (make-quoted quoted))]
+                      |List 'quote quoted| (make-quoted quoted)
+                      (zero sm/state-maybe))]
     result))
 
 (defn analyze-def []
@@ -157,14 +163,15 @@
                         (ast/def-expr name val-ast))
 
                       |List 'def name|
-                      (sm/state-maybe (ast/declare name)))]
+                      (sm/state-maybe (ast/declare name))
+                      (zero sm/state-maybe))]
     result))
 
 (defn analyze-cond []
   (for [expr (sm/get-val :expr)
         clause-pairs (match expr
-                            |List 'cond & clause-pairs|
-                            (traverse clause-pairs analyze-expr))]
+                            |List 'cond & clause-pairs| (traverse clause-pairs analyze-expr)
+                            (zero sm/state-maybe))]
     (let [clauses (partition-all clause-pairs 2)]
       (match (last clauses empty-list)
              |List default| (ast/cond-expr (butlast clauses) default)
@@ -185,7 +192,8 @@
                                                             pattern)
                                                           (analyze-expr result))))
                                     (sm/state-maybe empty-list))
-                                   (analyze-expr default)))]
+                                   (analyze-expr default))
+                         (zero sm/state-maybe))]
     match-ast))
 
 (defn analyze-proto-fn []
@@ -196,7 +204,9 @@
                              |List name args & exprs|
                              (for [body (traverse exprs analyze-expr)
                                    _ (sm/set-val :expr frms)]
-                               {name (list (ast/fixed-arity (rest args) body))})))]
+                               {name (list (ast/fixed-arity (rest args) body))})
+                             (zero sm/state-maybe))
+                      (zero sm/state-maybe))]
     result))
 
 (defn analyze-proto-impl []
@@ -206,7 +216,8 @@
                       (for [_ (sm/set-val :expr frms)
                             :when (instance? Symbol name)
                             fn-impls (sm/recur (analyze-proto-fn))]
-                        {name (apply merge-with comp fn-impls)}))]
+                        {name (apply merge-with comp fn-impls)})
+                      (zero sm/state-maybe))]
     result))
 
 (defn analyze-extensions [exts]
@@ -221,7 +232,9 @@
         result (match expr
                       |List 'extend-type name & defs|
                       (for [proto-specs (analyze-extensions defs)]
-                        (ast/type-extension name proto-specs)))]
+                        (ast/type-extension name proto-specs))
+
+                      (zero sm/state-maybe))]
     result))
 
 (defn analyze-add-ns []
@@ -229,7 +242,9 @@
         result (match expr
                       |List 'add-ns ns-name defs|
                       (for [asts (analyze-expr defs)]
-                        (ast/ns-add ns-name asts)))]
+                        (ast/ns-add ns-name asts))
+
+                      (zero sm/state-maybe))]
     result))
 
 (defn analyze-reify []
@@ -237,14 +252,16 @@
         result (match expr
                       |List 'reify & defs|
                       (for [proto-specs (analyze-extensions defs)]
-                        (ast/reified proto-specs)))]
+                        (ast/reified proto-specs))
+
+                      (zero sm/state-maybe))]
     result))
 
 (defn analyze-deftype []
   (for [expr (sm/get-val :expr)
         result (match expr
-                      |List 'deftype name fields & defs|
-                      (sm/state-maybe (ast/type-expr name fields defs)))]
+                      |List 'deftype name fields & defs| (sm/state-maybe (ast/type-expr name fields defs))
+                      (zero sm/state-maybe))]
     result))
 
 (defn analyze-module []
@@ -266,7 +283,8 @@
                                  _ (sm/set-val :file-name file-name)
                                  _ (sm/set-val :text text)]
                              (cons (ast/strng module-name)
-                                   asts))))]
+                                   asts)))
+                          (zero sm/state-maybe))]
     module-ast))
 
 (defn analyze-main []
@@ -274,7 +292,8 @@
         result (match expr
                       |List 'main args & exprs|
                       (for [body (traverse exprs analyze-expr)]
-                        (ast/main-fn args body)))]
+                        (ast/main-fn args body))
+                      (zero sm/state-maybe))]
     result))
 
 (defn expr-to-ast []

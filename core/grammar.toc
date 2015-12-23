@@ -485,6 +485,18 @@
                                (parser/always empty-list))
                          (parser/ignore (parser/term "|")))))
 
+(deftype Nope []
+  Parser
+  (parser/recursive-descent [_]
+    (for [file-name (sm/get-val :file-name)]
+      (let [_ (print-err :file-with-match file-name)]
+        (abort)))))
+
+(defn stupid []
+  (parser/ignore
+   (parser/rule "nope"
+                (fr/free (Nope)))))
+
 (defn read-match []
   (parser/rule "match"
                (apply-to (partial list 'match)
@@ -503,7 +515,7 @@
                                                         (read-number))
                                                        (read-sub-form)))
                          (comp (read-sub-form)
-                               (parser/always 'nothing))
+                               (stupid))
                          (parser/ignore (parser/term ")")))))
 
 (defn read-form []

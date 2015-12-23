@@ -8,8 +8,9 @@
            (match args
                   empty-list (list (list result) new-s)
                   (match (reduce-args args new-s)
-                         |List results final-s|
-                         (list (cons result results) final-s))))))
+                         |List results final-s| (list (cons result results) final-s)
+                         nothing))
+           nothing)))
 
 (defn -comp* [mv mvs s]
   (let [x (mv s)]
@@ -37,16 +38,18 @@
            (new-sm (fn [s]
                      (match (reduce-args args s)
                             |List results s| (let [[f s] (fv s)]
-                                               (list (apply f results) s)))))))
+                                               (list (apply f results) s))
+                            nothing)))))
 
   Monad
   (flat-map [ev f]
     (new-sm (fn [s]
               (match (invoke-fn s)
-                     |List v ss| ((f v) ss)))))
+                     |List v ss| ((f v) ss)
+                     nothing))))
 
   Monoid
-  (zero [_] nothing)
+  (zero [_] (new-sm (fn [_] nothing)))
   (comp* [mv mvs]
     (new-sm (partial -comp* mv mvs))))
 
@@ -58,7 +61,7 @@
                 (list v s))))
 
     Monoid
-    (zero [_] nothing)))
+    (zero [_] (new-sm (fn [_] nothing)))))
 
 (defn traverse [coll f]
   (apply* (state-maybe list) (map coll f)))
@@ -71,7 +74,8 @@
   ([k]
      (new-sm (fn [s]
                (match (m-get s k)
-                      |maybe v| (list v s)))))
+                      |maybe v| (list v s)
+                      nothing))))
   ([k nf]
      (new-sm (fn [s]
                  (list (get s k nf) s)))))
@@ -84,12 +88,14 @@
   ([path]
      (new-sm (fn [s]
                (match (get-in s path)
-                      |maybe v| (list v s)))))
+                      |maybe v| (list v s)
+                      nothing))))
   ([path nf]
      (new-sm (fn [s]
                (match (get-in s path)
                       nothing (list nf s)
-                      |maybe v| (list v s))))))
+                      |maybe v| (list v s)
+                      nothing)))))
 
 (defn assoc-in-val [path v]
   (new-sm (fn [s]
@@ -102,11 +108,14 @@
 (defn recur-fn [f as s]
   (match (f s)
          nothing (list as s)
-         |List v ss| (recur-fn f (cons v as) ss)))
+         |List v ss| (recur-fn f (cons v as) ss)
+         nothing))
 
 (defn recur [mv]
   (new-sm (fn [s]
             (match (mv s)
                    |List v ss|
                    (match (recur-fn (.invoke-fn mv) (list v) ss)
-                          |List x & xs| (cons (reverse x) xs))))))
+                          |List x & xs| (cons (reverse x) xs)
+                          nothing)
+                   nothing))))

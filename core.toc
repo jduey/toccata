@@ -1787,17 +1787,6 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
     (string-list [_]
       (list "<nothing>"))
 
-    Function
-    (invoke [n] n)
-    (invoke [n _] n)
-    (invoke [n _ _] n)
-    (invoke [n _ _ _] n)
-    (invoke [n _ _ _ _] n)
-    (invoke [n _ _ _ _ _] n)
-    (invoke [n _ _ _ _ _ _] n)
-    (invoke [n _ _ _ _ _ _ _] n)
-    (invoke [n _ _ _ _ _ _ _ _] n)
-
     Eq
     (=* [nv x] (type= nv x))
 
@@ -1805,8 +1794,8 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
     (zero [nv] nv)
     (comp* [nothing mvs]
       (match mvs
-             |List mv & mvs|
-             (comp* mv mvs)))
+             |List mv & mvs| (comp* mv mvs)
+             nothing))
 
     Functor
     (map [nv f] nv)
@@ -1935,8 +1924,8 @@ return((Value *)numberValue(shaVal));
 ;; TODO: remove
 (defn m-first [coll]
   (match coll
-         |List item|
-         (maybe item)))
+         |List item| (maybe item)
+         nothing))
 
 (defn second [coll]
   (first (rest coll)))
@@ -2042,8 +2031,8 @@ return((Value *)numberValue(shaVal));
   Traversable
   (traverse [l f]
     (match (map l f)
-           |List v & vs|
-           (apply* (wrap v list) (cons v vs))))
+           |List v & vs| (apply* (wrap v list) (cons v vs))
+           nothing))
 
   Eq
   (=* [x y]
@@ -2175,10 +2164,10 @@ return((Value *)numberValue(shaVal));
 
 (defn m-nth [coll n]
   (match (seq coll)
-         |List h & t|
-         (comp (for [_ (m= n 0)]
-                 h)
-               (m-nth t (dec n)))))
+         |List h & t| (comp (for [_ (m= n 0)]
+                              h)
+                            (m-nth t (dec n)))
+         nothing))
 
 (defn last [coll last-val]
   (nth coll (dec (count coll))))
