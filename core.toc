@@ -522,6 +522,7 @@ Value *(*hashSeq)(List *, Value* n, Value *s);
 Value *(*count)(List *, Value* n);
 Value *(*invoke1Arg)(List *closures, Value *f, Value* arg);
 Value *(*type_name)(List *closures, Value *t);
+int64_t nothing_type;
 
 // SHA1 implementation courtesy of: Steve Reid <sreid@sea-to-sky.net>
 // and others.
@@ -1165,7 +1166,6 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
        return((Value *)tail);
     }\n"))
 
-;; TODO: check for return value of 'maybe' from predicate 'f'
 (defn filter [l f]
   (inline-text List
      "List *l = (List *)arg0;
@@ -1203,9 +1203,9 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
             }
           }
 
-          // 'y' is the filter boolean value
+          // 'y' is the filter maybe/nothing value
 
-          if (isTrue(y)) {
+          if (y->type != nothing_type) {
             if (head == empty_list) {
               // if we haven't started the new list yet
               head = malloc_list();
@@ -1228,6 +1228,7 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
               head->len++;
             }
           }
+          dec_and_free(y);
         }
         return((Value *)head);
       }\n"))
@@ -1668,9 +1669,6 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
    b-val 0
    1))
 
-(defn remove [l f]
-  (filter l (fn [v] (not (f v)))))
-
 (defprotocol Collection
   ;; TODO: remove 'empty?'
   (empty? [coll])
@@ -1826,7 +1824,10 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
   Applicative
   (wrap [_ v] (maybe v))
   (apply* [_ args]
-    (let [nothing-args (filter args (partial =* nothing))]
+    (let [nothing-args (filter args (fn [x]
+                                        (match x
+                                               nothing (maybe x)
+                                               nothing)))]
       (match nothing-args
              empty-list (maybe (apply v (map args .v)))
              nothing)))
@@ -1850,6 +1851,9 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
   ([x y] (cond
           (=* x y) (maybe x)
           nothing)))
+
+(defn remove [l f]
+  (filter l (fn [v] (m= 0 (f v)))))
 
 ;; TODO: replace all uses with m<
 (defn <

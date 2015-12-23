@@ -374,7 +374,7 @@
 
 (defn free-scope-locals [result-sym]
   (for [scope-locals (sm/get-val :scope-locals)]
-    (let [locals (map (filter (seq scope-locals) second) first)]
+    (let [locals (map (filter (seq scope-locals) (fn [[_ x]] (m= 1 x))) first)]
       ;; TODO: getting closer. Still needs work
       (match (comp (for [_ (m= result-sym "")]
                      locals)
@@ -721,7 +721,7 @@
         :let [clause-sym (.c-val clause-result)
               clause-stmts (.init clause-result)]
         clause-suffix (for [scope-locals (sm/get-val :scope-locals)]
-                        (map (filter (seq scope-locals) second)
+                        (map (filter (seq scope-locals) (fn [[_ x]] (m= 1 x)))
                              (fn [[fn-sym-str]]
                                (str "dec_and_free(" fn-sym-str ");\n"))))
         cond-rest (cond
@@ -779,7 +779,7 @@
           :let [default-result (.c-val default)
                 default-type (.type-num default)]
           default-suffix (for [scope-locals (sm/get-val :scope-locals)]
-                           (map (filter (seq scope-locals) second)
+                           (map (filter (seq scope-locals) (fn [[_ x]] (m= 1 x)))
                                 (fn [[fn-sym-str]]
                                   (str "dec_and_free(" fn-sym-str ");\n"))))
           :let [default-stmts (comp (.init default)
@@ -960,7 +960,7 @@
                                      ", "))
             _ (write-strs (cons ") {\n" (.init body)))
             scope-locals (sm/get-val :scope-locals)
-            _ (write-strs (flat-map (filter (seq scope-locals) second)
+            _ (write-strs (flat-map (filter (seq scope-locals) (fn [[_ x]] (m= 1 x)))
                                     (fn [[fn-sym-str]]
                                       (list "dec_and_free(" fn-sym-str ");\n"))))
             _ (write-strs (list "\nreturn(0);\n}\n\n"))]
@@ -1569,6 +1569,9 @@
         arity-info (lookup-static-arity dispatch-fn-sym 2)
         _ (write-strs (list "Value *(*equal)(List *, Value*, Value*)"
                             " = " (.c-val arity-info) ";\n"))
+
+        n (lookup-sym 'nothing)
+        _ (write-strs (list "int64_t nothing_type = " (.type-num n) ";\n"))
         ]
     ""))
 

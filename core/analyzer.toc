@@ -78,7 +78,7 @@
         result (match expr
                       |List 'fn-arity args exprs|
                       (for [body (traverse exprs analyze-expr)]
-                        (match (filter args (partial = "&"))
+                        (match (filter args (partial m= "&"))
                                |List _|
                                (ast/variadic-arity (remove args (partial = "&")) body)
 
@@ -97,7 +97,7 @@
     result))
 
 (defn analyze-proto-arity [[fn-name params & body]]
-  (match (filter params (partial = "&"))
+  (match (filter params (partial m= "&"))
          |List _|
          (zero sm/state-maybe)
 
