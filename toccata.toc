@@ -371,11 +371,11 @@
   (sm/set-val :scope-locals scope-info))
 
 (defn remember-local [sym]
-  (sm/assoc-in-val (list :scope-locals (str sym)) 1))
+  (sm/assoc-in-val (list :scope-locals (str sym)) (maybe sym)))
 
 (defn free-scope-locals [result-sym]
   (for [scope-locals (sm/get-val :scope-locals)]
-    (let [locals (map (filter (seq scope-locals) (fn [[_ x]] (= 1 x))) first)]
+    (let [locals (map (filter (seq scope-locals) second) first)]
       ;; TODO: getting closer. Still needs work
       (match (comp (for [_ (= result-sym "")]
                      locals)
@@ -724,14 +724,14 @@
                            (fn [[fn-sym-str local?]]
                              (cond
                               (b= test-sym fn-sym-str) ""
-                              local? (str "dec_and_free(" fn-sym-str ");\n")
+                              (instance? maybe local?) (str "dec_and_free(" fn-sym-str ");\n")
                               ""))))
         _ (begin-scope)
         clause-result (fr/evaluate value-ast emit-c)
         :let [clause-sym (.c-val clause-result)
               clause-stmts (.init clause-result)]
         clause-suffix (for [scope-locals (sm/get-val :scope-locals)]
-                        (map (filter (seq scope-locals) (fn [[_ x]] (= 1 x)))
+                        (map (filter (seq scope-locals) second)
                              (fn [[fn-sym-str]]
                                (str "dec_and_free(" fn-sym-str ");\n"))))
         cond-rest (cond
@@ -789,7 +789,7 @@
           :let [default-result (.c-val default)
                 default-type (.type-num default)]
           default-suffix (for [scope-locals (sm/get-val :scope-locals)]
-                           (map (filter (seq scope-locals) (fn [[_ x]] (= 1 x)))
+                           (map (filter (seq scope-locals) second)
                                 (fn [[fn-sym-str]]
                                   (str "dec_and_free(" fn-sym-str ");\n"))))
           :let [default-stmts (comp (.init default)
@@ -972,7 +972,7 @@
                                      ", "))
             _ (write-strs (cons ") {\n" (.init body)))
             scope-locals (sm/get-val :scope-locals)
-            _ (write-strs (flat-map (filter (seq scope-locals) (fn [[_ x]] (= 1 x)))
+            _ (write-strs (flat-map (filter (seq scope-locals) second)
                                     (fn [[fn-sym-str]]
                                       (list "dec_and_free(" fn-sym-str ");\n"))))
             _ (write-strs (list "\nreturn(0);\n}\n\n"))]
@@ -1026,7 +1026,7 @@
                                    arity-decl
                                    FunctionType))
 
-                          (for [_ (sm/assoc-in-val (list :scope-locals fn-ptr-sym) 0)]
+                          (for [_ (sm/assoc-in-val (list :scope-locals fn-ptr-sym) nothing)]
                             (c-code fn-ptr-sym
                                     empty-list
                                     (comp arity-decl
