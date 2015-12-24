@@ -80,7 +80,7 @@
                       (for [body (traverse exprs analyze-expr)]
                         (match (filter args (partial m= "&"))
                                |List _|
-                               (ast/variadic-arity (remove args (partial = "&")) body)
+                               (ast/variadic-arity (remove args (partial m= "&")) body)
 
                                (ast/fixed-arity args body)))
                       (zero sm/state-maybe))]

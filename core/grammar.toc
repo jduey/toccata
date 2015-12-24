@@ -231,7 +231,7 @@
 (defn read-list-destructure []
   (parser/rule "list-destructure"
                (apply-to (fn [args tail]
-                           (comp args (remove tail (partial = "&"))))
+                           (comp args (remove tail (partial m= "&"))))
                          (parser/ignore (parser/none-or-more (whitespace)))
                          (parser/ignore (parser/term "["))
                          (parser/none-or-more (read-sub-dest))

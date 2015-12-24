@@ -11,7 +11,8 @@
 (defprotocol Parser
   (recursive-descent [f]
     (sm/state-maybe (fn [& args]
-                      (list (apply f (map (remove args empty?)
+                      (list (apply f (map (remove args (fn [x]
+                                                           (m= 0 (count x))))
                                           first)))))))
 
 (deftype parser-terminal [term-str]

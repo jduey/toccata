@@ -816,12 +816,12 @@
                                                                                                         (cons dont-care literals))
                                                                                          (list (cons dont-care symbols)
                                                                                                (cons x literals)))))
-                              binding-syms (remove symbols (partial = "&"))
+                              binding-syms (remove symbols (partial m= "&"))
                               binding-syms (match (m= (count symbols) (count binding-syms))
                                             |maybe| (comp symbols (list dont-care))
                                             binding-syms)]
                           ;; TODO: could probably use 'some' here
-                          (match (remove literals (partial = dont-care))
+                          (match (remove literals (partial m= dont-care))
                                  empty-list
                                  (apply-to list
                                            (an/analyze-expr
@@ -841,8 +841,8 @@
                                            (let [temp-args (cons (gensym "t-")
                                                                  (map literals (fn [_] (gensym "t-"))))
                                                  lit-args (remove (zip-lists temp-args literals)
-                                                                  (fn [[_ literal]]
-                                                                    (b= literal dont-care)))
+                                                                    (fn [[_ literal]]
+                                                                      (m= literal dont-care)))
                                                  lit-checks (map lit-args (partial cons '=*))]
                                              (an/analyze-expr (list 'cond
                                                                     (list 'instance? pattern-type match-val-sym)
@@ -1137,7 +1137,7 @@
           arg-count (count args)]
       (for [fn-context (reset-fn-context arity-fn-sym arg-count)
             arg-syms (gen-arg-syms (comp args (list :no-tail)))
-            :let [arg-syms (remove arg-syms (fn [arg] (b= "" (.c-val arg))))]
+            :let [arg-syms (remove arg-syms (fn [arg] (m= "" (.c-val arg))))]
             scope-info (begin-scope)
             body-exprs (eval-exprs (.body ast))
             closures (emit-closures)

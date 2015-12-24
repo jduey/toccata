@@ -1806,6 +1806,12 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
     (flatten [nv] nv)
     (flat-map [nv _] nv)))
 
+(defn remove [l f]
+  (filter l (fn [v]
+              (match (f v)
+                     nothing (maybe v)
+                     nothing))))
+
 (deftype maybe [v]
   Stringable
   (string-list [_]
@@ -1824,10 +1830,7 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
   Applicative
   (wrap [_ v] (maybe v))
   (apply* [_ args]
-    (let [nothing-args (filter args (fn [x]
-                                        (match x
-                                               nothing (maybe x)
-                                               nothing)))]
+    (let [nothing-args (remove args (fn [x] x))]
       (match nothing-args
              empty-list (maybe (apply v (map args .v)))
              nothing)))
@@ -1851,9 +1854,6 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
   ([x y] (cond
           (=* x y) (maybe x)
           nothing)))
-
-(defn remove [l f]
-  (filter l (fn [v] (m= 0 (f v)))))
 
 ;; TODO: replace all uses with m<
 (defn <
