@@ -20,7 +20,9 @@
   (recursive-descent [_]
     (let [term-count (count term-str)]
       (for [text (read-text)
-            :when (= 0 (< (count text) term-count))
+            :when (match (< (count text) term-count)
+                         nothing (maybe term-count)
+                         nothing)
             :when (= (subs text 0 term-count) term-str)
             _ (sm/set-val :text (subs text term-count))]
         (list term-str)))))
@@ -110,7 +112,7 @@
   Parser
   (recursive-descent [_]
     (char-test (fn [c]
-                 (m< (dec (char-code "a")) (char-code c) (inc (char-code "z")))))))
+                 (< (dec (char-code "a")) (char-code c) (inc (char-code "z")))))))
 
 (defn lower-alpha []
   (fr/free (parse-lower-alphas)))
@@ -119,7 +121,7 @@
   Parser
   (recursive-descent [_]
     (char-test (fn [c]
-                 (m< (dec (char-code "A")) (char-code c) (inc (char-code "Z")))))))
+                 (< (dec (char-code "A")) (char-code c) (inc (char-code "Z")))))))
 
 (defn upper-alpha []
   (fr/free (parse-upper-alphas)))
@@ -132,7 +134,7 @@
   Parser
   (recursive-descent [_]
     (char-test (fn [c]
-                 (m< (dec (char-code "0")) (char-code c) (inc (char-code "9")))))))
+                 (< (dec (char-code "0")) (char-code c) (inc (char-code "9")))))))
 
 (defn digit []
   (fr/free (parse-digit)))

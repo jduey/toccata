@@ -1846,16 +1846,7 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
           (=* x y) (maybe x)
           nothing)))
 
-;; TODO: replace all uses with m<
 (defn <
-  ([x y] (<* x y))
-  ([v & vs]
-     (cond
-      (list-empty? vs) 1
-      (not (<* v (car vs))) 0
-      (apply < vs))))
-
-(defn m<
   ([x y] (cond
           (<* x y) (maybe x)
           nothing))
@@ -1863,7 +1854,7 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
      (cond
       (list-empty? vs) (maybe v)
       (not (<* v (car vs))) nothing
-      (apply m< vs))))
+      (apply < vs))))
 
 (extend-type Number
   Getter
@@ -2108,21 +2099,21 @@ return((Value *)numberValue(shaVal));
            mv)))
 
 (defn take [coll n]
-  (match (apply-to list (m< 0 n) (m-first coll))
+  (match (apply-to list (< 0 n) (m-first coll))
          ;; TODO: would be nice to be able to destructure 'v'
          |maybe v| (let [[_ head] v]
                      (cons head (take (rest coll) (dec n))))
          empty-list))
 
 (defn drop [coll n]
-  (match (apply-to list (m< 0 n) (m-first coll))
+  (match (apply-to list (< 0 n) (m-first coll))
          |maybe| (drop (rest coll) (dec n))
          coll))
 
 (defn split [l n]
   ;; This could be written with 'take' and 'drop' but would require
   ;; two iterations over the prefix
-  (match (apply-to list (m< 0 n) (m-first l))
+  (match (apply-to list (< 0 n) (m-first l))
          ;; TODO: would be nice to be able to destructure 'v'
          |maybe v| (let [[_ head] v
                          [prefix suffix] (split (rest l) (dec n))]
@@ -2130,13 +2121,13 @@ return((Value *)numberValue(shaVal));
          (list empty-list l)))
 
 (defn partition [coll n]
-  (match (m< (count coll) n)
+  (match (< (count coll) n)
          |maybe| empty-list
          (cons (take coll n)
                (partition (drop coll n) n))))
 
 (defn partition-all [coll n]
-  (match (m< (count coll) n)
+  (match (< (count coll) n)
          |maybe| (list coll)
          (cons (take coll n)
                (partition-all (drop coll n) n))))
@@ -2145,14 +2136,14 @@ return((Value *)numberValue(shaVal));
 (defn nth
   ([coll n]
      (match (seq coll)
-            |List h & t| (match (m< n 1)
+            |List h & t| (match (< n 1)
                                 |maybe| h
                                 (nth (rest (seq coll)) (dec n)))
             (let [_ (print-err "'nth' from empty seq")]
               (abort))))
   ([coll n nth-nf]
      (match (seq coll)
-            |List h & t| (match (m< n 1)
+            |List h & t| (match (< n 1)
                                 |maybe| h
                                 (nth (rest (seq coll)) (dec n)))
             nth-nf)))
@@ -3081,7 +3072,7 @@ else {
       (instance? SubStr s)))
 
 (defn range* [n]
-  (match (m< n 1)
+  (match (< n 1)
          |maybe| (list 0)
          (cons n (range* (dec n)))))
 

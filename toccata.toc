@@ -1,11 +1,13 @@
 
 ;; TODO:
 ;; remove booleans and 'cond'
+;; add :when-not to 'for' clauses
 ;; use #line directive
 ;; make 'match' efficient
 ;; implement dissoc
 ;; implement definitions that require initialization at start time.
 ;; change the implementation of reified values
+;; supercompilation
 ;; implement lazy 'or'
 ;; refactor calls to 'match'
 ;; better error messages
@@ -22,7 +24,6 @@
 ;; async
 ;; dependencies
 ;; persistent data structures; vectors, hash-sets
-;; supercompilation
 ;; FFI
 ;; Android/iOS
 ;; native arrays
@@ -467,7 +468,7 @@
            reified-result (let [inits (crush impl-fns .init)]
                             (comp
                              (for [reified-sym (genlocal "reifiedDyn_")
-                                   :when (m< 0 (count inits))
+                                   :when (< 0 (count inits))
                                    _ (remember-local reified-sym)]
                                (let [impls-syms (map impl-fns .c-val)]
                                  (c-code reified-sym
