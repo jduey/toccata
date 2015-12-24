@@ -565,7 +565,7 @@
                                                          (apply str (interpose fields ", ")) "]>"))
                                              'Type
                                              (list 'instance? (list 'vector '_ 'v)
-                                                   (list '=* type-val-num (list 'get-type 'v)))
+                                                   (list 'number= type-val-num (list 'get-type 'v)))
                                              'Applicative
                                              (list 'apply* (list 'vector '_ 'args)
                                                    (list 'apply 'invoke '_ 'args))
@@ -578,6 +578,14 @@
                                                           (list* 'list fields))
                                                     (list 'type-name (list 'vector '_)
                                                           (str (.name ast)))
+                                                    'Eq
+                                                    (list '=* (list 'vector 'x 'y)
+                                                          '(cond
+                                                            (type= x y)
+                                                            (=* (type-args x)
+                                                                (type-args y))
+
+                                                            nothing))
                                                     (comp (map fields
                                                                (fn [field]
                                                                  (list (symbol (str "." field)) (list 'vector '_)
@@ -699,12 +707,13 @@
               (comp (comp* empty-list (map bindings .decl)) (.decl body-exprs))
               (.type-num body-exprs)))))
 
-;; TODO: Lot of refactoring and re-design to be done here
+;; TODO: obviously, this garbage has to be removed
 (defn b= [x y]
-  (match (= x y)
-         nothing 0
-         1))
+  (cond
+   (type= nothing (= x y)) 0
+   1))
 
+;; TODO: Lot of refactoring and re-design to be done here
 (defn eval-cond-clause [[[test-ast value-ast] & clauses] default-stmts cond-result]
   (for [_ (begin-scope)
         test (fr/evaluate test-ast emit-c)
@@ -726,7 +735,7 @@
                              (fn [[fn-sym-str]]
                                (str "dec_and_free(" fn-sym-str ");\n"))))
         cond-rest (cond
-                   (b= test-sym "(Value *)&trueVal")
+                   (b= test-sym "true")
                    (sm/state-maybe clause-result)
 
                    (empty? clauses)
@@ -740,7 +749,7 @@
                        (b= (.type-num cond-rest) (.type-num clause-result)) (.type-num clause-result)
                        :no-type)]
       (cond
-       (b= test-sym "(Value *)&trueVal")
+       (b= test-sym "true")
        (c-code cond-result
                (comp test-stmts
                      test-suffix
@@ -841,10 +850,12 @@
                                  (apply-to list
                                            (let [temp-args (cons (gensym "t-")
                                                                  (map literals (fn [_] (gensym "t-"))))
-                                                 lit-args (remove (zip-lists temp-args literals)
-                                                                    (fn [[_ literal]]
-                                                                      (= literal dont-care)))
-                                                 lit-checks (map lit-args (partial cons '=*))]
+                                                 lit-checks (map (remove (zip-lists temp-args literals)
+                                                                         (fn [[_ literal]]
+                                                                           (= literal dont-care)))
+                                                                 (fn [[val var]]
+                                                                   (list 'instance? 'maybe
+                                                                         (list '= val var))))]
                                              (an/analyze-expr (list 'cond
                                                                     (list 'instance? pattern-type match-val-sym)
                                                                     (list 'cond
@@ -862,9 +873,9 @@
                                                                                  type-args-sym))]
                                              (ast/let-expr (list b) (list expr))))))
 
-                  (apply-to list
-                            (an/analyze-expr (list '=* pattern match-val-sym))
-                            (sm/state-maybe expr))))))
+                        (for [test (an/analyze-expr (list 'instance? 'maybe
+                                                          (list '= pattern match-val-sym)))]
+                          (list test expr))))))
 
 (extend-type ast/match-ast
   Emitter
@@ -1204,7 +1215,7 @@
                                        (let [type-sym (.sym (.v (first arg-asts)))]
                                          (for [instance-type (sm/get-in-val (list :types type-sym))
                                                :when (= instance-type type-val)]
-                                           (c-code "(Value *)&trueVal", empty-list, empty-list, Number)))
+                                           (c-code "true", empty-list, empty-list, Number)))
                                        (zero sm/state-maybe))
                                 (zero sm/state-maybe))
                          (zero sm/state-maybe))
@@ -1526,50 +1537,47 @@
         proto-name (sm/get-in-val (list :defined-protos 'type-name))
         dispatch-fn-sym (sm/get-in-val (list :protocols proto-name :dispatch-sym))
         arity-info (lookup-static-arity dispatch-fn-sym 1)
-        _ (write-strs (list "Value *(*type_name)(List *, Value *)"
-                            " = " (.c-val arity-info) ";\n"))
+        _ (write-strs (list "Value *(*type_name)(List *, Value *) = "
+                            (.c-val arity-info) ";\n"))
 
         proto-name (sm/get-in-val (list :defined-protos 'invoke))
         dispatch-fn-sym (sm/get-in-val (list :protocols proto-name :dispatch-sym))
         arity-info (lookup-static-arity dispatch-fn-sym 2)
-        _ (write-strs (list "Value *(*invoke1Arg)(List *, Value *, Value*)"
-                            " = " (.c-val arity-info) ";\n"))
+        _ (write-strs (list "Value *(*invoke1Arg)(List *, Value *, Value*) = "
+                            (.c-val arity-info) ";\n"))
 
         proto-name (sm/get-in-val (list :defined-protos 'assoc*))
         dispatch-fn-sym (sm/get-in-val (list :protocols proto-name :dispatch-sym))
         arity-info (lookup-static-arity dispatch-fn-sym 5)
-        _ (write-strs (list "Value *(*assoc)(List *, Value*, Value*, Value*, Value*, Value*)"
-                            " = " (.c-val arity-info) ";\n"))
+        _ (write-strs (list "Value *(*assoc)(List *, Value*, Value*, Value*, Value*, Value*) = "
+                            (.c-val arity-info) ";\n"))
 
         proto-name (sm/get-in-val (list :defined-protos 'get*))
         dispatch-fn-sym (sm/get-in-val (list :protocols proto-name :dispatch-sym))
         arity-info (lookup-static-arity dispatch-fn-sym 5)
-        _ (write-strs (list "Value *(*get)(List *, Value*, Value*, Value*, Value*, Value*)"
-                            " = " (.c-val arity-info) ";\n"))
+        _ (write-strs (list "Value *(*get)(List *, Value*, Value*, Value*, Value*, Value*) = "
+                            (.c-val arity-info) ";\n"))
 
         proto-name (sm/get-in-val (list :defined-protos 'sha1))
         dispatch-fn-sym (sm/get-in-val (list :protocols proto-name :dispatch-sym))
         arity-info (lookup-static-arity dispatch-fn-sym 1)
-        _ (write-strs (list "Value *(*sha1)(List *, Value*)"
-                            " = " (.c-val arity-info) ";\n"))
+        _ (write-strs (list "Value *(*sha1)(List *, Value*) = "
+                            (.c-val arity-info) ";\n"))
 
         proto-name (sm/get-in-val (list :defined-protos 'hash-seq))
         dispatch-fn-sym (sm/get-in-val (list :protocols proto-name :dispatch-sym))
         arity-info (lookup-static-arity dispatch-fn-sym 2)
-        _ (write-strs (list "Value *(*hashSeq)(List *, Value*, Value*)"
-                            " = " (.c-val arity-info) ";\n"))
+        _ (write-strs (list "Value *(*hashSeq)(List *, Value*, Value*) = "
+                            (.c-val arity-info) ";\n"))
 
         proto-name (sm/get-in-val (list :defined-protos 'count))
         dispatch-fn-sym (sm/get-in-val (list :protocols proto-name :dispatch-sym))
         arity-info (lookup-static-arity dispatch-fn-sym 1)
-        _ (write-strs (list "Value *(*count)(List *, Value*)"
-                            " = " (.c-val arity-info) ";\n"))
+        _ (write-strs (list "Value *(*count)(List *, Value*) = "
+                            (.c-val arity-info) ";\n"))
 
-        proto-name (sm/get-in-val (list :defined-protos '=*))
-        dispatch-fn-sym (sm/get-in-val (list :protocols proto-name :dispatch-sym))
-        arity-info (lookup-static-arity dispatch-fn-sym 2)
-        _ (write-strs (list "Value *(*equal)(List *, Value*, Value*)"
-                            " = " (.c-val arity-info) ";\n"))
+        arity-info (lookup-fn-arity '=* 2)
+        _ (write-strs (list "Value *(*equal_star)(List *, Value*, Value*) = " arity-info ";\n"))
 
         n (lookup-sym 'nothing)
         _ (write-strs (list "int64_t nothing_type = " (.type-num n) ";\n"))

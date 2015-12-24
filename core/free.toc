@@ -12,7 +12,10 @@
     (string-list [_] (list "<FreeZero>"))
 
     Eq
-    (=* [x y] (type= x y))
+    (=* [x y]
+      (cond
+       (type= x y) (maybe x)
+       nothing))
 
     Applicative
     (wrap [_ v] (free v))
