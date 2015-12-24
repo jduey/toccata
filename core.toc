@@ -1840,16 +1840,7 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
   (flat-map [_ f]
     (f v)))
 
-;; TODO: delete this and replace with 'm='
 (defn =
-  ([v] 1)
-  ([x y] (=* x y))
-  ([v & vs]
-     (cond
-      (=* v (car vs)) (apply = vs)
-      0)))
-
-(defn m=
   ([v] (maybe v))
   ([x y] (cond
           (=* x y) (maybe x)
@@ -1971,7 +1962,7 @@ return((Value *)numberValue(shaVal));
   (map (flat-map (interpose vs " ") string-list) pr-err*)
   (pr-err* "\n"))
 
-;; TODO: rewrite later when 'm=' becomes '='
+;; TODO: rewrite later when '=' becomes '='
 (defn list=* [[h1 & t1] [h2 & t2]]
   (cond
    (list-empty? t1) 1
@@ -2040,7 +2031,7 @@ return((Value *)numberValue(shaVal));
 
   Eq
   (=* [x y]
-    ;; TODO: rewrite when 'm=' becomes '='
+    ;; TODO: rewrite when '=' becomes '='
     (cond
      (not (number= (get-type x) (get-type y))) 0
      (list-empty? x) (list-empty? y)
@@ -2168,7 +2159,7 @@ return((Value *)numberValue(shaVal));
 
 (defn m-nth [coll n]
   (match (seq coll)
-         |List h & t| (comp (for [_ (m= n 0)]
+         |List h & t| (comp (for [_ (= n 0)]
                               h)
                             (m-nth t (dec n)))
          nothing))
@@ -2744,11 +2735,11 @@ return(newNode);
   (let [not-found (reify
                     Eq
                     (=* [x y]
-                      (match (m= (get-type x) (get-type y))
+                      (match (= (get-type x) (get-type y))
                              nothing 0
                              1)))
         v? (get m k not-found)]
-    (match (m= not-found v?)
+    (match (= not-found v?)
            nothing (maybe v?)
            nothing)))
 

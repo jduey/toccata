@@ -12,7 +12,7 @@
   (recursive-descent [f]
     (sm/state-maybe (fn [& args]
                       (list (apply f (map (remove args (fn [x]
-                                                           (m= 0 (count x))))
+                                                           (= 0 (count x))))
                                           first)))))))
 
 (deftype parser-terminal [term-str]
@@ -20,8 +20,8 @@
   (recursive-descent [_]
     (let [term-count (count term-str)]
       (for [text (read-text)
-            :when (m= 0 (< (count text) term-count))
-            :when (m= (subs text 0 term-count) term-str)
+            :when (= 0 (< (count text) term-count))
+            :when (= (subs text 0 term-count) term-str)
             _ (sm/set-val :text (subs text term-count))]
         (list term-str)))))
 

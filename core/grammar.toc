@@ -99,8 +99,8 @@
   Parser
   (parser/recursive-descent [_]
     (parser/char-test (fn [c]
-                        (match (comp (m= c (char 92))
-                                     (m= c (char 34)))
+                        (match (comp (= c (char 92))
+                                     (= c (char 34)))
                                nothing (maybe c)
                                nothing)))))
 
@@ -182,7 +182,7 @@
   Parser
   (parser/recursive-descent [_]
     (parser/char-test (fn [c]
-                        (match (m= c (char 10))
+                        (match (= c (char 10))
                                nothing (maybe c)
                                nothing)))))
 
@@ -231,7 +231,7 @@
 (defn read-list-destructure []
   (parser/rule "list-destructure"
                (apply-to (fn [args tail]
-                           (comp args (remove tail (partial m= "&"))))
+                           (comp args (remove tail (partial = "&"))))
                          (parser/ignore (parser/none-or-more (whitespace)))
                          (parser/ignore (parser/term "["))
                          (parser/none-or-more (read-sub-dest))

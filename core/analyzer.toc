@@ -8,7 +8,7 @@
 
 (defn is-expr [pred]
   (for [expr (sm/get-val :expr)
-        :when (m= 1 (pred expr))]
+        :when (= 1 (pred expr))]
     expr))
 
 (def analyze-expr)
@@ -78,9 +78,9 @@
         result (match expr
                       |List 'fn-arity args exprs|
                       (for [body (traverse exprs analyze-expr)]
-                        (match (filter args (partial m= "&"))
+                        (match (filter args (partial = "&"))
                                |List _|
-                               (ast/variadic-arity (remove args (partial m= "&")) body)
+                               (ast/variadic-arity (remove args (partial = "&")) body)
 
                                (ast/fixed-arity args body)))
                       (zero sm/state-maybe))]
@@ -97,7 +97,7 @@
     result))
 
 (defn analyze-proto-arity [[fn-name params & body]]
-  (match (filter params (partial m= "&"))
+  (match (filter params (partial = "&"))
          |List _|
          (zero sm/state-maybe)
 
@@ -214,7 +214,7 @@
         result (match expr
                       |List name & frms|
                       (for [_ (sm/set-val :expr frms)
-                            :when (m= 1 (instance? Symbol name))
+                            :when (= 1 (instance? Symbol name))
                             fn-impls (sm/recur (analyze-proto-fn))]
                         {name (apply merge-with comp fn-impls)})
                       (zero sm/state-maybe))]
