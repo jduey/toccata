@@ -13,9 +13,7 @@
 
     Eq
     (=* [x y]
-      (cond
-       (type= x y) (maybe x)
-       nothing))
+      (type= x y))
 
     Applicative
     (wrap [_ v] (free v))

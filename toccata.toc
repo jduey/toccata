@@ -371,25 +371,21 @@
   (sm/set-val :scope-locals scope-info))
 
 (defn remember-local [sym]
-  (sm/assoc-in-val (list :scope-locals (str sym)) (maybe sym)))
+  (sm/assoc-in-val (list :scope-locals (str sym))
+                   (str "dec_and_free(" sym ");\n")))
 
 (defn free-scope-locals [result-sym]
   (for [scope-locals (sm/get-val :scope-locals)]
-    (let [locals (map (filter (seq scope-locals) second) first)]
+    (let [locals (seq scope-locals)]
       ;; TODO: getting closer. Still needs work
       (match (comp (for [_ (= result-sym "")]
                      locals)
-                   (for [local (m-first locals)
-                         _ (= (str result-sym) local)
-                         _ (= 1 (count locals))]
+                   (for [_ (= 1 (count locals))
+                         [local _] (m-first locals)
+                         _ (= (str result-sym) local)]
                      empty-list))
-             |maybe locals| (map locals
-                                 (fn [local]
-                                   (str "dec_and_free(" local ");\n")))
-             (list* "incRef(" result-sym ");\n"
-                    (map locals
-                         (fn [local]
-                           (str "dec_and_free(" local ");\n"))))))))
+             |maybe locals| (map locals second)
+             (list* "incRef(" result-sym ");\n" (map locals second))))))
 
 (defn emit-reified-fn [protocol-name type-num [name ast]]
   (let [fn-ptr (gensym "protoFnPtr_")
@@ -548,7 +544,10 @@
                                                                   "(List *closures, Value *arg);\n"))]
                                           ""))))))
 
-             _ (comp (for [def (sm/get-in-val (list :defined-syms new-type-name))]
+             _ (comp (for [def (sm/get-in-val (list :defined-syms new-type-name))
+                           _ (sm/assoc-in-val (list :defined-syms new-type-name)
+                                              (c-code (.c-val def) empty-list empty-list
+                                                      (dec type-val-num)))]
                        (.c-val def))
                      (let [c-name (gensym "var_")]
                        (for [_ (write-strs (list "// forward declaration for '"
@@ -565,7 +564,7 @@
                                                          (apply str (interpose fields ", ")) "]>"))
                                              'Type
                                              (list 'instance? (list 'vector '_ 'v)
-                                                   (list 'number= type-val-num (list 'get-type 'v)))
+                                                   (list '= type-val-num (list 'get-type 'v)))
                                              'Applicative
                                              (list 'apply* (list 'vector '_ 'args)
                                                    (list 'apply 'invoke '_ 'args))
@@ -580,12 +579,8 @@
                                                           (str (.name ast)))
                                                     'Eq
                                                     (list '=* (list 'vector 'x 'y)
-                                                          '(cond
-                                                            (type= x y)
-                                                            (=* (type-args x)
-                                                                (type-args y))
-
-                                                            nothing))
+                                                          '(=* (type-args x)
+                                                               (type-args y)))
                                                     (comp (map fields
                                                                (fn [field]
                                                                  (list (symbol (str "." field)) (list 'vector '_)
@@ -707,107 +702,62 @@
               (comp (comp* empty-list (map bindings .decl)) (.decl body-exprs))
               (.type-num body-exprs)))))
 
-;; TODO: obviously, this garbage has to be removed
-(defn b= [x y]
-  (cond
-   (type= nothing (= x y)) 0
-   1))
+(defn eval-cond-clause [cond-result clause]
+  (match clause
+         |List test-ast value-ast|
+         (for [_ (begin-scope)
+               test (fr/evaluate test-ast emit-c)
+               :let [test-sym (str (.c-val test))]
+               _ (sm/assoc-in-val (list :scope-locals test-sym) "")
+               test-suffix (sm/get-val :scope-locals)
+               _ (begin-scope)
+               clause-result (fr/evaluate value-ast emit-c)
+               clause-suffix (sm/get-val :scope-locals)]
+           (c-code cond-result
+                   (comp (.init test)
+                         (map (seq test-suffix) second)
+                         (list "\nif (" test-sym "->type != nothing_type) {\n"
+                               "dec_and_free(" test-sym ");\n")
+                         (.init clause-result)
+                         (list "incRef(" (.c-val clause-result) ");\n")
+                         (list (str cond-result " = " (.c-val clause-result) ";\n"))
+                         (map (seq clause-suffix) second)
+                         (list "} else {\n"
+                               "dec_and_free(" test-sym ");\n"))
+                   (comp (.decl test)
+                         (.decl clause-result))
+                   (.type-num clause-result)))
 
-;; TODO: Lot of refactoring and re-design to be done here
-(defn eval-cond-clause [[[test-ast value-ast] & clauses] default-stmts cond-result]
-  (for [_ (begin-scope)
-        test (fr/evaluate test-ast emit-c)
-        :let [test-sym (str (.c-val test))
-              test-stmts (.init test)]
-        test-suffix (for [scope-locals (sm/get-val :scope-locals)]
-                      (map (seq scope-locals)
-                           (fn [[fn-sym-str local?]]
-                             (cond
-                              (b= test-sym fn-sym-str) ""
-                              (instance? maybe local?) (str "dec_and_free(" fn-sym-str ");\n")
-                              ""))))
-        _ (begin-scope)
-        clause-result (fr/evaluate value-ast emit-c)
-        :let [clause-sym (.c-val clause-result)
-              clause-stmts (.init clause-result)]
-        clause-suffix (for [scope-locals (sm/get-val :scope-locals)]
-                        (map (filter (seq scope-locals) second)
-                             (fn [[fn-sym-str]]
-                               (str "dec_and_free(" fn-sym-str ");\n"))))
-        cond-rest (cond
-                   (b= test-sym "true")
-                   (sm/state-maybe clause-result)
-
-                   (empty? clauses)
-                   (sm/state-maybe (c-code cond-result
-                                           default-stmts
-                                           empty-list
-                                           (.type-num clause-result)))
-
-                   (eval-cond-clause clauses default-stmts cond-result))]
-    (let [result-type (cond
-                       (b= (.type-num cond-rest) (.type-num clause-result)) (.type-num clause-result)
-                       :no-type)]
-      (cond
-       (b= test-sym "true")
-       (c-code cond-result
-               (comp test-stmts
-                     test-suffix
-                     clause-stmts
-                     (list "incRef(" clause-sym ");\n")
-                     (list (str cond-result " = " clause-sym ";\n"))
-                     clause-suffix)
-               (comp (.decl test)
-                     (.decl clause-result))
-               result-type)
-
-       (c-code cond-result
-               (comp test-stmts
-                     test-suffix
-                     (list "\nif (isTrue(" test-sym ")) {\n"
-                           "dec_and_free(" test-sym ");\n")
-                     clause-stmts
-                     (list "incRef(" clause-sym ");\n")
-                     (list (str cond-result " = " clause-sym ";\n"))
-                     clause-suffix
-                     (list "} else {\n"
-                           "dec_and_free(" test-sym ");\n")
-                     (.init cond-rest)
-                     (list "}\n"))
-               (comp (.decl test)
-                     (.decl clause-result)
-                     (.decl cond-rest))
-               result-type)))))
+         (for [_ (begin-scope)
+               clause-result (fr/evaluate clause emit-c)
+               clause-suffix (sm/get-val :scope-locals)]
+           (c-code cond-result
+                   (comp (.init clause-result)
+                         (list "incRef(" (.c-val clause-result) ");\n")
+                         (list cond-result " = " (.c-val clause-result) ";\n")
+                         (map (seq clause-suffix) second))
+                   (.decl clause-result)
+                   (.type-num clause-result)))))
 
 (extend-type ast/cond-ast
   Emitter
   (emit-c [ast]
     (for [cond-result (genlocal "cond")
-          :let [cond-result (str cond-result)]
           scope-info (begin-scope)
-          default (fr/evaluate (.default ast) emit-c)
-          :let [default-result (.c-val default)
-                default-type (.type-num default)]
-          default-suffix (for [scope-locals (sm/get-val :scope-locals)]
-                           (map (filter (seq scope-locals) second)
-                                (fn [[fn-sym-str]]
-                                  (str "dec_and_free(" fn-sym-str ");\n"))))
-          :let [default-stmts (comp (.init default)
-                                    (list "incRef(" default-result ");\n")
-                                    (list cond-result " = " default-result ";\n")
-                                    default-suffix)]
-          evalled-clauses (eval-cond-clause (.clauses ast) default-stmts cond-result)
+          evalled-clauses (sm/traverse (comp (.clauses ast) (list (.default ast)))
+                                       (partial eval-cond-clause cond-result))
           _ (end-scope scope-info)
           _ (remember-local cond-result)]
-      (let [result-type (match (= (.type-num evalled-clauses) default-type)
-                               |maybe| default-type
-                               :no-type)]
+      (let [return-type (match (apply = (map evalled-clauses .type-num))
+                               |maybe return-type| return-type
+                               :no-type)
+            evalled-clauses (apply comp evalled-clauses)]
         (c-code cond-result
                 (comp (list "Value *" cond-result ";\n")
-                      (.init evalled-clauses))
-                (comp (.decl default)
-                      (.decl evalled-clauses))
-                result-type)))))
+                      (.init evalled-clauses)
+                      (repeat (count (.clauses ast)) "}\n"))
+                (.decl evalled-clauses)
+                return-type)))))
 
 (defn expand-match-clauses [match-val-sym type-args-sym clauses]
   (sm/traverse clauses
@@ -837,12 +787,12 @@
                                            (an/analyze-expr
                                             (list 'cond
                                                   (list 'instance? pattern-type match-val-sym)
-                                                  (list 'cond (list '<* (list 'count type-args-sym)
+                                                  (list 'cond (list '< (list 'count type-args-sym)
                                                                     (dec (count binding-syms)))
-                                                        0
-                                                        1)
+                                                        'nothing
+                                                        '(maybe 1))
 
-                                                  0))
+                                                  'nothing))
                                            (for [b (an/analyze-let-binding (list binding-syms
                                                                                  type-args-sym))]
                                              (ast/let-expr (list b) (list expr))))
@@ -853,28 +803,26 @@
                                                  lit-checks (map (remove (zip-lists temp-args literals)
                                                                          (fn [[_ literal]]
                                                                            (= literal dont-care)))
-                                                                 (fn [[val var]]
-                                                                   (list 'instance? 'maybe
-                                                                         (list '= val var))))]
+                                                                 (partial cons '=))]
                                              (an/analyze-expr (list 'cond
                                                                     (list 'instance? pattern-type match-val-sym)
                                                                     (list 'cond
-                                                                          (list '<* (list 'count type-args-sym)
+                                                                          (list '< (list 'count type-args-sym)
                                                                                 (dec (count binding-syms)))
-                                                                          '0
+                                                                          'nothing
 
                                                                           (list 'let (list (list temp-args type-args-sym))
+                                                                                ;; TODO: test this!!!
                                                                                 (match (count lit-checks)
                                                                                        1 (first lit-checks)
                                                                                        (cons 'and lit-checks))))
 
-                                                                    '0)))
+                                                                    'nothing)))
                                            (for [b (an/analyze-let-binding (list binding-syms
                                                                                  type-args-sym))]
                                              (ast/let-expr (list b) (list expr))))))
 
-                        (for [test (an/analyze-expr (list 'instance? 'maybe
-                                                          (list '= pattern match-val-sym)))]
+                        (for [test (an/analyze-expr (list '= pattern match-val-sym))]
                           (list test expr))))))
 
 (extend-type ast/match-ast
@@ -971,10 +919,9 @@
             _ (write-strs (interpose (map arg-syms (fn [arg] (str "Value *" (.c-val arg))))
                                      ", "))
             _ (write-strs (cons ") {\n" (.init body)))
-            scope-locals (sm/get-val :scope-locals)
-            _ (write-strs (flat-map (filter (seq scope-locals) second)
-                                    (fn [[fn-sym-str]]
-                                      (list "dec_and_free(" fn-sym-str ");\n"))))
+            scope-locals (for [scope-locals (sm/get-val :scope-locals)]
+                           (map (seq scope-locals) second))
+            _ (write-strs scope-locals)
             _ (write-strs (list "\nreturn(0);\n}\n\n"))]
         (c-code "" empty-list empty-list :no-type)))))
 
@@ -1026,7 +973,7 @@
                                    arity-decl
                                    FunctionType))
 
-                          (for [_ (sm/assoc-in-val (list :scope-locals fn-ptr-sym) nothing)]
+                          (for [_ (sm/assoc-in-val (list :scope-locals fn-ptr-sym) "")]
                             (c-code fn-ptr-sym
                                     empty-list
                                     (comp arity-decl
@@ -1399,9 +1346,10 @@
 
                       (sm/state-maybe empty-list))
           _ (sm/update-in-val (list :call-site-count :total) inc)
-          call-site (comp (match args
-                                 |List _ _| (call-instance? ast args)
-                                 (zero sm/state-maybe))
+          call-site (comp
+                     ;; (match args
+                     ;;             |List _ _| (call-instance? ast args)
+                     ;;             (zero sm/state-maybe))
                           (call-proto-impl (.callee ast) args)
                           (call-static-fixed target (map args .c-val))
                           (call-static-variadic target args)
@@ -1481,7 +1429,9 @@
         _ (write-strs (list "\nint main(int argc, char *argv[]) {\n"))
         start-up-init (sm/get-val :startup-init)
         _ (sm/traverse (reverse start-up-init) write-strs)
-        _ (write-strs (list "     outStream = stdout;\n"
+        nothing-info (lookup-sym 'nothing)
+        _ (write-strs (list "     nothing = " (.c-val nothing-info) ";\n"
+                            "     outStream = stdout;\n"
                             "     List *argList = malloc_list();\n"
                             "      argList->type = ListType;\n"
                             "      argList->len = 0;\n"
@@ -1579,8 +1529,11 @@
         arity-info (lookup-fn-arity '=* 2)
         _ (write-strs (list "Value *(*equal_star)(List *, Value*, Value*) = " arity-info ";\n"))
 
-        n (lookup-sym 'nothing)
-        _ (write-strs (list "int64_t nothing_type = " (.type-num n) ";\n"))
+        maybe-info (lookup-sym 'maybe)
+        arity-info (lookup-proto-arity 'invoke 2 (.type-num maybe-info))
+        _ (write-strs (list "Value *(*maybe)(List *, Value*, Value*) = " (.c-val arity-info) ";\n"))
+
+        _ (write-strs (list "int64_t nothing_type = " (.type-num nothing-info) ";\n"))
         ]
     ""))
 

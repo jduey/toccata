@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
+int64_t nothing_type;
 typedef struct {int64_t type; int32_t refs;} Value;
 typedef struct {int64_t type; int32_t refs; int64_t numVal;} Number;
 typedef struct {int64_t type; int32_t refs; int64_t len; char buffer[0];} String;
@@ -407,15 +408,6 @@ char *extractStr(Value *v) {
   return(newStr->buffer);
 }
 
-int64_t isTrue(Value *boolVal) {
-  if (boolVal->type != NumberType) {
-    fprintf(outStream, \"Invalid boolean value\\n\");
-    abort();
-  }
-  else
-    return(((Number *)boolVal)->numVal);
-}
-
 Value *findProtoImpl(int64_t type, ProtoImpls *impls) {
   int64_t implIndex = 0;
   Value *defaultImpl = (Value *)0;
@@ -514,7 +506,6 @@ List *listCons(Value *x, List *l) {
 ")
 
 (inline-text "
-int64_t nothing_type;
 Value *(*equal_star)(List *closures, Value *, Value *);
 int equal(Value *v1, Value *v2) {
    Value *equals = equal_star((List *)0, v1, v2);
@@ -530,6 +521,9 @@ Value *(*hashSeq)(List *, Value* n, Value *s);
 Value *(*count)(List *, Value* n);
 Value *(*invoke1Arg)(List *closures, Value *f, Value* arg);
 Value *(*type_name)(List *closures, Value *t);
+Value *nothing;
+Value *(*maybe)(List *, Value*, Value *);
+
 
 // SHA1 implementation courtesy of: Steve Reid <sreid@sea-to-sky.net>
 // and others.
@@ -954,11 +948,11 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
    "return(numberValue(arg0->type));"))
 
 (defn type= [x y]
-  (inline-text Number
+  (inline-text
    "if (arg0->type == arg1->type)
-      return(true);
+      return(maybe((List *)0, (Value *)0, arg0));
     else
-      return(false);\n"))
+      return(nothing);\n"))
 
 (defn pr* [str]
   (inline-text Number
@@ -1066,17 +1060,6 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
       return(false);
    else
       return(true);\n"))
-
-;; this function assumes the type of 'x' has already been checked
-(defn number-less-than [x y]
-  (inline-text Number
-   "if (arg0->type != arg1->type) {
-      fprintf(stderr, \"\\ninvalid types for 'number-less-than'\\n\");
-      abort();
-   } else if (((Number *)arg0)->numVal < ((Number *)arg1)->numVal)
-      return(true);
-   else
-      return(false);\n"))
 
 ;; this function assumes the type of 'x' has already been checked
 (defn add-numbers [x y]
@@ -1275,48 +1258,48 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
       String *s1 = (String *)arg0;
       String *s2 = (String *)arg1;
       if (s1->len == s2->len && strncmp(s1->buffer,s2->buffer,s1->len) == 0)
-        return(true);
+        return(maybe((List *)0, (Value *)0, arg0));
       else
-        return(false);
+        return(nothing);
     } else if (arg0->type == SubStringType && arg1->type == SubStringType) {
       SubString *s1 = (SubString *)arg0;
       SubString *s2 = (SubString *)arg1;
       if (s1->len == s2->len && strncmp(s1->buffer,s2->buffer,s1->len) == 0)
-        return(true);
+        return(maybe((List *)0, (Value *)0, arg0));
       else
-        return(false);
+        return(nothing);
     } else if (arg0->type == StringType &&
                arg1->type == SubStringType) {
       String *s1 = (String *)arg0;
       SubString *s2 = (SubString *)arg1;
       if (s1->len == s2->len && strncmp(s1->buffer,s2->buffer,s1->len) == 0)
-        return(true);
+        return(maybe((List *)0, (Value *)0, arg0));
       else
-        return(false);
+        return(nothing);
     } else if (arg0->type == SubStringType &&
                arg1->type == StringType) {
       SubString *s1 = (SubString *)arg0;
       String *s2 = (String *)arg1;
       if (s1->len == s2->len && strncmp(s1->buffer,s2->buffer,s1->len) == 0)
-        return(true);
+        return(maybe((List *)0, (Value *)0, arg0));
       else
-        return(false);
+        return(nothing);
     } else
-       return(false);\n"))
+       return(nothing);\n"))
 
 (defn symkey= [v1 v2]
   (inline-text Number
    "if (arg0->type != arg1->type)
-      return(false);
+      return(nothing);
     else {
       SubString *s1 = (SubString *)arg0;
       SubString *s2 = (SubString *)arg1;
       if (s1->type == s2->type &&
           s1->len == s2->len &&
           strncmp(s1->buffer, s2->buffer, s1->len) == 0) {
-        return(true);
+        return(maybe((List *)0, (Value *)0, arg0));
       } else
-        return(false);
+        return(nothing);
     }\n"))
 
 (defn str-malloc [len]
@@ -1661,20 +1644,10 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
   (type-args [_]))
 
 (defprotocol Type
-  (instance? [type val]
-    (cond
-     (number= Number (get-type type)) (number= type (get-type val))
-     (let [_ (pr* "*** call to 'instance?' with unknown type parameter.")]
-       (abort)))))
+  (instance? [type val]))
 
 (defn list [& l]
   l)
-
-;; TODO: delete this
-(defn not [b-val]
-  (cond
-   b-val 0
-   1))
 
 (defprotocol Collection
   ;; TODO: remove 'empty?'
@@ -1724,9 +1697,11 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
 (defprotocol Applicative
   (wrap [x v])
   (apply* [fv args]
-    (cond
-     (number= 0 (count args)) (flat-map fv (fn [f] (wrap fv (f))))
-     (flat-map fv (fn [f] (comprehend f args))))))
+    ;; TODO: don't know how to address this yet
+    ;; (cond
+    ;;  (number= 0 (count args)) (flat-map fv (fn [f] (wrap fv (f))))
+    ;;  (flat-map fv (fn [f] (comprehend f args))))
+    ))
 
 (defn comprehend [f [mv & mvs]]
   (let [rest-steps (reduce (reverse mvs)
@@ -1776,6 +1751,8 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
 
 (def maybe)
 
+(def <)
+
 (def nothing
   (reify
     Getter
@@ -1788,17 +1765,14 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
 
     Eq
     (=* [nv x]
-      (cond
-       (type= nv x) (maybe nv)
-       nv))
+      (type= nv x))
 
     Monoid
     (zero [nv] nv)
     (comp* [nothing mvs]
-      (cond
-       (number= 0 (count mvs)) nothing
-       (let [[mv & mvs] mvs]
-         (comp* mv mvs))))
+      (match mvs
+             |List mv & mvs| (comp* mv mvs)
+             nothing))
 
     Functor
     (map [nv f] nv)
@@ -1813,7 +1787,11 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
 
 (defn =
   ([v] (maybe v))
-  ([x y] (=* x y)))
+  ([x y] (=* x y))
+  ([x y & ys]
+     (match (=* x y)
+            nothing nothing
+            (apply = y ys))))
 
 (defn remove [l f]
   (filter l (fn [v]
@@ -1850,28 +1828,47 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
     (f v)))
 
 (defn <
-  ([x y] (cond
-          (<* x y) (maybe x)
-          nothing))
+  ([x y] (<* x y))
   ([v & vs]
-     (cond
-      (list-empty? vs) (maybe v)
-      (not (<* v (car vs))) nothing
-      (apply < vs))))
+     (match vs
+            |List y| (apply-to (fn [x _] x)
+                               (<* v (car vs))
+                               (apply < vs))
+            (maybe v))))
 
 (extend-type Number
+  Type
+  (instance? [type val]
+    (inline-text Number
+   "if (((Number *)arg0)->numVal != arg1->type)
+      return(nothing);
+   else
+      return(maybe((List *)0, (Value *)0, arg0));\n"))
+
   Getter
   (type-args [n] (list n))
   (type-name [_] "Number")
 
   Eq
   (=* [x y]
-    (cond
-     (number= x y) (maybe x)
-     nothing))
+    (inline-text "
+  if (arg0->type != arg1->type) {
+      return(nothing);
+   } else if (((Number *)arg0)->numVal != ((Number *)arg1)->numVal)
+      return(nothing);
+   else
+      return(maybe((List *)0, (Value *)0, arg0));\n"))
 
   Ord
-  (<* [x y] (number-less-than x y))
+  (<* [x y]
+    (inline-text
+   "if (arg0->type != arg1->type) {
+      fprintf(stderr, \"\\ninvalid types for '<*' for Number\\n\");
+      abort();
+   } else if (((Number *)arg0)->numVal < ((Number *)arg1)->numVal)
+      return(maybe((List *)0, (Value *)0, arg0));
+   else
+      return(nothing);\n"))
 
   Stringable
   (string-list [v] (list (number-str v)))
@@ -1959,9 +1956,9 @@ return((Value *)numberValue(shaVal));
   (pr-err* "\n"))
 
 (defn list=* [[h1 & t1] [h2 & t2]]
-  (apply-to list
-            (=* h1 h2)
-            (list=* t1 t2)))
+  (for [_ (=* h1 h2)
+        _ (list=* t1 t2)]
+    1))
 
 (defn zip-lists [l1 l2]
   (match (apply-to list (m-first l1) (m-first l2))
@@ -1982,14 +1979,6 @@ return((Value *)numberValue(shaVal));
 
 (defn list* [arg & args]
   (list** arg args))
-
-;; TODO: delete this
-(defn and
-  ([b-val] b-val)
-  ([b-val & b-vals]
-     (cond
-      b-val (apply and b-vals)
-      0)))
 
 (extend-type List
   Getter
@@ -2033,16 +2022,16 @@ return((Value *)numberValue(shaVal));
 
   Eq
   (=* [x y]
-    ;; TODO: rewrite
-    (cond
-     (not (number= (get-type x) (get-type y))) nothing
-     (list-empty? x) (cond
-                      (list-empty? y) (maybe x)
-                      nothing)
-     (not (number= (count x) (count y))) nothing
-     (match (list=* x y)
-            nothing nothing
-            (maybe x))))
+    ;; TODO: rewrite, huge influence on perf
+    (for [_ (type= x y)
+          :let [len-x (count x)
+                len-y (count y)]
+          _ (for [_ (=* len-x len-y)
+                  _ (cond
+                     (= 0 len-y) (maybe x)
+                     (list=* x y))]
+              1)]
+      x))
 
   Monoid
   (zero [_] empty-list)
@@ -2834,9 +2823,7 @@ return(newNode);
 
   Eq
   (=* [x y]
-    (cond
-     (str= x y) (maybe x)
-     nothing))
+    (str= x y))
 
   Collection
   (empty? [s]
@@ -2901,9 +2888,7 @@ return((Value *)numberValue(shaVal));
 
   Eq
   (=* [x y]
-    (cond
-     (str= x y) (maybe x)
-     nothing))
+    (str= x y))
 
   Collection
   (empty? [s]
@@ -2973,9 +2958,7 @@ else {
 
   Eq
   (=* [x y]
-    (cond
-     (symkey= x y) (maybe x)
-     nothing))
+    (symkey= x y))
 
   Named
   (name [v]
@@ -3022,9 +3005,7 @@ else {
 
   Eq
   (=* [x y]
-    (cond
-     (symkey= x y) (maybe x)
-     nothing))
+    (symkey= x y))
 
   Named
   (name [v]
@@ -3058,14 +3039,6 @@ else {
 }
 ")))
 
-;; TODO: delete this
-(defn or
-  ([b-val] b-val)
-  ([b-val & b-vals]
-     (cond
-      b-val 1
-      (apply or b-vals))))
-
 ;; TODO: This is wrong. Doesn't short circuit. Doesn't return orig element
 (defn some [coll f]
   (comp* nothing (map coll f)))
@@ -3083,8 +3056,9 @@ else {
   (new-keyword (str ":" kw-name)))
 
 (defn string? [s]
-  (or (instance? String s)
-      (instance? SubStr s)))
+  (comp
+   (instance? String s)
+   (instance? SubStr s)))
 
 (defn range* [n]
   (match (< n 1)
