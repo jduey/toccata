@@ -20,9 +20,10 @@
   (recursive-descent [_]
     (let [term-count (count term-str)]
       (for [text (read-text)
-            :when (match (< (count text) term-count)
-                         nothing (maybe term-count)
-                         nothing)
+            ;; TODO: do a fast implementation
+            ;; :when (match (< (count text) term-count)
+            ;;              nothing maybe1
+            ;;              nothing)
             :when (= (subs text 0 term-count) term-str)
             _ (sm/set-val :text (subs text term-count))]
         (list term-str)))))

@@ -101,7 +101,7 @@
     (parser/char-test (fn [c]
                         (match (comp (= c (char 92))
                                      (= c (char 34)))
-                               nothing (maybe c)
+                               nothing maybe1
                                nothing)))))
 
 (defn not-backslash []
@@ -183,7 +183,7 @@
   (parser/recursive-descent [_]
     (parser/char-test (fn [c]
                         (match (= c (char 10))
-                               nothing (maybe c)
+                               nothing maybe1
                                nothing)))))
 
 (defn not-eol []

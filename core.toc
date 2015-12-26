@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <string.h>
 
-int64_t nothing_type;
 typedef struct {int64_t type; int32_t refs;} Value;
 typedef struct {int64_t type; int32_t refs; int64_t numVal;} Number;
 typedef struct {int64_t type; int32_t refs; int64_t len; char buffer[0];} String;
@@ -506,6 +505,11 @@ List *listCons(Value *x, List *l) {
 ")
 
 (inline-text "
+int64_t nothing_type;
+Value *maybe1;
+Value *nothing;
+Value *(*maybe)(List *, Value*, Value *);
+
 Value *(*equal_star)(List *closures, Value *, Value *);
 int equal(Value *v1, Value *v2) {
    Value *equals = equal_star((List *)0, v1, v2);
@@ -521,8 +525,6 @@ Value *(*hashSeq)(List *, Value* n, Value *s);
 Value *(*count)(List *, Value* n);
 Value *(*invoke1Arg)(List *closures, Value *f, Value* arg);
 Value *(*type_name)(List *closures, Value *t);
-Value *nothing;
-Value *(*maybe)(List *, Value*, Value *);
 
 
 // SHA1 implementation courtesy of: Steve Reid <sreid@sea-to-sky.net>
@@ -950,7 +952,7 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
 (defn type= [x y]
   (inline-text
    "if (arg0->type == arg1->type)
-      return(maybe((List *)0, (Value *)0, arg0));
+      return(maybe1);
     else
       return(nothing);\n"))
 
@@ -1258,14 +1260,14 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
       String *s1 = (String *)arg0;
       String *s2 = (String *)arg1;
       if (s1->len == s2->len && strncmp(s1->buffer,s2->buffer,s1->len) == 0)
-        return(maybe((List *)0, (Value *)0, arg0));
+        return(maybe1);
       else
         return(nothing);
     } else if (arg0->type == SubStringType && arg1->type == SubStringType) {
       SubString *s1 = (SubString *)arg0;
       SubString *s2 = (SubString *)arg1;
       if (s1->len == s2->len && strncmp(s1->buffer,s2->buffer,s1->len) == 0)
-        return(maybe((List *)0, (Value *)0, arg0));
+        return(maybe1);
       else
         return(nothing);
     } else if (arg0->type == StringType &&
@@ -1273,7 +1275,7 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
       String *s1 = (String *)arg0;
       SubString *s2 = (SubString *)arg1;
       if (s1->len == s2->len && strncmp(s1->buffer,s2->buffer,s1->len) == 0)
-        return(maybe((List *)0, (Value *)0, arg0));
+        return(maybe1);
       else
         return(nothing);
     } else if (arg0->type == SubStringType &&
@@ -1281,7 +1283,7 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
       SubString *s1 = (SubString *)arg0;
       String *s2 = (String *)arg1;
       if (s1->len == s2->len && strncmp(s1->buffer,s2->buffer,s1->len) == 0)
-        return(maybe((List *)0, (Value *)0, arg0));
+        return(maybe1);
       else
         return(nothing);
     } else
@@ -1297,7 +1299,7 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
       if (s1->type == s2->type &&
           s1->len == s2->len &&
           strncmp(s1->buffer, s2->buffer, s1->len) == 0) {
-        return(maybe((List *)0, (Value *)0, arg0));
+        return(maybe1);
       } else
         return(nothing);
     }\n"))
@@ -1750,8 +1752,30 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
   (=* [x y]))
 
 (def maybe)
+(def nothing)
 
 (def <)
+
+(def maybe1
+  (reify
+    Stringable
+    (string-list [_] (list "<maybe 1>"))
+
+    Monoid
+    (zero [_] nothing)
+    (comp* [mv _] mv)
+
+    Functor
+    (map [_ f]
+      (maybe (f 1)))
+
+    Applicative
+    (wrap [_ v] (maybe v))
+
+    Monad
+    (flatten [_] 1)
+    (flat-map [_ f]
+      (f 1))))
 
 (def nothing
   (reify
@@ -1786,7 +1810,7 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
     (flat-map [nv _] nv)))
 
 (defn =
-  ([v] (maybe v))
+  ([v] maybe1)
   ([x y] (=* x y))
   ([x y & ys]
      (match (=* x y)
@@ -1796,7 +1820,7 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
 (defn remove [l f]
   (filter l (fn [v]
               (match (f v)
-                     nothing (maybe v)
+                     nothing maybe1
                      nothing))))
 
 (deftype maybe [v]
@@ -1843,7 +1867,7 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
    "if (((Number *)arg0)->numVal != arg1->type)
       return(nothing);
    else
-      return(maybe((List *)0, (Value *)0, arg0));\n"))
+      return(maybe1);\n"))
 
   Getter
   (type-args [n] (list n))
@@ -1857,7 +1881,7 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
    } else if (((Number *)arg0)->numVal != ((Number *)arg1)->numVal)
       return(nothing);
    else
-      return(maybe((List *)0, (Value *)0, arg0));\n"))
+      return(maybe1);\n"))
 
   Ord
   (<* [x y]
@@ -1866,7 +1890,7 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
       fprintf(stderr, \"\\ninvalid types for '<*' for Number\\n\");
       abort();
    } else if (((Number *)arg0)->numVal < ((Number *)arg1)->numVal)
-      return(maybe((List *)0, (Value *)0, arg0));
+      return(maybe1);
    else
       return(nothing);\n"))
 
@@ -1956,9 +1980,11 @@ return((Value *)numberValue(shaVal));
   (pr-err* "\n"))
 
 (defn list=* [[h1 & t1] [h2 & t2]]
-  (for [_ (=* h1 h2)
-        _ (list=* t1 t2)]
-    1))
+  (flat-map (=* h1 h2)
+            (fn [_]
+              (flat-map (list=* t1 t2)
+                        (fn [_]
+                          maybe1)))))
 
 (defn zip-lists [l1 l2]
   (match (apply-to list (m-first l1) (m-first l2))
@@ -2023,15 +2049,15 @@ return((Value *)numberValue(shaVal));
   Eq
   (=* [x y]
     ;; TODO: rewrite, huge influence on perf
-    (for [_ (type= x y)
-          :let [len-x (count x)
-                len-y (count y)]
-          _ (for [_ (=* len-x len-y)
-                  _ (cond
-                     (= 0 len-y) (maybe x)
-                     (list=* x y))]
-              1)]
-      x))
+    (flat-map (type= x y)
+              (fn [_]
+                (let [len-x (count x)
+                      len-y (count y)]
+                  (flat-map (=* len-x len-y)
+                            (fn [_]
+                              (cond
+                               (= 0 len-y) maybe1
+                               (list=* x y))))))))
 
   Monoid
   (zero [_] empty-list)

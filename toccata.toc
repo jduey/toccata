@@ -1,12 +1,11 @@
 
 ;; TODO:
-;; remove booleans and 'cond'
+;; change the implementation of reified values
 ;; add :when-not to 'for' clauses
 ;; use #line directive
 ;; make 'match' efficient
 ;; implement dissoc
 ;; implement definitions that require initialization at start time.
-;; change the implementation of reified values
 ;; supercompilation
 ;; implement lazy 'or'
 ;; refactor calls to 'match'
@@ -564,7 +563,7 @@
                                                          (apply str (interpose fields ", ")) "]>"))
                                              'Type
                                              (list 'instance? (list 'vector '_ 'v)
-                                                   (list '= type-val-num (list 'get-type 'v)))
+                                                   (list 'instance? type-val-num 'v))
                                              'Applicative
                                              (list 'apply* (list 'vector '_ 'args)
                                                    (list 'apply 'invoke '_ 'args))
@@ -790,7 +789,7 @@
                                                   (list 'cond (list '< (list 'count type-args-sym)
                                                                     (dec (count binding-syms)))
                                                         'nothing
-                                                        '(maybe 1))
+                                                        'maybe1)
 
                                                   'nothing))
                                            (for [b (an/analyze-let-binding (list binding-syms
@@ -943,7 +942,7 @@
             _ (comp (for [def (sm/get-in-val (list :defined-syms fn-name))
                           :when (match (= 'anon fn-name)
                                          |maybe| nothing
-                                         (maybe fn-name))
+                                         maybe1)
                           _ (update-startup-init (list (.c-val def) " = " fn-ptr-sym ";\n"))]
                       "")
                     (sm/state-maybe ""))
@@ -1431,6 +1430,8 @@
         _ (sm/traverse (reverse start-up-init) write-strs)
         nothing-info (lookup-sym 'nothing)
         _ (write-strs (list "     nothing = " (.c-val nothing-info) ";\n"
+                            "     maybe1 = maybe((List *)0, (Value *)0, numPtr0);\n"
+                            "     maybe1->refs = -1;"
                             "     outStream = stdout;\n"
                             "     List *argList = malloc_list();\n"
                             "      argList->type = ListType;\n"
@@ -1449,6 +1450,8 @@
                             "         tail = newTail;\n"
                             "         argList->len++;\n}\n"
                             "  int the_final_answer = " main-sym "((Value *)argList);\n"
+                            "  maybe1->refs = 1;\n"
+                            "  dec_and_free(maybe1);\n"
                             "  decRef((Value *)argList);\n"
                             "  dec_and_free((Value *)argList);\n"
                             "  for (int i = 0; i < 10; i++) {\n"
@@ -1484,6 +1487,8 @@
                             "     return(1);"
                             "  else\n"
                             "    return(the_final_answer);\n};\n"))
+        _ (write-strs (list "int64_t nothing_type = " (.type-num nothing-info) ";\n"))
+
         proto-name (sm/get-in-val (list :defined-protos 'type-name))
         dispatch-fn-sym (sm/get-in-val (list :protocols proto-name :dispatch-sym))
         arity-info (lookup-static-arity dispatch-fn-sym 1)
@@ -1532,8 +1537,6 @@
         maybe-info (lookup-sym 'maybe)
         arity-info (lookup-proto-arity 'invoke 2 (.type-num maybe-info))
         _ (write-strs (list "Value *(*maybe)(List *, Value*, Value*) = " (.c-val arity-info) ";\n"))
-
-        _ (write-strs (list "int64_t nothing_type = " (.type-num nothing-info) ";\n"))
         ]
     ""))
 
