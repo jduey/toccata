@@ -240,10 +240,10 @@
 
 (defn update-startup-init [init-list]
   (match init-list
-         |List _| (for [start-up-init (sm/get-val :startup-init)
-                        _ (sm/set-val :startup-init (cons init-list start-up-init))]
-                    "")
-         (sm/state-maybe "")))
+         empty-list (sm/state-maybe "")
+         (for [start-up-init (sm/get-val :startup-init)
+               _ (sm/set-val :startup-init (cons init-list start-up-init))]
+           "")))
 
 (defn define-declared-symbol [name evalled-expr]
   (let [result-sym (.c-val evalled-expr)
@@ -398,7 +398,14 @@
 
           ;; is the refied fn impl a closure or not?
           _ (match (.init evalled)
-                   |List _|
+                   ;; no, it's not a closure
+                   empty-list (for [proto-fn-name (sm/get-in-val (list :defined-protos name))
+                                    _ (sm/assoc-in-val (list :protocols proto-fn-name :impl-arities
+                                                             num-args type-num)
+                                                       {:arity-sym (.c-val evalled)
+                                                        :fn-sym fn-ptr})]
+                                evalled)
+
                    ;; yes it's a closure
                    (let [args (map (range num-args) (partial str "arg"))
                          arg-decls (apply str (interpose (cons (str "List *closures")
@@ -428,14 +435,7 @@
                            _ (sm/assoc-in-val (list :static-fns fn-ptr num-args)
                                               {:c-code (c-code impl-sym empty-list empty-list return-type)
                                                :ast ast})]
-                       evalled))
-
-                   ;; no, it's not a closure
-                   (for [proto-fn-name (sm/get-in-val (list :defined-protos name))
-                         _ (sm/assoc-in-val (list :protocols proto-fn-name :impl-arities num-args type-num)
-                                            {:arity-sym (.c-val evalled)
-                                             :fn-sym fn-ptr})]
-                     evalled))]
+                       evalled)))]
       evalled)))
 
 (extend-type ast/reify-ast
@@ -472,7 +472,8 @@
                                                      (count impls-syms) ");\n"
                                                      "((ReifiedVal *)" reified-sym ")->type = " type-num ";\n"
                                                      "((ReifiedVal *)" reified-sym ")->implCount = "
-                                                     (count impl-fns) ";\n")
+                                                     (count impl-fns) ";\n"
+                                                     "((ReifiedVal *)" reified-sym ")->typeArgs = (Value *)0;\n")
                                                (flat-map (index impls-syms)
                                                          (fn [[index sym]]
                                                            (list "((ReifiedVal *)" reified-sym
@@ -488,7 +489,8 @@
                                         empty-list
                                         (comp
                                          (crush impl-fns .decl)
-                                         (list "ReifiedVal " reified-sym " = {" type-num ", -1, 0, {}};\n"
+                                         (list "ReifiedVal " reified-sym " = {"
+                                               type-num ", -1, (Value *)0, 0, {}};\n"
                                                "Value *" reified-ptr " = (Value *)&" reified-sym ";\n"))
                                         type-num)))))]
        reified-result)
@@ -556,6 +558,30 @@
                                                 (c-code c-name empty-list empty-list
                                                         (dec type-val-num)))]
                          c-name)))
+             :let [impls (match fields
+                                empty-list (.impls ast)
+                                (map (.impls ast)
+                                     (fn [impl]
+                                       (match impl
+                                              |List fn-name args & body|
+                                              (let [args-map (reduce args {}
+                                                                     (fn [m arg]
+                                                                       (assoc m arg '_)))
+                                                    fields (map fields (fn [f] (get args-map f f)))]
+                                                (list fn-name args
+                                                          (list* 'let (list (list (comp fields (list :dont-care))
+                                                                                  (list 'type-args (second args))))
+                                                                 body)))
+
+                                              impl))))
+                   getters (map fields
+                                (fn [field]
+                                  (list (symbol (str "." field))
+                                        (list 'vector 'x)
+                                        (list 'let
+                                              (list (list (comp fields (list :dont-care))
+                                                          '(type-args x)))
+                                              field))))]
              type-ast (an/analyze-expr (list 'reify
                                              'Stringable
                                              (list 'string-list (list 'vector '_)
@@ -569,22 +595,19 @@
                                                    (list 'apply 'invoke '_ 'args))
                                              'Function
                                              (list 'invoke (list* 'vector '_ fields)
-                                                   (list*
-                                                    'reify
-                                                    'Getter
-                                                    (list 'type-args (list 'vector '_)
-                                                          (list* 'list fields))
-                                                    (list 'type-name (list 'vector '_)
-                                                          (str (.name ast)))
-                                                    'Eq
-                                                    (list '=* (list 'vector 'x 'y)
-                                                          '(=* (type-args x)
-                                                               (type-args y)))
-                                                    (comp (map fields
-                                                               (fn [field]
-                                                                 (list (symbol (str "." field)) (list 'vector '_)
-                                                                       field)))
-                                                          (.impls ast))))))
+                                                   (list 'new-type-value
+                                                         (list*
+                                                          'reify
+                                                          'Eq
+                                                          (list '=* (list 'vector 'x 'y)
+                                                                '(=* (type-args x) (type-args y)))
+                                                          'Getter
+                                                          (list 'type-name (list 'vector '_)
+                                                                (str (.name ast)))
+                                                          (comp
+                                                           getters
+                                                           impls))
+                                                         (cons 'list fields)))))
              evalled (fr/evaluate type-ast emit-c)
              _ (write-strs (.decl evalled))
              result (define-declared-symbol new-type-name evalled)
@@ -600,8 +623,8 @@
                                            {}
                                            (fn [m [name type-num]]
                                              (match (= type-num type-val-num)
-                                                    |maybe| (assoc m new-type-name type-num)
-                                                    (assoc m name type-num))))))]
+                                                    nothing (assoc m name type-num)
+                                                    (assoc m new-type-name type-num))))))]
          result)))))
 
 (extend-type ast/extend-ast
@@ -764,21 +787,22 @@
                  (match pattern
                         |List|
                         (let [dont-care (gensym "dont_care_")
-                              [[pattern-type & symbols] [_ & literals]] (reduce (reverse pattern)
-                                                                                (list empty-list empty-list)
-                                                                                (fn [[symbols literals] x]
-                                                                                  (match x
-                                                                                         "&" (list (cons x symbols)
-                                                                                                   literals)
+                              [[pattern-type & symbols] [_ & literals]]
+                              (reduce (reverse pattern)
+                                      (list empty-list empty-list)
+                                      (fn [[symbols literals] x]
+                                        (match x
+                                               "&" (list (cons x symbols)
+                                                         literals)
 
-                                                                                         |Symbol| (list (cons x symbols)
-                                                                                                        (cons dont-care literals))
-                                                                                         (list (cons dont-care symbols)
-                                                                                               (cons x literals)))))
+                                               |Symbol| (list (cons x symbols)
+                                                              (cons dont-care literals))
+                                               (list (cons dont-care symbols)
+                                                     (cons x literals)))))
                               binding-syms (remove symbols (partial = "&"))
                               binding-syms (match (= (count symbols) (count binding-syms))
-                                            |maybe| (comp symbols (list dont-care))
-                                            binding-syms)]
+                                                  nothing binding-syms
+                                                  (comp symbols (list dont-care)))]
                           ;; TODO: could probably use 'some' here
                           (match (remove literals (partial = dont-care))
                                  empty-list
@@ -786,14 +810,17 @@
                                            (an/analyze-expr
                                             (list 'cond
                                                   (list 'instance? pattern-type match-val-sym)
-                                                  (list 'cond (list '< (list 'count type-args-sym)
-                                                                    (dec (count binding-syms)))
-                                                        'nothing
-                                                        'maybe1)
+                                                  (list 'let
+                                                        (list (list type-args-sym
+                                                                    (list 'type-args match-val-sym)))
+                                                        (list 'cond (list '< (list 'count type-args-sym)
+                                                                          (dec (count binding-syms)))
+                                                              'nothing
+                                                              'maybe1))
 
                                                   'nothing))
                                            (for [b (an/analyze-let-binding (list binding-syms
-                                                                                 type-args-sym))]
+                                                                                 (list 'type-args match-val-sym)))]
                                              (ast/let-expr (list b) (list expr))))
 
                                  (apply-to list
@@ -805,7 +832,10 @@
                                                                  (partial cons '=))]
                                              (an/analyze-expr (list 'cond
                                                                     (list 'instance? pattern-type match-val-sym)
-                                                                    (list 'cond
+                                                                    (list 'let
+                                                                          (list (list type-args-sym
+                                                                                      (list 'type-args match-val-sym)))
+                                                                          (list 'cond
                                                                           (list '< (list 'count type-args-sym)
                                                                                 (dec (count binding-syms)))
                                                                           'nothing
@@ -814,11 +844,11 @@
                                                                                 ;; TODO: test this!!!
                                                                                 (match (count lit-checks)
                                                                                        1 (first lit-checks)
-                                                                                       (cons 'and lit-checks))))
+                                                                                       (cons 'and lit-checks)))))
 
                                                                     'nothing)))
                                            (for [b (an/analyze-let-binding (list binding-syms
-                                                                                 type-args-sym))]
+                                                                                 (list 'type-args match-val-sym)))]
                                              (ast/let-expr (list b) (list expr))))))
 
                         (for [test (an/analyze-expr (list '= pattern match-val-sym))]
@@ -834,9 +864,7 @@
             list-type (sm/get-in-val (list :types 'List))
             _ (an/analyze-expr list-type)
             :let [match-ast (ast/let-expr
-                             (list (ast/binding match-val-sym (.value ast))
-                                   (ast/binding type-args-sym (ast/call-expr (ast/sym 'type-args)
-                                                                             (list (ast/sym match-val-sym)))))
+                             (list (ast/binding match-val-sym (.value ast)))
                              (list
                               (ast/cond-expr
                                expanded-asts
@@ -941,8 +969,8 @@
             _ (remember-local fn-ptr-sym)
             _ (comp (for [def (sm/get-in-val (list :defined-syms fn-name))
                           :when (match (= 'anon fn-name)
-                                         |maybe| nothing
-                                         maybe1)
+                                       nothing maybe1
+                                       nothing)
                           _ (update-startup-init (list (.c-val def) " = " fn-ptr-sym ";\n"))]
                       "")
                     (sm/state-maybe ""))
@@ -956,7 +984,16 @@
                   arity-init (crush arity-vals .init)
                   arity-decl (crush arity-vals .decl)]
             result (match arity-init
-                          |List _|
+                          empty-list (for [_ (sm/assoc-in-val (list :scope-locals fn-ptr-sym) "")]
+                                       (c-code fn-ptr-sym
+                                               empty-list
+                                               (comp arity-decl
+                                                     (list "\n// --------- " fn-name " main body --------------\n"
+                                                           "Function " fn-sym " = {FunctionType, -1, \""
+                                                           fn-name "\", " arity-count ", "
+                                                           "{" (apply str (interpose arity-syms ", ")) "}};\n"
+                                                           "Value *" fn-ptr-sym " = (Value *)&" fn-sym ";\n\n"))
+                                               FunctionType))
                           (sm/state-maybe
                            (c-code fn-ptr-sym
                                    (comp arity-init
@@ -970,18 +1007,7 @@
                                                 (str fn-sym "->arities[" index "] = "
                                                      (nth arity-syms index "") ";\n"))))
                                    arity-decl
-                                   FunctionType))
-
-                          (for [_ (sm/assoc-in-val (list :scope-locals fn-ptr-sym) "")]
-                            (c-code fn-ptr-sym
-                                    empty-list
-                                    (comp arity-decl
-                                          (list "\n// --------- " fn-name " main body --------------\n"
-                                                "Function " fn-sym " = {FunctionType, -1, \""
-                                                fn-name "\", " arity-count ", "
-                                                "{" (apply str (interpose arity-syms ", ")) "}};\n"
-                                                "Value *" fn-ptr-sym " = (Value *)&" fn-sym ";\n\n"))
-                                    FunctionType)))
+                                   FunctionType)))
             _ (sm/set-val :curr-fn-sym curr-fn-sym)
             _ (sm/set-val :curr-fn-ptr curr-fn-ptr)]
         result))))
@@ -1340,10 +1366,8 @@
   (emit-c [ast]
     (for [target (fr/evaluate (.callee ast) emit-c)
           args (match (.args (.params ast))
-                      |List _|
-                      (fr/evaluate (.params ast) emit-c)
-
-                      (sm/state-maybe empty-list))
+                      empty-list (sm/state-maybe empty-list)
+                      (fr/evaluate (.params ast) emit-c))
           _ (sm/update-in-val (list :call-site-count :total) inc)
           call-site (comp
                      ;; (match args
@@ -1431,7 +1455,7 @@
         nothing-info (lookup-sym 'nothing)
         _ (write-strs (list "     nothing = " (.c-val nothing-info) ";\n"
                             "     maybe1 = maybe((List *)0, (Value *)0, numPtr0);\n"
-                            "     maybe1->refs = -1;"
+                            "     maybe1->refs = -1;\n"
                             "     outStream = stdout;\n"
                             "     List *argList = malloc_list();\n"
                             "      argList->type = ListType;\n"

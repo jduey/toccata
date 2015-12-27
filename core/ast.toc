@@ -111,17 +111,23 @@
 (defn main-fn [args body]
   (fr/free (main-ast args (apply* (fr/free list) body))))
 
-(deftype variadic-arity-ast [args body])
+(deftype variadic-arity-ast [args body]
+  Stringable
+  (string-list [_] (list "<variadic-arity-ast >")))
 
 (defn variadic-arity [args body]
   (fr/free (variadic-arity-ast args (apply* (fr/free list) body))))
 
-(deftype fn-arity-ast [args body])
+(deftype fn-arity-ast [args body]
+  Stringable
+  (string-list [_] (list "<fn-arity-ast >")))
 
 (defn fixed-arity [args body]
   (fr/free (fn-arity-ast args (apply* (fr/free list) body))))
 
-(deftype fn-ast [fn-name arities])
+(deftype fn-ast [fn-name arities]
+  Stringable
+  (string-list [_] (list "<fixed-arity-ast >")))
 
 (defn fn-expr [name arities]
   (fr/free (fn-ast name (apply* (fr/free list) arities))))

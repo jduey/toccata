@@ -13,7 +13,7 @@ typedef struct {int64_t type; int32_t refs; int count; List *closures; int varia
 typedef struct {int64_t type; int32_t refs; char *name; int64_t arityCount; FnArity *arities[];} Function;
 typedef struct {int64_t type; Value *implFn;} ProtoImpl;
 typedef struct {int64_t implCount; ProtoImpl impls[];} ProtoImpls;
-typedef struct {int64_t type; int32_t refs; int implCount; Value* impls[];} ReifiedVal;
+typedef struct {int64_t type; int32_t refs; Value *typeArgs; int implCount; Value* impls[];} ReifiedVal;
 typedef struct {int64_t type; int32_t refs; void *ptr;} Opaque;
 typedef struct {int64_t type; int32_t refs; int32_t bitmap; Value *array[];} BitmapIndexedNode;
 typedef struct {int64_t type; int32_t refs; Value *array[32];} ArrayNode;
@@ -150,6 +150,8 @@ ReifiedVal *malloc_reified(int implCount) {
     DirectLL *newReifiedVal = freeReified[implCount];
     freeReified[implCount] = newReifiedVal->next;
     ((ReifiedVal *)newReifiedVal)->refs = 1;
+    ((ReifiedVal *)newReifiedVal)->implCount = implCount;
+    ((ReifiedVal *)newReifiedVal)->typeArgs = (Value *)0;
     return((ReifiedVal *)newReifiedVal);
   }
 }
@@ -307,18 +309,6 @@ void dec_and_free(Value *v) {
       free_count++;
       free(v);
     }
-  } else if (v->type == ListType) {
-    Value *head = ((List *)v)->head;
-    List *tail = ((List *)v)->tail;
-    v->refs = -10;
-    if (head != (Value *)0) {
-      dec_and_free(head);
-    }
-    if (tail != (List *)0) {
-      dec_and_free((Value *)tail);
-    }
-    ((DirectLL *)v)->next = freeLists;
-    freeLists = (DirectLL *)v;
   } else if (v->type == KeywordType ||
              v->type == SubStringType ||
              v->type == SymbolType) {
@@ -373,11 +363,25 @@ void dec_and_free(Value *v) {
     v->refs = -10;
     free_count++;
     free(v);
+  } else if (v->type == ListType) {
+    Value *head = ((List *)v)->head;
+    List *tail = ((List *)v)->tail;
+    v->refs = -10;
+    if (head != (Value *)0) {
+      dec_and_free(head);
+    }
+    if (tail != (List *)0) {
+      dec_and_free((Value *)tail);
+    }
+    ((DirectLL *)v)->next = freeLists;
+    freeLists = (DirectLL *)v;
   } else {
     ReifiedVal *rv = (ReifiedVal *)v;
     for (int i = 0; i < rv->implCount; i++) {
       dec_and_free(rv->impls[i]);
     }
+    if (rv->typeArgs != (Value *)0)
+      dec_and_free(rv->typeArgs);
     v->refs = -10;
     if (rv->implCount < 20) {
       DirectLL *freedList = freeReified[rv->implCount];
@@ -1643,7 +1647,23 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
 (defprotocol Getter
   (type-name [_]
     (number-str (get-type _)))
-  (type-args [_]))
+  (type-args [_]
+    (inline-text "
+  incRef(((ReifiedVal *)arg0)->typeArgs);
+  return(((ReifiedVal *)arg0)->typeArgs);
+")))
+
+(defn new-type-value [reified-template type-args]
+  (inline-text "
+  ReifiedVal *template = (ReifiedVal *)arg0;
+  ReifiedVal *rv = malloc_reified(template->implCount);
+  int rvSize = sizeof(ReifiedVal) + sizeof(Function *) * template->implCount;
+  memcpy(rv, template, rvSize);
+  incRef(arg1);
+  rv->typeArgs = arg1;
+  rv->refs = 1;
+  return((Value *)rv);
+"))
 
 (defprotocol Type
   (instance? [type val]))
@@ -1836,7 +1856,8 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
 
   Functor
   (map [_ f]
-    (maybe (f v)))
+    (let [[v] (type-args _)]
+      (maybe (f v))))
 
   Applicative
   (wrap [_ v] (maybe v))
@@ -1847,7 +1868,8 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
              nothing)))
 
   Monad
-  (flatten [_] v)
+  (flatten [_]
+    v)
   (flat-map [_ f]
     (f v)))
 
@@ -1859,6 +1881,10 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
                                (<* v (car vs))
                                (apply < vs))
             (maybe v))))
+
+(extend-type FnArity
+  Stringable
+  (string-list [_] (list "<FnArity >")))
 
 (extend-type Number
   Type
@@ -1995,8 +2021,8 @@ return((Value *)numberValue(shaVal));
 
 (defn reduce-list [[h & t] result f]
   (match t
-         |List _| (reduce-list t (f result h) f)
-         (f result h)))
+         empty-list (f result h)
+         (reduce-list t (f result h) f)))
 
 (defn list** [arg args]
   (match args
@@ -2032,8 +2058,8 @@ return((Value *)numberValue(shaVal));
   (count [l] (list-count l))
   (reduce [l result f]
     (match l
-           |List _| (reduce-list l result f)
-           result))
+           empty-list result
+           (reduce-list l result f)))
 
   Crushable
   (crush [l f]
@@ -2129,53 +2155,49 @@ return((Value *)numberValue(shaVal));
            mv)))
 
 (defn take [coll n]
-  (match (apply-to list (< 0 n) (m-first coll))
-         ;; TODO: would be nice to be able to destructure 'v'
-         |maybe v| (let [[_ head] v]
-                     (cons head (take (rest coll) (dec n))))
+  (match (flat-map (< 0 n) (fn [_] (m-first coll)))
+         |maybe head| (cons head (take (rest coll) (dec n)))
          empty-list))
 
 (defn drop [coll n]
-  (match (apply-to list (< 0 n) (m-first coll))
-         |maybe| (drop (rest coll) (dec n))
-         coll))
+  (match (flat-map (< 0 n) (fn [_] (m-first coll)))
+         nothing coll
+         (drop (rest coll) (dec n))))
 
 (defn split [l n]
   ;; This could be written with 'take' and 'drop' but would require
   ;; two iterations over the prefix
-  (match (apply-to list (< 0 n) (m-first l))
-         ;; TODO: would be nice to be able to destructure 'v'
-         |maybe v| (let [[_ head] v
-                         [prefix suffix] (split (rest l) (dec n))]
-                     (list (cons head prefix) suffix))
+  (match (flat-map (< 0 n) (fn [_] (m-first l)))
+         |maybe head| (let [[prefix suffix] (split (rest l) (dec n))]
+                        (list (cons head prefix) suffix))
          (list empty-list l)))
 
 (defn partition [coll n]
   (match (< (count coll) n)
-         |maybe| empty-list
-         (cons (take coll n)
-               (partition (drop coll n) n))))
+         nothing (cons (take coll n)
+                       (partition (drop coll n) n))
+         empty-list))
 
 (defn partition-all [coll n]
   (match (< (count coll) n)
-         |maybe| (list coll)
-         (cons (take coll n)
-               (partition-all (drop coll n) n))))
+         nothing (cons (take coll n)
+                       (partition-all (drop coll n) n))
+         (list coll)))
 
 ;; TODO: eliminate
 (defn nth
   ([coll n]
      (match (seq coll)
             |List h & t| (match (< n 1)
-                                |maybe| h
-                                (nth (rest (seq coll)) (dec n)))
+                                nothing (nth (rest (seq coll)) (dec n))
+                                h)
             (let [_ (print-err "'nth' from empty seq")]
               (abort))))
   ([coll n nth-nf]
      (match (seq coll)
             |List h & t| (match (< n 1)
-                                |maybe| h
-                                (nth (rest (seq coll)) (dec n)))
+                                nothing (nth (rest (seq coll)) (dec n))
+                                h)
             nth-nf)))
 
 (defn m-nth [coll n]
@@ -2190,10 +2212,8 @@ return((Value *)numberValue(shaVal));
 
 (defn butlast [coll]
   (match coll
-         |List _|
-         (car (split coll (dec (count coll))))
-
-         coll))
+         empty-list coll
+         (car (split coll (dec (count coll))))))
 
 (def emptyBMI
   (inline-text "(Value *)&emptyBMI"))
@@ -2247,15 +2267,13 @@ else
   (string-list [n]
     (let [a-list (seq n)]
       (match a-list
-             |List _|
+             empty-list (list "{}")
              (let [kv-strs (map a-list
                                 (fn [[k v]]
                                   (comp (string-list k) (list " ") (string-list v))))]
                (comp (list "{")
                      (apply comp (interpose kv-strs (list ", ")))
-                     (list "}")))
-
-             (list "{}"))))
+                     (list "}"))))))
 
   HashMapNode
   (hash-seq [n s]
@@ -2489,15 +2507,13 @@ return(numberValue(accum));
   (string-list [n]
     (let [a-list (seq n)]
       (match a-list
-             |List _|
+             empty-list (list "{}")
              (let [kv-strs (map a-list
                                 (fn [[k v]]
                                   (comp (string-list k) (list " ") (string-list v))))]
                (comp (list "{")
                      (apply comp (interpose kv-strs (list ", ")))
-                     (list "}")))
-
-             (list "{}"))))
+                     (list "}"))))))
 
   HashMapNode
   (hash-seq [n s]
@@ -2631,15 +2647,13 @@ return(numberValue(((HashCollisionNode *) arg0)->count / 2));
   (string-list [n]
     (let [a-list (seq n)]
       (match a-list
-             |List _|
+             empty-list (list "{}")
              (let [kv-strs (map a-list
                                 (fn [[k v]]
                                   (comp (string-list k) (list " ") (string-list v))))]
                (comp (list "{")
                      (apply comp (interpose kv-strs (list ", ")))
-                     (list "}")))
-
-             (list "{}"))))
+                     (list "}"))))))
 
   HashMapNode
   (hash-seq [n s]
@@ -2747,10 +2761,15 @@ return(newNode);
 ")))
 
 (defn hash-map [& kv-pairs]
-  (reduce (partition kv-pairs 2)
-          emptyBMI
-          (fn [bmi [k v]]
-            (assoc bmi k v))))
+  (let [parted (partition kv-pairs 2)]
+    ;; (cond
+    ;;  (= 0 (count parted)) ""
+    ;;  (print-err :parted (first parted)))
+    (reduce parted
+            emptyBMI
+            (fn [bmi [k v]]
+              ;; (print-err :k k :v v)
+              (assoc bmi k v)))))
 
 (defn m-get [m k]
   (let [not-found (reify
@@ -2764,7 +2783,7 @@ return(newNode);
 
 (defn merge-with [merge-fn hm & ms]
   (match ms
-         |List _|
+         empty-list hm
          (reduce ms hm
                  (fn [hm m]
                    (reduce (seq m) hm
@@ -2772,9 +2791,7 @@ return(newNode);
                              (let [new-v (match (m-get hm k)
                                                 |maybe old-v| (merge-fn old-v v)
                                                 v)]
-                               (assoc hm k new-v))))))
-
-         hm))
+                               (assoc hm k new-v))))))))
 
 (defn get-in [m path]
   (match path
@@ -2882,12 +2899,10 @@ return(newNode);
   Monoid
   (comp* [s ss]
     (match ss
-           |List _|
+           empty-list s
            (let [ss-list (cons s ss)
                  new-len (apply + (map ss-list str-count))]
-             (car (map ss-list (partial str-append (str-malloc new-len)))))
-
-           s))
+             (car (map ss-list (partial str-append (str-malloc new-len)))))))
 
   Hash
   (sha1 [_]
@@ -2944,12 +2959,10 @@ return((Value *)numberValue(shaVal));
   Monoid
   (comp* [s ss]
     (match ss
-           |List _|
+           empty-list s
            (let [ss-list (cons s ss)
                  new-len (apply + (map ss-list str-count))]
-             (car (map ss-list (partial str-append (str-malloc new-len)))))
-
-           s))
+             (car (map ss-list (partial str-append (str-malloc new-len)))))))
 
   Hash
   (sha1 [_]
@@ -3071,12 +3084,10 @@ else {
 
 (defn str [& vs]
   (match vs
-         |List _|
+         empty-list ""
          (let [ss-list (flat-map vs string-list)
                new-len (apply + (map ss-list str-count))]
-           (car (map ss-list (partial str-append (str-malloc new-len)))))
-
-         ""))
+           (car (map ss-list (partial str-append (str-malloc new-len)))))))
 
 (defn keyword [kw-name]
   (new-keyword (str ":" kw-name)))
@@ -3088,8 +3099,8 @@ else {
 
 (defn range* [n]
   (match (< n 1)
-         |maybe| (list 0)
-         (cons n (range* (dec n)))))
+         nothing (cons n (range* (dec n)))
+         (list 0)))
 
 (defn range [n]
   (reverse (range* (dec n))))

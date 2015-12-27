@@ -79,10 +79,8 @@
                       |List 'fn-arity args exprs|
                       (for [body (traverse exprs analyze-expr)]
                         (match (filter args (partial = "&"))
-                               |List _|
-                               (ast/variadic-arity (remove args (partial = "&")) body)
-
-                               (ast/fixed-arity args body)))
+                               empty-list (ast/fixed-arity args body)
+                               (ast/variadic-arity (remove args (partial = "&")) body)))
                       (zero sm/state-maybe))]
     result))
 
@@ -98,15 +96,11 @@
 
 (defn analyze-proto-arity [[fn-name params & body]]
   (match (filter params (partial = "&"))
-         |List _|
-         (zero sm/state-maybe)
-
-         (match body
-                |List _|
-                (for [ast (analyze-expr (list 'fn-arity (rest params) body))]
-                  {fn-name {(dec (count params)) {:default ast}}})
-
-                (sm/state-maybe {fn-name {(dec (count params)) {}}}))))
+         empty-list (match body
+                           empty-list (sm/state-maybe {fn-name {(dec (count params)) {}}})
+                           (for [ast (analyze-expr (list 'fn-arity (rest params) body))]
+                             {fn-name {(dec (count params)) {:default ast}}}))
+         (zero sm/state-maybe)))
 
 (defn analyze-protocol []
   (for [expr (sm/get-val :expr)
@@ -237,16 +231,6 @@
                       (zero sm/state-maybe))]
     result))
 
-(defn analyze-add-ns []
-  (for [expr (sm/get-val :expr)
-        result (match expr
-                      |List 'add-ns ns-name defs|
-                      (for [asts (analyze-expr defs)]
-                        (ast/ns-add ns-name asts))
-
-                      (zero sm/state-maybe))]
-    result))
-
 (defn analyze-reify []
   (for [expr (sm/get-val :expr)
         result (match expr
@@ -261,6 +245,16 @@
   (for [expr (sm/get-val :expr)
         result (match expr
                       |List 'deftype name fields & defs| (sm/state-maybe (ast/type-expr name fields defs))
+                      (zero sm/state-maybe))]
+    result))
+
+(defn analyze-add-ns []
+  (for [expr (sm/get-val :expr)
+        result (match expr
+                      |List 'add-ns ns-name defs|
+                      (for [asts (analyze-expr defs)]
+                        (ast/ns-add ns-name asts))
+
                       (zero sm/state-maybe))]
     result))
 
