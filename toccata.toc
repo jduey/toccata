@@ -1,14 +1,14 @@
 
 ;; TODO:
-;; change the implementation of reified values
-;; add :when-not to 'for' clauses
+;; implement lazy 'or', 'and'
+;; refactor calls to 'match'
 ;; use #line directive
 ;; make 'match' efficient
+;; memoize call-sites with static args
+;; get rid of TODO's
 ;; implement dissoc
 ;; implement definitions that require initialization at start time.
 ;; supercompilation
-;; implement lazy 'or'
-;; refactor calls to 'match'
 ;; better error messages
 ;; implement to-be-freed lists
 ;; problem in multi-arity defn when one arity has no args
@@ -241,9 +241,9 @@
 (defn update-startup-init [init-list]
   (match init-list
          empty-list (sm/state-maybe "")
-         (for [start-up-init (sm/get-val :startup-init)
-               _ (sm/set-val :startup-init (cons init-list start-up-init))]
-           "")))
+         (flat-map (sm/get-val :startup-init)
+                   (fn [start-up-init]
+                     (sm/set-val :startup-init (cons init-list start-up-init))))))
 
 (defn define-declared-symbol [name evalled-expr]
   (let [result-sym (.c-val evalled-expr)
@@ -498,6 +498,7 @@
                (fn [_]
                  (abort))))))
 
+;; TODO: re-factor and clean this up
 (extend-type ast/type-ast
   Emitter
   (emit-c [ast]
@@ -603,12 +604,13 @@
                                                                 '(=* (type-args x) (type-args y)))
                                                           'Getter
                                                           (list 'type-name (list 'vector '_)
-                                                                (str (.name ast)))
+                                                                (str new-type-name))
                                                           (comp
                                                            getters
                                                            impls))
                                                          (cons 'list fields)))))
              evalled (fr/evaluate type-ast emit-c)
+
              _ (write-strs (.decl evalled))
              result (define-declared-symbol new-type-name evalled)
 

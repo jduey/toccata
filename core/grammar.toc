@@ -384,10 +384,19 @@
                          (parser/ignore (parser/one-or-more (whitespace)))
                          (read-sub-form))))
 
+(defn read-for-when-not []
+  (parser/rule "for-when-not"
+               (apply-to (partial list :when-not)
+                         (parser/ignore (parser/none-or-more (whitespace)))
+                         (parser/ignore (parser/term ":when-not"))
+                         (parser/ignore (parser/one-or-more (whitespace)))
+                         (read-sub-form))))
+
 (defn read-for-binding []
   (parser/rule "for-binding"
                (comp (read-for-let)
                      (read-for-when)
+                     (read-for-when-not)
                      (read-let-binding))))
 
 (defn read-for []
@@ -402,6 +411,8 @@
                                                     |List :let val| (list 'let val expr)
                                                     |List :when val| (list 'cond val expr
                                                                            (list 'zero wrap-sym))
+                                                    |List :when-not val| (list 'cond (list '=* 'nothing val)
+                                                                               expr (list 'zero wrap-sym))
                                                     (list 'flat-map (second for-clause)
                                                           (list 'fn 'anon
                                                                 (list (list 'fn-arity
@@ -489,18 +500,6 @@
                                (parser/always empty-list))
                          (parser/ignore (parser/term "|")))))
 
-(deftype Nope []
-  Parser
-  (parser/recursive-descent [_]
-    (for [file-name (sm/get-val :file-name)]
-      (let [_ (print-err :file-with-match file-name)]
-        (abort)))))
-
-(defn stupid []
-  (parser/ignore
-   (parser/rule "nope"
-                (fr/free (Nope)))))
-
 (defn read-match []
   (parser/rule "match"
                (apply-to (partial list 'match)
@@ -519,7 +518,7 @@
                                                         (read-number))
                                                        (read-sub-form)))
                          (comp (read-sub-form)
-                               (stupid))
+                               (parser/always 'nothing))
                          (parser/ignore (parser/term ")")))))
 
 (defn read-form []
@@ -543,3 +542,4 @@
                    (read-vector)
                    (read-list))
              (parser/ignore (parser/none-or-more (whitespace))))))
+

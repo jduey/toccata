@@ -8,17 +8,23 @@
            (match args
                   empty-list (list (list result) new-s)
                   (match (reduce-args args new-s)
-                         |List results final-s| (list (cons result results) final-s)
-                         nothing))
-           nothing)))
+                         |List results final-s| (list (cons result results) final-s))))))
 
 (defn -comp* [mv mvs s]
   (let [x (mv s)]
-    (match mvs
-           empty-list x
-           (match x
-                  nothing (-comp* (first mvs) (rest mvs) s)
-                  x))))
+    (cond
+     (list-empty? mvs) x
+     (= nothing x) (let [[mv & mvs] mvs]
+                     (-comp* mv mvs s))
+     x))
+  ;; slow
+  ;; (let [x (mv s)]
+  ;;   (match mvs
+  ;;          empty-list x
+  ;;          (match x
+  ;;                 nothing (-comp* (first mvs) (rest mvs) s)
+  ;;                 x)))
+  )
 
 (deftype new-sm [invoke-fn]
   Stringable
@@ -36,17 +42,33 @@
     (match args
            empty-list (new-sm (fn [s] (list list s)))
            (new-sm (fn [s]
-                     (match (reduce-args args s)
-                            |List results s| (let [[f s] (fv s)]
-                                               (list (apply f results) s))
-                            nothing)))))
+              (let [reduce-state (reduce-args args s)]
+                (cond
+                 (= nothing reduce-state) nothing
+                 (let [[results s] reduce-state
+                       [f s] (fv s)]
+                   (list (apply f results) s))))))
+           ;; slow but not by much
+           ;; (new-sm (fn [s]
+           ;;           (match (reduce-args args s)
+           ;;                  |List results s| (let [[f s] (fv s)]
+           ;;                                     (list (apply f results) s))
+           ;;                  )))
+           ))
 
   Monad
   (flat-map [ev f]
     (new-sm (fn [s]
-              (match (invoke-fn s)
-                     |List v ss| ((f v) ss)
-                     nothing))))
+              (let [v-ss (invoke-fn s)]
+                (cond
+                 (= nothing v-ss) v-ss
+                 (let [[v ss] v-ss]
+                   ((f v) ss))))
+              ;; slow
+              ;; (match (invoke-fn s)
+              ;;        |List v ss| ((f v) ss)
+              ;;        )
+              )))
 
   Monoid
   (zero [_] (new-sm (fn [_] nothing)))
@@ -64,7 +86,12 @@
     (zero [_] (new-sm (fn [_] nothing)))))
 
 (defn traverse [coll f]
-  (apply* (state-maybe list) (map coll f)))
+  ;; (cond
+  ;;  (empty? coll) (state-maybe empty-list)
+  ;;  (apply* (state-maybe list) (map coll f)))
+  ;; slow
+  (apply* (state-maybe list) (map coll f))
+  )
 
 (defn update-state [f]
   (new-sm (fn [s]
@@ -73,9 +100,15 @@
 (defn get-val
   ([k]
      (new-sm (fn [s]
-               (match (m-get s k)
-                      |maybe v| (list v s)
-                      nothing))))
+               (let [v (m-get s k)]
+                 (cond
+                  (= nothing v) nothing
+                  (list (.v v) s)))
+               ;; slow
+               ;; (match (m-get s k)
+               ;;        |maybe v| (list v s)
+               ;;        )
+               )))
   ([k nf]
      (new-sm (fn [s]
                  (list (get s k nf) s)))))
@@ -87,15 +120,27 @@
 (defn get-in-val
   ([path]
      (new-sm (fn [s]
-               (match (get-in s path)
-                      |maybe v| (list v s)
-                      nothing))))
+               (let [v (get-in s path)]
+                 (cond
+                  (= nothing v) nothing
+                  (list (.v v) s)))
+               ;; slow
+               ;; (match (get-in s path)
+               ;;        |maybe v| (list v s)
+               ;;        )
+               )))
   ([path nf]
      (new-sm (fn [s]
-               (match (get-in s path)
-                      nothing (list nf s)
-                      |maybe v| (list v s)
-                      nothing)))))
+               (let [v (get-in s path)]
+                 (cond
+                  (= nothing v) (list nf s)
+                  (list (.v v) s)))
+               ;; slow
+               ;; (match (get-in s path)
+               ;;        nothing (list nf s)
+               ;;        |maybe v| (list v s)
+               ;;        )
+               ))))
 
 (defn assoc-in-val [path v]
   (new-sm (fn [s]
@@ -106,16 +151,33 @@
               (list (get-in s path) (update-in s path f)))))
 
 (defn recur-fn [f as s]
-  (match (f s)
-         nothing (list as s)
-         |List v ss| (recur-fn f (cons v as) ss)
-         nothing))
+  (let [v-ss (f s)]
+    (cond
+     (= nothing v-ss) (list as s)
+     (let [[v ss] v-ss]
+       (recur-fn f (cons v as) ss))))
+  ;; slow
+  ;; (match (f s)
+  ;;        nothing (list as s)
+  ;;        |List v ss| (recur-fn f (cons v as) ss)
+  ;;        )
+  )
 
 (defn recur [mv]
   (new-sm (fn [s]
-            (match (mv s)
-                   |List v ss|
-                   (match (recur-fn (.invoke-fn mv) (list v) ss)
-                          |List x & xs| (cons (reverse x) xs)
-                          nothing)
-                   nothing))))
+            (let [v-ss (mv s)]
+              (cond
+               (= nothing v-ss) nothing
+               (let [[v ss] v-ss
+                     x (recur-fn (.invoke-fn mv) (list v) ss)]
+                 (cond
+                  (= nothing x) x
+                  (cons (reverse (car x)) (cdr x))))))))
+  ;; (new-sm (fn [s]
+  ;;           (match (mv s)
+  ;;                  |List v ss|
+  ;;                  (match (recur-fn (.invoke-fn mv) (list v) ss)
+  ;;                         |List x & xs| (cons (reverse x) xs)
+  ;;                         )
+  ;;                  )))
+  )

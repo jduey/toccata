@@ -1129,9 +1129,9 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
         abort();
      }
      else if (((List *)arg0)->len == 0)
-        return(true);
+        return(maybe1);
      else
-        return(false);"))
+        return(nothing);"))
 
 (defn car [l]
   (inline-text
@@ -1856,8 +1856,7 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
 
   Functor
   (map [_ f]
-    (let [[v] (type-args _)]
-      (maybe (f v))))
+    (maybe (f v)))
 
   Applicative
   (wrap [_ v] (maybe v))
@@ -2007,10 +2006,12 @@ return((Value *)numberValue(shaVal));
 
 (defn list=* [[h1 & t1] [h2 & t2]]
   (flat-map (=* h1 h2)
-            (fn [_]
-              (flat-map (list=* t1 t2)
-                        (fn [_]
-                          maybe1)))))
+             (fn [_]
+               (cond
+                (list-empty? t1) maybe1
+                (flat-map (list=* t1 t2)
+                          (fn [_]
+                            maybe1))))))
 
 (defn zip-lists [l1 l2]
   (match (apply-to list (m-first l1) (m-first l2))
@@ -2077,13 +2078,11 @@ return((Value *)numberValue(shaVal));
     ;; TODO: rewrite, huge influence on perf
     (flat-map (type= x y)
               (fn [_]
-                (let [len-x (count x)
-                      len-y (count y)]
-                  (flat-map (=* len-x len-y)
-                            (fn [_]
-                              (cond
-                               (= 0 len-y) maybe1
-                               (list=* x y))))))))
+                (cond
+                 (list-empty? x) (list-empty? y)
+                 (flat-map (=* (count x) (count y))
+                           (fn [_]
+                             (list=* x y)))))))
 
   Monoid
   (zero [_] empty-list)
@@ -2202,10 +2201,10 @@ return((Value *)numberValue(shaVal));
 
 (defn m-nth [coll n]
   (match (seq coll)
-         |List h & t| (comp (for [_ (= n 0)]
-                              h)
-                            (m-nth t (dec n)))
-         nothing))
+         |List h & t|
+         (comp (for [_ (= n 0)]
+                 h)
+               (m-nth t (dec n)))))
 
 (defn last [coll last-val]
   (nth coll (dec (count coll))))
@@ -2761,15 +2760,10 @@ return(newNode);
 ")))
 
 (defn hash-map [& kv-pairs]
-  (let [parted (partition kv-pairs 2)]
-    ;; (cond
-    ;;  (= 0 (count parted)) ""
-    ;;  (print-err :parted (first parted)))
-    (reduce parted
-            emptyBMI
-            (fn [bmi [k v]]
-              ;; (print-err :k k :v v)
-              (assoc bmi k v)))))
+  (reduce (partition kv-pairs 2)
+          emptyBMI
+          (fn [bmi [k v]]
+            (assoc bmi k v))))
 
 (defn m-get [m k]
   (let [not-found (reify
@@ -2852,12 +2846,19 @@ return(newNode);
   Applicative
   (apply* [f args]
     ;; TODO: really, really need to destructure in match patterns
-    (match args
-           empty-list (f)
-           ;; Remember, the last element of 'args' must be a list
-           ;; everything up to that must be prepended to it
-           (let [[arg & args] args]
-             (fn-apply f (list** arg args))))))
+    ;; (match args
+    ;;        empty-list (f)
+    ;;        ;; Remember, the last element of 'args' must be a list
+    ;;        ;; everything up to that must be prepended to it
+    ;;        (let [[arg & args] args]
+    ;;          (fn-apply f (list** arg args))))
+    (cond
+     (list-empty? args) (f)
+     ;; Remember, the last element of 'args' must be a list
+     ;; everything up to that must be prepended to it
+     (let [[arg & args] args]
+       (fn-apply f (list** arg args))))
+    ))
 
 (extend-type String
   Getter

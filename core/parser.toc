@@ -11,8 +11,7 @@
 (defprotocol Parser
   (recursive-descent [f]
     (sm/state-maybe (fn [& args]
-                      (list (apply f (map (remove args (fn [x]
-                                                           (= 0 (count x))))
+                      (list (apply f (map (remove args list-empty?)
                                           first)))))))
 
 (deftype parser-terminal [term-str]
@@ -20,10 +19,7 @@
   (recursive-descent [_]
     (let [term-count (count term-str)]
       (for [text (read-text)
-            ;; TODO: do a fast implementation
-            ;; :when (match (< (count text) term-count)
-            ;;              nothing maybe1
-            ;;              nothing)
+            :when-not (< (count text) term-count)
             :when (= (subs text 0 term-count) term-str)
             _ (sm/set-val :text (subs text term-count))]
         (list term-str)))))
