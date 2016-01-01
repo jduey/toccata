@@ -99,23 +99,25 @@
     (for [type (sm/get-in-val (list :types (.result-type ast)) :no-type)]
       (c-code "" (list (.txt ast)) empty-list type))))
 
+(defn already-closed-over [closed-over sym]
+  (sm/when (some closed-over (fn [[c-sym sym-literal]]
+                               (for [_ (= sym sym-literal)]
+                                 c-sym)))))
+
+(defn new-closure [sym]
+  (for [closure-sym (genlocal "val")
+        _ (sm/update-in-val (list :closed-over)
+                            (partial cons (list closure-sym sym)))]
+    closure-sym))
+
 (defn closed-over-sym [sym]
   (for [;; it's supposed to fail if 'sym' is not in the context
         sym-val (sm/get-in-val (list :context sym))
 
         ;; if 'sym' is in the context, it should be in :closed-over
         closed-over (sm/get-val :closed-over)
-        closure-sym (match (some closed-over (fn [[c-sym sym-literal]]
-                                               (for [_ (= sym sym-literal)]
-                                                 c-sym)))
-                           ;; just return it if already in :closed-over
-                           |maybe found| (sm/state-maybe found)
-
-                           ;; otherwise, create new 'closure-sym' and add it
-                           (for [closure-sym (genlocal "val")
-                                 _ (sm/update-in-val (list :closed-over)
-                                                     (partial cons (list closure-sym sym)))]
-                             closure-sym))]
+        closure-sym (comp (already-closed-over closed-over sym)
+                          (new-closure sym))]
     (c-code closure-sym empty-list empty-list (.type-num sym-val))))
 
 (defn lookup-static-arity [target-sym num-args]
@@ -239,38 +241,44 @@
                       SymbolType))))))
 
 (defn update-startup-init [init-list]
-  (match init-list
-         empty-list (sm/state-maybe "")
-         (flat-map (sm/get-val :startup-init)
-                   (fn [start-up-init]
-                     (sm/set-val :startup-init (cons init-list start-up-init))))))
+  (comp (for [_ (sm/when-not (list-empty? init-list))
+              start-up-init (sm/get-val :startup-init)
+              _ (sm/set-val :startup-init (cons init-list start-up-init))]
+          "")
+        (sm/state-maybe "")))
 
-(defn define-declared-symbol [name evalled-expr]
-  (let [result-sym (.c-val evalled-expr)
-        initialization (.init evalled-expr)
-        expr-type (.type-num evalled-expr)]
-    (for [def (sm/get-in-val (list :defined-syms name))
-          ;; TODO: there is almost certainly a better way
-          _ (.v (comp (for [_ (= result-sym "")]
-                        (write-strs (list "Value *" (.c-val def) " = "
-                                          (first initialization) ";\n")))
+(defn define-inline-text-value [name evalled-expr]
+  (for [_ (sm/when (= (.c-val evalled-expr) ""))
+        c-name (comp (for [def (sm/get-in-val (list :defined-syms name))]
+                       ;; for a declared symbol
+                       (.c-val def))
+                     (for [c-name (sm/state-maybe (gensym "var_"))]
+                       ;; for a newly defined symbol
+                       c-name))
+        _ (write-strs (list "Value *" c-name " = "
+                            (first (.init evalled-expr)) ";\n"))]
+    (c-code c-name empty-list empty-list (.type-num evalled-expr))))
 
-                      (for [_ (= (.c-val def) result-sym)]
-                        (update-startup-init initialization))
+(defn declared-immediate-init [name evalled-expr]
+  (for [def (sm/get-in-val (list :defined-syms name))
+        :when (= (.c-val def) (.c-val evalled-expr))
+        _ (update-startup-init (.init evalled-expr))]
+    (c-code (.c-val def) empty-list empty-list (.type-num evalled-expr))))
 
-                      (maybe (update-startup-init (comp initialization
-                                                        (list (.c-val def) " = "
-                                                              result-sym ";\n"))))))]
-      (c-code (.c-val def) empty-list empty-list expr-type))))
+(defn declared-startup-init [name evalled-expr]
+  (for [def (sm/get-in-val (list :defined-syms name))
+        _ (update-startup-init (comp (.init evalled-expr)
+                                     (list (.c-val def) " = "
+                                           (.c-val evalled-expr) ";\n")))]
+    (c-code (.c-val def) empty-list empty-list (.type-num evalled-expr))))
+
+(defn define-declared-symbol [defined-sym evalled-expr]
+  (comp (declared-immediate-init defined-sym evalled-expr)
+        (declared-startup-init defined-sym evalled-expr)))
 
 (defn define-value [evalled-expr]
-  (match (.c-val evalled-expr)
-         "" (for [c-name (sm/state-maybe (gensym "var_"))
-                  _ (write-strs (list "Value *" c-name " = " (first (.init evalled-expr)) ";\n"))]
-              (c-code c-name empty-list empty-list (.type-num evalled-expr)))
-
-         (for [_ (update-startup-init (.init evalled-expr))]
-           (c-code (.c-val evalled-expr) empty-list empty-list (.type-num evalled-expr)))))
+  (for [_ (update-startup-init (.init evalled-expr))]
+    (c-code (.c-val evalled-expr) empty-list empty-list (.type-num evalled-expr))))
 
 (extend-type ast/definition-ast
   Emitter
@@ -278,7 +286,8 @@
     (let [defined-sym (.name ast)]
       (for [evalled-expr (fr/evaluate (.value ast) emit-c)
             _ (write-strs (.decl evalled-expr))
-            value (comp (define-declared-symbol defined-sym evalled-expr)
+            value (comp (define-inline-text-value defined-sym evalled-expr)
+                        (define-declared-symbol defined-sym evalled-expr)
                         (define-value evalled-expr))
             file-name (sm/get-val :file-name)
             _ (sm/assoc-in-val (list :modules file-name :syms defined-sym) value)

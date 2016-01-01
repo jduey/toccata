@@ -181,3 +181,13 @@
   ;;                         )
   ;;                  )))
   )
+
+(defn when [val]
+  (match val
+         |maybe v| (state-maybe v)
+         (zero state-maybe)))
+
+(defn when-not [val]
+  (match val
+         nothing (state-maybe 1)
+         (zero state-maybe)))
