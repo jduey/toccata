@@ -395,7 +395,7 @@
              |maybe locals| (map locals second)
              (list* "incRef(" result-sym ");\n" (map locals second))))))
 
-(defn emit-reified-fn [protocol-name type-num [name ast]]
+(defn emit-reified-fn [type-num [protocol-name name ast]]
   (let [fn-ptr (gensym "protoFnPtr_")
         num-args (count (.args (.v ast)))]
     (for [_ (sm/set-val :curr-fn-ptr fn-ptr)
@@ -406,45 +406,46 @@
           ;; _ (debug :reifying protocol-name type-num name (type-name name) qualified-name)
 
           ;; is the refied fn impl a closure or not?
-          _ (match (.init evalled)
-                   ;; no, it's not a closure
-                   empty-list (for [proto-fn-name (sm/get-in-val (list :defined-protos name))
-                                    _ (sm/assoc-in-val (list :protocols proto-fn-name :impl-arities
-                                                             num-args type-num)
-                                                       {:arity-sym (.c-val evalled)
-                                                        :fn-sym fn-ptr})]
-                                evalled)
+          _ (comp
+             ;; no, it's not a closure
+             (for [_ (sm/when (list-empty? (.init evalled)))
+                   proto-fn-name (sm/get-in-val (list :defined-protos name))
+                   _ (sm/assoc-in-val (list :protocols proto-fn-name :impl-arities
+                                            num-args type-num)
+                                      {:arity-sym (.c-val evalled)
+                                       :fn-sym fn-ptr})]
+               evalled)
 
-                   ;; yes it's a closure
-                   (let [args (map (range num-args) (partial str "arg"))
-                         arg-decls (apply str (interpose (cons (str "List *closures")
-                                                               (map args (fn [arg] (str "Value *" arg))))
-                                                         ", "))
-                         args (apply str (interpose (cons "closures" args) ", "))
-                         fn-arity-sym (gensym "protoFnArity_")]
-                     (for [qualified-name (sm/get-in-val (list :defined-protos name))
-                           reify-fn-index (sm/get-val :reify-fn-index)
-                           impl-sym (sm/state-maybe (gensym "protoImpl_"))
-                           _ (sm/assoc-in-val (list :protocols qualified-name :impl-arities num-args type-num)
-                                              {:arity-sym (str "&" fn-arity-sym)
-                                               :fn-sym fn-ptr})
-                           _ (write-strs (list "// implementation of " protocol-name "\n"
-                                               "Value *" impl-sym "(" arg-decls ") {\n"
-                                               "FnArity *arityPtr = (FnArity *)((ReifiedVal *)arg0)->impls["
-                                               reify-fn-index "];\n"
-                                               "Value *rval = ((FnType" num-args
-                                               " *)arityPtr->fn)(arityPtr->" args ");\n"
-                                               "return(rval);\n"
-                                               "};\n\n"
-                                               "FnArity " fn-arity-sym " = {FnArityType, -1, " num-args
-                                               ", (List *)0, 0, " impl-sym "};\n"
-                                               "Function " fn-ptr " = {FunctionType, -1, \"" name
-                                               "\", 1, {&" fn-arity-sym "}};\n\n"))
-                           return-type (lookup-static-return-type (.c-val evalled) num-args)
-                           _ (sm/assoc-in-val (list :static-fns fn-ptr num-args)
-                                              {:c-code (c-code impl-sym empty-list empty-list return-type)
-                                               :ast ast})]
-                       evalled)))]
+             ;; yes it's a closure
+             (let [args (map (range num-args) (partial str "arg"))
+                   arg-decls (apply str (interpose (cons (str "List *closures")
+                                                         (map args (fn [arg] (str "Value *" arg))))
+                                                   ", "))
+                   args (apply str (interpose (cons "closures" args) ", "))
+                   fn-arity-sym (gensym "protoFnArity_")]
+               (for [qualified-name (sm/get-in-val (list :defined-protos name))
+                     reify-fn-index (sm/get-val :reify-fn-index)
+                     impl-sym (sm/state-maybe (gensym "protoImpl_"))
+                     _ (sm/assoc-in-val (list :protocols qualified-name :impl-arities num-args type-num)
+                                        {:arity-sym (str "&" fn-arity-sym)
+                                         :fn-sym fn-ptr})
+                     _ (write-strs (list "// implementation of " protocol-name "\n"
+                                         "Value *" impl-sym "(" arg-decls ") {\n"
+                                         "FnArity *arityPtr = (FnArity *)((ReifiedVal *)arg0)->impls["
+                                         reify-fn-index "];\n"
+                                         "Value *rval = ((FnType" num-args
+                                         " *)arityPtr->fn)(arityPtr->" args ");\n"
+                                         "return(rval);\n"
+                                         "};\n\n"
+                                         "FnArity " fn-arity-sym " = {FnArityType, -1, " num-args
+                                         ", (List *)0, 0, " impl-sym "};\n"
+                                         "Function " fn-ptr " = {FunctionType, -1, \"" name
+                                         "\", 1, {&" fn-arity-sym "}};\n\n"))
+                     return-type (lookup-static-return-type (.c-val evalled) num-args)
+                     _ (sm/assoc-in-val (list :static-fns fn-ptr num-args)
+                                        {:c-code (c-code impl-sym empty-list empty-list return-type)
+                                         :ast ast})]
+                 evalled)))]
       evalled)))
 
 (extend-type ast/reify-ast
@@ -458,14 +459,15 @@
            _ (sm/set-val :reify-fn-index 0)
            curr-fn-ptr (sm/get-val :curr-fn-ptr)
            curr-fn-sym (sm/get-val :curr-fn-sym)
-           impl-fns (sm/traverse (for [[proto-name impl-fns] (seq (.impls ast))
-                                       [fn-name arities] (seq impl-fns)
-                                       impl-arity arities]
-                                   (list proto-name (list fn-name impl-arity)))
-                                 (fn [[proto-name impl-fn]]
-                                   (for [impl-fn (emit-reified-fn proto-name type-num impl-fn)
+           :let [impl-arities (for [[proto-name impl-fns] (seq (.impls ast))
+                                    [fn-name arities] (seq impl-fns)
+                                    impl-arity arities]
+                                (list proto-name fn-name impl-arity))]
+           impl-fns (sm/traverse impl-arities
+                                 (fn [impl-arity]
+                                   (for [impl-arity (emit-reified-fn type-num impl-arity)
                                          _ (sm/update-in-val (list :reify-fn-index) inc)]
-                                     impl-fn)))
+                                     impl-arity)))
            _ (sm/set-val :curr-fn-ptr curr-fn-ptr)
            _ (sm/set-val :curr-fn-sym curr-fn-sym)
            _ (sm/set-val :reify-fn-index reify-fn-index)
@@ -507,7 +509,87 @@
                (fn [_]
                  (abort))))))
 
-;; TODO: re-factor and clean this up
+(defn declare-getters [fields]
+  (sm/traverse fields
+               (fn [field]
+                 (let [getter-name (str "Getter/." field)]
+                   (comp (for [_ (sm/get-in-val (list :protocols getter-name))
+                               _ (sm/assoc-in-val (list :defined-protos (symbol (str "." field)))
+                                                  getter-name)]
+                           (list (symbol (str "." field))
+                                 (list 'vector 'x)
+                                 (list 'let
+                                       (list (list (comp fields (list :dont-care))
+                                                   '(type-args x)))
+                                       field)))
+                         (let [dispatch-fn-sym (gensym "dispatchFnPtr_")
+                               proto-arity-sym (gensym "protoImpl_")
+                               impls-sym (gensym "protoImpls_")]
+                           (for [_ (sm/assoc-in-val (list :defined-protos (symbol (str "." field)))
+                                                    getter-name)
+                                 _ (sm/assoc-in-val (list :protocols getter-name)
+                                                    {:dispatch-sym dispatch-fn-sym
+                                                     :impls-syms {1 impls-sym}
+                                                     :impl-arities {1 {}}})
+                                 _ (write-strs (list "ProtoImpls " impls-sym ";\n"))
+                                 _ (write-strs (list "Value *" dispatch-fn-sym ";\n"))
+                                 _ (sm/assoc-in-val (list :static-fns dispatch-fn-sym 1 :c-code)
+                                                    (c-code proto-arity-sym empty-list
+                                                            empty-list :no-type))
+                                 _ (write-strs (list "Value *" proto-arity-sym
+                                                     "(List *closures, Value *arg);\n"))]
+                             (list (symbol (str "." field))
+                                   (list 'vector 'x)
+                                   (list 'let
+                                         (list (list (comp fields (list :dont-care))
+                                                     '(type-args x)))
+                                         field)))))))))
+
+(defn constructor-expr [new-type-name type-val-num type-val-template fields]
+  (list 'def new-type-name
+        (list 'reify
+              'Stringable
+              (list 'string-list (list 'vector '_)
+                    (list 'list "<TypeCon " (str new-type-name) " ["
+                          (apply str (interpose fields ", ")) "]>"))
+              'Type
+              (list 'instance? (list 'vector '_ 'v)
+                    (list 'instance? type-val-num 'v))
+              'Applicative
+              (list 'apply* (list 'vector '_ 'args)
+                    (list 'apply 'invoke '_ 'args))
+              'Function
+              (list 'invoke (list* 'vector '_ fields)
+                    (list 'new-type-value type-val-template
+                          (cons 'list fields))))))
+
+(defn build-impls [fields impls]
+  (map impls
+       (fn [impl]
+         (match impl
+                |List fn-name args & body|
+                (let [args-map (reduce args {}
+                                       (fn [m arg]
+                                         (assoc m arg '_)))
+                      fields (map fields (fn [fld] (get args-map fld fld)))]
+                  (list fn-name args
+                        (list* 'let (list (list (comp fields (list :dont-care))
+                                                (list 'type-args (second args))))
+                               body)))
+
+                impl))))
+
+(defn template-expr [template-sym getters impls]
+  (list 'def template-sym
+        (list*
+         'reify
+         'Eq
+         (list '=* (list 'vector 'x 'y)
+               '(=* (type-args x) (type-args y)))
+         (comp
+          getters
+          impls))))
+
 (extend-type ast/type-ast
   Emitter
   (emit-c [ast]
@@ -521,122 +603,34 @@
      (let [new-type-name (.name ast)
            fields (.fields ast)]
        (for [types (sm/get-val :types)
-             ;; TODO: type-val-num needs to be made thread-safe like gen-sym
-             :let [type-val-num (+ 2 (count types))]
+             :let [type-val-num (+ 2 (count types))
+                   type-val-template (gensym "type-val-")]
 
-             _ (sm/assoc-in-val (list :type-names (dec type-val-num)) (str new-type-name))
-             type-num-info (comp (sm/get-in-val (list :numbers type-val-num))
-                                 (make-static-num type-val-num))
-             _ (write-strs (.decl type-num-info))
+             declare-ast (an/analyze-expr (list 'def type-val-template))
+             _ (fr/evaluate declare-ast emit-c)
 
-             ;; make sure the getters are declared
-             _ (sm/traverse fields
-                            (fn [field]
-                              (let [getter-name (str "Getter/." field)]
-                                (comp (for [_ (sm/get-in-val (list :protocols getter-name))
-                                            _ (sm/assoc-in-val (list :defined-protos (symbol (str "." field)))
-                                                               getter-name)]
-                                        "")
-                                      (let [dispatch-fn-sym (gensym "dispatchFnPtr_")
-                                            proto-arity-sym (gensym "protoImpl_")
-                                            impls-sym (gensym "protoImpls_")]
-                                        (for [_ (sm/assoc-in-val (list :defined-protos (symbol (str "." field)))
-                                                                 getter-name)
-                                              _ (sm/assoc-in-val (list :protocols getter-name)
-                                                                 {:dispatch-sym dispatch-fn-sym
-                                                                  :impls-syms {1 impls-sym}
-                                                                  :impl-arities {1 {}}})
-                                              _ (write-strs (list "ProtoImpls " impls-sym ";\n"))
-                                              _ (write-strs (list "Value *" dispatch-fn-sym ";\n"))
-                                              _ (sm/assoc-in-val (list :static-fns dispatch-fn-sym 1 :c-code)
-                                                                 (c-code proto-arity-sym empty-list
-                                                                         empty-list :no-type))
-                                              _ (write-strs (list "Value *" proto-arity-sym
-                                                                  "(List *closures, Value *arg);\n"))]
-                                          ""))))))
-
-             _ (comp (for [def (sm/get-in-val (list :defined-syms new-type-name))
-                           _ (sm/assoc-in-val (list :defined-syms new-type-name)
-                                              (c-code (.c-val def) empty-list empty-list
-                                                      (dec type-val-num)))]
-                       (.c-val def))
-                     (let [c-name (gensym "var_")]
-                       (for [_ (write-strs (list "// forward declaration for '"
-                                                 new-type-name "'\n"
-                                                 "Value *" c-name ";\n\n"))
-                             _ (sm/assoc-in-val (list :defined-syms new-type-name)
-                                                (c-code c-name empty-list empty-list
-                                                        (dec type-val-num)))]
-                         c-name)))
-             :let [impls (match fields
-                                empty-list (.impls ast)
-                                (map (.impls ast)
-                                     (fn [impl]
-                                       (match impl
-                                              |List fn-name args & body|
-                                              (let [args-map (reduce args {}
-                                                                     (fn [m arg]
-                                                                       (assoc m arg '_)))
-                                                    fields (map fields (fn [f] (get args-map f f)))]
-                                                (list fn-name args
-                                                          (list* 'let (list (list (comp fields (list :dont-care))
-                                                                                  (list 'type-args (second args))))
-                                                                 body)))
-
-                                              impl))))
-                   getters (map fields
-                                (fn [field]
-                                  (list (symbol (str "." field))
-                                        (list 'vector 'x)
-                                        (list 'let
-                                              (list (list (comp fields (list :dont-care))
-                                                          '(type-args x)))
-                                              field))))]
-             type-ast (an/analyze-expr (list 'reify
-                                             'Stringable
-                                             (list 'string-list (list 'vector '_)
-                                                   (list 'list "<TypeCon " (str new-type-name) " ["
-                                                         (apply str (interpose fields ", ")) "]>"))
-                                             'Type
-                                             (list 'instance? (list 'vector '_ 'v)
-                                                   (list 'instance? type-val-num 'v))
-                                             'Applicative
-                                             (list 'apply* (list 'vector '_ 'args)
-                                                   (list 'apply 'invoke '_ 'args))
-                                             'Function
-                                             (list 'invoke (list* 'vector '_ fields)
-                                                   (list 'new-type-value
-                                                         (list*
-                                                          'reify
-                                                          'Eq
-                                                          (list '=* (list 'vector 'x 'y)
-                                                                '(=* (type-args x) (type-args y)))
-                                                          'Getter
-                                                          (list 'type-name (list 'vector '_)
-                                                                (str new-type-name))
-                                                          (comp
-                                                           getters
-                                                           impls))
-                                                         (cons 'list fields)))))
+             type-ast (an/analyze-expr (constructor-expr new-type-name type-val-num
+                                                         type-val-template fields))
              evalled (fr/evaluate type-ast emit-c)
 
-             _ (write-strs (.decl evalled))
-             result (define-declared-symbol new-type-name evalled)
+             getters (declare-getters fields)
+             :let [getters (list* 'Getter
+                                  (list 'type-name (list 'vector '_)
+                                        (str new-type-name))
+                                  getters)
+                   impls (match fields
+                                empty-list (.impls ast)
+                                (build-impls fields (.impls ast)))]
+
+             template-ast (an/analyze-expr (template-expr type-val-template getters impls))
+             evalled-template (fr/evaluate template-ast emit-c)
 
              file-name (sm/get-val :file-name)
-             _ (sm/assoc-in-val (list :modules file-name :syms new-type-name) result)
              _ (sm/assoc-in-val (list :modules file-name :types new-type-name) type-val-num)
              _ (sm/assoc-in-val (list :defined-types new-type-name) type-val-num)
-
-             _ (sm/update-in-val (list :types)
-                                 (fn [types]
-                                   (reduce (seq types)
-                                           {}
-                                           (fn [m [name type-num]]
-                                             (match (= type-num type-val-num)
-                                                    nothing (assoc m name type-num)
-                                                    (assoc m new-type-name type-num))))))]
-         result)))))
+             _ (sm/assoc-in-val (list :type-names (dec type-val-num)) (str new-type-name))
+             _ (sm/assoc-in-val (list :types new-type-name) type-val-num)]
+         evalled)))))
 
 (extend-type ast/extend-ast
   Emitter
@@ -840,7 +834,7 @@
                                                  lit-checks (map (remove (zip-lists temp-args literals)
                                                                          (fn [[_ literal]]
                                                                            (= literal dont-care)))
-                                                                 (partial cons '=))]
+                                                                 (partial cons '=*))]
                                              (an/analyze-expr (list 'cond
                                                                     (list 'instance? pattern-type match-val-sym)
                                                                     (list 'let
@@ -862,7 +856,7 @@
                                                                                  (list 'type-args match-val-sym)))]
                                              (ast/let-expr (list b) (list expr))))))
 
-                        (for [test (an/analyze-expr (list '= pattern match-val-sym))]
+                        (for [test (an/analyze-expr (list '=* pattern match-val-sym))]
                           (list test expr))))))
 
 (extend-type ast/match-ast

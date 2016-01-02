@@ -40,7 +40,9 @@
                 (list v s))))
   (apply* [fv args]
     (match args
-           empty-list (new-sm (fn [s] (list list s)))
+           empty-list (new-sm (fn [s]
+                                (let [[f new-s] (fv s)]
+                                  (list (f) new-s))))
            (new-sm (fn [s]
               (let [reduce-state (reduce-args args s)]
                 (cond
