@@ -14,16 +14,14 @@
 (def analyze-expr)
 
 (defn analyze-inline-text []
-  (for [expr (sm/get-val :expr)
-        result (match expr
-                      |List 'inline-text type text|
-                      (sm/state-maybe (ast/inline-text text type))
+  (flat-map (sm/get-val :expr)
+            (fn [expr]
+              (sm/when (match expr
+                              |List 'inline-text type text|
+                              (maybe (ast/inline-text text type))
 
-                      |List 'inline-text text|
-                      (sm/state-maybe (ast/inline-text text :no-type))
-
-                      (zero sm/state-maybe))]
-    result))
+                              |List 'inline-text text|
+                              (maybe (ast/inline-text text :no-type)))))))
 
 (defn analyze-symbol []
   (for [sym (is-expr (partial instance? Symbol))]
@@ -50,66 +48,60 @@
 
 (defn analyze-call []
   (for [expr (sm/get-val :expr)
-        [target & args] (traverse expr analyze-expr)]
+        [target & args] (sm/traverse expr analyze-expr)]
     (ast/call-expr target args)))
 
 (defn analyze-let-binding [binding-pair]
-  (match binding-pair
-         |List binding expr|
-         (for [curr-expr (sm/get-val :expr)
-               ast (analyze-expr expr)
-               _ (sm/set-val :expr curr-expr)]
-           (ast/binding binding ast))
-
-         (zero sm/state-maybe)))
+  (for [_ (sm/when (= 2 (count binding-pair)))
+        :let [[binding expr] binding-pair]
+        curr-expr (sm/get-val :expr)
+        ast (analyze-expr expr)
+        _ (sm/set-val :expr curr-expr)]
+    (ast/binding binding ast)))
 
 (defn analyze-let []
   (for [expr (sm/get-val :expr)
-        result (match expr
-                      |List 'let bindings & exprs|
-                      (for [bindings (traverse bindings analyze-let-binding)
-                            body (traverse exprs analyze-expr)]
-                        (ast/let-expr bindings body))
-                      (zero sm/state-maybe))]
-    result))
+        [bindings exprs] (sm/when (match expr
+                                         |List 'let bindings & exprs|
+                                         (maybe (list bindings exprs))))
+        bindings (sm/traverse bindings analyze-let-binding)
+        body (sm/traverse exprs analyze-expr)]
+    (ast/let-expr bindings body)))
 
 (defn analyze-fn-arity []
   (for [expr (sm/get-val :expr)
-        result (match expr
-                      |List 'fn-arity args exprs|
-                      (for [body (traverse exprs analyze-expr)]
-                        (match (filter args (partial = "&"))
-                               empty-list (ast/fixed-arity args body)
-                               (ast/variadic-arity (remove args (partial = "&")) body)))
-                      (zero sm/state-maybe))]
-    result))
+        [args exprs] (sm/when (match expr
+                                     |List 'fn-arity args exprs|
+                                     (maybe (list args exprs))))
+       body (sm/traverse exprs analyze-expr)]
+    (match (some args (partial = "&"))
+           nothing (ast/fixed-arity args body)
+           (ast/variadic-arity (remove args (partial = "&")) body))))
 
 ;; TODO: let anonymous function closures reference themselves by name
 (defn analyze-fn []
   (for [expr (sm/get-val :expr)
-        result (match expr
-                      |List 'fn name arities|
-                      (for [arities (traverse arities analyze-expr)]
-                        (ast/fn-expr (ast/sym name) arities))
-                      (zero sm/state-maybe))]
-    result))
+        [_ name arities] (sm/when (match expr
+                                         |List 'fn _ _|
+                                         (maybe expr)))
+        arities (sm/traverse arities analyze-expr)]
+    (ast/fn-expr (ast/sym name) arities)))
 
-(defn analyze-proto-arity [[fn-name params & body]]
-  (match (filter params (partial = "&"))
-         empty-list (match body
-                           empty-list (sm/state-maybe {fn-name {(dec (count params)) {}}})
-                           (for [ast (analyze-expr (list 'fn-arity (rest params) body))]
-                             {fn-name {(dec (count params)) {:default ast}}}))
-         (zero sm/state-maybe)))
+(defn analyze-proto-arity [[fn-name params & default-body]]
+  (flat-map (sm/when-not (some params (partial = "&")))
+            (fn [_]
+              (comp (for [_ (sm/when (list-empty? default-body))]
+                      {fn-name {(dec (count params)) {}}})
+                    (for [ast (analyze-expr (list 'fn-arity (rest params) default-body))]
+                      {fn-name {(dec (count params)) {:default ast}}})))))
 
 (defn analyze-protocol []
   (for [expr (sm/get-val :expr)
-        result (match expr
-                      |List 'defprotocol name & defs|
-                      (for [proto-fns (traverse defs analyze-proto-arity)]
-                        (ast/proto name (apply merge-with comp proto-fns)))
-                      (zero sm/state-maybe))]
-    result))
+        [name defs] (sm/when (match expr
+                                    |List 'defprotocol name & defs|
+                                    (maybe (list name defs))))
+        proto-fns (sm/traverse defs analyze-proto-arity)]
+    (ast/proto name (apply merge-with comp proto-fns))))
 
 (defn make-quoted [quoted-form]
   (match quoted-form
@@ -129,43 +121,46 @@
          (make-quoted (car (cdr quoted-form)))
 
          |List 'hash-map|
-         (for [contents (traverse (cdr quoted-form) make-quoted)]
+         (for [contents (sm/traverse (cdr quoted-form) make-quoted)]
            (ast/call-expr (ast/sym 'hash-map) contents))
 
          |List 'vector|
-         (for [contents (traverse (cdr quoted-form) make-quoted)]
+         (for [contents (sm/traverse (cdr quoted-form) make-quoted)]
            (ast/call-expr (ast/sym 'vector) contents))
 
          |List|
-         (for [qs (traverse quoted-form make-quoted)]
+         (for [qs (sm/traverse quoted-form make-quoted)]
            (ast/call-expr (ast/sym 'list) qs))
 
          (sm/state-maybe "")))
 
 (defn analyze-quoted []
   (for [expr (sm/get-val :expr)
-        result (match expr
-                      |List 'quote quoted| (make-quoted quoted)
-                      (zero sm/state-maybe))]
-    result))
+        to-be-quoted (sm/when (match expr
+                                     |List 'quote quoted|
+                                     (maybe quoted)))
+        quoted (make-quoted to-be-quoted)]
+    quoted))
 
 (defn analyze-def []
-  (for [expr (sm/get-val :expr)
-        result (match expr
-                      |List 'def name value|
-                      (for [val-ast (analyze-expr value)]
-                        (ast/def-expr name val-ast))
+  (flat-map (sm/get-val :expr)
+            (fn [expr]
+              (match expr
+                     |List 'def name value|
+                     (for [val-ast (analyze-expr value)]
+                       (ast/def-expr name val-ast))
 
-                      |List 'def name|
-                      (sm/state-maybe (ast/declare name))
-                      (zero sm/state-maybe))]
-    result))
+                     |List 'def name|
+                     (sm/state-maybe (ast/declare name))
+
+                     (zero sm/state-maybe)))))
 
 (defn analyze-cond []
   (for [expr (sm/get-val :expr)
-        clause-pairs (match expr
-                            |List 'cond & clause-pairs| (traverse clause-pairs analyze-expr)
-                            (zero sm/state-maybe))]
+        clause-pairs (sm/when (match expr
+                                     |List 'cond & clause-pairs|
+                                     (maybe clause-pairs)))
+        clause-pairs (sm/traverse clause-pairs analyze-expr)]
     (let [clauses (partition-all clause-pairs 2)]
       (match (last clauses empty-list)
              |List default| (ast/cond-expr (butlast clauses) default)
@@ -174,45 +169,38 @@
 
 (defn analyze-match []
   (for [expr (sm/get-val :expr)
-        match-ast (match expr
-                         |List 'match value clauses default|
-                         (apply-to ast/match-expr
-                                   (analyze-expr value)
-                                   (comp
-                                    (traverse clauses
-                                              (fn [[pattern result]]
-                                                (apply-to list
-                                                          (for [_ (analyze-expr pattern)]
-                                                            pattern)
-                                                          (analyze-expr result))))
-                                    (sm/state-maybe empty-list))
-                                   (analyze-expr default))
-                         (zero sm/state-maybe))]
-    match-ast))
+        [value clauses default] (sm/when (match expr
+                                                |List 'match value clauses default|
+                                                (maybe (list value clauses default))))
+        value (analyze-expr value)
+        clauses (sm/traverse clauses
+                             (fn [[pattern result]]
+                               (for [_ (analyze-expr pattern)
+                                     result (analyze-expr result)]
+                                 (list pattern result))))
+        default (analyze-expr default)]
+    (ast/match-expr value clauses default)))
 
 (defn analyze-proto-fn []
   (for [expr (sm/get-val :expr)
-        result (match expr
-                      |List frm & frms|
-                      (match frm
-                             |List name args & exprs|
-                             (for [body (traverse exprs analyze-expr)
-                                   _ (sm/set-val :expr frms)]
-                               {name (list (ast/fixed-arity (rest args) body))})
-                             (zero sm/state-maybe))
-                      (zero sm/state-maybe))]
-    result))
+        [name args exprs frms] (sm/when (match expr
+                                               |List frm & frms|
+                                               (match frm
+                                                      |List name args & exprs|
+                                                      (maybe (list name args exprs frms)))))
+       body (sm/traverse exprs analyze-expr)
+        _ (sm/set-val :expr frms)]
+    {name (list (ast/fixed-arity (rest args) body))}))
 
 (defn analyze-proto-impl []
   (for [expr (sm/get-val :expr)
-        result (match expr
-                      |List name & frms|
-                      (for [_ (sm/set-val :expr frms)
-                            :when (instance? Symbol name)
-                            fn-impls (sm/recur (analyze-proto-fn))]
-                        {name (apply merge-with comp fn-impls)})
-                      (zero sm/state-maybe))]
-    result))
+        [name frms] (sm/when (match expr
+                                    |List name & frms|
+                                    (maybe (list name frms))))
+        :when (instance? Symbol name)
+        _ (sm/set-val :expr frms)
+        fn-impls (sm/recur (analyze-proto-fn))]
+    {name (apply merge-with comp fn-impls)}))
 
 (defn analyze-extensions [exts]
   (for [curr-expr (sm/get-val :expr)
@@ -223,72 +211,65 @@
 
 (defn analyze-extend-type []
   (for [expr (sm/get-val :expr)
-        result (match expr
-                      |List 'extend-type name & defs|
-                      (for [proto-specs (analyze-extensions defs)]
-                        (ast/type-extension name proto-specs))
-
-                      (zero sm/state-maybe))]
-    result))
+        [name defs] (sm/when (match expr
+                                    |List 'extend-type name & defs|
+                                    (maybe (list name defs))))
+        proto-specs (analyze-extensions defs)]
+    (ast/type-extension name proto-specs)))
 
 (defn analyze-reify []
   (for [expr (sm/get-val :expr)
-        result (match expr
-                      |List 'reify & defs|
-                      (for [proto-specs (analyze-extensions defs)]
-                        (ast/reified proto-specs))
-
-                      (zero sm/state-maybe))]
-    result))
+        defs (sm/when (match expr
+                             |List 'reify & defs|
+                             (maybe defs)))
+        proto-specs (analyze-extensions defs)]
+    (ast/reified proto-specs)))
 
 (defn analyze-deftype []
-  (for [expr (sm/get-val :expr)
-        result (match expr
-                      |List 'deftype name fields & defs| (sm/state-maybe (ast/type-expr name fields defs))
-                      (zero sm/state-maybe))]
-    result))
+  (flat-map (sm/get-val :expr)
+            (fn [expr]
+              (sm/when (match expr
+                              |List 'deftype name fields & defs|
+                              (maybe (ast/type-expr name fields defs)))))))
 
 (defn analyze-add-ns []
   (for [expr (sm/get-val :expr)
-        result (match expr
-                      |List 'add-ns ns-name defs|
-                      (for [asts (analyze-expr defs)]
-                        (ast/ns-add ns-name asts))
-
-                      (zero sm/state-maybe))]
-    result))
+        [ns-name defs] (sm/when (match expr
+                                       |List 'add-ns ns-name defs|
+                                       (maybe (list ns-name defs))))
+        asts (analyze-expr defs)]
+    (ast/ns-add ns-name asts)))
 
 (defn analyze-module []
   (for [expr (sm/get-val :expr)
-        module-ast (match expr
-                          |List 'module module-name|
-                          (comp
-                           (for [_ (sm/get-in-val (list :modules module-name))]
-                             (list (ast/strng module-name)))
-                           (for [text (sm/get-val :text)
-                                 _ (sm/set-val :text (slurp module-name))
-                                 file-name (sm/get-val :file-name)
-                                 _ (sm/set-val :file-name module-name)
-                                 parser (sm/get-val :parser)
-                                 asts (sm/recur (for [expr parser
-                                                      ast (analyze-expr expr)]
-                                                  ast))
-                                 ;; :let [_ (fio/close-stream module-stream)]
-                                 _ (sm/set-val :file-name file-name)
-                                 _ (sm/set-val :text text)]
-                             (cons (ast/strng module-name)
-                                   asts)))
-                          (zero sm/state-maybe))]
+        module-name (sm/when (match expr
+                                    |List 'module module-name|
+                                    (maybe module-name)))
+        module-ast (comp
+                    (for [_ (sm/get-in-val (list :modules module-name))]
+                      (list (ast/strng module-name)))
+                    (for [text (sm/get-val :text)
+                          _ (sm/set-val :text (slurp module-name))
+                          file-name (sm/get-val :file-name)
+                          _ (sm/set-val :file-name module-name)
+                          parser (sm/get-val :parser)
+                          asts (sm/recur (for [expr parser
+                                               ast (analyze-expr expr)]
+                                           ast))
+                          ;; :let [_ (fio/close-stream module-stream)]
+                          _ (sm/set-val :file-name file-name)
+                          _ (sm/set-val :text text)]
+                      (cons (ast/strng module-name)
+                            asts)))]
     module-ast))
 
 (defn analyze-main []
   (for [expr (sm/get-val :expr)
-        result (match expr
-                      |List 'main args & exprs|
-                      (for [body (traverse exprs analyze-expr)]
-                        (ast/main-fn args body))
-                      (zero sm/state-maybe))]
-    result))
+        [args exprs] (sm/when (match expr
+                               |List 'main args & exprs|
+                               (maybe (list args exprs))))
+        body (sm/traverse exprs analyze-expr)]
+    (ast/main-fn args body)))
 
 (defn expr-to-ast []
   (comp (analyze-symbol)

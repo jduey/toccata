@@ -8,7 +8,8 @@
            (match args
                   empty-list (list (list result) new-s)
                   (match (reduce-args args new-s)
-                         |List results final-s| (list (cons result results) final-s))))))
+                         |List results final-s|
+                         (list (cons result results) final-s))))))
 
 (defn -comp* [mv mvs s]
   (let [x (mv s)]

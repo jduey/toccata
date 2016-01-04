@@ -20,7 +20,7 @@ cd to the repo directory
 run the 'scripts/build' script.
   This will compile the 'toccata' executable and then use that to compile 'examples/hello.toc' and execute it. You should see 'Howdy, Universe!!!' as the final output.
 
-Rebuilding Toccata core.c and toccata.c from toccata.toc
+Rebuilding Toccata
 =========
 
 Run './toccata toccata.toc > toccata.c'

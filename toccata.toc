@@ -2,6 +2,7 @@
 ;; TODO:
 ;; implement lazy 'or', 'and'
 ;; refactor calls to 'match'
+;; get rid of calls to '(zero sm/state-maybe)'
 ;; use #line directive
 ;; make 'match' efficient
 ;; memoize call-sites with static args
@@ -306,17 +307,15 @@
         def))))
 
 (defn emit-proto-default [proto-name [num-args impl-map]]
-  (match (m-get impl-map :default)
+  (comp (for [default-impl (sm/when (m-get impl-map :default))
+              default-fn (fr/evaluate default-impl emit-c)
+              _ (write-strs (.decl default-fn))
+              ;; '0' is the 'default' type.
+              _ (sm/assoc-in-val (list :protocols proto-name :impl-arities num-args 0 :arity-sym)
+                                 (.c-val default-fn))]
+          default-fn)
 
-         |maybe default-impl|
-         (for [default-fn (fr/evaluate default-impl emit-c)
-               _ (write-strs (.decl default-fn))
-               ;; '0' is the 'default' type.
-               _ (sm/assoc-in-val (list :protocols proto-name :impl-arities num-args 0 :arity-sym)
-                                  (.c-val default-fn))]
-           default-fn)
-
-         (sm/assoc-in-val (list :protocols proto-name :impl-arities num-args) {})))
+        (sm/assoc-in-val (list :protocols proto-name :impl-arities num-args) {})))
 
 (defn declare-proto-dispatch-arity [proto-name dispatch-fn-sym [num-args]]
   (let [proto-arity-sym (gensym "protoDisp_")
@@ -386,12 +385,12 @@
   (for [scope-locals (sm/get-val :scope-locals)]
     (let [locals (seq scope-locals)]
       ;; TODO: getting closer. Still needs work
-      (match (comp (for [_ (= result-sym "")]
-                     locals)
-                   (for [_ (= 1 (count locals))
-                         [local _] (m-first locals)
-                         _ (= (str result-sym) local)]
-                     empty-list))
+      (match (or (and (= result-sym "")
+                      (maybe locals))
+                 (and (= 1 (count locals))
+                      (for [[local _] (m-first locals)
+                            _ (= (str result-sym) local)]
+                        empty-list)))
              |maybe locals| (map locals second)
              (list* "incRef(" result-sym ");\n" (map locals second))))))
 
@@ -474,7 +473,7 @@
            reified-result (let [inits (crush impl-fns .init)]
                             (comp
                              (for [reified-sym (genlocal "reifiedDyn_")
-                                   :when (< 0 (count inits))
+                                   :when-not (list-empty? inits)
                                    _ (remember-local reified-sym)]
                                (let [impls-syms (map impl-fns .c-val)]
                                  (c-code reified-sym
@@ -690,8 +689,8 @@
 
                          (for [arg-sym (genlocal "arg")
                                :let [c-sym (match (= arg last-arg)
-                                                  |maybe _| (c-code arg-sym empty-list empty-list ListType)
-                                            (c-code arg-sym empty-list empty-list :no-type))]
+                                                  nothing (c-code arg-sym empty-list empty-list :no-type)
+                                                  (c-code arg-sym empty-list empty-list ListType))]
                                _ (sm/assoc-in-val (list :local-syms arg) c-sym)]
                            c-sym))))))
 
@@ -743,11 +742,13 @@
            (c-code cond-result
                    (comp (.init test)
                          (map (seq test-suffix) second)
-                         (list "\nif (" test-sym "->type != nothing_type) {\n"
-                               "dec_and_free(" test-sym ");\n")
+                         (match (= (str test-sym) (str (.c-val clause-result)))
+                                nothing (list "\nif (" test-sym "->type != nothing_type) {\n"
+                                              "dec_and_free(" test-sym ");\n")
+                                (list "\nif (" test-sym "->type != nothing_type) {\n"))
                          (.init clause-result)
-                         (list "incRef(" (.c-val clause-result) ");\n")
-                         (list (str cond-result " = " (.c-val clause-result) ";\n"))
+                         (list "incRef(" (.c-val clause-result) ");\n"
+                               (str cond-result " = " (.c-val clause-result) ";\n"))
                          (map (seq clause-suffix) second)
                          (list "} else {\n"
                                "dec_and_free(" test-sym ");\n"))
@@ -802,6 +803,7 @@
 
                                                |Symbol| (list (cons x symbols)
                                                               (cons dont-care literals))
+
                                                (list (cons dont-care symbols)
                                                      (cons x literals)))))
                               binding-syms (remove symbols (partial = "&"))
@@ -885,15 +887,14 @@
     (list syms types protos file-name)))
 
 (defn set-module-defs [defs]
-  (match defs
-         |List syms types protos file-name|
-         (for [current-defs (get-module-defs)
-               _ (sm/set-val :defined-syms syms)
-               _ (sm/set-val :defined-types types)
-               _ (sm/set-val :defined-protos protos)
-               _ (sm/set-val :file-name file-name)]
-           current-defs)
-         (zero sm/state-maybe)))
+  (for [_  (sm/when (= 4 (count defs)))
+        :let [[syms types protos file-name] defs]
+        current-defs (get-module-defs)
+        _ (sm/set-val :defined-syms syms)
+        _ (sm/set-val :defined-types types)
+        _ (sm/set-val :defined-protos protos)
+        _ (sm/set-val :file-name file-name)]
+    current-defs))
 
 (defn add-module-info [ns-sym module-name]
   (apply-to (fn [& _]
@@ -973,9 +974,7 @@
                                 "Value *" fn-ptr-sym ";\n"))
             _ (remember-local fn-ptr-sym)
             _ (comp (for [def (sm/get-in-val (list :defined-syms fn-name))
-                          :when (match (= 'anon fn-name)
-                                       nothing maybe1
-                                       nothing)
+                          :when-not (= 'anon fn-name)
                           _ (update-startup-init (list (.c-val def) " = " fn-ptr-sym ";\n"))]
                       "")
                     (sm/state-maybe ""))
@@ -988,31 +987,32 @@
                   arity-syms (map arity-vals .c-val)
                   arity-init (crush arity-vals .init)
                   arity-decl (crush arity-vals .decl)]
-            result (match arity-init
-                          empty-list (for [_ (sm/assoc-in-val (list :scope-locals fn-ptr-sym) "")]
-                                       (c-code fn-ptr-sym
-                                               empty-list
-                                               (comp arity-decl
-                                                     (list "\n// --------- " fn-name " main body --------------\n"
-                                                           "Function " fn-sym " = {FunctionType, -1, \""
-                                                           fn-name "\", " arity-count ", "
-                                                           "{" (apply str (interpose arity-syms ", ")) "}};\n"
-                                                           "Value *" fn-ptr-sym " = (Value *)&" fn-sym ";\n\n"))
-                                               FunctionType))
-                          (sm/state-maybe
+            result (comp (for [_ (sm/when (list-empty? arity-init))
+                               _ (sm/assoc-in-val (list :scope-locals fn-ptr-sym) "")]
                            (c-code fn-ptr-sym
-                                   (comp arity-init
-                                         (list "Function *" fn-sym " = malloc_function(" arity-count ");\n"
-                                               fn-sym "->type = FunctionType;\n"
-                                               fn-sym "->name = \"" fn-name "\";\n"
-                                               fn-sym "->arityCount = " arity-count ";\n"
-                                               "Value *" fn-ptr-sym " = (Value *)" fn-sym ";\n\n")
-                                         (map (range arity-count)
-                                              (fn [index]
-                                                (str fn-sym "->arities[" index "] = "
-                                                     (nth arity-syms index "") ";\n"))))
-                                   arity-decl
-                                   FunctionType)))
+                                   empty-list
+                                   (comp arity-decl
+                                         (list "\n// --------- " fn-name " main body --------------\n"
+                                               "Function " fn-sym " = {FunctionType, -1, \""
+                                               fn-name "\", " arity-count ", "
+                                               "{" (apply str (interpose arity-syms ", ")) "}};\n"
+                                               "Value *" fn-ptr-sym " = (Value *)&" fn-sym ";\n\n"))
+                                   FunctionType))
+
+                         (sm/state-maybe
+                          (c-code fn-ptr-sym
+                                  (comp arity-init
+                                        (list "Function *" fn-sym " = malloc_function(" arity-count ");\n"
+                                              fn-sym "->type = FunctionType;\n"
+                                              fn-sym "->name = \"" fn-name "\";\n"
+                                              fn-sym "->arityCount = " arity-count ";\n"
+                                              "Value *" fn-ptr-sym " = (Value *)" fn-sym ";\n\n")
+                                        (map (range arity-count)
+                                             (fn [index]
+                                               (str fn-sym "->arities[" index "] = "
+                                                    (nth arity-syms index "") ";\n"))))
+                                  arity-decl
+                                  FunctionType)))
             _ (sm/set-val :curr-fn-sym curr-fn-sym)
             _ (sm/set-val :curr-fn-ptr curr-fn-ptr)]
         result))))
@@ -1053,7 +1053,7 @@
 
 (defn closures-init [arity-sym closures]
   (for [closure-syms (sm/traverse (map closures second) lookup-sym)
-        :when (m-first closures)]
+        :when-not (list-empty? closures)]
     (reduce (reverse closure-syms) empty-list
             (fn [closed-over sym]
               (let [c-sym (.c-val sym)]
@@ -1084,7 +1084,7 @@
                              locals
                              ;; TODO: this is silly. every fn should return a value
                              (match (= (.c-val body-exprs) "")
-                                    |maybe _| ""
+                                    |maybe| ""
                                     (list "return(" (.c-val body-exprs) ");\n"))
                              (list "};\n\n"))]
             _ (end-scope scope-info)
@@ -1177,26 +1177,21 @@
         result))))
 
 (defn call-instance? [ast args]
-  (let [type-val (.type-num (second args))]
-    (match type-val
-           :no-type (zero sm/state-maybe)
-           (match ast
-                  |ast/call-ast callee args|
-                  (match callee
-                         |fr/free target-ast|
-                         (match target-ast
-                                |ast/symbol-ast 'instance?|
-                                (match args
-                                       |fr/free-app _ arg-asts|
-                                       ;; TODO: 'type-sym' is not general enough.
-                                       (let [type-sym (.sym (.v (first arg-asts)))]
-                                         (for [instance-type (sm/get-in-val (list :types type-sym))
-                                               :when (= instance-type type-val)]
-                                           (c-code "true", empty-list, empty-list, Number)))
-                                       (zero sm/state-maybe))
-                                (zero sm/state-maybe))
-                         (zero sm/state-maybe))
-                  (zero sm/state-maybe)))))
+  (for [type-sym (sm/when
+                     (match ast
+                            |ast/call-ast callee args|
+                            (match callee
+                                   |fr/free target-ast|
+                                   (match target-ast
+                                          |ast/symbol-ast 'instance?|
+                                          (match args
+                                                 |fr/free-app _ arg-asts|
+                                                 ;; TODO: not general enough.
+                                                 (maybe (.sym (.v (first arg-asts)))))))))
+        instance-type (sm/get-in-val (list :types type-sym))
+        :when (= instance-type (.type-num (second args)))
+        maybe-type (sm/get-in-val (list :types 'maybe))]
+    (c-code "maybe1", empty-list, empty-list, maybe-type)))
 
 (defn call-invoke [target args]
   (for [arity-info (lookup-proto-arity 'invoke (inc (count args)) (.type-num target))
@@ -1209,50 +1204,54 @@
             empty-list
             (.type-num arity-info))))
 
+(defn dispatch-type-known [dispatch-val name args]
+  (for [arity-info (lookup-proto-arity name (count args) (.type-num dispatch-val))
+        result-sym (genlocal "rslt")
+        _ (remember-local result-sym)]
+    (let [return-type (.type-num arity-info)
+          return-type (match return-type
+                             ;; TODO: these should be the result of
+                             ;; asserts on the protocol fn defs
+                             :no-type (match name
+                                             |Symbol 'map| (.type-num dispatch-val)
+                                             |Symbol 'map| (.type-num dispatch-val)
+                                             |Symbol 'comp*| (.type-num dispatch-val)
+                                             |Symbol 'comp| (.type-num dispatch-val)
+                                             |Symbol 'flat-map| (.type-num dispatch-val)
+                                             :no-type)
+                             return-type)
+          arg-syms (cons "empty_list" (map args .c-val))]
+      (c-code result-sym
+              (comp (list "Value *" result-sym " = " (.c-val arity-info) "(")
+                    (interpose arg-syms ", ")
+                    (list ");\n"))
+              empty-list
+              return-type))))
+
+(defn dispatch-type-unknown [dispatch-val name args]
+  (for [qualified-name (sm/get-in-val (list :defined-protos name))
+        impls-sym (sm/get-in-val (list :protocols qualified-name :impls-syms (count args)))
+        result-sym (genlocal "rslt")
+        _ (remember-local result-sym)]
+    (c-code result-sym
+            (comp (list "Value *" result-sym " = proto" (count args) "Arg(&"
+                        impls-sym ", \"" qualified-name "\", ")
+                  (interpose (map args .c-val) ", ")
+                  (list ");\n"))
+            empty-list
+            :no-type)))
+
 (defn call-proto-impl [target-ast args]
-  (match args
-         |List dispatch-val|
-         (match target-ast
-                |fr/free target|
-                (match target
-                       |ast/symbol-ast name|
-                       (comp
-                        (for [arity-info (lookup-proto-arity name (count args) (.type-num dispatch-val))
-                              result-sym (genlocal "rslt")
-                              _ (remember-local result-sym)]
-                          (let [return-type (.type-num arity-info)
-                                return-type (match return-type
-                                                   ;; TODO: these should be the result of
-                                                   ;; asserts on the protocol fn defs
-                                                   :no-type (match name
-                                                                   |Symbol 'map| (.type-num dispatch-val)
-                                                                   |Symbol 'map| (.type-num dispatch-val)
-                                                                   |Symbol 'comp*| (.type-num dispatch-val)
-                                                                   |Symbol 'comp| (.type-num dispatch-val)
-                                                                   |Symbol 'flat-map| (.type-num dispatch-val)
-                                                                   :no-type)
-                                                   return-type)
-                                arg-syms (cons "empty_list" (map args .c-val))]
-                            (c-code result-sym
-                                    (comp (list "Value *" result-sym " = " (.c-val arity-info) "(")
-                                          (interpose arg-syms ", ")
-                                          (list ");\n"))
-                                    empty-list
-                                    return-type)))
-                        (for [qualified-name (sm/get-in-val (list :defined-protos name))
-                              impls-sym (sm/get-in-val (list :protocols qualified-name :impls-syms (count args)))
-                              result-sym (genlocal "rslt")
-                              _ (remember-local result-sym)]
-                          (c-code result-sym
-                                  (comp (list "Value *" result-sym " = proto" (count args) "Arg(&"
-                                              impls-sym ", \"" qualified-name "\", ")
-                                        (interpose (map args .c-val) ", ")
-                                        (list ");\n"))
-                                  empty-list
-                                  :no-type)))
-                       (zero sm/state-maybe))
-                (zero sm/state-maybe))
-         (zero sm/state-maybe)))
+  (flat-map (sm/when (match args
+                            |List dispatch-val|
+                            (match target-ast
+                                   |fr/free target|
+                                   (match target
+                                          |ast/symbol-ast name|
+                                          (maybe (list dispatch-val name))))))
+            (fn [[dispatch-val name]]
+              (comp (dispatch-type-known dispatch-val name args)
+                    (dispatch-type-unknown dispatch-val name args)))))
 
 (defn call-static-fixed [target arg-syms]
   (for [arity-info (lookup-static-arity (.c-val target) (count arg-syms))
@@ -1370,9 +1369,9 @@
   Emitter
   (emit-c [ast]
     (for [target (fr/evaluate (.callee ast) emit-c)
-          args (match (.args (.params ast))
-                      empty-list (sm/state-maybe empty-list)
-                      (fr/evaluate (.params ast) emit-c))
+          args (comp (flat-map (sm/when-not (list-empty? (.args (.params ast))))
+                               (fn [_] (fr/evaluate (.params ast) emit-c)))
+                     (sm/state-maybe empty-list))
           _ (sm/update-in-val (list :call-site-count :total) inc)
           call-site (comp
                      ;; (match args
@@ -1398,9 +1397,8 @@
       (comp (comp* target args) call-site))))
 
 (defn emit-proto-arity [proto-name fn-ptr-sym proto-impls [num-args impls]]
-  (let [impls-sym (match (get-in proto-impls (list :impls-syms num-args))
-                         |maybe sym| sym
-                         (gensym "protoImpls_"))
+  (let [impls-sym (.v (or (get-in proto-impls (list :impls-syms num-args))
+                          (maybe (gensym "protoImpls_"))))
         arity-sym (gensym "protoFnArity_")
         args (map (range num-args) (partial str "arg"))]
     (for [arity-info (lookup-static-arity fn-ptr-sym num-args)
@@ -1428,27 +1426,24 @@
       (str "&" arity-sym))))
 
 (defn finalize-protocols []
-  (for [protocols (sm/get-val :protocols)
-        _ (sm/traverse
-           (seq protocols)
-           (fn [[proto-name proto-impls]]
-             (match (m-get proto-impls :dispatch-sym)
-                    |maybe dispatch-fn-sym|
-                    (let [fn-sym (gensym "protoFn_")]
-                      (for [arity-syms (match (m-get proto-impls :impl-arities)
-                                              |maybe impls-map|
-                                              (sm/traverse (seq impls-map)
-                                                           (partial emit-proto-arity proto-name
-                                                                    dispatch-fn-sym proto-impls))
-                                              (zero sm/state-maybe))
-                            _ (write-strs (list "Function " fn-sym " = {FunctionType, -1, \""
-                                                proto-name "\", " (count arity-syms) ", {"))
-                            _ (write-strs (interpose arity-syms ", "))
-                            _ (write-strs (list "}};\n" "Value *" dispatch-fn-sym
-                                                " = (Value *)&" fn-sym ";\n\n"))]
-                        ""))
-                    (zero sm/state-maybe))))]
-    ""))
+  (flat-map
+   (sm/get-val :protocols)
+            (fn [protocols]
+              (sm/traverse (seq protocols)
+                           (fn [[proto-name proto-impls]]
+                             (for [dispatch-fn-sym (sm/when (m-get proto-impls :dispatch-sym))
+                                   arity-syms (flat-map (sm/when (m-get proto-impls :impl-arities))
+                                                        (fn [impls-map]
+                                                          (sm/traverse (seq impls-map)
+                                                                       (partial emit-proto-arity proto-name
+                                                                                dispatch-fn-sym proto-impls))))
+                                   :let [fn-sym (gensym "protoFn_")]
+                                   _ (write-strs (list "Function " fn-sym " = {FunctionType, -1, \""
+                                                       proto-name "\", " (count arity-syms) ", {"))
+                                   _ (write-strs (interpose arity-syms ", "))
+                                   _ (write-strs (list "}};\n" "Value *" dispatch-fn-sym
+                                                       " = (Value *)&" fn-sym ";\n\n"))]
+                               ""))))))
 
 (defn emit-main []
   (for [_ (sm/set-val :local-sym-count 0)

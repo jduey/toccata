@@ -1814,9 +1814,11 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
     Monoid
     (zero [nv] nv)
     (comp* [nothing mvs]
+      ;; BTW, the name of the 'nothing' parameter is hugely important
+      ;; The expansion of 'match' depends on 'nothing' being defined
       (match mvs
-             |List mv & mvs| (comp* mv mvs)
-             nothing))
+             |List mv & mvs|
+             (comp* mv mvs)))
 
     Functor
     (map [nv f] nv)
@@ -1833,9 +1835,8 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
   ([v] maybe1)
   ([x y] (=* x y))
   ([x y & ys]
-     (match (=* x y)
-            nothing nothing
-            (apply = y ys))))
+     (or (=* x y)
+         (apply = y ys))))
 
 (defn remove [l f]
   (filter l (fn [v]
@@ -1861,10 +1862,8 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
   Applicative
   (wrap [_ v] (maybe v))
   (apply* [_ args]
-    (let [nothing-args (remove args (fn [x] x))]
-      (match nothing-args
-             empty-list (maybe (apply v (map args .v)))
-             nothing)))
+    (and (list-empty? (remove args (fn [x] x)))
+         (maybe (apply v (map args .v)))))
 
   Monad
   (flatten [_]
@@ -1875,11 +1874,11 @@ Value *proto9Arg(ProtoImpls *protoImpls, char *name, Value *arg0, Value *arg1, V
 (defn <
   ([x y] (<* x y))
   ([v & vs]
-     (match vs
-            |List y| (apply-to (fn [x _] x)
-                               (<* v (car vs))
-                               (apply < vs))
-            (maybe v))))
+     (or (and (list-empty? vs)
+              (maybe v))
+         (apply-to (fn [x _] x)
+                   (<* v (car vs))
+                   (apply < vs)))))
 
 (extend-type FnArity
   Stringable
@@ -1960,9 +1959,8 @@ return((Value *)numberValue(shaVal));
 
 ;; TODO: remove
 (defn m-first [coll]
-  (match coll
-         |List item| (maybe item)
-         nothing))
+  (and (< 0 (count coll))
+       (maybe (first coll))))
 
 (defn second [coll]
   (first (rest coll)))
@@ -2005,13 +2003,9 @@ return((Value *)numberValue(shaVal));
   (pr-err* "\n"))
 
 (defn list=* [[h1 & t1] [h2 & t2]]
-  (flat-map (=* h1 h2)
-             (fn [_]
-               (cond
-                (list-empty? t1) maybe1
-                (flat-map (list=* t1 t2)
-                          (fn [_]
-                            maybe1))))))
+  (and (=* h1 h2)
+       (or (list-empty? t1)
+           (list=* t1 t2))))
 
 (defn zip-lists [l1 l2]
   (match (apply-to list (m-first l1) (m-first l2))
@@ -2068,21 +2062,19 @@ return((Value *)numberValue(shaVal));
             (fn [x y] (comp x (f y)))))
 
   Traversable
+  ;; TODO: I bet this is wrong
   (traverse [l f]
     (match (map l f)
-           |List v & vs| (apply* (wrap v list) (cons v vs))
-           nothing))
+           |List v & vs|
+           (apply* (wrap v list) (cons v vs))))
 
   Eq
   (=* [x y]
-    ;; TODO: rewrite, huge influence on perf
-    (flat-map (type= x y)
-              (fn [_]
-                (cond
-                 (list-empty? x) (list-empty? y)
-                 (flat-map (=* (count x) (count y))
-                           (fn [_]
-                             (list=* x y)))))))
+    (and (type= x y)
+         (or (and (list-empty? x)
+                  (list-empty? y))
+             (and (=* (count x) (count y))
+                  (list=* x y)))))
 
   Monoid
   (zero [_] empty-list)
@@ -2154,19 +2146,19 @@ return((Value *)numberValue(shaVal));
            mv)))
 
 (defn take [coll n]
-  (match (flat-map (< 0 n) (fn [_] (m-first coll)))
+  (match (and (< 0 n) (m-first coll))
          |maybe head| (cons head (take (rest coll) (dec n)))
          empty-list))
 
 (defn drop [coll n]
-  (match (flat-map (< 0 n) (fn [_] (m-first coll)))
+  (match (and (< 0 n) (m-first coll))
          nothing coll
          (drop (rest coll) (dec n))))
 
 (defn split [l n]
   ;; This could be written with 'take' and 'drop' but would require
   ;; two iterations over the prefix
-  (match (flat-map (< 0 n) (fn [_] (m-first l)))
+  (match (and (< 0 n) (m-first l))
          |maybe head| (let [[prefix suffix] (split (rest l) (dec n))]
                         (list (cons head prefix) suffix))
          (list empty-list l)))
@@ -2200,11 +2192,9 @@ return((Value *)numberValue(shaVal));
             nth-nf)))
 
 (defn m-nth [coll n]
-  (match (seq coll)
-         |List h & t|
-         (comp (for [_ (= n 0)]
-                 h)
-               (m-nth t (dec n)))))
+  (or (and (= n 0)
+           (m-first coll))
+      (m-nth (rest coll) (dec n))))
 
 (defn last [coll last-val]
   (nth coll (dec (count coll))))
@@ -2772,8 +2762,7 @@ return(newNode);
                       (= (get-type x) (get-type y))))
         v? (get m k not-found)]
     (match (= not-found v?)
-           nothing (maybe v?)
-           nothing)))
+           nothing (maybe v?))))
 
 (defn merge-with [merge-fn hm & ms]
   (match ms
@@ -2795,9 +2784,7 @@ return(newNode);
            v)
 
          |List curr-key|
-         (m-get m curr-key)
-
-         nothing))
+         (m-get m curr-key)))
 
 (defn update-in [m path f]
   (match path
@@ -2871,9 +2858,7 @@ return(newNode);
 
   Collection
   (empty? [s]
-    (match (str-count s)
-           0 0
-           1))
+    (= 0 (str-count s)))
   (empty [s]
     "")
   (count [s]
@@ -2934,9 +2919,7 @@ return((Value *)numberValue(shaVal));
 
   Collection
   (empty? [s]
-    (match (str-count s)
-           0 0
-           1))
+    (= 0 (str-count s)))
   (empty [s]
     "")
   (count [s]
@@ -3079,9 +3062,10 @@ else {
 }
 ")))
 
-;; TODO: This is wrong. Doesn't short circuit. Doesn't return orig element
 (defn some [coll f]
-  (comp* nothing (map coll f)))
+  (and (< 0 (count coll))
+       (or (f (first coll))
+           (some (rest coll) f))))
 
 (defn str [& vs]
   (match vs

@@ -99,9 +99,8 @@
 
 (defn char-test [pred]
   (for [text (read-text)
-        :when (match text
-                     "" nothing
-                     (pred (subs text 0 1)))
+        :when-not (=* "" text)
+        :when (pred (subs text 0 1))
         _ (sm/set-val :text (rest text))]
     (list (subs text 0 1))))
 

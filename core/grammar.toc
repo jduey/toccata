@@ -99,8 +99,8 @@
   Parser
   (parser/recursive-descent [_]
     (parser/char-test (fn [c]
-                        (match (comp (= c (char 92))
-                                     (= c (char 34)))
+                        (match (or (=* (char 92) c)
+                                   (=* (char 34) c))
                                nothing maybe1
                                nothing)))))
 
@@ -182,7 +182,7 @@
   Parser
   (parser/recursive-descent [_]
     (parser/char-test (fn [c]
-                        (match (= c (char 10))
+                        (match (=* (char 10) c)
                                nothing maybe1
                                nothing)))))
 
@@ -431,6 +431,39 @@
                          (parser/ignore (parser/none-or-more (whitespace)))
                          (parser/ignore (parser/term ")")))))
 
+(defn read-and []
+  (parser/rule "and"
+               (apply-to (fn [exprs]
+                           (let [exprs (reverse exprs)]
+                             (reduce (rest exprs)
+                                     (first exprs)
+                                     (fn [final-expr and-clause]
+                                       (list 'cond and-clause final-expr
+                                             'nothing)))))
+                         (parser/ignore (parser/term "("))
+                         (parser/ignore (parser/none-or-more (whitespace)))
+                         (parser/ignore (parser/term "and"))
+                         (parser/ignore (parser/one-or-more (whitespace)))
+                         (parser/one-or-more (read-sub-form))
+                         (parser/ignore (parser/term ")")))))
+
+(defn read-or []
+  (parser/rule "or"
+               (apply-to (fn [exprs]
+                           (let [exprs (reverse exprs)]
+                             (reduce (rest exprs)
+                                     (first exprs)
+                                     (fn [final-expr or-clause]
+                                       (let [or-sym (gensym "or-")]
+                                         (list 'let (list (list or-sym or-clause))
+                                               (list 'cond or-sym or-sym final-expr)))))))
+                         (parser/ignore (parser/term "("))
+                         (parser/ignore (parser/none-or-more (whitespace)))
+                         (parser/ignore (parser/term "or"))
+                         (parser/ignore (parser/one-or-more (whitespace)))
+                         (parser/one-or-more (read-sub-form))
+                         (parser/ignore (parser/term ")")))))
+
 (defn read-apply []
   (parser/rule "apply"
                (apply-to (fn [f args]
@@ -540,6 +573,8 @@
                    (read-apply-to)
                    (read-hash-map)
                    (read-vector)
+                   (read-or)
+                   (read-and)
                    (read-list))
              (parser/ignore (parser/none-or-more (whitespace))))))
 
