@@ -1,0 +1,257 @@
+;; # Magic  Squares using the Siamese Alogorithm
+;; -------------------------------------------
+;; 
+;; A magic square is a square grid of numbers where every column,
+;; and row, and the two main diagonals add up to the same number.
+;; This example constructs odd order magic squares, that is magic squares
+;; of 3x3, 5x5, 7x7 and so on, using the Siamese method.
+;;
+;; The method consists of placing one in the top middle space of the square,
+;; and then proceeding up and left for the position of the next numberr,
+;; and the next. The edges wrap around so that moving up of the square brings 
+;; you back to the bottom, and moving right off the sqaure brings you in at 
+;; the left.
+;;
+;; As positions are filled travelling up and left will eventually meet an
+;; position. At this point the next position due south of the occupied
+;; space is used, and then travel up and left continues.
+;; 
+;; Full details of the method and its history can be found on [Wikipedia] (http://en.wikipedia.org/wiki/Siamese_method).
+;;
+;; The example demonstrates the use of types and protocols in Toccata as it
+;; constructs and uses data types for an x-y pair, an occupied position, and
+;; the board itself. The resulting code is relatively abstract.
+;;
+;;
+;; ## Simple Types
+;; ---------------
+;;
+;; This section contains the various types that are needed to produce the 
+;; solution. Types are defined to represent a square of a particular size - its
+;; order, a point with an x and y value, representing a position on the grid,
+;; and an occupied position conisting of a point and a value at that point.
+;;
+;; The overall approach is that square are represented by collections of
+;; occupied cells rather han a list of list representing a two diemnsional
+;; grid. This approach can sometimes yield preciuse and compact code, see
+;; [Christophe Grande's Game of life] (http://clj-me.cgrand.net/2011/08/19/conways-game-of-life/) in Clojure example for an example.
+
+;; ### odd?
+;; The Siamese method only works on magic squares of odd order so this little 
+;; helper function is defined to make it easy to find out if an integer is odd
+;;  or not.
+
+(defn odd? [n]
+   (= (rem n 2) 1))
+
+;; ### square
+;; The square type is the first of the three simple data types the program 
+;; needs. A squre will consist of an intger - the order - and a list of
+;; occupied positions on the grid. This is represented by the area.
+;;
+;; Because a deftype has been used, two functions have been automatically
+;; created to extract the contents of a square. These are `(.order some-sq)` 
+;; and `(.area some-sq)`.
+
+(deftype square [order area])
+
+;; ### new-sq
+;; Now a function to create new squares can be defined. The normal case is
+;; that it is called with a positive integer. If it is called with a 
+;; negative integer it will return a square of order 0 instead. Note that
+;; although the Siamese method only works on odd order squares, this data
+;; type will allow even order grids to be created as well. The order is
+;; checked elsewhere.
+
+(defn new-sq [ord]
+  (cond (< 0 ord)
+    (square ord empty-list)
+    (square 0 empty-list)))
+
+;; ### point
+;; The point is the second data type that is needed. It represents a position
+;; on the grid of a magic square. During the construction of this program it 
+;; was useful to be able to print out points, so it was defined as a member
+;; of the `Stringable` protocol that allows `(println ...)` to operate
+;; on it. 
+;;
+;; Later on in the program, point equality will need to be tested so
+;; the point data type was also made part of the `Eq` protocol. This defines
+;; a single function `=*` that means that `(= sq0 sq1)` can used. Equality
+;; of two points is defined here to mean that their x and y values are the 
+;; same.
+;; 
+;; The functions `(.x a-point)` and `(.y a-point)` are simultaneously defined.
+
+
+(deftype point [x y]
+  Stringable
+  (string-list [p] 
+    (list  "(point " (str (.x p)) ", " (str (.y p)) ")"))
+  Eq
+  (=* [a b]
+    (and (number= (.x a) (.x b)) (number= (.y a) (.y b)))))  
+
+;; ### cell
+;; The final data type is the cell. The intention is that `pt` will contain
+;; a point (already defined) and `val` will contain an integer representing
+;; the value at the point.
+;;
+;; The functions `(.pt a-cell)` and `(.val a-cell)` are defined at the 
+;; same time.
+
+(deftype cell [pt val])
+
+;; ## Functions manipulating data types
+;; ------------------------------------
+;; 
+;; This section contains the functions that manipulate the data types defined
+;; in the previous section.
+;;
+;; ### content-area
+;; The area of a square is a list of cells, each one representing a position
+;; on the  grid  that is occupied. To find the value of any particular
+;; position, we filter the area using a simple anonymous function
+;; that looks for cells where the value of the embedded point type is
+;; the same as the crd parameter. If we don't find one, the defaulat value
+;; of 0 is returned, otherwise the value of the cell is returned.
+;;
+;; THis function operates on the assumption that the area list contains a 
+;; single cell for each occupied position.
+
+(defn content-area [ar crd]
+  (let [positions (filter ar (fn [cll] (= (.pt cll) crd)))]
+    (cond (empty? positions) 0
+      (.val (first positions)))))
+
+;; ### content
+;; This simply hands the area part of a square, and the point to the
+;; `content-area` function.
+
+(defn content [sq crd]
+  (content-area (.area sq) crd))
+
+;; ### occupied?
+;; A position is a square is considered unoccupied if `content` returns 0.
+
+(defn occupied? [sq crd]
+  (not (= (content sq crd) 0)))
+
+;; ### occupy
+;; Provided the point falls within the grid of the square, and the position is 
+;; not already occupied, this function returns a new square with the position
+;; occupied by the given value. If any of these conditions are not met the
+;; original square is returned.
+
+(defn occupy [sq crd val]
+  (let [ord (.order sq)
+        x (.x crd)
+        y (.y crd)
+        ar (.area sq)]
+    (cond (and (< x ord) (< y ord) (not (occupied? sq crd)))
+      (square ord (cons (cell (point x y) val) ar))
+      sq)))
+
+;; ### north-east
+;; Given a point, find the point to the north-east, that is up one, right one.
+;; if the calulated point is off the board the coordinates wrap around. The 
+;; size of the square (in ord) is needed to make this calculation peroperly.
+
+(defn north-east [ord crd]
+  (let [x (.x crd)
+        y (.y crd)
+        max (dec ord)
+        new-x (cond (= x max) 0 (inc x))
+        new-y (cond (= y 0) max (dec y))]
+    (point new-x new-y)))
+
+;; ### south
+;; Given a point, find the point due south. The coordinates wrap around so 
+;; size of the square (in ord) is needed to make this calculation properly.
+
+(defn south [ord crd]
+  (let [x (.x crd)
+        y (.y  crd)
+        max (dec ord)
+        new-y (cond (= y max) 0 (inc  y))]
+    (point x new-y)))
+  
+;; ### quot
+;; (Due to Jim Duey) A stand in function for integer division that is 
+;; here for the moemnt as it is not yet part of the core. It is used to
+;; calculate the top middle position of an odd order grid - as needed 
+;; by the Siamese method.
+
+( defn quot [x y]
+  (inline-text
+   "if (arg0->type != NumberType ||
+        arg1->type != NumberType) {
+      printf(\"\\ninvalid types for 'quot'\\n\");
+      abort();
+    } else
+      return(numberValue(((Number *)arg0)->numVal /
+                         ((Number *)arg1)->numVal));\n"))
+
+;; ## Functions used to define the algorithm
+;; -----------------------------------------
+;;
+;; These final functions use the foundations that have come before to 
+;; assemble the final parts of the algorithm.
+;;
+;; ### siam
+;; The siam function takes four parameters
+;; - max, the total number of positions. When this is reached the square is complete
+;; - sq, the current square
+;; - n, the next value to be placed
+;; - crd the next position to be occupied
+;;
+;; The siam function proceeds by checking that max has not yet been reached. If
+;; it has not it proceeds by working out the coordinates of the point north 
+;; east  of the current position. If the north east point is already occupied 
+;; it chooses the point south of the current as the next position.
+;;
+;; The function occupies the current coordinates in the square, giving a new
+;; square and then recurses using the next value to be placed and the next
+;; position to place it in.
+
+(defn siam [max sq n crd]
+  (let [ord (.order sq)
+        ne (north-east ord crd)
+        next (occupy sq crd n)]
+    (cond (= n max) next
+          (siam max next (inc n) (cond (occupied? sq ne) (south ord crd)
+                                       ne))))) 
+;; ### magic
+;; This function initializes the siam algorithm for a given order. Siam's max
+;; becomes ord * ord, the initial square is a new one, and the first point
+;; to be occupied is the top middle position of the square.
+
+(defn magic [ord]
+  (siam (* ord ord) (new-sq ord) 1 (point (quot ord 2) 0)))
+
+;; ### extend the square data type
+;; At this point it is convenient to extend the square data type with the 
+;; Stringable protocol so that squares can be printed by `println`. This 
+;; couldn't be done in the original definition because doing this needs
+;; functions to get the values at of the positions in the grid. The functions
+;; needed to do this had not been defined at this point.
+
+(extend-type square
+  Stringable
+  (string-list [sq]
+    (let [ord (.order sq)]
+      (apply str
+        (for [y (range ord)]
+           (apply str (comp 
+             (for [x (range ord)]
+               (str (content sq (point x y)) ", "))
+             (list "\n"))))))))
+
+;; ### main
+;; print out examples of odd order magic squares.
+
+(main [arg-list]
+  (println (magic 3))
+  (println (magic 5))
+  (println (magic 7)))
+
