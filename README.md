@@ -1,6 +1,9 @@
 Toccata
 =======
 
+*This project is no longer active. It has moved to https://github.com/Toccata-Lang/toccata*
+===========================================================================================
+
 A Clojure-inspired Lisp dialect that compiles to native executable using the Clang compiler
 
 This is very much WFM code. Not suitable for any useful purpose.
